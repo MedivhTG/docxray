@@ -39,11 +39,10 @@ ELM_T = TypeVar("ELM_T", bound=OpcOxmlElement)
 
 
 def parse_xml(
-    text: str | bytes, assert_element: type[ELM_T] = OpcOxmlElement
+    text: str | bytes, elm_hint: type[ELM_T] = OpcOxmlElement
 ) -> ELM_T:
     elm = etree.fromstring(text, parser)
-    assert isinstance(elm, assert_element)
-    return elm
+    return elm  # pyright: ignore[reportReturnType]
 
 
 class CT_Default(OpcOxmlElement):

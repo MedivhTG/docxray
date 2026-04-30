@@ -5,16 +5,17 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Callable, Self, Type
+from typing import Callable, Generic, Self, Type, TypeVar
 
+# from docx.lxml import BaseOxmlElement
 from docx.opc.package import OpcPackage
 from docx.opc.packuri import PackURI
 from docx.opc.rel import _Relationship, Relationships
 from docx.opc.shared import cls_method_fn
 from docx.oxml.parser import parse_xml
+from docx.oxml.xmlchemy import OxmlElement
 
-if TYPE_CHECKING:
-    from docx.oxml.xmlchemy import BaseOxmlElement
+PART_T = TypeVar("PART_T", bound=Part)
 
 
 class Part:
@@ -108,14 +109,18 @@ class Part:
         '/ppt/slides/slide1.xml'."""
         return self._partname
 
-    def part_related_by(self, reltype: str) -> Part:
+    def part_related_by(
+        self, reltype: str, assert_part: type[PART_T]
+    ) -> PART_T:
         """Return part to which this part has a relationship of `reltype`.
 
         Raises |KeyError| if no such relationship is found and |ValueError| if more than
         one such relationship is found. Provides ability to resolve implicitly related
         part, such as Slide -> SlideLayout.
         """
-        return self.rels.part_with_reltype(reltype)
+        target_part = self.rels.part_with_reltype(reltype)
+        assert isinstance(target_part, assert_part)
+        return target_part
 
     @property
     def related_parts(self) -> dict[str, Part | str]:
@@ -179,7 +184,10 @@ class PartFactory:
         return cls.default_part_type
 
 
-class XmlPart(Part):
+ELM_T = TypeVar("ELM_T", bound=OxmlElement)
+
+
+class XmlPart(Part, Generic[ELM_T]):
     """Base class for package parts containing an XML payload, which is most of them.
 
     Provides additional methods to the |Part| base class that take care of parsing and
@@ -190,14 +198,14 @@ class XmlPart(Part):
         self,
         partname: PackURI,
         content_type: str,
-        element: BaseOxmlElement,
+        element: ELM_T,
         package: OpcPackage,
     ) -> None:
         super().__init__(partname, content_type, package=package)
         self._element = element
 
     @property
-    def element(self) -> BaseOxmlElement:
+    def element(self) -> ELM_T:
         """The root XML element of this XML part."""
         return self._element
 
@@ -210,4 +218,13 @@ class XmlPart(Part):
         package: OpcPackage,
     ) -> Self:
         element = parse_xml(blob)
-        return cls(partname, content_type, element, package)
+        return cls(
+            partname,
+            content_type,
+            element,  # pyright: ignore[reportArgumentType]
+            package,
+        )
+
+    @property
+    def part(self) -> Self:
+        return self

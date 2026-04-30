@@ -1,5 +1,7 @@
 """Enumerations related to styles."""
 
+from enum import StrEnum
+
 from .base import BaseEnum, BaseXmlEnum
 
 
@@ -423,7 +425,7 @@ class WD_BUILTIN_STYLE(BaseEnum):
 WD_STYLE = WD_BUILTIN_STYLE
 
 
-class WD_STYLE_TYPE(BaseXmlEnum):
+class WD_STYLE_TYPE(StrEnum):
     """Specifies one of the four style types: paragraph, character, list, or table.
 
     Example::
@@ -439,14 +441,7 @@ class WD_STYLE_TYPE(BaseXmlEnum):
     http://msdn.microsoft.com/en-us/library/office/ff196870.aspx
     """
 
-    CHARACTER = (2, "character", "Character style.")
-    """Character style."""
-
-    LIST = (4, "numbering", "List style.")
-    """List style."""
-
-    PARAGRAPH = (1, "paragraph", "Paragraph style.")
-    """Paragraph style."""
-
-    TABLE = (3, "table", "Table style.")
-    """Table style."""
+    CHARACTER = "character"
+    LIST = "numbering"
+    PARAGRAPH = "paragraph"
+    TABLE = "table"

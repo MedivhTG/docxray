@@ -12,6 +12,16 @@ class BaseOxmlElement(etree.ElementBase):
     ) -> Any:
         return super().xpath(xpath_qn)
 
+    def find(  # type: ignore[override]
+        self,
+        path: str,
+        elm_hint: type[ELM_T],
+        namespaces: Mapping[str, str] | None = None,
+    ) -> ELM_T | None:
+        return super().find(
+            path, namespaces
+        )  # pyright: ignore[reportReturnType]
+
     def findall(  # type: ignore[override]
         self,
         path: str,

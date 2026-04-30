@@ -15,12 +15,16 @@ from docx.shared import Inches, Parented, StoryChild, lazyproperty
 
 if TYPE_CHECKING:
     import docx.types as t
-    from docx.enum.table import WD_ROW_HEIGHT_RULE, WD_TABLE_ALIGNMENT, WD_TABLE_DIRECTION
+    from docx.enum.table import (
+        WD_ROW_HEIGHT_RULE,
+        WD_TABLE_ALIGNMENT,
+        WD_TABLE_DIRECTION,
+    )
     from docx.oxml.table import CT_Row, CT_Tbl, CT_TblPr, CT_Tc
     from docx.shared import Length
     from docx.styles.style import (
         ParagraphStyle,
-        _TableStyle,  # pyright: ignore[reportPrivateUsage]
+        TableStyle,  # pyright: ignore[reportPrivateUsage]
     )
 
 TableParent: TypeAlias = "Table | _Columns | _Rows"
@@ -117,7 +121,7 @@ class Table(StoryChild):
         return _Rows(self._tbl, self)
 
     @property
-    def style(self) -> _TableStyle | None:
+    def style(self) -> TableStyle | None:
         """|_TableStyle| object representing the style applied to this table.
 
         Read/write. The default table style for the document (often `Normal Table`) is
@@ -130,10 +134,13 @@ class Table(StoryChild):
         `Light Shading - Accent 1` becomes `Light Shading Accent 1`.
         """
         style_id = self._tbl.tblStyle_val
-        return cast("_TableStyle | None", self.part.get_style(style_id, WD_STYLE_TYPE.TABLE))
+        return cast(
+            "_TableStyle | None",
+            self.part.get_style(style_id, WD_STYLE_TYPE.TABLE),
+        )
 
     @style.setter
-    def style(self, style_or_name: _TableStyle | str | None):
+    def style(self, style_or_name: TableStyle | str | None):
         style_id = self.part.get_style_id(style_or_name, WD_STYLE_TYPE.TABLE)
         self._tbl.tblStyle_val = style_id
 
@@ -197,7 +204,9 @@ class _Cell(BlockItemContainer):
         self._parent = parent
         self._tc = self._element = tc
 
-    def add_paragraph(self, text: str = "", style: str | ParagraphStyle | None = None):
+    def add_paragraph(
+        self, text: str = "", style: str | ParagraphStyle | None = None
+    ):
         """Return a paragraph newly added to the end of the content in this cell.
 
         If present, `text` is added to the paragraph in a single run. If specified, the
@@ -421,7 +430,9 @@ class _Row(Parented):
             # -- discovery to that prior-row `w:tc` element (recursively) until we arrive at the
             # -- "root" cell -- for the vertical span.
             if tc.vMerge == "continue":
-                yield from iter_tc_cells(tc._tc_above)  # pyright: ignore[reportPrivateUsage]
+                yield from iter_tc_cells(
+                    tc._tc_above
+                )  # pyright: ignore[reportPrivateUsage]
                 return
 
             # -- Otherwise, vMerge is either "restart" or None, meaning this `tc` holds the actual
