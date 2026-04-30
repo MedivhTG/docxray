@@ -1,10 +1,19 @@
-/build/
-.coverage
-/dist/
-/docs/.build/
-/src/*.egg-info
-*.pyc
-.pytest_cache/
-_scratch/
-Session.vim
-/.tox/
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Environments
+.env
+
+# Mypy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
