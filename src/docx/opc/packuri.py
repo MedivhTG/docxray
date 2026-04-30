@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import posixpath
 import re
+from typing import Self
 
 
 class PackURI(str):
@@ -17,7 +18,7 @@ class PackURI(str):
 
     _filename_re = re.compile("([a-zA-Z]+)([1-9][0-9]*)?")
 
-    def __new__(cls, pack_uri_str: str):
+    def __new__(cls, pack_uri_str: str) -> Self:
         if pack_uri_str[0] != "/":
             tmpl = "PackURI must begin with slash, got '%s'"
             raise ValueError(tmpl % pack_uri_str)
@@ -50,7 +51,7 @@ class PackURI(str):
         return raw_ext[1:] if raw_ext.startswith(".") else raw_ext
 
     @property
-    def filename(self):
+    def filename(self) -> str:
         """The "filename" portion of this pack URI, e.g. ``'slide1.xml'`` for
         ``'/ppt/slides/slide1.xml'``.
 
@@ -59,7 +60,7 @@ class PackURI(str):
         return posixpath.split(self)[1]
 
     @property
-    def idx(self):
+    def idx(self) -> int | None:
         """Return partname index as integer for tuple partname or None for singleton
         partname, e.g. ``21`` for ``'/ppt/slides/slide21.xml'`` and |None| for
         ``'/ppt/presentation.xml'``."""
@@ -75,7 +76,7 @@ class PackURI(str):
         return None
 
     @property
-    def membername(self):
+    def membername(self) -> str:
         """The pack URI with the leading slash stripped off, the form used as the Zip
         file membername for the package item.
 
@@ -83,7 +84,7 @@ class PackURI(str):
         """
         return self[1:]
 
-    def relative_ref(self, baseURI: str):
+    def relative_ref(self, baseURI: str) -> str:
         """Return string containing relative reference to package item from `baseURI`.
 
         E.g. PackURI('/ppt/slideLayouts/slideLayout1.xml') would return
@@ -94,7 +95,7 @@ class PackURI(str):
         return self[1:] if baseURI == "/" else posixpath.relpath(self, baseURI)
 
     @property
-    def rels_uri(self):
+    def rels_uri(self) -> PackURI:
         """The pack URI of the .rels part corresponding to the current pack URI.
 
         Only produces sensible output if the pack URI is a partname or the package

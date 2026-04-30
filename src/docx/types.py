@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, BinaryIO
 
 from typing_extensions import Protocol
 
@@ -32,3 +33,6 @@ class ProvidesXmlPart(Protocol):
 
     @property
     def part(self) -> XmlPart: ...
+
+
+type PkgFile = str | Path | BinaryIO

@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, TypeVar
-
-_T = TypeVar("_T")
+from typing import Any, Dict
 
 
 class CaseInsensitiveDict(Dict[str, Any]):
@@ -16,16 +14,18 @@ class CaseInsensitiveDict(Dict[str, Any]):
     passed in constructor are not accounted for
     """
 
-    def __contains__(self, key):
+    def __contains__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, key: str
+    ) -> bool:
         return super(CaseInsensitiveDict, self).__contains__(key.lower())
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return super(CaseInsensitiveDict, self).__getitem__(key.lower())
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> Any:
         return super(CaseInsensitiveDict, self).__setitem__(key.lower(), value)
 
 
-def cls_method_fn(cls: type, method_name: str):
+def cls_method_fn(cls: type, method_name: str) -> Any:
     """Return method of `cls` having `method_name`."""
     return getattr(cls, method_name)

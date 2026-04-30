@@ -17,7 +17,7 @@ dev = [
     "mypy==1.*",
     "ruff==0.*",
     "isort==5.*",
-    "lxml-stubs>=0.5.1",
+    "types-lxml>=2026.2.16",
 ]
 
 [tool.black]
