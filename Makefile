@@ -4,25 +4,25 @@ export
 SHELL = /bin/bash
 
 test:
-	./src/scripts/test.sh
+	./scripts/test.sh
 
 test_win:
-	.\src\scripts\test_win.bat
+	.\scripts\test_win.bat
 
 check: 
-	./src/scripts/ruff_mypy.sh
+	./scripts/ruff_mypy.sh
 
 check_win: 
-	.\src\scripts\ruff_mypy_win.bat
+	.\scripts\ruff_mypy_win.bat
 
 format_check: 
-	./src/scripts/format_check.sh
+	./scripts/format_check.sh
 
 format_check_win:
-	.\src\scripts\format_check_win.bat
+	.\scripts\format_check_win.bat
 
 format: 
-	./src/scripts/format.sh
+	./scripts/format.sh
 
 format_win: 
-	.\src\scripts\format_win.bat
+	.\scripts\format_win.bat
