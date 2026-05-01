@@ -22,7 +22,17 @@ class CT_I(OxmlToggled):
     pass
 
 
+class CT_RStyle(OxmlElement):
+    @cached_property
+    def val(self) -> str:
+        return self.get_one(W.VAL)
+
+
 class CT_RPr(OxmlElement):
     @cached_property
     def i(self) -> CT_I | None:
         return self.child_zero_or_first(W.I, CT_I)
+
+    @cached_property
+    def rStyle(self) -> CT_RStyle | None:
+        return self.child_zero_or_first(W.R_STYLE, CT_RStyle)

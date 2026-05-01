@@ -19,6 +19,13 @@ class OxmlElement(BaseOxmlElement):
     def xpath(self, xpath: str) -> Any:  # type: ignore[override]
         return super().xpath(xpath, nsmap)
 
+    def get_one(self, tag: str) -> str:
+        attr = self.get(tag)
+        if attr is None:
+            msg = f"Cannot get '{tag}' from {self}"
+            raise OxmlError(msg)
+        return attr
+
     def get_enum(self, qn: str, to: type[ENUM_T]) -> ENUM_T | None:
         val = self.get(qn)
         if val is None:

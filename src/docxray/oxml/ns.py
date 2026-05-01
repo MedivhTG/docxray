@@ -38,6 +38,7 @@ class W:
     BODY = qn("w:body")
 
     R_PR = qn("w:rPr")
+    R_STYLE = qn("w:rStyle")
     I = qn("w:i")  # noqa: E741
 
     T = qn("w:t")
@@ -50,3 +51,4 @@ class W:
 
     STYLE = qn("w:style")
     STYLE_ID = qn("w:styleId")
+    BASED_ON = qn("w:basedOn")

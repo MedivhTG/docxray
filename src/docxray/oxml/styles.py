@@ -23,12 +23,26 @@ class CT_DocDefaults(OxmlElement):
         return self.child_zero_or_first(W.R_PR_DEFAULT, CT_RPrDefault)
 
 
+class CT_BasedOn(OxmlElement):
+    @cached_property
+    def val(self) -> str:
+        return self.get_one(W.VAL)
+
+
 class CT_Style(OxmlElement):
     """A ``<w:style>`` element, representing a style definition."""
 
     @cached_property
+    def rPr(self) -> CT_RPr | None:
+        return self.child_zero_or_first(W.R_PR, CT_RPr)
+
+    @cached_property
     def type(self) -> WD_STYLE_TYPE | None:
         return self.get_enum(W.TYPE, WD_STYLE_TYPE)
+
+    @cached_property
+    def basedOn(self) -> CT_BasedOn | None:
+        return self.child_zero_or_first(W.BASED_ON, CT_BasedOn)
 
 
 class CT_Styles(OxmlElement):

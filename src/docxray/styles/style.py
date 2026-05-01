@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from functools import cached_property
+from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
-from docxray.oxml.styles import CT_Style
+from docxray.oxml.styles import CT_Style, CT_Styles
 from docxray.shared import ElementProxy
 
 if TYPE_CHECKING:
@@ -30,11 +31,30 @@ def StyleFactory(style_elm: CT_Style, part: StylesPart) -> BaseStyle:
 class BaseStyle(ElementProxy[CT_Style]):
     @property
     def part(self) -> StylesPart:
-        return self.part
+        return cast("StylesPart", self._parent)
 
 
 class CharacterStyle(BaseStyle):
-    pass
+    @cached_property
+    def based_on(self) -> str | None:
+        basedOn = self.element.basedOn
+        if basedOn is None:
+            return None
+        return basedOn.val
+
+    @cached_property
+    def base_style(self) -> BaseStyle | None:
+        basedOn = self.based_on
+        if basedOn is None:
+            return None
+        styles_elm = self.element.getparent()
+        if styles_elm is None:
+            return None
+        assert isinstance(styles_elm, CT_Styles)
+        style_elm = styles_elm.get_by_id(basedOn)
+        if style_elm is None:
+            return None
+        return StyleFactory(style_elm, self.part)
 
 
 class ParagraphStyle(CharacterStyle):

@@ -8,6 +8,7 @@ from docxray.format.property_path import PropertyPath, safe_get_prop
 from docxray.oxml.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
+from docxray.styles.style import CharacterStyle
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -45,6 +46,26 @@ class BaseFormat(Generic[STORY_ELM_T]):
         if doc_dflts is None:
             return None
         return safe_get_prop(doc_dflts.element, property_path)
+
+    def _rslv_from_char_style(
+        self, story_elm: CT_R, property_path: PropertyPath
+    ) -> Any | None:
+        char_style = self._styles.char_style(story_elm)
+        if char_style is None:
+            return None
+        return self._rslv_from_style_hierarchy(char_style, property_path)
+
+    def _rslv_from_style_hierarchy(
+        self, style: CharacterStyle, property_path: PropertyPath
+    ) -> Any | None:
+        val = None
+        while val is None:
+            val = safe_get_prop(style.element, property_path)
+            base_style = self._styles.base_style(style)
+            if not isinstance(base_style, style.__class__):
+                return val
+            style = base_style
+        return val
 
     @abstractmethod
     def _rslv_from_styles(

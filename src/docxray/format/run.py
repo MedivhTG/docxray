@@ -28,7 +28,10 @@ class RunFormat(BaseFormat[CT_R]):
         val = self._rslv_from_doc_dflts(doc_path)
         if val:
             return True
-        return False
+        run_val = bool(
+            self._rslv_from_char_style(self._story_elm, property_path)
+        )
+        return run_val
 
     def _rslv_from_styles_default(
         self, propety_path: PropertyPath

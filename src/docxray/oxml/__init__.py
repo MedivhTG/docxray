@@ -19,10 +19,11 @@ from .text.run import CT_R, CT_T
 register_element_cls("w:r", CT_R)
 register_element_cls("w:t", CT_T)
 
-from .text.run_props import CT_I, CT_RPr
+from .text.run_props import CT_I, CT_RPr, CT_RStyle
 
 register_element_cls("w:rPr", CT_RPr)
 register_element_cls("w:i", CT_I)
+register_element_cls("w:rStyle", CT_RStyle)
 
 from .table import CT_Tbl, CT_Tc, CT_Tr
 
@@ -30,12 +31,19 @@ register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Tr)
 register_element_cls("w:tc", CT_Tc)
 
-from .styles import CT_DocDefaults, CT_RPrDefault, CT_Style, CT_Styles
+from .styles import (
+    CT_BasedOn,
+    CT_DocDefaults,
+    CT_RPrDefault,
+    CT_Style,
+    CT_Styles,
+)
 
 register_element_cls("w:rPrDefault", CT_RPrDefault)
 register_element_cls("w:docDefaults", CT_DocDefaults)
 register_element_cls("w:styles", CT_Styles)
 register_element_cls("w:style", CT_Style)
+register_element_cls("w:basedOn", CT_BasedOn)
 
 from .numbering import CT_Numbering
 
