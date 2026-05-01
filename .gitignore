@@ -10,10 +10,21 @@ wheels/
 .venv
 
 # Environments
-.env
+.env_test
 
 # Mypy
 .mypy_cache/
 
 # Ruff
 .ruff_cache/
+
+# Pytest
+.pytest_cache/
+
+# Allure
+allure-results/
+
+# Coverage
+coverage.xml
+report.xml
+.coverage
