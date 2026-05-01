@@ -10,7 +10,7 @@ from docxray.oxml.text.run import CT_R
 class RunFormat(BaseFormat[CT_R]):
     @cached_property
     def italic(self) -> bool:
-        return self._rslv_prop_toggled("italic")
+        return self._rslv_prop_toggled("i")
 
     def _rslv_prop_toggled(self, name: str) -> bool:
         return bool(self._rslv_prop(name, is_toggled=True))
@@ -23,7 +23,7 @@ class RunFormat(BaseFormat[CT_R]):
             return self._rslv_from_styles_toggled(property_path)
         return self._rslv_from_styles_default(property_path)
 
-    def _rslv_from_styles_toggled(self, propery_path: PropertyPath) -> bool:
+    def _rslv_from_styles_toggled(self, property_path: PropertyPath) -> bool:
         return False
 
     def _rslv_from_styles_default(

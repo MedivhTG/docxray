@@ -37,8 +37,8 @@ def safe_get_prop(
         Any: Value from property or default.
     """
     current = obj
-    for attr in prop_path.links:
-        if not hasattr(current, attr):
+    for link in prop_path.links:
+        if not hasattr(current, link):
             return default
-        current = getattr(current, attr)
+        current = getattr(current, link)
     return current
