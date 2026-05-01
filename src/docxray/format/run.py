@@ -27,7 +27,7 @@ class RunFormat(BaseFormat[CT_R]):
         doc_path = property_path.join_left("rPrDefault")
         val = self._rslv_from_doc_dflts(doc_path)
         if val:
-            return val
+            return True
         return False
 
     def _rslv_from_styles_default(
