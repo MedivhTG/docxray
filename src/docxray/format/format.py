@@ -40,6 +40,12 @@ class BaseFormat(Generic[STORY_ELM_T]):
             return self._rslv_from_styles(path, **kwargs)
         return direct
 
+    def _rslv_from_doc_dflts(self, property_path: PropertyPath) -> Any | None:
+        doc_dflts = self._styles.document_defaults
+        if doc_dflts is None:
+            return None
+        return safe_get_prop(doc_dflts.element, property_path)
+
     @abstractmethod
     def _rslv_from_styles(
         self, property_path: PropertyPath, **kwargs: Any

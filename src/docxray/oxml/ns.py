@@ -45,5 +45,8 @@ class W:
     TYPE = qn("w:type")
     VAL = qn("w:val")
 
+    DOC_DEFAULTS = qn("w:docDefaults")
+    R_PR_DEFAULT = qn("w:rPrDefault")
+
     STYLE = qn("w:style")
     STYLE_ID = qn("w:styleId")

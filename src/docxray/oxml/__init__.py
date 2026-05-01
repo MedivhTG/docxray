@@ -30,8 +30,10 @@ register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Tr)
 register_element_cls("w:tc", CT_Tc)
 
-from .styles import CT_Style, CT_Styles
+from .styles import CT_DocDefaults, CT_RPrDefault, CT_Style, CT_Styles
 
+register_element_cls("w:rPrDefault", CT_RPrDefault)
+register_element_cls("w:docDefaults", CT_DocDefaults)
 register_element_cls("w:styles", CT_Styles)
 register_element_cls("w:style", CT_Style)
 

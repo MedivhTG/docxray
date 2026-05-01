@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
 from docxray.shared import ElementProxy
+from docxray.styles.doc_dflts import DocumentDefaults
 from docxray.styles.style import BaseStyle, StyleFactory
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
@@ -23,6 +25,13 @@ class Styles(ElementProxy[CT_Styles]):
     @property
     def part(self) -> StylesPart:
         return self.part
+
+    @cached_property
+    def document_defaults(self) -> DocumentDefaults | None:
+        doc_dflts = self.element.docDefaults
+        if doc_dflts is None:
+            return None
+        return DocumentDefaults(doc_dflts, self)
 
     def get_by_id(
         self,

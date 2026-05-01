@@ -1,19 +1,23 @@
-from functools import cached_property
+from __future__ import annotations
+
 from typing import Any, Self
 
 
 class PropertyPath(str):
-    @cached_property
+    @property
     def prop(self) -> str:
         return self.rsplit(".", 1)[-1]
 
-    @cached_property
+    @property
     def path_to_prop(self) -> str:
         return self.rsplit(".", 1)[0]
 
-    @cached_property
+    @property
     def links(self) -> list[str]:
         return self.split(".")
+
+    def join_left(self, left: str) -> PropertyPath:
+        return PropertyPath.base(self.prop, f"{left}.{self.path_to_prop}")
 
     @classmethod
     def base(cls, prop: str, path_to_prop: str = "") -> Self:

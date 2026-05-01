@@ -25,4 +25,4 @@ class CT_I(OxmlToggled):
 class CT_RPr(OxmlElement):
     @cached_property
     def i(self) -> CT_I | None:
-        return self.child_zero_or_one(W.I, CT_I)
+        return self.child_zero_or_first(W.I, CT_I)

@@ -25,14 +25,19 @@ class OxmlElement(BaseOxmlElement):
             return None
         return to(val)
 
-    def child_only_one(self, qn: str, elm_hint: type[ELM_T]) -> ELM_T:
+    def child_first_only(self, qn: str, elm_hint: type[ELM_T]) -> ELM_T:
         child = self.find(qn, elm_hint)
         if child is None:
             msg = f"Cannot get child '{qn}' from {self}"
             raise OxmlError(msg)
         return child
 
-    def child_zero_or_one(
+    def child_zero_or_first(
         self, qn: str, elm_hint: type[ELM_T]
     ) -> ELM_T | None:
         return self.find(qn, elm_hint)
+
+    def child_zero_or_more(
+        self, qn: str, elm_hint: type[ELM_T]
+    ) -> list[ELM_T]:
+        return self.findall(qn, elm_hint)
