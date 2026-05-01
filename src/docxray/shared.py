@@ -2,28 +2,41 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 # docxray stuff
-from docxray.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
+from docxray.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
-    from docxray.parts.story import StoryPart
+
+XML_PART_T = TypeVar("XML_PART_T", bound="XmlPart")
 
 
-class ElementProxy(Generic[ELM_T]):
-    """Base class for lxml element proxy classes.
+class PartProxy(Generic[ELM_T, XML_PART_T]):
+    def __init__(self, element: ELM_T, part: XML_PART_T | None = None) -> None:
+        self._element = element
+        self._part = part
 
-    An element proxy class is one whose primary responsibilities are fulfilled by
-    manipulating the attributes and child elements of an XML element. They are the most
-    common type of class in python-docx other than custom element (oxml) classes.
-    """
+    @property
+    def element(self) -> ELM_T:
+        """The lxml element proxied by this object."""
+        return self._element
 
-    def __init__(
-        self, element: ELM_T, parent: ProvidesXmlPart[ELM_T] | None = None
-    ) -> None:
+    @property
+    def part(self) -> XML_PART_T:
+        """The package part containing this object."""
+        if self._part is None:
+            raise ValueError("part is not accessible from this element")
+        return self._part
+
+
+PARENT_T = TypeVar("PARENT_T")
+
+
+class ElementProxy(Generic[ELM_T, PARENT_T]):
+    def __init__(self, element: ELM_T, parent: PARENT_T) -> None:
         self._element = element
         self._parent = parent
 
@@ -33,45 +46,5 @@ class ElementProxy(Generic[ELM_T]):
         return self._element
 
     @property
-    def part(self) -> XmlPart[ELM_T]:
-        """The package part containing this object."""
-        if self._parent is None:
-            raise ValueError("part is not accessible from this element")
-        return self._parent.part
-
-
-class Parented(Generic[ELM_T]):
-    """Provides common services for document elements that occur below a part but may
-    occasionally require an ancestor object to provide a service, such as add or drop a
-    relationship.
-
-    Provides ``self._parent`` attribute to subclasses.
-    """
-
-    def __init__(self, parent: ProvidesXmlPart[ELM_T]) -> None:
-        self._parent = parent
-
-    @property
-    def part(self) -> XmlPart[ELM_T]:
-        """The package part containing this object."""
-        return self._parent.part
-
-
-class StoryChild(Generic[ELM_T]):
-    """A document element within a story part.
-
-    Story parts include DocumentPart and Header/FooterPart and can contain block items
-    (paragraphs and tables). Items from the block-item subtree occasionally require an
-    ancestor object to provide access to part-level or package-level items like styles
-    or images or to add or drop a relationship.
-
-    Provides `self._parent` attribute to subclasses.
-    """
-
-    def __init__(self, parent: ProvidesStoryPart[ELM_T]):
-        self._parent = parent
-
-    @property
-    def part(self) -> StoryPart[ELM_T]:
-        """The package part containing this object."""
-        return self._parent.part
+    def parent(self) -> PARENT_T:
+        return self._parent

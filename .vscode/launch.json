@@ -2,15 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run test.py",
+            "name": "Debug pytest",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/tests/test.py",
+            "module": "pytest",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/src"
-            }
         }
     ]
 }

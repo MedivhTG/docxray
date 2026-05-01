@@ -2,20 +2,23 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.blkcntnr import BlockItemContainer
-from docxray.oxml.document import CT_Document
-from docxray.shared import ElementProxy
+from docxray.oxml.document import CT_Body, CT_Document
+from docxray.shared import PartProxy
+from docxray.table import Table
+from docxray.text.paragraph import Paragraph
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.parts.document import DocumentPart
 
 
-class Document(ElementProxy[CT_Document]):
+class Document(PartProxy[CT_Document, "DocumentPart"]):
     """WordprocessingML (WML) document.
 
     Not intended to be constructed directly. Use :func:`docx.Document` to open or create
@@ -23,18 +26,17 @@ class Document(ElementProxy[CT_Document]):
     """
 
     def __init__(self, element: CT_Document, part: DocumentPart) -> None:
-        super().__init__(element, part)
+        super().__init__(element)
         self._part = part
 
     @cached_property
     def body(self) -> Body:
         return Body(self.element.body, self)
 
-    @property
-    def part(self) -> DocumentPart:
-        """The |DocumentPart| object of this document."""
-        return self._part
+    def iter_inner_content(self) -> Iterator[Paragraph | Table]:
+        """Generate each `Paragraph` or `Table` in this document in document order."""
+        return self.body.iter_inner_content()
 
 
-class Body(BlockItemContainer[CT_Document]):
+class Body(BlockItemContainer[CT_Body, Document]):
     pass

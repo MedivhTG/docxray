@@ -6,6 +6,8 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.ns import W
+from docxray.oxml.table import CT_Tbl
+from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.xmlchemy import OxmlElement
 
 
@@ -18,4 +20,6 @@ class CT_Document(OxmlElement):
 
 
 class CT_Body(OxmlElement):
-    pass
+    @cached_property
+    def inner_content_elements(self) -> list[CT_P | CT_Tbl]:
+        return self.xpath("w:p | w:tbl")

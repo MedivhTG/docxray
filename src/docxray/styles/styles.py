@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
-from docxray.shared import ElementProxy
+from docxray.shared import PartProxy
 from docxray.styles.style import BaseStyle, StyleFactory
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
 
+if TYPE_CHECKING:
+    # docxray stuff
+    from docxray.parts.styles import StylesPart  # noqa: F401
 
-class Styles(ElementProxy[CT_Styles]):
+
+class Styles(PartProxy[CT_Styles, "StylesPart"]):
     """Provides access to the styles defined in a document."""
 
     def get_by_id(
@@ -35,4 +39,4 @@ class Styles(ElementProxy[CT_Styles]):
         if style is None or style.type != style_type:
             msg = f"No such style by id {style_id}"
             raise ValueError(msg)
-        return StyleFactory(style)
+        return StyleFactory(style, self.part)

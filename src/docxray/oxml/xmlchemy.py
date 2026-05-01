@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from lxml.etree import LxmlError
 
 # docxray stuff
 from docxray.lxml import BaseOxmlElement
+from docxray.oxml.ns import nsmap
 from docxray.types import ELM_T
 
 ENUM_T = TypeVar("ENUM_T", bound=Enum)
@@ -15,6 +16,9 @@ class OxmlError(LxmlError):
 
 
 class OxmlElement(BaseOxmlElement):
+    def xpath(self, xpath: str) -> Any:  # type: ignore[override]
+        return super().xpath(xpath, nsmap)
+
     def get_enum(self, qn: str, to: type[ENUM_T]) -> ENUM_T | None:
         val = self.get(qn)
         if val is None:

@@ -39,6 +39,9 @@ class W:
 
     BODY = qn("w:body")
 
+    P = qn("w:p")
+    TBL = qn("w:tbl")
+
     TYPE = qn("w:type")
 
     STYLE = qn("w:style")
