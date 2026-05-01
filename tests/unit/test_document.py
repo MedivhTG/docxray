@@ -2,6 +2,7 @@ from pathlib import Path
 
 from docxray import Document
 from docxray.document import Document as D
+from docxray.table import Table
 from docxray.text.paragraph import Paragraph
 from docxray.text.run import Run
 
@@ -12,12 +13,18 @@ class TestDocument:
 
     def test_iter_inner_content(self, test_file: Path) -> None:
         doc = self.test_open(test_file)
+        part = doc.part
         for p_or_t in doc.iter_inner_content():
+            if isinstance(p_or_t, Table):
+                part = p_or_t.part
+                t_fmt = p_or_t.fmt
             if not isinstance(p_or_t, Paragraph):
                 continue
+            part = p_or_t.part
+            p_fmt = p_or_t.fmt
             for r_or_h in p_or_t.iter_inner_content():
                 if not isinstance(r_or_h, Run):
                     continue
-
-                txt = r_or_h.raw_text
-                elms = r_or_h.element.inner_content_items
+                part = r_or_h.part
+                r_fmt = r_or_h.fmt
+                wait = 1

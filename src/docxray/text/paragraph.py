@@ -1,19 +1,20 @@
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from functools import cached_property
 
 # docxray stuff
+from docxray.format.paragraph import ParagraphFormat
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
-from docxray.shared import ElementProxy
+from docxray.shared import StoryChild
 from docxray.text.hyperlink import Hyperlink
 from docxray.text.run import Run
 
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.blkcntnr import BlockItemContainer  # noqa: F401
 
+class Paragraph(StoryChild[CT_P]):
+    @cached_property
+    def fmt(self) -> ParagraphFormat:
+        return ParagraphFormat(self.element, self.part.document_part)
 
-class Paragraph(ElementProxy[CT_P, "BlockItemContainer"]):
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
         """Generate the runs and hyperlinks in this paragraph, in the order they appear.
 

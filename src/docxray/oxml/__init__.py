@@ -13,13 +13,14 @@ from .text.paragraph import CT_P
 from .text.run import CT_R, CT_T
 
 register_element_cls("w:p", CT_P)
+register_element_cls("w:hyperlink", CT_Hyperlink)
 register_element_cls("w:r", CT_R)
 register_element_cls("w:t", CT_T)
-register_element_cls("w:hyperlink", CT_Hyperlink)
 
-from .table import CT_Tbl, CT_Tc
+from .table import CT_Tbl, CT_Tc, CT_Tr
 
 register_element_cls("w:tbl", CT_Tbl)
+register_element_cls("w:tr", CT_Tr)
 register_element_cls("w:tc", CT_Tc)
 
 from .styles import CT_Style, CT_Styles

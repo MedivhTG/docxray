@@ -1,16 +1,15 @@
-from typing import TYPE_CHECKING
+from functools import cached_property
 
 # docxray stuff
+from docxray.format.table import TableFormat
 from docxray.oxml.table import CT_Tbl
-from docxray.shared import ElementProxy
-
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.blkcntnr import BlockItemContainer  # noqa: F401
+from docxray.shared import StoryChild
 
 
-class Table(ElementProxy[CT_Tbl, "BlockItemContainer"]):
-    pass
+class Table(StoryChild[CT_Tbl]):
+    @cached_property
+    def fmt(self) -> TableFormat:
+        return TableFormat(self.element, self.part.document_part)
 
 
 class Cell:

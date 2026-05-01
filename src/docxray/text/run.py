@@ -1,16 +1,16 @@
 from functools import cached_property
-from typing import TYPE_CHECKING
 
 # docxray stuff
+from docxray.format.run import RunFormat
 from docxray.oxml.text.run import CT_R
-from docxray.shared import ElementProxy
-
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.text.paragraph import Paragraph  # noqa: F401
+from docxray.shared import StoryChild
 
 
-class Run(ElementProxy[CT_R, "Paragraph"]):
+class Run(StoryChild[CT_R]):
+    @cached_property
+    def fmt(self) -> RunFormat:
+        return RunFormat(self.element, self.part.document_part)
+
     @cached_property
     def raw_text(self) -> str:
         t_elm = self.element.t

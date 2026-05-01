@@ -7,18 +7,22 @@ from typing import TYPE_CHECKING, TypeVar
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
-from docxray.shared import PartProxy
+from docxray.shared import ElementProxy
 from docxray.styles.style import BaseStyle, StyleFactory
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.styles import StylesPart  # noqa: F401
+    from docxray.parts.styles import StylesPart
 
 
-class Styles(PartProxy[CT_Styles, "StylesPart"]):
+class Styles(ElementProxy[CT_Styles]):
     """Provides access to the styles defined in a document."""
+
+    @property
+    def part(self) -> StylesPart:
+        return self.part
 
     def get_by_id(
         self,

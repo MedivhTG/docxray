@@ -9,6 +9,10 @@ class CT_Tbl(OxmlElement):
     pass
 
 
+class CT_Tr(OxmlElement):
+    pass
+
+
 class CT_Tc(OxmlElement):
     @cached_property
     def inner_content_elements(self) -> list[CT_P | CT_Tbl]:

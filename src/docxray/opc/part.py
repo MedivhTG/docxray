@@ -216,3 +216,7 @@ class XmlPart(Part, Generic[ELM_T]):
             element,  # type: ignore[arg-type]
             package,
         )
+
+    @property
+    def part(self) -> Self:
+        return self

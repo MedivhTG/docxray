@@ -29,12 +29,12 @@ class DocumentPart(StoryPart[CT_Document]):
         return Document(self._element, self)
 
     @cached_property
-    def numbering_part(self) -> NumberingPart:
-        """A |NumberingPart| object providing access to the numbering definitions for this document.
-
-        Creates an empty numbering part if one is not present.
-        """
-        return self.part_related_by(RT.NUMBERING, NumberingPart)
+    def numbering_part(self) -> NumberingPart | None:
+        """A |NumberingPart| object providing access to the numbering definitions for this document."""
+        try:
+            return self.part_related_by(RT.NUMBERING, NumberingPart)
+        except KeyError:
+            return None
 
     @property
     def styles(self) -> Styles:

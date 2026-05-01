@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Style
-from docxray.shared import PartProxy
+from docxray.shared import ElementProxy
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -27,8 +27,10 @@ def StyleFactory(style_elm: CT_Style, part: StylesPart) -> BaseStyle:
     return style_cls(style_elm, part)
 
 
-class BaseStyle(PartProxy[CT_Style, "StylesPart"]):
-    pass
+class BaseStyle(ElementProxy[CT_Style]):
+    @property
+    def part(self) -> StylesPart:
+        return self.part
 
 
 class CharacterStyle(BaseStyle):
