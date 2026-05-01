@@ -10,12 +10,19 @@ register_element_cls("w:body", CT_Body)
 
 from .text.hyperlink import CT_Hyperlink
 from .text.paragraph import CT_P
-from .text.run import CT_R, CT_T
 
 register_element_cls("w:p", CT_P)
 register_element_cls("w:hyperlink", CT_Hyperlink)
+
+from .text.run import CT_R, CT_T
+
 register_element_cls("w:r", CT_R)
 register_element_cls("w:t", CT_T)
+
+from .text.run_props import CT_I, CT_RPr
+
+register_element_cls("w:rPr", CT_RPr)
+register_element_cls("w:i", CT_I)
 
 from .table import CT_Tbl, CT_Tc, CT_Tr
 

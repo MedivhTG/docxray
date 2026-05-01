@@ -9,7 +9,7 @@ from docxray.shared import StoryChild
 class Table(StoryChild[CT_Tbl]):
     @cached_property
     def fmt(self) -> TableFormat:
-        return TableFormat(self.element, self.part.document_part)
+        return TableFormat(self.element, self.part.document_part, "NO")
 
 
 class Cell:

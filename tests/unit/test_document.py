@@ -27,4 +27,5 @@ class TestDocument:
                     continue
                 part = r_or_h.part
                 r_fmt = r_or_h.fmt
+                italic = r_fmt.italic
                 wait = 1

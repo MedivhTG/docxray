@@ -5,7 +5,7 @@ from lxml.etree import LxmlError
 
 # docxray stuff
 from docxray.lxml import BaseOxmlElement
-from docxray.oxml.ns import nsmap
+from docxray.oxml.ns import W, nsmap
 from docxray.types import ELM_T
 
 ENUM_T = TypeVar("ENUM_T", bound=Enum)
@@ -36,3 +36,17 @@ class OxmlElement(BaseOxmlElement):
         self, qn: str, elm_hint: type[ELM_T]
     ) -> ELM_T | None:
         return self.find(qn, elm_hint)
+
+    def child_toggled(self, qn: str) -> bool | None:
+        child = self.child_zero_or_one(qn, OxmlElement)
+        if child is None:
+            return None
+        val = child.get(W.VAL)
+        if val is None:
+            return True
+        return self._bool_val(val)
+
+    def _bool_val(self, val: str) -> bool:
+        if val == "0":
+            return False
+        return True

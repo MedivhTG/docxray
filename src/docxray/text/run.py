@@ -9,7 +9,7 @@ from docxray.shared import StoryChild
 class Run(StoryChild[CT_R]):
     @cached_property
     def fmt(self) -> RunFormat:
-        return RunFormat(self.element, self.part.document_part)
+        return RunFormat(self.element, self.part.document_part, "rPr")
 
     @cached_property
     def raw_text(self) -> str:
