@@ -35,12 +35,9 @@ def qn(tag: str) -> str:
 
 
 class W:
-    DOCUMENT = qn("w:document")
-
     BODY = qn("w:body")
 
-    P = qn("w:p")
-    TBL = qn("w:tbl")
+    T = qn("w:t")
 
     TYPE = qn("w:type")
 
