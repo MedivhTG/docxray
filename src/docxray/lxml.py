@@ -10,6 +10,11 @@ class BaseOxmlElement(etree.ElementBase):
     def xpath(self, xpath: str, ns: dict[str, str]) -> Any:  # type: ignore[override]
         return super().xpath(xpath, namespaces=ns)
 
+    def getparent(self, elm_hint: type[BASE_ELM_T]) -> BASE_ELM_T | None:  # type: ignore[override]
+        if not hasattr(self, "_parent"):
+            self._parent = super().getparent()
+        return self._parent  # type: ignore[return-value]
+
     def find(  # type: ignore[override]
         self,
         path: str,

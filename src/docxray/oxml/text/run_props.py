@@ -2,36 +2,15 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.ns import W
-from docxray.oxml.shared import CT_String
-from docxray.oxml.simpletypes import ST_OnOff
+from docxray.oxml.shared import CT_OnOff, CT_String
 from docxray.oxml.xmlchemy import OxmlElement
-
-
-class CT_Toggled(OxmlElement):
-    def __bool__(self) -> bool:
-        return self.val
-
-    @cached_property
-    def val(self) -> bool:
-        val = self.get(W.VAL)
-        if val is None:
-            return True
-        return ST_OnOff.validate(val)
-
-
-class CT_I(CT_Toggled):
-    pass
-
-
-class CT_RStyle(CT_String):
-    pass
 
 
 class CT_RPr(OxmlElement):
     @cached_property
-    def i(self) -> CT_I | None:
-        return self.child_zero_or_first(W.I, CT_I)
+    def i(self) -> CT_OnOff | None:
+        return self.child_zero_or_first(W.I, CT_OnOff)
 
     @cached_property
-    def rStyle(self) -> CT_RStyle | None:
-        return self.child_zero_or_first(W.R_STYLE, CT_RStyle)
+    def rStyle(self) -> CT_String | None:
+        return self.child_zero_or_first(W.R_STYLE, CT_String)

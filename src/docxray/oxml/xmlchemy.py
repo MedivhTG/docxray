@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import Any, TypeVar
+from typing import Any
 
 from lxml.etree import LxmlError
 
@@ -7,8 +6,6 @@ from lxml.etree import LxmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.ns import nsmap
 from docxray.types import ELM_T
-
-ENUM_T = TypeVar("ENUM_T", bound=Enum)
 
 
 class OxmlError(LxmlError):
@@ -18,27 +15,6 @@ class OxmlError(LxmlError):
 class OxmlElement(BaseOxmlElement):
     def xpath(self, xpath: str) -> Any:  # type: ignore[override]
         return super().xpath(xpath, nsmap)
-
-    def ancestor(self, elm_type: type[ELM_T]) -> ELM_T | None:
-        parent = self.getparent()
-        while parent is not None:
-            if isinstance(parent, elm_type):
-                return parent
-            parent = parent.getparent()
-        return None
-
-    def get_attr_one(self, tag: str) -> str:
-        attr = self.get(tag)
-        if attr is None:
-            msg = f"Cannot get '{tag}' from {self}"
-            raise OxmlError(msg)
-        return attr
-
-    def get_attr_enum(self, qn: str, to: type[ENUM_T]) -> ENUM_T | None:
-        val = self.get(qn)
-        if val is None:
-            return None
-        return to(val)
 
     def child_first_only(self, qn: str, elm_hint: type[ELM_T]) -> ELM_T:
         child = self.find(qn, elm_hint)

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 type StoryElements = CT_R | CT_P | CT_Tbl
 STORY_ELM_T = TypeVar("STORY_ELM_T", bound=StoryElements)
-ANCESTOR_T = TypeVar("ANCESTOR_T", bound=OxmlElement)
+PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
 
 
 class ResolveError(Exception):
@@ -47,14 +47,14 @@ class BaseResolver(Generic[STORY_ELM_T]):
             return self._from_styles_hierarchy(path, **kwargs)
         return direct
 
-    def _elm_ancestor(
-        self, elm: OxmlElement, ancestor_type: type[ANCESTOR_T]
-    ) -> ANCESTOR_T:
-        ancestor = elm.ancestor(ancestor_type)
-        if ancestor is None:
-            msg = f"Ancestor of type {ancestor_type} not found for {elm}"
+    def _elm_parent(
+        self, elm: OxmlElement, parent_type: type[PARENT_T]
+    ) -> PARENT_T:
+        parent = elm.getparent(parent_type)
+        if not isinstance(parent, parent_type):
+            msg = f"Cannot get from {elm} parent of derived type {parent_type}"
             raise ResolveError(msg)
-        return ancestor
+        return parent
 
     def _from_doc_dflts(self, property_path: PropertyPath) -> Any | None:
         doc_dflts = self._styles.document_defaults

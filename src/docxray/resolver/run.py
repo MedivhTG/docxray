@@ -2,6 +2,7 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
+from docxray.oxml.table import CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.resolver.property_path import PropertyPath
@@ -30,10 +31,16 @@ class RunResolver(BaseResolver[CT_R]):
         if doc_val:
             return True
         char_val = bool(self._from_char_style(self._story_elm, property_path))
-        p_elm = self._elm_ancestor(self._story_elm, CT_P)
+        p_elm = self._elm_parent(self._story_elm, CT_P)
         para_val = bool(self._from_para_style(p_elm, property_path))
-        # XOR of toggled properties
-        return para_val ^ char_val
+        tc_elm = p_elm.getparent(CT_Tc)
+        if tc_elm is None:
+            return para_val ^ char_val
+        table_val = self.__table_value(tc_elm)
+        return para_val ^ char_val ^ table_val
+
+    def __table_value(self, tc_elm: CT_Tc) -> bool:
+        return False
 
     def _from_styles_default(self, property_path: PropertyPath) -> Any | None:
         return None

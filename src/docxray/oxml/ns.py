@@ -41,6 +41,7 @@ class W:
 
     R_PR = qn("w:rPr")
     R_STYLE = qn("w:rStyle")
+    P_STYLE = qn("w:pStyle")
     I = qn("w:i")  # noqa: E741
 
     T = qn("w:t")

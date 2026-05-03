@@ -47,10 +47,9 @@ class CharacterStyle(BaseStyle):
         basedOn = self.based_on
         if basedOn is None:
             return None
-        styles_elm = self.element.getparent()
+        styles_elm = self.element.getparent(CT_Styles)
         if styles_elm is None:
             return None
-        assert isinstance(styles_elm, CT_Styles)
         style_elm = styles_elm.get_by_id(basedOn)
         if style_elm is None:
             return None

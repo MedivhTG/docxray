@@ -7,6 +7,8 @@ from functools import cached_property
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.ns import W
+from docxray.oxml.shared import CT_String
+from docxray.oxml.simpletypes import ST_StyleType
 from docxray.oxml.text.run_props import CT_RPr
 from docxray.oxml.xmlchemy import OxmlElement
 
@@ -23,12 +25,6 @@ class CT_DocDefaults(OxmlElement):
         return self.child_zero_or_first(W.R_PR_DEFAULT, CT_RPrDefault)
 
 
-class CT_BasedOn(OxmlElement):
-    @cached_property
-    def val(self) -> str:
-        return self.get_attr_one(W.VAL)
-
-
 class CT_Style(OxmlElement):
     """A ``<w:style>`` element, representing a style definition."""
 
@@ -37,12 +33,12 @@ class CT_Style(OxmlElement):
         return self.child_zero_or_first(W.R_PR, CT_RPr)
 
     @cached_property
-    def type(self) -> WD_STYLE_TYPE | None:
-        return self.get_attr_enum(W.TYPE, WD_STYLE_TYPE)
+    def type(self) -> WD_STYLE_TYPE:
+        return ST_StyleType.validate(self.get(W.TYPE))
 
     @cached_property
-    def basedOn(self) -> CT_BasedOn | None:
-        return self.child_zero_or_first(W.BASED_ON, CT_BasedOn)
+    def basedOn(self) -> CT_String | None:
+        return self.child_zero_or_first(W.BASED_ON, CT_String)
 
 
 class CT_Styles(OxmlElement):
