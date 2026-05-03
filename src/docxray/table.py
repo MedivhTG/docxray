@@ -1,9 +1,33 @@
+from collections.abc import Iterator
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.table import CT_Tbl
+from docxray.blkcntnr import BlockItemContainer
+from docxray.enum.table import WD_MERGE
+from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.resolver.table import TableResolver
-from docxray.shared import StoryChild
+from docxray.shared import (
+    ElementProxy,
+    PropertyPath,
+    StoryChild,
+    safe_get_prop,
+)
+
+
+class Cell(BlockItemContainer[CT_Tc]):
+    pass
+
+
+class Row(ElementProxy[CT_Row]):
+    def iter_cells(self, skip_vert_merged: bool = True) -> Iterator[Cell]:
+        for tc_elm in self.element.tc_lst:
+            if skip_vert_merged:
+                vMerge_val = safe_get_prop(
+                    tc_elm, PropertyPath.base("val", "tcPr.vMerge")
+                )
+                if vMerge_val == WD_MERGE.CONTINUE:
+                    continue
+            yield Cell(tc_elm, self)  # type: ignore[arg-type]
 
 
 class Table(StoryChild[CT_Tbl]):
@@ -11,6 +35,6 @@ class Table(StoryChild[CT_Tbl]):
     def resolver(self) -> TableResolver:
         return TableResolver(self.element, self.part.document_part, "NO")
 
-
-class Cell:
-    pass
+    def iter_rows(self) -> Iterator[Row]:
+        for tr_elm in self.element.tr_lst:
+            yield Row(tr_elm, self)

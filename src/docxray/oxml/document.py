@@ -8,7 +8,7 @@ from functools import cached_property
 from docxray.oxml.background import CT_Background
 from docxray.oxml.ns import W
 from docxray.oxml.shared import CT_AltChunk
-from docxray.oxml.table import CT_Tbl
+from docxray.oxml.table.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.xmlchemy import OxmlElement
 

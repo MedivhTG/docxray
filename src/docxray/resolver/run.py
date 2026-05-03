@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.table import CT_Tc
+from docxray.oxml.table.table import CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.resolver.resolver import BaseResolver

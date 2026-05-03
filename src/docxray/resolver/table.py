@@ -1,7 +1,7 @@
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.table import CT_Tbl
+from docxray.oxml.table.table import CT_Tbl
 from docxray.resolver.resolver import BaseResolver
 from docxray.shared import PropertyPath
 

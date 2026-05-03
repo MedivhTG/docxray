@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.enum.table import WD_CNF_FORMAT
-from docxray.oxml.table import CT_Row, CT_Tbl, CT_Tc
+from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.oxml.xmlchemy import OxmlElement

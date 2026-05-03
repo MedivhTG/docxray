@@ -40,22 +40,38 @@ class W:
     BODY = qn("w:body")
     ALT_CHUNK = qn("w:altChunk")
 
+    TR = qn("w:tr")
+    TC = qn("w:tc")
+
     SECT_PR = qn("w:sectPr")
     P_PR = qn("w:pPr")
     R_PR = qn("w:rPr")
     TBL_PR = qn("w:tblPr")
+    TR_PR = qn("w:trPr")
+    TC_PR = qn("w:tcPr")
+
+    TC_W = qn("w:tcW")
+    GRID_SPAN = qn("w:gridSpan")
+    H_MERGE = qn("w:hMerge")
+    V_MERGE = qn("w:vMerge")
+    TC_BORDERS = qn("w:tcBorders")
+    SHD = qn("w:shd")
+    NO_WRAP = qn("w:noWrap")
+    TC_MAR = qn("w:tcMar")
+    TEXT_DIRECTION = qn("w:textDirection")
+    TC_FIT_TEXT = qn("w:tcFitText")
+    V_ALIGN = qn("w:vAlign")
+    HIDE_MARK = qn("w:hideMark")
 
     R_STYLE = qn("w:rStyle")
     P_STYLE = qn("w:pStyle")
     TBL_STYLE = qn("w:tblStyle")
+    CNF_STYLE = qn("w:cnfStyle")
+
     TBL_STYLE_PR = qn("w:tblStylePr")
 
     I = qn("w:i")  # noqa: E741
-
     T = qn("w:t")
-
-    TYPE = qn("w:type")
-    VAL = qn("w:val")
 
     DOC_DEFAULTS = qn("w:docDefaults")
     R_PR_DEFAULT = qn("w:rPrDefault")
@@ -64,6 +80,5 @@ class W:
     STYLE_ID = qn("w:styleId")
     BASED_ON = qn("w:basedOn")
 
-    TR_PR = qn("w:trPr")
-    TC_PR = qn("w:tcPr")
-    CNF_STYLE = qn("w:cnfStyle")
+    TYPE = qn("w:type")
+    VAL = qn("w:val")

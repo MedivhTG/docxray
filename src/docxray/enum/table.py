@@ -1,4 +1,4 @@
-from enum import IntFlag
+from enum import IntFlag, StrEnum
 from typing import Literal
 
 
@@ -58,3 +58,8 @@ _PRIORITY_FLAGS = [
     WD_CNF_FORMAT.EVEN_VERTICAL_BAND,
     WD_CNF_FORMAT.ODD_VERTICAL_BAND,
 ]
+
+
+class WD_MERGE(StrEnum):
+    CONTINUE = "continue"
+    RESTART = "restart"

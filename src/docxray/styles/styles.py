@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
-from docxray.oxml.table import CT_Tbl
+from docxray.oxml.table.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.shared import ElementProxy, PropertyPath, safe_get_prop

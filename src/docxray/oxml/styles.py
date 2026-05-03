@@ -9,7 +9,9 @@ from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.ns import W
 from docxray.oxml.shared import CT_String
 from docxray.oxml.simpletypes import ST_StyleType, ST_TblStyleOverrideType
-from docxray.oxml.table_props import CT_TblPrBase, CT_TcPr, CT_TrPr
+from docxray.oxml.table.cell_props import CT_TcPr
+from docxray.oxml.table.row_props import CT_TrPr
+from docxray.oxml.table.table_props import CT_TblPrBase
 from docxray.oxml.text.paragraph_props import CT_PPr
 from docxray.oxml.text.run_props import CT_RPr
 from docxray.oxml.xmlchemy import OxmlElement

@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
-from docxray.enum.table import WD_CNF_FORMAT
+from docxray.enum.table import WD_CNF_FORMAT, WD_MERGE
 from docxray.exceptions import InvalidXmlError
 
 ENUM_T = TypeVar("ENUM_T", bound=Enum)
@@ -34,6 +34,16 @@ class ST_String(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> str:
         return cls.validate_str(obj)
+
+
+class ST_DecimalNumber(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> int:
+        try:
+            return int(obj)
+        except (ValueError, TypeError):
+            msg = f"Invalid DecimalNumber value for {obj}; MUST be integer"
+            raise InvalidXmlError(msg)
 
 
 class ST_OnOff(SimpleType):
@@ -77,3 +87,9 @@ class ST_TblStyleOverrideType(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_TBL_STYLE_OVERRIDE_TYPE:
         return cls.validate_enum(obj, WD_TBL_STYLE_OVERRIDE_TYPE)
+
+
+class ST_Merge(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_MERGE:
+        return cls.validate_enum(obj, WD_MERGE)
