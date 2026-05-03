@@ -1,0 +1,2 @@
+class ResolveError(Exception):
+    pass

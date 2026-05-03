@@ -1,4 +1,4 @@
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from typing import Any, TypeVar
 
 from lxml import etree
@@ -11,25 +11,34 @@ class BaseOxmlElement(etree.ElementBase):
         return super().xpath(xpath, namespaces=ns)
 
     def getparent(self, elm_hint: type[BASE_ELM_T]) -> BASE_ELM_T | None:  # type: ignore[override]
+        # Cache parent for styles
         if not hasattr(self, "_parent"):
             self._parent = super().getparent()
         return self._parent  # type: ignore[return-value]
 
+    def iterfind(  # type: ignore[override]
+        self,
+        elm_qn: str,
+        elm_hint: type[BASE_ELM_T],
+        namespaces: Mapping[str, str] | None = None,
+    ) -> Iterator[BASE_ELM_T]:
+        return super().iterfind(elm_qn, namespaces)  # type: ignore[return-value]
+
     def find(  # type: ignore[override]
         self,
-        path: str,
+        elm_qn: str,
         elm_hint: type[BASE_ELM_T],
         namespaces: Mapping[str, str] | None = None,
     ) -> BASE_ELM_T | None:
-        return super().find(path, namespaces)  # type: ignore[return-value]
+        return super().find(elm_qn, namespaces)  # type: ignore[return-value]
 
     def findall(  # type: ignore[override]
         self,
-        path: str,
+        elm_qn: str,
         elm_hint: type[BASE_ELM_T],
         namespaces: Mapping[str, str] | None = None,
     ) -> list[BASE_ELM_T]:
-        return super().findall(path, namespaces)  # type: ignore[return-value]
+        return super().findall(elm_qn, namespaces)  # type: ignore[return-value]
 
     def __repr__(self) -> str:
         return (

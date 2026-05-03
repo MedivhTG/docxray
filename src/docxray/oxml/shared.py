@@ -9,7 +9,7 @@ from docxray.oxml.xmlchemy import OxmlElement
 class CT_String(OxmlElement):
     @cached_property
     def val(self) -> str:
-        return ST_String.validate(self.get(W.VAL))
+        return self.attr_required(W.VAL, ST_String)
 
 
 class CT_OnOff(OxmlElement):
@@ -18,7 +18,4 @@ class CT_OnOff(OxmlElement):
 
     @cached_property
     def val(self) -> bool:
-        val = self.get(W.VAL)
-        if val is None:
-            return True
-        return ST_OnOff.validate(val)
+        return self.attr_optional(W.VAL, ST_OnOff, True)

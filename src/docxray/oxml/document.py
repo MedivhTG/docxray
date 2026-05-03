@@ -16,7 +16,7 @@ class CT_Document(OxmlElement):
 
     @cached_property
     def body(self) -> CT_Body:
-        return self.child_first_only(W.BODY, CT_Body)
+        return self.child_exactly_one(W.BODY, CT_Body)
 
 
 class CT_Body(OxmlElement):

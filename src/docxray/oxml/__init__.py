@@ -34,11 +34,19 @@ register_element_cls("w:rPr", CT_RPr)
 register_element_cls("w:i", CT_OnOff)
 register_element_cls("w:rStyle", CT_String)
 
-from .table import CT_Tbl, CT_Tc, CT_Tr
+from .table import CT_Row, CT_Tbl, CT_Tc
 
 register_element_cls("w:tbl", CT_Tbl)
-register_element_cls("w:tr", CT_Tr)
+register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
+
+from .table_props import CT_Cnf, CT_TblPr, CT_TcPr, CT_TrPr
+
+register_element_cls("w:tblPr", CT_TblPr)
+register_element_cls("w:trPr", CT_TrPr)
+register_element_cls("w:tcPr", CT_TcPr)
+register_element_cls("w:cnfStyle", CT_Cnf)
+register_element_cls("w:tblStyle", CT_String)
 
 from .styles import (
     CT_DocDefaults,

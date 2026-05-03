@@ -1,34 +1,97 @@
-from typing import Any
-
-from lxml.etree import LxmlError
+from typing import Any, TypeVar
 
 # docxray stuff
+from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.ns import nsmap
+from docxray.oxml.simpletypes import SimpleType
 from docxray.types import ELM_T
 
-
-class OxmlError(LxmlError):
-    pass
+ST_T = TypeVar("ST_T", bound=SimpleType)
+T = TypeVar("T")
 
 
 class OxmlElement(BaseOxmlElement):
     def xpath(self, xpath: str) -> Any:  # type: ignore[override]
         return super().xpath(xpath, nsmap)
 
-    def child_first_only(self, qn: str, elm_hint: type[ELM_T]) -> ELM_T:
-        child = self.find(qn, elm_hint)
+    def attr_optional(
+        self, elm_qn: str, simple_type: type[ST_T], default: T | None = None
+    ) -> Any | T:
+        attr = self.get(elm_qn)
+        if attr is None:
+            return default
+        return simple_type.validate(attr)
+
+    def attr_required(self, elm_qn: str, simple_type: type[ST_T]) -> Any:
+        attr = self.get(elm_qn)
+        if attr is None:
+            msg = (
+                f"Attribute {elm_qn} was None when one was required for {self}"
+            )
+            raise InvalidXmlError(msg)
+        return simple_type.validate(attr)
+
+    def child_exactly_one(self, elm_qn: str, elm_hint: type[ELM_T]) -> ELM_T:
+        """Get child with `minOccurs=1` and `maxOccurs=1`.
+
+        Args:
+            elm_qn (str): Qualified name of element tag (clark-notation).
+            elm_hint (type[ELM_T]): Element cast hint returned.
+
+        Raises:
+            InvalidXmlError: If child not found.
+            InvalidXmlError: If child appears more than 1 times.
+
+        Returns:
+            ELM_T: OxmlElement found.
+        """
+        iterator = self.iterfind(elm_qn, elm_hint)
+        child = next(iterator, None)
         if child is None:
-            msg = f"Cannot get child '{qn}' from {self}"
-            raise OxmlError(msg)
+            msg = f"Child {elm_qn} was None when one was required for {self}"
+            raise InvalidXmlError(msg)
+        child_ahead = next(iterator, None)
+        if child_ahead is not None:
+            msg = f"Child {elm_qn} must appear only once for {self}"
+            raise InvalidXmlError(msg)
         return child
 
-    def child_zero_or_first(
-        self, qn: str, elm_hint: type[ELM_T]
+    def child_zero_or_one(
+        self, elm_qn: str, elm_hint: type[ELM_T]
     ) -> ELM_T | None:
-        return self.find(qn, elm_hint)
+        """Get child with `minOccurs=0` and `maxOccurs=1`.
+
+        Args:
+            elm_qn (str): Qualified name of element tag (clark-notation).
+            elm_hint (type[ELM_T]): Element cast hint returned.
+
+        Raises:
+            InvalidXmlError: If child appears more than 1 times.
+
+        Returns:
+            ELM_T | None: OxmlElement found or not.
+        """
+        iterator = self.iterfind(elm_qn, elm_hint)
+        child = next(iterator, None)
+        if child is None:
+            return None
+        child_ahead = next(iterator, None)
+        if child_ahead is not None:
+            msg = f"Child {elm_qn} must appear 0 or 1 time for {self}"
+            raise InvalidXmlError(msg)
+        return child
 
     def child_zero_or_more(
-        self, qn: str, elm_hint: type[ELM_T]
+        self, elm_qn: str, elm_hint: type[ELM_T]
     ) -> list[ELM_T]:
-        return self.findall(qn, elm_hint)
+        """Get children with `minOccurs=0` and `maxOccurs=*`.
+
+        Args:
+            elm_qn (str): Qualified name of element tag (clark-notation).
+            elm_hint (type[ELM_T]): Element cast hint returned.
+
+        Returns:
+            list[ELM_T]: List of Oxmlelement's found.
+        """
+        return self.findall(elm_qn, elm_hint)

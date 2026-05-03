@@ -9,8 +9,8 @@ from docxray.oxml.xmlchemy import OxmlElement
 class CT_RPr(OxmlElement):
     @cached_property
     def i(self) -> CT_OnOff | None:
-        return self.child_zero_or_first(W.I, CT_OnOff)
+        return self.child_zero_or_one(W.I, CT_OnOff)
 
     @cached_property
     def rStyle(self) -> CT_String | None:
-        return self.child_zero_or_first(W.R_STYLE, CT_String)
+        return self.child_zero_or_one(W.R_STYLE, CT_String)

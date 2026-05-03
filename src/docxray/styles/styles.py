@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
+from docxray.oxml.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.shared import ElementProxy
@@ -17,6 +18,7 @@ from docxray.styles.style import (
     CharacterStyle,
     ParagraphStyle,
     StyleFactory,
+    TableStyle,
 )
 from docxray.types import ProvidesXmlPart
 
@@ -78,6 +80,17 @@ class Styles(ElementProxy[CT_Styles]):
             return None
         return self.get_by_id(
             pStyle_elm.val, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
+        )
+
+    def table_style(self, tbl_elm: CT_Tbl) -> TableStyle | None:
+        tblPr_elm = tbl_elm.tblPr
+        if tblPr_elm is None:
+            return None
+        tblStyle_elm = tblPr_elm.tblStyle
+        if tblStyle_elm is None:
+            return None
+        return self.get_by_id(
+            tblStyle_elm.val, WD_STYLE_TYPE.TABLE, TableStyle
         )
 
     def get_by_id(

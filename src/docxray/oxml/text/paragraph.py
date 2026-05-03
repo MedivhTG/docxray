@@ -17,4 +17,4 @@ class CT_P(OxmlElement):
 
     @cached_property
     def pPr(self) -> CT_PPr | None:
-        return self.child_zero_or_first(W.P_PR, CT_PPr)
+        return self.child_zero_or_one(W.P_PR, CT_PPr)

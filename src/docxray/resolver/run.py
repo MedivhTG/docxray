@@ -34,13 +34,12 @@ class RunResolver(BaseResolver[CT_R]):
         p_elm = self._elm_parent(self._story_elm, CT_P)
         para_val = bool(self._from_para_style(p_elm, property_path))
         tc_elm = p_elm.getparent(CT_Tc)
-        if tc_elm is None:
+        if not isinstance(tc_elm, CT_Tc):
             return para_val ^ char_val
-        table_val = self.__table_value(tc_elm)
+        table_val = bool(
+            self._from_table_style_hierarchy(tc_elm, property_path)
+        )
         return para_val ^ char_val ^ table_val
-
-    def __table_value(self, tc_elm: CT_Tc) -> bool:
-        return False
 
     def _from_styles_default(self, property_path: PropertyPath) -> Any | None:
         return None

@@ -9,4 +9,4 @@ from docxray.oxml.xmlchemy import OxmlElement
 class CT_PPr(OxmlElement):
     @cached_property
     def pStyle(self) -> CT_String | None:
-        return self.child_zero_or_first(W.P_STYLE, CT_String)
+        return self.child_zero_or_one(W.P_STYLE, CT_String)

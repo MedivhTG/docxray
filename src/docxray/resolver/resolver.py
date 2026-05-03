@@ -4,10 +4,11 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
-from docxray.oxml.table import CT_Tbl
+from docxray.oxml.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.oxml.xmlchemy import OxmlElement
+from docxray.resolver.exceptions import ResolveError
 from docxray.resolver.property_path import PropertyPath, safe_get_prop
 from docxray.styles.style import CharacterStyle
 
@@ -18,10 +19,6 @@ if TYPE_CHECKING:
 type StoryElements = CT_R | CT_P | CT_Tbl
 STORY_ELM_T = TypeVar("STORY_ELM_T", bound=StoryElements)
 PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
-
-
-class ResolveError(Exception):
-    pass
 
 
 class BaseResolver(Generic[STORY_ELM_T]):
@@ -63,20 +60,38 @@ class BaseResolver(Generic[STORY_ELM_T]):
         return safe_get_prop(doc_dflts.element, property_path)
 
     def _from_char_style(
-        self, story_elm: CT_R, property_path: PropertyPath
+        self, r_elm: CT_R, property_path: PropertyPath
     ) -> Any | None:
-        char_style = self._styles.char_style(story_elm)
+        char_style = self._styles.char_style(r_elm)
         if char_style is None:
             return None
         return self._from_style_inheritance(char_style, property_path)
 
     def _from_para_style(
-        self, story_elm: CT_P, property_path: PropertyPath
+        self, p_elm: CT_P, property_path: PropertyPath
     ) -> Any | None:
-        para_style = self._styles.para_style(story_elm)
+        para_style = self._styles.para_style(p_elm)
         if para_style is None:
             return None
         return self._from_style_inheritance(para_style, property_path)
+
+    def _from_table_style(
+        self, tbl_elm: CT_Tbl, property_path: PropertyPath
+    ) -> Any | None:
+        table_style = self._styles.table_style(tbl_elm)
+        if table_style is None:
+            return None
+        return self._from_style_inheritance(table_style, property_path)
+
+    def _from_table_style_hierarchy(
+        self, tc_elm: CT_Tc, property_path: PropertyPath
+    ) -> Any | None:
+        tr_elm = self._elm_parent(tc_elm, CT_Row)
+        tbl_elm = self._elm_parent(tr_elm, CT_Tbl)
+        table_val = self._from_table_style(tbl_elm, property_path)
+        if table_val is not None:
+            return table_val
+        return None
 
     def _from_style_inheritance(
         self, style: CharacterStyle, property_path: PropertyPath
