@@ -11,7 +11,7 @@ from docxray.oxml.styles import CT_Styles
 from docxray.oxml.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
-from docxray.shared import ElementProxy
+from docxray.shared import ElementProxy, PropertyPath, safe_get_prop
 from docxray.styles.doc_dflts import DocumentDefaults
 from docxray.styles.style import (
     BaseStyle,
@@ -61,37 +61,28 @@ class Styles(ElementProxy[CT_Styles]):
         return base_style
 
     def char_style(self, r_elm: CT_R) -> CharacterStyle | None:
-        rPr_elm = r_elm.rPr
-        if rPr_elm is None:
-            return None
-        rStyle_elm = rPr_elm.rStyle
-        if rStyle_elm is None:
+        style_id = safe_get_prop(r_elm, PropertyPath.base("val", "rPr.rStyle"))
+        if style_id is None:
             return None
         return self.get_by_id(
-            rStyle_elm.val, WD_STYLE_TYPE.CHARACTER, CharacterStyle
+            style_id, WD_STYLE_TYPE.CHARACTER, CharacterStyle
         )
 
     def para_style(self, p_elm: CT_P) -> ParagraphStyle | None:
-        pPr_elm = p_elm.pPr
-        if pPr_elm is None:
-            return None
-        pStyle_elm = pPr_elm.pStyle
-        if pStyle_elm is None:
+        style_id = safe_get_prop(p_elm, PropertyPath.base("val", "pPr.pStyle"))
+        if style_id is None:
             return None
         return self.get_by_id(
-            pStyle_elm.val, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
+            style_id, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
         )
 
     def table_style(self, tbl_elm: CT_Tbl) -> TableStyle | None:
-        tblPr_elm = tbl_elm.tblPr
-        if tblPr_elm is None:
-            return None
-        tblStyle_elm = tblPr_elm.tblStyle
-        if tblStyle_elm is None:
-            return None
-        return self.get_by_id(
-            tblStyle_elm.val, WD_STYLE_TYPE.TABLE, TableStyle
+        style_id = safe_get_prop(
+            tbl_elm, PropertyPath.base("val", "tblPr.tblStyle")
         )
+        if style_id is None:
+            return None
+        return self.get_by_id(style_id, WD_STYLE_TYPE.TABLE, TableStyle)
 
     def get_by_id(
         self,

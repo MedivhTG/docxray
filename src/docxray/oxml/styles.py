@@ -9,6 +9,8 @@ from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.ns import W
 from docxray.oxml.shared import CT_String
 from docxray.oxml.simpletypes import ST_StyleType, ST_TblStyleOverrideType
+from docxray.oxml.table_props import CT_TblPrBase, CT_TcPr, CT_TrPr
+from docxray.oxml.text.paragraph_props import CT_PPr
 from docxray.oxml.text.run_props import CT_RPr
 from docxray.oxml.xmlchemy import OxmlElement
 
@@ -30,6 +32,26 @@ class CT_TblStylePr(OxmlElement):
     def type(self) -> WD_TBL_STYLE_OVERRIDE_TYPE:
         return self.attr_required(W.TYPE, ST_TblStyleOverrideType)
 
+    @cached_property
+    def pPr(self) -> CT_PPr | None:
+        return self.child_zero_or_one(W.P_PR, CT_PPr)
+
+    @cached_property
+    def rPr(self) -> CT_RPr | None:
+        return self.child_zero_or_one(W.R_PR, CT_RPr)
+
+    @cached_property
+    def tblPr(self) -> CT_TblPrBase | None:
+        return self.child_zero_or_one(W.TBL_PR, CT_TblPrBase)
+
+    @cached_property
+    def trPr(self) -> CT_TrPr | None:
+        return self.child_zero_or_one(W.TR_PR, CT_TrPr)
+
+    @cached_property
+    def tcPr(self) -> CT_TcPr | None:
+        return self.child_zero_or_one(W.TC_PR, CT_TcPr)
+
 
 class CT_Style(OxmlElement):
     """A ``<w:style>`` element, representing a style definition."""
@@ -49,8 +71,18 @@ class CT_Style(OxmlElement):
         return self.child_zero_or_one(W.BASED_ON, CT_String)
 
     @cached_property
-    def tblStylePr(self) -> list[CT_TblStylePr]:
+    def tblStylePr_lst(self) -> list[CT_TblStylePr]:
         return self.child_zero_or_more(W.TBL_STYLE_PR, CT_TblStylePr)
+
+    def tblStylePr_for(
+        self, type: WD_TBL_STYLE_OVERRIDE_TYPE
+    ) -> CT_TblStylePr | None:
+        tblStylPr_elm = self.find(
+            f"./{W.TBL_STYLE_PR}[@{W.TYPE}='{type}']", CT_TblStylePr
+        )
+        if tblStylPr_elm is None:
+            return None
+        return tblStylPr_elm
 
 
 class CT_Styles(OxmlElement):

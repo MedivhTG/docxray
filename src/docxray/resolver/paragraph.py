@@ -2,8 +2,8 @@ from typing import Any
 
 # docxray stuff
 from docxray.oxml.text.paragraph import CT_P
-from docxray.resolver.property_path import PropertyPath
 from docxray.resolver.resolver import BaseResolver
+from docxray.shared import PropertyPath
 
 
 class ParagraphResolver(BaseResolver[CT_P]):

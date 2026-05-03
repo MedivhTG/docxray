@@ -2,8 +2,8 @@ from typing import Any
 
 # docxray stuff
 from docxray.oxml.table import CT_Tbl
-from docxray.resolver.property_path import PropertyPath
 from docxray.resolver.resolver import BaseResolver
+from docxray.shared import PropertyPath
 
 
 class TableResolver(BaseResolver[CT_Tbl]):

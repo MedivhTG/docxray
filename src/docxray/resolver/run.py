@@ -5,8 +5,8 @@ from typing import Any
 from docxray.oxml.table import CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
-from docxray.resolver.property_path import PropertyPath
 from docxray.resolver.resolver import BaseResolver
+from docxray.shared import PropertyPath
 
 
 class RunResolver(BaseResolver[CT_R]):

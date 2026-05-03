@@ -6,8 +6,9 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.enum.style import WD_STYLE_TYPE
-from docxray.oxml.styles import CT_Style, CT_Styles
+from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
+from docxray.enum.table import WD_CNF_FORMAT
+from docxray.oxml.styles import CT_Style, CT_Styles, CT_TblStylePr
 from docxray.shared import ElementProxy
 
 if TYPE_CHECKING:
@@ -61,7 +62,87 @@ class ParagraphStyle(CharacterStyle):
 
 
 class TableStyle(ParagraphStyle):
-    pass
+    @cached_property
+    def firstRow(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FIRST_ROW)
+
+    @cached_property
+    def lastRow(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.LAST_ROW)
+
+    @cached_property
+    def firstCol(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FIRST_COL)
+
+    @cached_property
+    def lastCol(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.LAST_COL)
+
+    @cached_property
+    def band1Vert(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_1_VERT)
+
+    @cached_property
+    def band2Vert(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_2_VERT)
+
+    @cached_property
+    def band1Horz(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_1_HORZ)
+
+    @cached_property
+    def band2Horz(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_2_HORZ)
+
+    @cached_property
+    def nwCell(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.NW_CELL)
+
+    @cached_property
+    def neCell(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.NE_CELL)
+
+    @cached_property
+    def swCell(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.SW_CELL)
+
+    @cached_property
+    def seCell(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.SE_CELL)
+
+    def bitwise_table_style_property(
+        self, flag: WD_CNF_FORMAT
+    ) -> CT_TblStylePr | None:
+        match flag:
+            case WD_CNF_FORMAT.FIRST_ROW:
+                return self.firstRow
+            case WD_CNF_FORMAT.LAST_ROW:
+                return self.lastRow
+            case WD_CNF_FORMAT.FIRST_COLUMN:
+                return self.firstCol
+            case WD_CNF_FORMAT.LAST_COLUMN:
+                return self.lastCol
+            case WD_CNF_FORMAT.ODD_VERTICAL_BAND:
+                return self.band1Vert
+            case WD_CNF_FORMAT.EVEN_VERTICAL_BAND:
+                return self.band2Vert
+            case WD_CNF_FORMAT.ODD_HORIZONTAL_BAND:
+                return self.band1Horz
+            case WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND:
+                return self.band2Horz
+            case WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN:
+                return self.nwCell
+            case WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN:
+                return self.neCell
+            case WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN:
+                return self.swCell
+            case WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN:
+                return self.seCell
+
+    def tbl_style_prop(
+        self, type: WD_TBL_STYLE_OVERRIDE_TYPE
+    ) -> CT_TblStylePr | None:
+        return self.element.tblStylePr_for(type)
 
 
 class NumberingStyle(BaseStyle):

@@ -4,13 +4,14 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
+from docxray.enum.table import WD_CNF_FORMAT
 from docxray.oxml.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.oxml.xmlchemy import OxmlElement
 from docxray.resolver.exceptions import ResolveError
-from docxray.resolver.property_path import PropertyPath, safe_get_prop
-from docxray.styles.style import CharacterStyle
+from docxray.shared import PropertyPath, safe_get_prop
+from docxray.styles.style import CharacterStyle, TableStyle
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -91,6 +92,44 @@ class BaseResolver(Generic[STORY_ELM_T]):
         table_val = self._from_table_style(tbl_elm, property_path)
         if table_val is not None:
             return table_val
+
+        cnf_flags = None
+        tr_cnf_flags: WD_CNF_FORMAT | None = safe_get_prop(
+            tr_elm, PropertyPath.base("val", "trPr.cnfStyle")
+        )
+        tc_cnf_flags: WD_CNF_FORMAT | None = safe_get_prop(
+            tc_elm, PropertyPath.base("val", "tcPr.cnfStyle")
+        )
+        if tr_cnf_flags is not None:
+            cnf_flags = tr_cnf_flags
+        if tc_cnf_flags is not None:
+            if cnf_flags is None:
+                cnf_flags = tc_cnf_flags
+            else:
+                cnf_flags |= tc_cnf_flags
+        if cnf_flags is None:
+            return None
+        table_style = self._styles.table_style(tbl_elm)
+        if table_style is None:
+            msg = f"Table style not found for {tc_elm} when cnf_flags were derived inside or in upper parents"
+            raise ResolveError(msg)
+        return self._from_cnf_style(table_style, cnf_flags, property_path)
+
+    def _from_cnf_style(
+        self,
+        table_style: TableStyle,
+        cnf_flags: WD_CNF_FORMAT,
+        property_path: PropertyPath,
+    ) -> Any | None:
+        for flag in WD_CNF_FORMAT.ordered_flags():
+            if cnf_flags & flag:
+                tblStylePr_elm = table_style.bitwise_table_style_property(flag)
+                if tblStylePr_elm is None:
+                    continue
+                cnf_val = safe_get_prop(tblStylePr_elm, property_path)
+                if cnf_val is None:
+                    continue
+                return cnf_val
         return None
 
     def _from_style_inheritance(
