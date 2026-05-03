@@ -2,9 +2,9 @@ from collections.abc import Iterator
 from functools import cached_property
 
 # docxray stuff
-from docxray.format.paragraph import ParagraphFormat
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
+from docxray.resolver.paragraph import ParagraphResolver
 from docxray.shared import StoryChild
 from docxray.text.hyperlink import Hyperlink
 from docxray.text.run import Run
@@ -12,8 +12,8 @@ from docxray.text.run import Run
 
 class Paragraph(StoryChild[CT_P]):
     @cached_property
-    def fmt(self) -> ParagraphFormat:
-        return ParagraphFormat(self.element, self.part.document_part, "NO")
+    def resolver(self) -> ParagraphResolver:
+        return ParagraphResolver(self.element, self.part.document_part, "NO")
 
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
         """Generate the runs and hyperlinks in this paragraph, in the order they appear.

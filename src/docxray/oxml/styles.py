@@ -26,7 +26,7 @@ class CT_DocDefaults(OxmlElement):
 class CT_BasedOn(OxmlElement):
     @cached_property
     def val(self) -> str:
-        return self.get_one(W.VAL)
+        return self.get_attr_one(W.VAL)
 
 
 class CT_Style(OxmlElement):
@@ -38,7 +38,7 @@ class CT_Style(OxmlElement):
 
     @cached_property
     def type(self) -> WD_STYLE_TYPE | None:
-        return self.get_enum(W.TYPE, WD_STYLE_TYPE)
+        return self.get_attr_enum(W.TYPE, WD_STYLE_TYPE)
 
     @cached_property
     def basedOn(self) -> CT_BasedOn | None:

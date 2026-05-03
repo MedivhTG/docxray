@@ -8,10 +8,16 @@ from typing import TYPE_CHECKING, TypeVar, cast
 # docxray stuff
 from docxray.enum.style import WD_STYLE_TYPE
 from docxray.oxml.styles import CT_Styles
+from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.shared import ElementProxy
 from docxray.styles.doc_dflts import DocumentDefaults
-from docxray.styles.style import BaseStyle, CharacterStyle, StyleFactory
+from docxray.styles.style import (
+    BaseStyle,
+    CharacterStyle,
+    ParagraphStyle,
+    StyleFactory,
+)
 from docxray.types import ProvidesXmlPart
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
@@ -61,6 +67,17 @@ class Styles(ElementProxy[CT_Styles]):
             return None
         return self.get_by_id(
             rStyle_elm.val, WD_STYLE_TYPE.CHARACTER, CharacterStyle
+        )
+
+    def para_style(self, p_elm: CT_P) -> ParagraphStyle | None:
+        pPr_elm = p_elm.pPr
+        if pPr_elm is None:
+            return None
+        pStyle_elm = pPr_elm.pStyle
+        if pStyle_elm is None:
+            return None
+        return self.get_by_id(
+            pStyle_elm.val, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
         )
 
     def get_by_id(

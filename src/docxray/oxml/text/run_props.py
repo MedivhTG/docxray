@@ -2,11 +2,12 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.ns import W
+from docxray.oxml.shared import CT_String
 from docxray.oxml.simpletypes import ST_OnOff
 from docxray.oxml.xmlchemy import OxmlElement
 
 
-class OxmlToggled(OxmlElement):
+class CT_Toggled(OxmlElement):
     def __bool__(self) -> bool:
         return self.val
 
@@ -18,14 +19,12 @@ class OxmlToggled(OxmlElement):
         return ST_OnOff.validate(val)
 
 
-class CT_I(OxmlToggled):
+class CT_I(CT_Toggled):
     pass
 
 
-class CT_RStyle(OxmlElement):
-    @cached_property
-    def val(self) -> str:
-        return self.get_one(W.VAL)
+class CT_RStyle(CT_String):
+    pass
 
 
 class CT_RPr(OxmlElement):

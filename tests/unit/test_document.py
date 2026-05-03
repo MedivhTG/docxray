@@ -17,16 +17,16 @@ class TestDocument:
         for p_or_t in doc.iter_inner_content():
             if isinstance(p_or_t, Table):
                 part = p_or_t.part
-                t_fmt = p_or_t.fmt
+                t_fmt = p_or_t.resolver
             if not isinstance(p_or_t, Paragraph):
                 continue
             part = p_or_t.part
-            p_fmt = p_or_t.fmt
+            p_fmt = p_or_t.resolver
             for r_or_h in p_or_t.iter_inner_content():
                 if not isinstance(r_or_h, Run):
                     continue
                 part = r_or_h.part
-                r_fmt = r_or_h.fmt
+                r_fmt = r_or_h.resolver
                 italic = r_fmt.italic
                 italic2 = r_fmt.italic
                 wait = 1

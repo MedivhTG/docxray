@@ -37,6 +37,8 @@ def qn(tag: str) -> str:
 class W:
     BODY = qn("w:body")
 
+    P_PR = qn("w:pPr")
+
     R_PR = qn("w:rPr")
     R_STYLE = qn("w:rStyle")
     I = qn("w:i")  # noqa: E741

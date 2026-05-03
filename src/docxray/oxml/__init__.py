@@ -8,10 +8,19 @@ from .document import CT_Body, CT_Document
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
 
-from .text.hyperlink import CT_Hyperlink
+
 from .text.paragraph import CT_P
 
 register_element_cls("w:p", CT_P)
+
+from .text.paragraph_props import CT_PPr, CT_PStyle
+
+register_element_cls("w:pPr", CT_PPr)
+register_element_cls("w:pStyle", CT_PStyle)
+
+
+from .text.hyperlink import CT_Hyperlink
+
 register_element_cls("w:hyperlink", CT_Hyperlink)
 
 from .text.run import CT_R, CT_T
