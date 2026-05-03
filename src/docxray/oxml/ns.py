@@ -35,8 +35,12 @@ def qn(tag: str) -> str:
 
 
 class W:
-    BODY = qn("w:body")
+    BACKGROUND = qn("w:background")
 
+    BODY = qn("w:body")
+    ALT_CHUNK = qn("w:altChunk")
+
+    SECT_PR = qn("w:sectPr")
     P_PR = qn("w:pPr")
     R_PR = qn("w:rPr")
     TBL_PR = qn("w:tblPr")

@@ -19,3 +19,7 @@ class CT_OnOff(OxmlElement):
     @cached_property
     def val(self) -> bool:
         return self.attr_optional(W.VAL, ST_OnOff, True)
+
+
+class CT_AltChunk(OxmlElement):
+    pass

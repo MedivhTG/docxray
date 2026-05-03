@@ -4,15 +4,15 @@ The base exception class is PythonDocxError.
 """
 
 
-class PythonDocxError(Exception):
+class DocxrayError(Exception):
     """Generic error class."""
 
 
-class InvalidSpanError(PythonDocxError):
+class InvalidSpanError(DocxrayError):
     """Raised when an invalid merge region is specified in a request to merge table
     cells."""
 
 
-class InvalidXmlError(PythonDocxError):
+class InvalidXmlError(DocxrayError):
     """Raised when invalid XML is encountered, such as on attempt to access a missing
     required child element."""
