@@ -96,7 +96,7 @@ class OxmlElement(BaseOxmlElement):
         """
         return self.findall(elm_qn, elm_hint)
 
-    def child_zero_or_max(
+    def child_zero_or_n(
         self, elm_qn: str, elm_hint: type[ELM_T], max_occurs: int
     ) -> list[ELM_T]:
         """Get children with `minOccurs=0` and `maxOccurs=custom`

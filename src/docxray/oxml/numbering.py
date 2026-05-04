@@ -140,7 +140,7 @@ class CT_AbstractNum(OxmlElement):
 
     @cached_property
     def lvl_lst(self) -> list[CT_Lvl]:
-        return self.child_zero_or_max(W.LVL, CT_Lvl, 9)
+        return self.child_zero_or_n(W.LVL, CT_Lvl, 9)
 
     def lvl_by_ilvl(self, ilvl_val: int) -> CT_Lvl | None:
         return self.child_zero_or_one(
@@ -181,7 +181,7 @@ class CT_Num(OxmlElement):
 
     @cached_property
     def lvlOverride_lst(self) -> list[CT_NumLvl]:
-        return self.child_zero_or_max(W.LVL_OVERRIDE, CT_NumLvl, 9)
+        return self.child_zero_or_n(W.LVL_OVERRIDE, CT_NumLvl, 9)
 
     def override_num_by_ilvl(self, ilvl_val: int) -> CT_NumLvl | None:
         return self.child_zero_or_one(
