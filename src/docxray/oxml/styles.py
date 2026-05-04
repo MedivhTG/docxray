@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
+from docxray.enum.word import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.ns import W
 from docxray.oxml.shared import CT_String
 from docxray.oxml.simpletypes import ST_StyleType, ST_TblStyleOverrideType

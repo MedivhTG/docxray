@@ -3,7 +3,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.blkcntnr import BlockItemContainer
-from docxray.enum.table import WD_MERGE
+from docxray.enum.word import WD_MERGE
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.resolver.table import TableResolver
 from docxray.shared import (
@@ -19,9 +19,9 @@ class Cell(BlockItemContainer[CT_Tc]):
 
 
 class Row(ElementProxy[CT_Row]):
-    def iter_cells(self, skip_vert_merged: bool = True) -> Iterator[Cell]:
+    def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
         for tc_elm in self.element.tc_lst:
-            if skip_vert_merged:
+            if skip_merged:
                 vMerge_val = safe_get_prop(
                     tc_elm, PropertyPath.base("val", "tcPr.vMerge")
                 )

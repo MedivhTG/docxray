@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
-from docxray.enum.table import WD_CNF_FORMAT
+from docxray.enum.word import WD_CNF_FORMAT
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 type StoryElements = CT_R | CT_P | CT_Tbl
 STORY_ELM_T = TypeVar("STORY_ELM_T", bound=StoryElements)
 PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
+DEFAULT_T = TypeVar("DEFAULT_T")
 
 
 class BaseResolver(Generic[STORY_ELM_T]):
@@ -38,12 +39,20 @@ class BaseResolver(Generic[STORY_ELM_T]):
             self._numbering = num_part.numbering
         self._property_base = property_base
 
-    def _prop(self, name: str, **kwargs: Any) -> Any | None:
-        path = PropertyPath.base(name, self._property_base)
-        direct = safe_get_prop(self._story_elm, path)
-        if direct is None:
-            return self._from_styles_hierarchy(path, **kwargs)
-        return direct
+    def _prop_val_path(self, end_name: str, path_to_name: str) -> PropertyPath:
+        return PropertyPath.base(end_name, path_to_name)
+
+    def _prop_val(
+        self, name: str, default: DEFAULT_T | None = None, **kwargs: Any
+    ) -> Any | DEFAULT_T:
+        path = self._prop_val_path("val", f"{self._property_base}.{name}")
+        direct_val = safe_get_prop(self._story_elm, path)
+        if direct_val is not None:
+            return direct_val
+        style_val = self._from_styles_hierarchy(path, **kwargs)
+        if style_val is not None:
+            return style_val
+        return default
 
     def _elm_parent(
         self, elm: OxmlElement, parent_type: type[PARENT_T]

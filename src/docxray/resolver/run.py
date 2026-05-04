@@ -2,6 +2,7 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
+from docxray.enum.word import WD_VERTICAL_ALIGN_RUN
 from docxray.oxml.table.table import CT_Tc
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
@@ -11,11 +12,31 @@ from docxray.shared import PropertyPath
 
 class RunResolver(BaseResolver[CT_R]):
     @cached_property
+    def bold(self) -> bool:
+        return self._prop_toggled("b")
+
+    @cached_property
+    def all_caps(self) -> bool:
+        return self._prop_toggled("caps")
+
+    @cached_property
     def italic(self) -> bool:
         return self._prop_toggled("i")
 
+    @cached_property
+    def small_caps(self) -> bool:
+        return self._prop_toggled("smallCaps")
+
+    @cached_property
+    def strike(self) -> bool:
+        return self._prop_toggled("strike")
+
+    @cached_property
+    def vertical_align(self) -> WD_VERTICAL_ALIGN_RUN:
+        return self._prop_val("vertAlign", WD_VERTICAL_ALIGN_RUN.BASELINE)
+
     def _prop_toggled(self, name: str) -> bool:
-        return bool(self._prop(name, is_toggled=True))
+        return self._prop_val(name, default=False, is_toggled=True)
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
@@ -42,4 +63,17 @@ class RunResolver(BaseResolver[CT_R]):
         return para_val ^ char_val ^ table_val
 
     def _from_styles_default(self, property_path: PropertyPath) -> Any | None:
-        return None
+        char_val = self._from_char_style(self._story_elm, property_path)
+        if char_val is not None:
+            return char_val
+        p_elm = self._elm_parent(self._story_elm, CT_P)
+        para_val = self._from_para_style(p_elm, property_path)
+        if para_val is not None:
+            return para_val
+        tc_elm = p_elm.getparent(CT_Tc)
+        if not isinstance(tc_elm, CT_Tc):
+            return self._from_doc_dflts(property_path)
+        table_val = self._from_table_style_hierarchy(tc_elm, property_path)
+        if table_val is not None:
+            return None
+        return self._from_doc_dflts(property_path)

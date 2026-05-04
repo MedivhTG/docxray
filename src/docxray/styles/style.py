@@ -6,8 +6,11 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
-from docxray.enum.table import WD_CNF_FORMAT
+from docxray.enum.word import (
+    WD_CNF_FORMAT,
+    WD_STYLE_TYPE,
+    WD_TBL_STYLE_OVERRIDE_TYPE,
+)
 from docxray.oxml.styles import CT_Style, CT_Styles, CT_TblStylePr
 from docxray.shared import ElementProxy
 

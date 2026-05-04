@@ -31,6 +31,7 @@ class TestDocument:
                                     r_fmt = r_or_h.resolver
                                     italic = r_fmt.italic
                                     italic2 = r_fmt.italic
+                                    bold = r_fmt.bold
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 part = p_or_t.part
@@ -42,4 +43,6 @@ class TestDocument:
                     r_fmt = r_or_h.resolver
                     italic = r_fmt.italic
                     italic2 = r_fmt.italic
+                    bold = r_fmt.bold
+                    v_align = r_fmt.vertical_align
                     wait = 1

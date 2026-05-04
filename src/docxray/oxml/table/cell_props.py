@@ -1,9 +1,9 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.table import WD_MERGE
+from docxray.enum.word import WD_MERGE
 from docxray.oxml.ns import W
-from docxray.oxml.shared import CT_Cnf, CT_DecimalNumber, CT_OnOff
+from docxray.oxml.shared import CT_Cnf, CT_DecimalNumber, CT_OnOff, CT_Shd
 from docxray.oxml.simpletypes import ST_Merge
 from docxray.oxml.xmlchemy import OxmlElement
 
@@ -23,10 +23,6 @@ class CT_VMerge(OxmlElement):
 
 
 class CT_TcBorders(OxmlElement):
-    pass
-
-
-class CT_Shd(OxmlElement):
     pass
 
 

@@ -4,7 +4,27 @@
 from docxray.oxml.parser import register_element_cls
 
 from .document import CT_Body, CT_Document
-from .shared import CT_Cnf, CT_DecimalNumber, CT_OnOff, CT_String
+from .shared import (
+    CT_Border,
+    CT_Cnf,
+    CT_Color,
+    CT_DecimalNumber,
+    CT_EastAsianLayout,
+    CT_Em,
+    CT_FitText,
+    CT_Fonts,
+    CT_Highlight,
+    CT_HpsMeasure,
+    CT_Language,
+    CT_OnOff,
+    CT_Shd,
+    CT_SignedHpsMeasure,
+    CT_SignedTwipsMeasure,
+    CT_String,
+    CT_TextEffect,
+    CT_TextScale,
+    CT_Underline,
+)
 
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
@@ -28,11 +48,49 @@ from .text.run import CT_R, CT_T
 register_element_cls("w:r", CT_R)
 register_element_cls("w:t", CT_T)
 
-from .text.run_props import CT_RPr
+from .text.run_props import CT_RPr, CT_RPrChange, CT_VerticalAlignRun
 
 register_element_cls("w:rPr", CT_RPr)
+register_element_cls("w:rPrChange", CT_RPrChange)
 register_element_cls("w:i", CT_OnOff)
+register_element_cls("w:iCs", CT_OnOff)
+register_element_cls("w:b", CT_OnOff)
+register_element_cls("w:bCs", CT_OnOff)
+register_element_cls("w:caps", CT_OnOff)
+register_element_cls("w:smallCaps", CT_OnOff)
+register_element_cls("w:strike", CT_OnOff)
+register_element_cls("w:dstrike", CT_OnOff)
+register_element_cls("w:outline", CT_OnOff)
+register_element_cls("w:shadow", CT_OnOff)
+register_element_cls("w:emboss", CT_OnOff)
+register_element_cls("w:imprint", CT_OnOff)
+register_element_cls("w:noProof", CT_OnOff)
+register_element_cls("w:snapToGrid", CT_OnOff)
+register_element_cls("w:vanish", CT_OnOff)
+register_element_cls("w:webHidden", CT_OnOff)
 register_element_cls("w:rStyle", CT_String)
+register_element_cls("w:rFonts", CT_Fonts)
+register_element_cls("w:color", CT_Color)
+register_element_cls("w:spacing", CT_SignedTwipsMeasure)
+register_element_cls("w:w", CT_TextScale)
+register_element_cls("w:kern", CT_HpsMeasure)
+register_element_cls("w:position", CT_SignedHpsMeasure)
+register_element_cls("w:sz", CT_HpsMeasure)
+register_element_cls("w:szCs", CT_HpsMeasure)
+register_element_cls("w:highlight", CT_Highlight)
+register_element_cls("w:u", CT_Underline)
+register_element_cls("w:effect", CT_TextEffect)
+register_element_cls("w:bdr", CT_Border)
+register_element_cls("w:shd", CT_Shd)
+register_element_cls("w:fitText", CT_FitText)
+register_element_cls("w:vertAlign", CT_VerticalAlignRun)
+register_element_cls("w:rtl", CT_OnOff)
+register_element_cls("w:cs", CT_OnOff)
+register_element_cls("w:em", CT_Em)
+register_element_cls("w:lang", CT_Language)
+register_element_cls("w:eastAsianLayout", CT_EastAsianLayout)
+register_element_cls("w:specVanish", CT_OnOff)
+register_element_cls("w:oMath", CT_OnOff)
 
 from .table.table import CT_Row, CT_Tbl, CT_Tc
 
@@ -52,7 +110,6 @@ register_element_cls("w:trPr", CT_TrPr)
 
 from .table.cell_props import (
     CT_HMerge,
-    CT_Shd,
     CT_TblWidth,
     CT_TcBorders,
     CT_TcMar,

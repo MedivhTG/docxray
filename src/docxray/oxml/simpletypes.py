@@ -1,10 +1,16 @@
 from abc import abstractmethod
+from datetime import datetime
 from enum import Enum
 from typing import Any, TypeVar
 
 # docxray stuff
-from docxray.enum.style import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
-from docxray.enum.table import WD_CNF_FORMAT, WD_MERGE
+from docxray.enum.word import (
+    WD_CNF_FORMAT,
+    WD_MERGE,
+    WD_STYLE_TYPE,
+    WD_TBL_STYLE_OVERRIDE_TYPE,
+    WD_VERTICAL_ALIGN_RUN,
+)
 from docxray.exceptions import InvalidXmlError
 
 ENUM_T = TypeVar("ENUM_T", bound=Enum)
@@ -34,6 +40,19 @@ class ST_String(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> str:
         return cls.validate_str(obj)
+
+
+class ST_DateTime(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> datetime:
+        val_str = cls.validate_str(obj)
+        if val_str.endswith("Z"):
+            val_str = val_str.replace("Z", "+00:00")
+        try:
+            return datetime.fromisoformat(val_str)
+        except ValueError as e:
+            msg = f"Invalid DateTime value for {obj}; MUST be datetime (iso); internal err {e}"
+            raise InvalidXmlError(msg)
 
 
 class ST_DecimalNumber(SimpleType):
@@ -93,3 +112,9 @@ class ST_Merge(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_MERGE:
         return cls.validate_enum(obj, WD_MERGE)
+
+
+class ST_VerticalAlignRun(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_VERTICAL_ALIGN_RUN:
+        return cls.validate_enum(obj, WD_VERTICAL_ALIGN_RUN)
