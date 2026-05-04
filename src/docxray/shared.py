@@ -80,6 +80,8 @@ def safe_get_prop(
     Returns:
         Any: Value from property or default.
     """
+    if obj is None:
+        return default
     current = obj
     for link in prop_path.links:
         if not hasattr(current, link):

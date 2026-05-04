@@ -142,6 +142,11 @@ class CT_AbstractNum(OxmlElement):
     def lvl_lst(self) -> list[CT_Lvl]:
         return self.child_zero_or_max(W.LVL, CT_Lvl, 9)
 
+    def lvl_by_ilvl(self, ilvl_val: int) -> CT_Lvl | None:
+        return self.child_zero_or_one(
+            f"./{W.LVL}[@{W.ILVL}='{ilvl_val}']", CT_Lvl
+        )
+
 
 class CT_NumLvl(OxmlElement):
     @cached_property
@@ -170,6 +175,19 @@ class CT_Num(OxmlElement):
     def lvlOverride_lst(self) -> list[CT_NumLvl]:
         return self.child_zero_or_max(W.LVL_OVERRIDE, CT_NumLvl, 9)
 
+    def override_num_by_ilvl(self, ilvl_val: int) -> CT_NumLvl | None:
+        return self.child_zero_or_one(
+            f"./{W.LVL_OVERRIDE}[@{W.ILVL}='{ilvl_val}']", CT_NumLvl
+        )
+
+    def abstract_num_by_id(
+        self, abstract_num_id_val: int
+    ) -> CT_AbstractNum | None:
+        return self.child_zero_or_one(
+            f"./{W.ABSTRACT_NUM}[@{W.ABSTRACT_NUM_ID}='{abstract_num_id_val}']",
+            CT_AbstractNum,
+        )
+
 
 class CT_Numbering(OxmlElement):
     @cached_property
@@ -188,4 +206,9 @@ class CT_Numbering(OxmlElement):
     def numIdMacAtCleanup(self) -> CT_DecimalNumber | None:
         return self.child_zero_or_one(
             W.NUM_ID_MAC_AT_CLEANUP, CT_DecimalNumber
+        )
+
+    def num_by_id(self, numId_val: int) -> CT_Num | None:
+        return self.child_zero_or_one(
+            f"./{W.NUM}[@{W.NUM_ID}='{numId_val}']", CT_Num
         )

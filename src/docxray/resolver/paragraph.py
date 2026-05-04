@@ -62,4 +62,7 @@ class ParagraphResolver(BaseResolver[CT_P]):
     def _from_1_numPr_0_para_style(
         self, property_path: PropertyPath, numPr: CT_NumPr
     ) -> Any | None:
-        return None
+        val = self._from_num_prop(property_path, numPr)
+        if val is not None:
+            return val
+        return self._from_0_numPr_0_para_style(property_path)

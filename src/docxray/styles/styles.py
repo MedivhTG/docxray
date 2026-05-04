@@ -16,6 +16,7 @@ from docxray.styles.doc_dflts import DocumentDefaults
 from docxray.styles.style import (
     BaseStyle,
     CharacterStyle,
+    NumberingStyle,
     ParagraphStyle,
     StyleFactory,
     TableStyle,
@@ -75,6 +76,9 @@ class Styles(ElementProxy[CT_Styles]):
         return self.get_by_id(
             style_id, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
         )
+
+    def num_style(self, style_id: str) -> NumberingStyle:
+        return self.get_by_id(style_id, WD_STYLE_TYPE.LIST, NumberingStyle)
 
     def table_style(self, tbl_elm: CT_Tbl) -> TableStyle | None:
         style_id = safe_get_prop(

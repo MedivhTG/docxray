@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.numbering import CT_AbstractNum
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
+from docxray.oxml.text.num_props import CT_NumPr
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.oxml.xmlchemy import OxmlElement
@@ -139,6 +141,72 @@ class BaseResolver(Generic[ELM_T]):
                     continue
                 return cnf_val
         return None
+
+    def _from_num_prop(
+        self, property_path: PropertyPath, numPr: CT_NumPr
+    ) -> Any | None:
+        msg = f"Invalid numbering reference for {property_path} on {numPr} of {self._elm}"
+        err = ResolveError(msg)
+        numId = numPr.numId
+        ilvl = numPr.ilvl
+        if numId is None or ilvl is None:
+            raise err
+        numbering = self._numbering
+        if numbering is None:
+            raise err
+        num = numbering.get_num(numId.val)
+        if num is None:
+            raise err
+        override_num = num.get_override_num(ilvl.val)
+        if override_num is not None:
+            return safe_get_prop(override_num.element.lvl, property_path)
+        abstract_num = num.get_abstract_num(num.element.abstractNumId.val)
+        if abstract_num is not None:
+            return self._from_abstract_num_style(
+                property_path, abstract_num.element
+            )
+        raise err
+
+    def _from_abstract_num_style(
+        self, property_path: PropertyPath, abstractNum_elm: CT_AbstractNum
+    ) -> Any | None:
+        link = abstractNum_elm.numStyleLink
+        val = None
+        msg = f"Invalid numbering reference for {property_path} of {self._elm}"
+        err = ResolveError(msg)
+        while link is not None:
+            num_style = self._styles.num_style(link.val)
+            numPr: CT_NumPr | None = safe_get_prop(
+                num_style.element,
+                self._prop_val_path("numPr", self._property_base),
+            )
+            if numPr is None:
+                msg = f"Error occured while resolving numbering refs: style with id {link.val} has not numPr"
+                raise ResolveError(msg)
+
+            numId = numPr.numId
+            ilvl = numPr.ilvl
+            if numId is None or ilvl is None:
+                raise err
+            numbering = self._numbering
+            if numbering is None:
+                raise err
+            num = numbering.get_num(numId.val)
+            if num is None:
+                raise err
+            override_num = num.get_override_num(ilvl.val)
+            if override_num is not None:
+                return safe_get_prop(override_num.element.lvl, property_path)
+            abstract_num = num.get_abstract_num(num.element.abstractNumId.val)
+            if abstract_num is not None:
+                lvl = abstract_num.get_lvl(ilvl.val)
+                val = safe_get_prop(lvl, property_path)
+                if val is not None:
+                    return val
+                link = abstract_num.element.numStyleLink
+            else:
+                link = None
+        return val
 
     def _from_style_inheritance(
         self, style: CharacterStyle, property_path: PropertyPath
