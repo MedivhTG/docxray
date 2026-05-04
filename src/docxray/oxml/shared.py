@@ -119,6 +119,10 @@ class CT_Markup(OxmlElement):
         return self.attr_required(W.ID, ST_DecimalNumber)
 
 
+class CT_LongHexNumber(OxmlElement):
+    pass
+
+
 class CT_TrackChange(CT_Markup):
     @cached_property
     def author(self) -> str:

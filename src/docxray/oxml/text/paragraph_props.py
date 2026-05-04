@@ -13,15 +13,12 @@ from docxray.oxml.shared import (
     CT_TextDirection,
     CT_TrackChange,
 )
+from docxray.oxml.text.num_props import CT_NumPr
 from docxray.oxml.text.run_props import CT_RPr, EG_RPrBase
 from docxray.oxml.xmlchemy import OxmlElement
 
 
 class EG_ParaRPrTrackChanges(OxmlElement):
-    pass
-
-
-class CT_NumPr(OxmlElement):
     pass
 
 

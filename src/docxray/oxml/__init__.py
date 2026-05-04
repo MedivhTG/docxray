@@ -17,6 +17,7 @@ from .shared import (
     CT_Highlight,
     CT_HpsMeasure,
     CT_Language,
+    CT_LongHexNumber,
     CT_OnOff,
     CT_Shd,
     CT_SignedHpsMeasure,
@@ -24,7 +25,10 @@ from .shared import (
     CT_TextDirection,
     CT_TextEffect,
     CT_TextScale,
+    CT_TrackChange,
 )
+
+register_element_cls("w:rsid", CT_LongHexNumber)
 
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
@@ -37,7 +41,6 @@ register_element_cls("w:p", CT_P)
 from .text.paragraph_props import (
     CT_Ind,
     CT_Jc,
-    CT_NumPr,
     CT_PBdr,
     CT_PPr,
     CT_Tabs,
@@ -52,7 +55,6 @@ register_element_cls("w:keepLines", CT_OnOff)
 register_element_cls("w:pageBreakBefore", CT_OnOff)
 register_element_cls("w:framePr", CT_FramePr)
 register_element_cls("w:widowControl", CT_OnOff)
-register_element_cls("w:numPr", CT_NumPr)
 register_element_cls("w:suppressLineNumbers", CT_OnOff)
 register_element_cls("w:pBdr", CT_PBdr)
 register_element_cls("w:shd", CT_Shd)
@@ -78,6 +80,15 @@ register_element_cls("w:textboxTightWrap", CT_TextboxTightWrap)
 register_element_cls("w:outlineLvl", CT_DecimalNumber)
 register_element_cls("w:divId", CT_DecimalNumber)
 register_element_cls("w:cnfStyle", CT_Cnf)
+
+from .text.num_props import CT_NumPr, CT_TrackChangeNumbering
+
+register_element_cls("w:numPr", CT_NumPr)
+register_element_cls("w:ilvl", CT_DecimalNumber)
+register_element_cls("w:numId", CT_DecimalNumber)
+register_element_cls("w:numberingChange", CT_TrackChangeNumbering)
+register_element_cls("w:ins", CT_TrackChange)
+
 
 from .text.hyperlink import CT_Hyperlink
 
@@ -176,6 +187,7 @@ register_element_cls("w:hideMark", CT_OnOff)
 
 from .styles import (
     CT_DocDefaults,
+    CT_LatentStyles,
     CT_RPrDefault,
     CT_Style,
     CT_Styles,
@@ -187,10 +199,30 @@ register_element_cls("w:rPrDefault", CT_RPrDefault)
 
 register_element_cls("w:styles", CT_Styles)
 
+register_element_cls("w:latentStyles", CT_LatentStyles)
+
 register_element_cls("w:style", CT_Style)
+register_element_cls("w:name", CT_String)
+register_element_cls("w:aliases", CT_String)
 register_element_cls("w:basedOn", CT_String)
+register_element_cls("w:next", CT_String)
+register_element_cls("w:link", CT_String)
+register_element_cls("w:autoRedefine", CT_String)
+register_element_cls("w:hidden", CT_OnOff)
+register_element_cls("w:uiPriority", CT_DecimalNumber)
+register_element_cls("w:semiHidden", CT_OnOff)
+register_element_cls("w:unhideWhenUsed", CT_OnOff)
+register_element_cls("w:qFormat", CT_OnOff)
+register_element_cls("w:locked", CT_OnOff)
+register_element_cls("w:personal", CT_OnOff)
+register_element_cls("w:personalCompose", CT_OnOff)
+register_element_cls("w:personalReply", CT_OnOff)
 register_element_cls("w:tblStylePr", CT_TblStylePr)
 
-from .numbering import CT_Numbering
+from .numbering import CT_AbstractNum, CT_Numbering, CT_NumPicBullet
 
 register_element_cls("w:numbering", CT_Numbering)
+register_element_cls("w:numPicBullet", CT_NumPicBullet)
+register_element_cls("w:abstractNum", CT_AbstractNum)
+register_element_cls("w:numIdMacAtCleanup", CT_DecimalNumber)
+register_element_cls("w:abstractNumId", CT_DecimalNumber)

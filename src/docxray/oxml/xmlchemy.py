@@ -95,3 +95,33 @@ class OxmlElement(BaseOxmlElement):
             list[ELM_T]: List of Oxmlelement's found.
         """
         return self.findall(elm_qn, elm_hint)
+
+    def child_zero_or_max(
+        self, elm_qn: str, elm_hint: type[ELM_T], max_occurs: int
+    ) -> list[ELM_T]:
+        """Get children with `minOccurs=0` and `maxOccurs=custom`
+
+        Args:
+            elm_qn (str): Qualified name of element tag (clark-notation).
+            elm_hint (type[ELM_T]): Element cast hint returned.
+            max_occurs (int): Maximum of found children.
+
+        Raises:
+            InvalidXmlError: When iteration exceeded the `max_occurs`.
+
+        Returns:
+            list[ELM_T]: List of Oxmlelement's found.
+        """
+        count = 0
+        children: list[ELM_T] = []
+        iterator = self.iterfind(elm_qn, elm_hint)
+        while count <= max_occurs:
+            child = next(iterator, None)
+            if child is None:
+                return children
+            count += 1
+            children.append(child)
+        msg = (
+            f"Children {elm_qn} iteration exceeded the maximum of {max_occurs}"
+        )
+        raise InvalidXmlError(msg)
