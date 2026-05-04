@@ -55,8 +55,8 @@ class RunResolver(BaseResolver[CT_R]):
         doc_val = self._from_doc_dflts(doc_path)
         if doc_val:
             return True
-        char_val = bool(self._from_char_style(self._story_elm, property_path))
-        p_elm = self._elm_parent(self._story_elm, CT_P)
+        char_val = bool(self._from_char_style(self._elm, property_path))
+        p_elm = self._elm_parent(self._elm, CT_P)
         para_val = bool(self._from_para_style(p_elm, property_path))
         tc_elm = p_elm.getparent(CT_Tc)
         if not isinstance(tc_elm, CT_Tc):
@@ -67,10 +67,10 @@ class RunResolver(BaseResolver[CT_R]):
         return para_val ^ char_val ^ table_val
 
     def _from_styles_default(self, property_path: PropertyPath) -> Any | None:
-        char_val = self._from_char_style(self._story_elm, property_path)
+        char_val = self._from_char_style(self._elm, property_path)
         if char_val is not None:
             return char_val
-        p_elm = self._elm_parent(self._story_elm, CT_P)
+        p_elm = self._elm_parent(self._elm, CT_P)
         para_val = self._from_para_style(p_elm, property_path)
         if para_val is not None:
             return para_val

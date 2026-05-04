@@ -7,7 +7,7 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.background import CT_Background
 from docxray.oxml.ns import W
-from docxray.oxml.shared import CT_AltChunk
+from docxray.oxml.shared import CT_AltChunk, CT_SectPr
 from docxray.oxml.table.table import CT_Tbl
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.xmlchemy import OxmlElement
@@ -25,10 +25,6 @@ class CT_Document(CT_DocumentBase):
     @cached_property
     def body(self) -> CT_Body:
         return self.child_exactly_one(W.BODY, CT_Body)
-
-
-class CT_SectPr(OxmlElement):
-    pass
 
 
 class CT_Body(OxmlElement):

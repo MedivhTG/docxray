@@ -89,6 +89,18 @@ class CT_AltChunk(OxmlElement):
     pass
 
 
+class CT_FramePr(OxmlElement):
+    pass
+
+
+class CT_TextDirection(OxmlElement):
+    pass
+
+
+class CT_SectPr(OxmlElement):
+    pass
+
+
 class CT_DecimalNumber(OxmlElement):
     @cached_property
     def val(self) -> int:

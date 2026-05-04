@@ -12,25 +12,24 @@ from docxray.oxml.xmlchemy import OxmlElement
 from docxray.resolver.exceptions import ResolveError
 from docxray.shared import PropertyPath, safe_get_prop
 from docxray.styles.style import CharacterStyle, TableStyle
+from docxray.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.parts.document import DocumentPart
 
-type StoryElements = CT_R | CT_P | CT_Tbl
-STORY_ELM_T = TypeVar("STORY_ELM_T", bound=StoryElements)
 PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
 DEFAULT_T = TypeVar("DEFAULT_T")
 
 
-class BaseResolver(Generic[STORY_ELM_T]):
+class BaseResolver(Generic[ELM_T]):
     def __init__(
         self,
-        story_elm: STORY_ELM_T,
+        story_elm: ELM_T,
         document_part: DocumentPart,
         property_base: str,
     ) -> None:
-        self._story_elm = story_elm
+        self._elm = story_elm
         self._styles = document_part.styles_part.styles
         num_part = document_part.numbering_part
         if num_part is None:
@@ -46,7 +45,7 @@ class BaseResolver(Generic[STORY_ELM_T]):
         self, name: str, default: DEFAULT_T | None = None, **kwargs: Any
     ) -> Any | DEFAULT_T:
         path = self._prop_val_path("val", f"{self._property_base}.{name}")
-        direct_val = safe_get_prop(self._story_elm, path)
+        direct_val = safe_get_prop(self._elm, path)
         if direct_val is not None:
             return direct_val
         style_val = self._from_styles_hierarchy(path, **kwargs)

@@ -6,12 +6,12 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
+from docxray.enum.word import WD_STYLE_TYPE
 from docxray.opc.part import XmlPart
 from docxray.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.enum.style import WD_STYLE_TYPE
     from docxray.parts.document import DocumentPart
     from docxray.styles.style import BaseStyle
 

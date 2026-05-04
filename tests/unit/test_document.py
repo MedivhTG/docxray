@@ -19,11 +19,17 @@ class TestDocument:
                 part = p_or_t.part
                 t_fmt = p_or_t.resolver
                 for row in p_or_t.iter_rows():
+                    part = row.part
                     for cell in row.iter_cells():
+                        part = cell.part
+                        cell_fmt = cell.resolver
                         for p_or_t in cell.iter_inner_content():
                             if isinstance(p_or_t, Paragraph):
                                 part = p_or_t.part
                                 p_fmt = p_or_t.resolver
+                                pPr = p_or_t.element.pPr
+                                if pPr is not None:
+                                    spacing = pPr.spacing
                                 for r_or_h in p_or_t.iter_inner_content():
                                     if not isinstance(r_or_h, Run):
                                         continue
@@ -36,6 +42,10 @@ class TestDocument:
             elif isinstance(p_or_t, Paragraph):
                 part = p_or_t.part
                 p_fmt = p_or_t.resolver
+                pPr = p_or_t.element.pPr
+                if pPr is not None:
+                    spacing = pPr.spacing
+                    w = 1
                 for r_or_h in p_or_t.iter_inner_content():
                     if not isinstance(r_or_h, Run):
                         continue

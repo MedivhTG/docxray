@@ -5,7 +5,7 @@ from functools import cached_property
 from docxray.blkcntnr import BlockItemContainer
 from docxray.enum.word import WD_MERGE
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
-from docxray.resolver.table import TableResolver
+from docxray.resolver.table import CellResolver, RowResolver, TableResolver
 from docxray.shared import (
     ElementProxy,
     PropertyPath,
@@ -15,10 +15,16 @@ from docxray.shared import (
 
 
 class Cell(BlockItemContainer[CT_Tc]):
-    pass
+    @cached_property
+    def resolver(self) -> CellResolver:
+        return CellResolver(self.element, self.part.document_part, "")
 
 
 class Row(ElementProxy[CT_Row]):
+    @cached_property
+    def resolver(self) -> RowResolver:
+        return RowResolver(self.element, self.part, "NO")  # type: ignore[arg-type]
+
     def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
         for tc_elm in self.element.tc_lst:
             if skip_merged:

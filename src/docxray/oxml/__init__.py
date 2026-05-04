@@ -13,14 +13,15 @@ from .shared import (
     CT_Em,
     CT_FitText,
     CT_Fonts,
+    CT_FramePr,
     CT_Highlight,
     CT_HpsMeasure,
     CT_Language,
     CT_OnOff,
     CT_Shd,
     CT_SignedHpsMeasure,
-    CT_SignedTwipsMeasure,
     CT_String,
+    CT_TextDirection,
     CT_TextEffect,
     CT_TextScale,
 )
@@ -33,10 +34,50 @@ from .text.paragraph import CT_P
 
 register_element_cls("w:p", CT_P)
 
-from .text.paragraph_props import CT_PPr
+from .text.paragraph_props import (
+    CT_Ind,
+    CT_Jc,
+    CT_NumPr,
+    CT_PBdr,
+    CT_PPr,
+    CT_Tabs,
+    CT_TextAlignment,
+    CT_TextboxTightWrap,
+)
 
 register_element_cls("w:pPr", CT_PPr)
 register_element_cls("w:pStyle", CT_String)
+register_element_cls("w:keepNext", CT_OnOff)
+register_element_cls("w:keepLines", CT_OnOff)
+register_element_cls("w:pageBreakBefore", CT_OnOff)
+register_element_cls("w:framePr", CT_FramePr)
+register_element_cls("w:widowControl", CT_OnOff)
+register_element_cls("w:numPr", CT_NumPr)
+register_element_cls("w:suppressLineNumbers", CT_OnOff)
+register_element_cls("w:pBdr", CT_PBdr)
+register_element_cls("w:shd", CT_Shd)
+register_element_cls("w:tabs", CT_Tabs)
+register_element_cls("w:suppressAutoHyphens", CT_OnOff)
+register_element_cls("w:kinsoku", CT_OnOff)
+register_element_cls("w:wordWrap", CT_OnOff)
+register_element_cls("w:overflowPunct", CT_OnOff)
+register_element_cls("w:topLinePunct", CT_OnOff)
+register_element_cls("w:autoSpaceDE", CT_OnOff)
+register_element_cls("w:autoSpaceDN", CT_OnOff)
+register_element_cls("w:bidi", CT_OnOff)
+register_element_cls("w:adjustRightInd", CT_OnOff)
+register_element_cls("w:snapToGrid", CT_OnOff)
+register_element_cls("w:ind", CT_Ind)
+register_element_cls("w:contextualSpacing", CT_OnOff)
+register_element_cls("w:mirrorIndents", CT_OnOff)
+register_element_cls("w:suppressOverlap", CT_OnOff)
+register_element_cls("w:jc", CT_Jc)
+register_element_cls("w:textDirection", CT_TextDirection)
+register_element_cls("w:textAlignment", CT_TextAlignment)
+register_element_cls("w:textboxTightWrap", CT_TextboxTightWrap)
+register_element_cls("w:outlineLvl", CT_DecimalNumber)
+register_element_cls("w:divId", CT_DecimalNumber)
+register_element_cls("w:cnfStyle", CT_Cnf)
 
 from .text.hyperlink import CT_Hyperlink
 
@@ -75,7 +116,6 @@ register_element_cls("w:webHidden", CT_OnOff)
 register_element_cls("w:rStyle", CT_String)
 register_element_cls("w:rFonts", CT_Fonts)
 register_element_cls("w:color", CT_Color)
-register_element_cls("w:spacing", CT_SignedTwipsMeasure)
 register_element_cls("w:w", CT_TextScale)
 register_element_cls("w:kern", CT_HpsMeasure)
 register_element_cls("w:position", CT_SignedHpsMeasure)
@@ -118,22 +158,18 @@ from .table.cell_props import (
     CT_TcBorders,
     CT_TcMar,
     CT_TcPr,
-    CT_TextDirection,
     CT_VerticalJc,
     CT_VMerge,
 )
 
 register_element_cls("w:tcPr", CT_TcPr)
-register_element_cls("w:cnfStyle", CT_Cnf)
 register_element_cls("w:tcW", CT_TblWidth)
 register_element_cls("w:gridSpan", CT_DecimalNumber)
 register_element_cls("w:hMerge", CT_HMerge)
 register_element_cls("w:vMerge", CT_VMerge)
 register_element_cls("w:tcBorders", CT_TcBorders)
-register_element_cls("w:shd", CT_Shd)
 register_element_cls("w:noWrap", CT_OnOff)
 register_element_cls("w:tcMar", CT_TcMar)
-register_element_cls("w:textDirection", CT_TextDirection)
 register_element_cls("w:tcFitText", CT_OnOff)
 register_element_cls("w:vAlign", CT_VerticalJc)
 register_element_cls("w:hideMark", CT_OnOff)
