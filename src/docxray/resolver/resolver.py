@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
-from docxray.oxml.numbering import CT_AbstractNum
+from docxray.numbering.numbering import OverrideNum
+from docxray.oxml.shared import CT_String
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.text.num_props import CT_NumPr
 from docxray.oxml.text.paragraph import CT_P
@@ -13,7 +14,7 @@ from docxray.oxml.text.run import CT_R
 from docxray.oxml.xmlchemy import OxmlElement
 from docxray.resolver.exceptions import ResolveError
 from docxray.shared import PropertyPath, safe_get_prop
-from docxray.styles.style import CharacterStyle, TableStyle
+from docxray.styles.style import CharacterStyle, ParagraphStyle, TableStyle
 from docxray.types import ELM_T
 
 if TYPE_CHECKING:
@@ -143,70 +144,55 @@ class BaseResolver(Generic[ELM_T]):
         return None
 
     def _from_num_prop(
-        self, property_path: PropertyPath, numPr: CT_NumPr
+        self,
+        property_path: PropertyPath,
+        numPr_elm: CT_NumPr,
+        last_para_style: ParagraphStyle | None = None,
     ) -> Any | None:
-        msg = f"Invalid numbering reference for {property_path} on {numPr} of {self._elm}"
-        err = ResolveError(msg)
-        numId = numPr.numId
-        ilvl = numPr.ilvl
-        if numId is None or ilvl is None:
-            raise err
         numbering = self._numbering
         if numbering is None:
-            raise err
-        num = numbering.get_num(numId.val)
-        if num is None:
-            raise err
-        override_num = num.get_override_num(ilvl.val)
-        if override_num is not None:
-            return safe_get_prop(override_num.element.lvl, property_path)
-        abstract_num = num.get_abstract_num(num.element.abstractNumId.val)
-        if abstract_num is not None:
-            return self._from_abstract_num_style(
-                property_path, abstract_num.element
-            )
-        raise err
-
-    def _from_abstract_num_style(
-        self, property_path: PropertyPath, abstractNum_elm: CT_AbstractNum
-    ) -> Any | None:
-        link = abstractNum_elm.numStyleLink
-        val = None
-        msg = f"Invalid numbering reference for {property_path} of {self._elm}"
-        err = ResolveError(msg)
+            return None
+        proxy = numbering.get_lvl_proxy(numPr_elm)
+        if proxy is None:
+            return None
+        if isinstance(proxy, OverrideNum):
+            lvl = proxy.lvl
+            if lvl is None:
+                return None
+            return safe_get_prop(lvl.element, property_path)
+        link = proxy.element.numStyleLink
         while link is not None:
             num_style = self._styles.num_style(link.val)
-            numPr: CT_NumPr | None = safe_get_prop(
+            numPr_elm2: CT_NumPr | None = safe_get_prop(
                 num_style.element,
                 self._prop_val_path("numPr", self._property_base),
             )
-            if numPr is None:
-                msg = f"Error occured while resolving numbering refs: style with id {link.val} has not numPr"
-                raise ResolveError(msg)
-
-            numId = numPr.numId
-            ilvl = numPr.ilvl
-            if numId is None or ilvl is None:
-                raise err
-            numbering = self._numbering
-            if numbering is None:
-                raise err
-            num = numbering.get_num(numId.val)
-            if num is None:
-                raise err
-            override_num = num.get_override_num(ilvl.val)
-            if override_num is not None:
-                return safe_get_prop(override_num.element.lvl, property_path)
-            abstract_num = num.get_abstract_num(num.element.abstractNumId.val)
-            if abstract_num is not None:
-                lvl = abstract_num.get_lvl(ilvl.val)
-                val = safe_get_prop(lvl, property_path)
-                if val is not None:
-                    return val
-                link = abstract_num.element.numStyleLink
-            else:
-                link = None
-        return val
+            if numPr_elm2 is None:
+                return None
+            proxy = numbering.get_lvl_proxy(numPr_elm2)
+            if proxy is None:
+                return None
+            if isinstance(proxy, OverrideNum):
+                lvl = proxy.lvl
+                if lvl is None:
+                    return None
+                return safe_get_prop(lvl.element, property_path)
+            link = proxy.element.numStyleLink
+        para_style_id = None
+        if last_para_style is not None:
+            para_style_id = last_para_style.element.styleId
+        if para_style_id is None:
+            pStyle: CT_String | None = safe_get_prop(
+                self._elm, self._prop_val_path("pStyle", self._property_base)
+            )
+            if pStyle is not None:
+                para_style_id = pStyle.val
+        if para_style_id is None:
+            return None
+        lvl = proxy.get_lvl_by_pstyle(para_style_id)
+        if lvl is not None:
+            return safe_get_prop(lvl.element, property_path)
+        return None
 
     def _from_style_inheritance(
         self, style: CharacterStyle, property_path: PropertyPath

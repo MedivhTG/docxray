@@ -42,6 +42,7 @@ class TestDocument:
             elif isinstance(p_or_t, Paragraph):
                 part = p_or_t.part
                 p_fmt = p_or_t.resolver
+                outl = p_fmt.outline_lvl
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
                     spacing = pPr.spacing

@@ -147,6 +147,14 @@ class CT_AbstractNum(OxmlElement):
             f"./{W.LVL}[@{W.ILVL}='{ilvl_val}']", CT_Lvl
         )
 
+    def lvl_by_pStyle(self, pStyle_val: str) -> CT_Lvl | None:
+        lvl_elms: list[CT_Lvl] = self.xpath(
+            f"./w:lvl[w:pStyle[@w:val='{pStyle_val}']]"
+        )
+        if lvl_elms:
+            return lvl_elms[0]
+        return None
+
 
 class CT_NumLvl(OxmlElement):
     @cached_property
@@ -180,14 +188,6 @@ class CT_Num(OxmlElement):
             f"./{W.LVL_OVERRIDE}[@{W.ILVL}='{ilvl_val}']", CT_NumLvl
         )
 
-    def abstract_num_by_id(
-        self, abstract_num_id_val: int
-    ) -> CT_AbstractNum | None:
-        return self.child_zero_or_one(
-            f"./{W.ABSTRACT_NUM}[@{W.ABSTRACT_NUM_ID}='{abstract_num_id_val}']",
-            CT_AbstractNum,
-        )
-
 
 class CT_Numbering(OxmlElement):
     @cached_property
@@ -211,4 +211,12 @@ class CT_Numbering(OxmlElement):
     def num_by_id(self, numId_val: int) -> CT_Num | None:
         return self.child_zero_or_one(
             f"./{W.NUM}[@{W.NUM_ID}='{numId_val}']", CT_Num
+        )
+
+    def abstract_num_by_id(
+        self, abstract_num_id_val: int
+    ) -> CT_AbstractNum | None:
+        return self.child_zero_or_one(
+            f"./{W.ABSTRACT_NUM}[@{W.ABSTRACT_NUM_ID}='{abstract_num_id_val}']",
+            CT_AbstractNum,
         )

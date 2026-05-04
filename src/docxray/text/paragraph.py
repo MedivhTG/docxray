@@ -13,7 +13,7 @@ from docxray.text.run import Run
 class Paragraph(StoryChild[CT_P]):
     @cached_property
     def resolver(self) -> ParagraphResolver:
-        return ParagraphResolver(self.element, self.part.document_part, "NO")
+        return ParagraphResolver(self.element, self.part.document_part, "pPr")
 
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
         """Generate the runs and hyperlinks in this paragraph, in the order they appear.

@@ -226,6 +226,7 @@ from .numbering import (
     CT_Lvl,
     CT_LvlLegacy,
     CT_MultiLevelType,
+    CT_Num,
     CT_Numbering,
     CT_NumFmt,
     CT_NumLvl,
@@ -246,6 +247,7 @@ register_element_cls("w:tmpl", CT_LongHexNumber)
 register_element_cls("w:styleLink", CT_String)
 register_element_cls("w:numStyleLink", CT_String)
 
+register_element_cls("w:num", CT_Num)
 register_element_cls("w:lvl", CT_Lvl)
 register_element_cls("w:start", CT_DecimalNumber)
 register_element_cls("w:numFmt", CT_NumFmt)

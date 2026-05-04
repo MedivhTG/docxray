@@ -1,0 +1,11 @@
+class WD_OUTLINE_LEVEL:
+    HEADER_1 = 0
+    HEADER_2 = 1
+    HEADER_3 = 2
+    HEADER_4 = 3
+    HEADER_5 = 4
+    HEADER_6 = 5
+    HEADER_7 = 6
+    HEADER_8 = 7
+    HEADER_9 = 8
+    TEXT = 9
