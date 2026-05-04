@@ -16,6 +16,7 @@ from .shared import (
     CT_FramePr,
     CT_Highlight,
     CT_HpsMeasure,
+    CT_Jc,
     CT_Language,
     CT_LongHexNumber,
     CT_OnOff,
@@ -29,6 +30,7 @@ from .shared import (
 )
 
 register_element_cls("w:rsid", CT_LongHexNumber)
+register_element_cls("w:name", CT_String)
 
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
@@ -40,7 +42,6 @@ register_element_cls("w:p", CT_P)
 
 from .text.paragraph_props import (
     CT_Ind,
-    CT_Jc,
     CT_PBdr,
     CT_PPr,
     CT_Tabs,
@@ -202,7 +203,6 @@ register_element_cls("w:styles", CT_Styles)
 register_element_cls("w:latentStyles", CT_LatentStyles)
 
 register_element_cls("w:style", CT_Style)
-register_element_cls("w:name", CT_String)
 register_element_cls("w:aliases", CT_String)
 register_element_cls("w:basedOn", CT_String)
 register_element_cls("w:next", CT_String)
@@ -219,10 +219,40 @@ register_element_cls("w:personalCompose", CT_OnOff)
 register_element_cls("w:personalReply", CT_OnOff)
 register_element_cls("w:tblStylePr", CT_TblStylePr)
 
-from .numbering import CT_AbstractNum, CT_Numbering, CT_NumPicBullet
+from .numbering import (
+    CT_AbstractNum,
+    CT_LevelSuffix,
+    CT_LevelText,
+    CT_Lvl,
+    CT_LvlLegacy,
+    CT_MultiLevelType,
+    CT_Numbering,
+    CT_NumFmt,
+    CT_NumLvl,
+    CT_NumPicBullet,
+)
 
 register_element_cls("w:numbering", CT_Numbering)
 register_element_cls("w:numPicBullet", CT_NumPicBullet)
+
 register_element_cls("w:abstractNum", CT_AbstractNum)
 register_element_cls("w:numIdMacAtCleanup", CT_DecimalNumber)
 register_element_cls("w:abstractNumId", CT_DecimalNumber)
+register_element_cls("w:lvlOverride", CT_NumLvl)
+register_element_cls("w:startOverride", CT_DecimalNumber)
+register_element_cls("w:nsid", CT_LongHexNumber)
+register_element_cls("w:multiLevelType", CT_MultiLevelType)
+register_element_cls("w:tmpl", CT_LongHexNumber)
+register_element_cls("w:styleLink", CT_String)
+register_element_cls("w:numStyleLink", CT_String)
+
+register_element_cls("w:lvl", CT_Lvl)
+register_element_cls("w:start", CT_DecimalNumber)
+register_element_cls("w:numFmt", CT_NumFmt)
+register_element_cls("w:lvlRestart", CT_DecimalNumber)
+register_element_cls("w:isLgl", CT_OnOff)
+register_element_cls("w:suff", CT_LevelSuffix)
+register_element_cls("w:lvlText", CT_LevelText)
+register_element_cls("w:lvlPicBulletId", CT_DecimalNumber)
+register_element_cls("w:legacy", CT_LvlLegacy)
+register_element_cls("w:lvlJc", CT_Jc)

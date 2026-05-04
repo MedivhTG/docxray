@@ -7,6 +7,7 @@ from typing import Any, TypeVar
 from docxray.enum.word import (
     WD_CNF_FORMAT,
     WD_MERGE,
+    WD_MULTILEVEL_TYPE,
     WD_STYLE_TYPE,
     WD_TBL_STYLE_OVERRIDE_TYPE,
     WD_UNDERLINE,
@@ -63,6 +64,26 @@ class ST_DecimalNumber(SimpleType):
             return int(obj)
         except (ValueError, TypeError):
             msg = f"Invalid DecimalNumber value for {obj}; MUST be integer"
+            raise InvalidXmlError(msg)
+
+
+class ST_LongHexNumber(SimpleType):
+    OCTETS = 4
+    HEX = 16
+
+    @classmethod
+    def validate(cls, obj: Any) -> int:
+        val_str = cls.validate_str(obj)
+        try:
+            val_bytes = bytes.fromhex(val_str)
+            if len(val_bytes) != cls.OCTETS:
+                msg = f"Invalid LongHexNumber value for {obj}; MUST have only {cls.OCTETS} (bytes)"
+                raise InvalidXmlError(msg)
+            return int(val_str, cls.HEX)
+        except ValueError:
+            msg = (
+                f"Invalid LongHexNumber value for {obj}; MUST be an hex string"
+            )
             raise InvalidXmlError(msg)
 
 
@@ -125,3 +146,9 @@ class ST_Underline(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_UNDERLINE:
         return cls.validate_enum(obj, WD_UNDERLINE)
+
+
+class ST_MultiLevelType(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_MULTILEVEL_TYPE:
+        return cls.validate_enum(obj, WD_MULTILEVEL_TYPE)

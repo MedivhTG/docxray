@@ -6,6 +6,7 @@ from docxray.oxml.shared import (
     CT_Cnf,
     CT_DecimalNumber,
     CT_FramePr,
+    CT_Jc,
     CT_OnOff,
     CT_SectPr,
     CT_Shd,
@@ -35,10 +36,6 @@ class CT_Spacing(OxmlElement):
 
 
 class CT_Ind(OxmlElement):
-    pass
-
-
-class CT_Jc(OxmlElement):
     pass
 
 

@@ -8,6 +8,7 @@ from docxray.oxml.simpletypes import (
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
+    ST_LongHexNumber,
     ST_OnOff,
     ST_String,
 )
@@ -73,6 +74,10 @@ class CT_FitText(OxmlElement):
     pass
 
 
+class CT_Jc(OxmlElement):
+    pass
+
+
 class CT_Em(OxmlElement):
     pass
 
@@ -120,7 +125,9 @@ class CT_Markup(OxmlElement):
 
 
 class CT_LongHexNumber(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> int:
+        return self.attr_required(W.VAL, ST_LongHexNumber)
 
 
 class CT_TrackChange(CT_Markup):

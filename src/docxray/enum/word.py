@@ -113,3 +113,9 @@ class WD_UNDERLINE(StrEnum):
     WAVY_HEAVY = "wavyHeavy"
     WAVY_DOUBLE = "wavyDouble"
     NONE = "none"
+
+
+class WD_MULTILEVEL_TYPE(StrEnum):
+    SINGLE_LEVEL = "singleLevel"
+    MULTILEVEL = "multilevel"
+    HYBRID_MULTILEVEL = "hybridMultilevel"
