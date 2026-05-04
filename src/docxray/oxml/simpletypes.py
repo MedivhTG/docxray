@@ -9,6 +9,7 @@ from docxray.enum.word import (
     WD_MERGE,
     WD_STYLE_TYPE,
     WD_TBL_STYLE_OVERRIDE_TYPE,
+    WD_UNDERLINE,
     WD_VERTICAL_ALIGN_RUN,
 )
 from docxray.exceptions import InvalidXmlError
@@ -118,3 +119,9 @@ class ST_VerticalAlignRun(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_VERTICAL_ALIGN_RUN:
         return cls.validate_enum(obj, WD_VERTICAL_ALIGN_RUN)
+
+
+class ST_Underline(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_UNDERLINE:
+        return cls.validate_enum(obj, WD_UNDERLINE)

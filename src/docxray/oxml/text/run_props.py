@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_VERTICAL_ALIGN_RUN
+from docxray.enum.word import WD_UNDERLINE, WD_VERTICAL_ALIGN_RUN
 from docxray.oxml.ns import W
 from docxray.oxml.shared import (
     CT_Border,
@@ -23,9 +23,8 @@ from docxray.oxml.shared import (
     CT_TextEffect,
     CT_TextScale,
     CT_TrackChange,
-    CT_Underline,
 )
-from docxray.oxml.simpletypes import ST_VerticalAlignRun
+from docxray.oxml.simpletypes import ST_Underline, ST_VerticalAlignRun
 from docxray.oxml.xmlchemy import OxmlElement
 
 
@@ -33,6 +32,12 @@ class CT_VerticalAlignRun(OxmlElement):
     @cached_property
     def val(self) -> WD_VERTICAL_ALIGN_RUN:
         return self.attr_required(W.VAL, ST_VerticalAlignRun)
+
+
+class CT_Underline(OxmlElement):
+    @cached_property
+    def val(self) -> WD_UNDERLINE:
+        return self.attr_optional(W.VAL, ST_Underline, WD_UNDERLINE.SINGLE)
 
 
 class CT_RPr(OxmlElement):

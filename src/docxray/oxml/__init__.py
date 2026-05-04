@@ -23,7 +23,6 @@ from .shared import (
     CT_String,
     CT_TextEffect,
     CT_TextScale,
-    CT_Underline,
 )
 
 register_element_cls("w:document", CT_Document)
@@ -48,7 +47,12 @@ from .text.run import CT_R, CT_T
 register_element_cls("w:r", CT_R)
 register_element_cls("w:t", CT_T)
 
-from .text.run_props import CT_RPr, CT_RPrChange, CT_VerticalAlignRun
+from .text.run_props import (
+    CT_RPr,
+    CT_RPrChange,
+    CT_Underline,
+    CT_VerticalAlignRun,
+)
 
 register_element_cls("w:rPr", CT_RPr)
 register_element_cls("w:rPrChange", CT_RPrChange)

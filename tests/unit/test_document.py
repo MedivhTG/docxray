@@ -45,4 +45,5 @@ class TestDocument:
                     italic2 = r_fmt.italic
                     bold = r_fmt.bold
                     v_align = r_fmt.vertical_align
+                    u = r_fmt.underline
                     wait = 1

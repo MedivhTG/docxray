@@ -57,10 +57,6 @@ class CT_Highlight(OxmlElement):
     pass
 
 
-class CT_Underline(OxmlElement):
-    pass
-
-
 class CT_TextEffect(OxmlElement):
     pass
 
