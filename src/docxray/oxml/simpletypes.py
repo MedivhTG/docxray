@@ -1,10 +1,12 @@
+import re
 from abc import abstractmethod
 from datetime import datetime
-from enum import Enum
-from typing import Any, TypeVar
+from enum import StrEnum
+from typing import Any, Literal, TypeVar
 
 # docxray stuff
 from docxray.enum.word import (
+    WD_BORDER,
     WD_CNF_FORMAT,
     WD_MERGE,
     WD_MULTILEVEL_TYPE,
@@ -16,7 +18,7 @@ from docxray.enum.word import (
 )
 from docxray.exceptions import InvalidXmlError
 
-ENUM_T = TypeVar("ENUM_T", bound=Enum)
+ENUM_T = TypeVar("ENUM_T", bound=StrEnum)
 
 
 class SimpleType:
@@ -33,10 +35,11 @@ class SimpleType:
 
     @classmethod
     def validate_enum(cls, obj: Any, enum_cls: type[ENUM_T]) -> ENUM_T:
-        if obj not in enum_cls.__members__.values():
-            msg = f"XML object {obj} is not a member of enum {enum_cls}"
+        val_str = cls.validate_str(obj)
+        if val_str not in enum_cls.__members__.values():
+            msg = f"XML object {val_str} is not a member of enum {enum_cls}"
             raise InvalidXmlError(msg)
-        return enum_cls(obj)
+        return enum_cls(val_str)
 
 
 class ST_String(SimpleType):
@@ -159,3 +162,42 @@ class ST_TableWidth(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_TABLE_WIDTH:
         return cls.validate_enum(obj, WD_TABLE_WIDTH)
+
+
+class ST_Border(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_BORDER:
+        return cls.validate_enum(obj, WD_BORDER)
+
+
+class ST_HexColorAuto(SimpleType):
+    AUTO = "auto"
+
+    @classmethod
+    def validate(cls, obj: Any) -> Literal["auto"]:
+        val_str = cls.validate_str(obj)
+        if val_str != cls.AUTO:
+            msg = f"Invalid HexColorAuto for {val_str}; MUST be `auto`"
+            raise InvalidXmlError(msg)
+        return "auto"
+
+
+class ST_HexColorRGB(SimpleType):
+    RGB_RE = r"[0-9A-Fa-f]{6}"
+
+    @classmethod
+    def validate(cls, obj: Any) -> str:
+        val_str = cls.validate_str(obj)
+        if not re.fullmatch(cls.RGB_RE, val_str):
+            msg = f"Invalid HexColorRGB for {val_str}; MUST be hex number with 6 digits"
+            raise InvalidXmlError(msg)
+        return val_str
+
+
+class ST_HexColor(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> Literal["auto"] | str:
+        try:
+            return ST_HexColorAuto.validate(obj)
+        except InvalidXmlError:
+            return ST_HexColorRGB.validate(obj)

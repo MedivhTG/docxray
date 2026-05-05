@@ -128,7 +128,23 @@ class W:
     GRID_SPAN = qn("w:gridSpan")
     H_MERGE = qn("w:hMerge")
     V_MERGE = qn("w:vMerge")
+
     TC_BORDERS = qn("w:tcBorders")
+    TOP = qn("w:top")
+    LEFT = qn("w:left")
+    BOTTOM = qn("w:bottom")
+    RIGHT = qn("w:right")
+    INSIDE_H = qn("w:insideH")
+    INSIDE_V = qn("w:insideV")
+    TL_2_BR = qn("w:tl2br")
+    TR_2_BL = qn("w:tr2bl")
+
+    THEME_COLOR = qn("w:themeColor")
+    THEME_TINT = qn("w:themeTint")
+    THEME_SHADE = qn("w:themeShade")
+    SPACE = qn("w:space")
+    FRAME = qn("w:frame")
+
     SHD = qn("w:shd")
     NO_WRAP = qn("w:noWrap")
     TC_MAR = qn("w:tcMar")

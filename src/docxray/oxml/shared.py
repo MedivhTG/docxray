@@ -1,13 +1,16 @@
 from datetime import datetime
 from functools import cached_property
+from typing import Literal
 
 # docxray stuff
-from docxray.enum.word import WD_CNF_FORMAT
+from docxray.enum.word import WD_BORDER, WD_CNF_FORMAT
 from docxray.oxml.ns import W
 from docxray.oxml.simpletypes import (
+    ST_Border,
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
+    ST_HexColor,
     ST_LongHexNumber,
     ST_OnOff,
     ST_String,
@@ -63,7 +66,42 @@ class CT_TextEffect(OxmlElement):
 
 
 class CT_Border(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> WD_BORDER:
+        return self.attr_required(W.VAL, ST_Border)
+
+    @cached_property
+    def color(self) -> Literal["auto"] | str | None:
+        return self.attr_optional(W.COLOR, ST_HexColor)
+
+    # TODO: uncomment and do work
+    # @cached_property
+    # def themeColor(self):
+    #     return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
+
+    # @cached_property
+    # def themeTint(self):
+    #     return self.attr_optional(W.THEME_TINT, ST_UcharHexNumber)
+
+    # @cached_property
+    # def themeShade(self):
+    #     return self.attr_optional(W.THEME_SHADE, ST_UcharHexNumber)
+
+    # @cached_property
+    # def sz(self):
+    #     return self.attr_optional(W.SZ, ST_EighthPointMeasure)
+
+    # @cached_property
+    # def space(self):
+    #     return self.attr_optional(W.SPACE, ST_PointMeasure)
+
+    @cached_property
+    def shadow(self) -> bool | None:
+        return self.attr_optional(W.SHADOW, ST_OnOff)
+
+    @cached_property
+    def frame(self) -> bool | None:
+        return self.attr_optional(W.FRAME, ST_OnOff)
 
 
 class CT_Shd(OxmlElement):
