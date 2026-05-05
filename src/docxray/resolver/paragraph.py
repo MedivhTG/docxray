@@ -6,7 +6,6 @@ from docxray.constants import WD_OUTLINE_LEVEL
 from docxray.oxml.table.table import CT_Tc
 from docxray.oxml.text.num_props import CT_NumPr
 from docxray.oxml.text.paragraph import CT_P
-from docxray.resolver.exceptions import ResolveError
 from docxray.resolver.resolver import BaseResolver
 from docxray.shared import PropertyPath, safe_get_prop
 from docxray.styles.style import ParagraphStyle
@@ -16,6 +15,29 @@ class ParagraphResolver(BaseResolver[CT_P]):
     @cached_property
     def outline_lvl(self) -> int:
         return self._prop_val("outlineLvl", WD_OUTLINE_LEVEL.TEXT)
+
+    @cached_property
+    def in_list(self) -> bool:
+        numPr: CT_NumPr | None = safe_get_prop(
+            self._elm, PropertyPath.base("numPr", "pPr")
+        )
+        if numPr is not None:
+            return True
+        para_style = self._styles.para_style(self._elm)
+        if para_style is None:
+            return False
+        numPr = None
+        while numPr is None:
+            numPr = safe_get_prop(
+                para_style.element,
+                self._prop_val_path("numPr", f"{self._property_base}"),
+            )
+            if numPr is not None:
+                return True
+            base_style = self._styles.base_style(para_style)
+            if not isinstance(base_style, para_style.__class__):
+                return False
+            para_style = base_style
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
@@ -31,8 +53,13 @@ class ParagraphResolver(BaseResolver[CT_P]):
         elif numPr is not None and para_style is None:
             return self._from_1_numPr_0_para_style(property_path, numPr)
         elif numPr is not None and para_style is not None:
-            msg = f"Сannot have list formatting and paragraph style at the same time for {self._elm}"
-            raise ResolveError(msg)
+            # TODO: well, i will look for it in docs, temporary we prefer numbering over style
+            val = self._from_1_numPr_0_para_style(
+                property_path, numPr, para_style
+            )
+            if val is not None:
+                return val
+            return self._from_0_numPr_1_para_style(property_path, para_style)
         return None
 
     def _from_0_numPr_0_para_style(

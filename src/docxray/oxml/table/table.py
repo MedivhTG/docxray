@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.oxml.ns import W
@@ -8,8 +9,11 @@ from docxray.oxml.shared import CT_AltChunk
 from docxray.oxml.table.cell_props import CT_TcPr
 from docxray.oxml.table.row_props import CT_TrPr
 from docxray.oxml.table.table_props import CT_TblPr
-from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.xmlchemy import OxmlElement
+
+if TYPE_CHECKING:
+    # docxray stuff
+    from docxray.oxml.text.paragraph import CT_P
 
 
 class CT_Tc(OxmlElement):

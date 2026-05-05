@@ -28,7 +28,29 @@ from docxray.oxml.simpletypes import ST_Underline, ST_VerticalAlignRun
 from docxray.oxml.xmlchemy import OxmlElement
 
 
-class EG_RPrBase(OxmlElement):
+class CT_VerticalAlignRun(OxmlElement):
+    @cached_property
+    def val(self) -> WD_VERTICAL_ALIGN_RUN:
+        return self.attr_required(W.VAL, ST_VerticalAlignRun)
+
+
+class CT_Underline(OxmlElement):
+    @cached_property
+    def val(self) -> WD_UNDERLINE:
+        return self.attr_optional(W.VAL, ST_Underline, WD_UNDERLINE.SINGLE)
+
+
+class CT_RPrOriginal(OxmlElement):
+    pass
+
+
+class CT_RPrChange(CT_TrackChange):
+    @cached_property
+    def rPr(self) -> CT_RPrOriginal:
+        return CT_RPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
+
+
+class CT_RPr(OxmlElement):
     @cached_property
     def rStyle(self) -> CT_String | None:
         return self.child_zero_or_one(W.R_STYLE, CT_String)
@@ -188,34 +210,6 @@ class EG_RPrBase(OxmlElement):
     def oMath(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.O_MATH, CT_OnOff)
 
-
-class EG_RPrContent(EG_RPrBase):
     @cached_property
     def rPrChange(self) -> CT_RPrChange | None:
         return self.child_zero_or_one(W.R_PR_CHANGE, CT_RPrChange)
-
-
-class CT_VerticalAlignRun(OxmlElement):
-    @cached_property
-    def val(self) -> WD_VERTICAL_ALIGN_RUN:
-        return self.attr_required(W.VAL, ST_VerticalAlignRun)
-
-
-class CT_Underline(OxmlElement):
-    @cached_property
-    def val(self) -> WD_UNDERLINE:
-        return self.attr_optional(W.VAL, ST_Underline, WD_UNDERLINE.SINGLE)
-
-
-class CT_RPrOriginal(EG_RPrBase):
-    pass
-
-
-class CT_RPrChange(CT_TrackChange):
-    @cached_property
-    def rPr(self) -> CT_RPrOriginal:
-        return CT_RPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
-
-
-class CT_RPr(EG_RPrContent):
-    pass

@@ -40,6 +40,8 @@ class W:
     BODY = qn("w:body")
     ALT_CHUNK = qn("w:altChunk")
 
+    R = qn("w:r")
+
     TR = qn("w:tr")
     TC = qn("w:tc")
 
@@ -201,6 +203,11 @@ class W:
     DATE = qn("w:date")
     RSID = qn("w:rsid")
     NSID = qn("w:nsid")
+    RSID_R_PR = qn("w:rsidRPr")
+    RSID_R = qn("w:rsidR")
+    RSID_DEL = qn("w:rsidDel")
+    RSID_P = qn("w:rsidP")
+    RSID_R_DEFAULT = qn("w:rsidRDefault")
 
     TYPE = qn("w:type")
     VAL = qn("w:val")

@@ -8,10 +8,32 @@ from docxray.oxml.text.run_props import CT_RPr
 from docxray.oxml.xmlchemy import OxmlElement
 
 
-class CT_T(OxmlElement):
-    @cached_property
-    def txt(self) -> str:
-        return self.text or ""
+class CT_RunTrackChange(OxmlElement):
+    pass
+
+
+class CT_Perm(OxmlElement):
+    pass
+
+
+class CT_PermStart(OxmlElement):
+    pass
+
+
+class CT_ProofErr(OxmlElement):
+    pass
+
+
+class CT_SdtRun(OxmlElement):
+    pass
+
+
+class CT_SmartTagRun(OxmlElement):
+    pass
+
+
+class CT_CustomXmlRun(OxmlElement):
+    pass
 
 
 class CT_R(OxmlElement):
@@ -26,3 +48,9 @@ class CT_R(OxmlElement):
     @cached_property
     def inner_content_items(self) -> list[CT_T]:
         return self.xpath("w:t")
+
+
+class CT_T(OxmlElement):
+    @cached_property
+    def txt(self) -> str:
+        return self.text or ""

@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from functools import cached_property
 
 # docxray stuff
+from docxray.oxml.text.hyperlink import CT_Hyperlink
 from docxray.oxml.text.paragraph import CT_P
 from docxray.oxml.text.run import CT_R
 from docxray.resolver.paragraph import ParagraphResolver
@@ -24,8 +25,7 @@ class Paragraph(StoryChild[CT_P]):
         that a hyperlink itself contains runs.
         """
         for run_or_hyperlink in self.element.inner_content_elements:
-            yield (
-                Run(run_or_hyperlink, self)
-                if isinstance(run_or_hyperlink, CT_R)
-                else Hyperlink(run_or_hyperlink, self)
-            )
+            if isinstance(run_or_hyperlink, CT_R):
+                yield Run(run_or_hyperlink, self)
+            elif isinstance(run_or_hyperlink, CT_Hyperlink):
+                yield Hyperlink(run_or_hyperlink, self)

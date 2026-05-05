@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from collections.abc import Iterator
 from functools import cached_property
+from typing import cast
 
 # docxray stuff
 from docxray.blkcntnr import BlockItemContainer
@@ -19,21 +22,50 @@ class Cell(BlockItemContainer[CT_Tc]):
     def resolver(self) -> CellResolver:
         return CellResolver(self.element, self.part.document_part, "")
 
+    @cached_property
+    def row(self) -> Row:
+        return cast("Row", self._parent)
+
+    @cached_property
+    def idx(self) -> int:
+        return self.row.cells_alive.index(self)
+
+    @cached_property
+    def next_cell_alive(self) -> Cell | None:
+        return self.row.get_cell_alive(self.idx + 1)
+
+    @cached_property
+    def prev_cell_alive(self) -> Cell | None:
+        return self.row.get_cell_alive(self.idx - 1)
+
 
 class Row(ElementProxy[CT_Row]):
     @cached_property
     def resolver(self) -> RowResolver:
         return RowResolver(self.element, self.part, "NO")  # type: ignore[arg-type]
 
-    def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
+    @cached_property
+    def cells_alive(self) -> list[Cell]:
+        cells = []
         for tc_elm in self.element.tc_lst:
-            if skip_merged:
-                vMerge_val = safe_get_prop(
-                    tc_elm, PropertyPath.base("val", "tcPr.vMerge")
-                )
-                if vMerge_val == WD_MERGE.CONTINUE:
-                    continue
-            yield Cell(tc_elm, self)  # type: ignore[arg-type]
+            vMerge_val = safe_get_prop(
+                tc_elm, PropertyPath.base("val", "tcPr.vMerge")
+            )
+            if vMerge_val == WD_MERGE.CONTINUE:
+                continue
+            cells.append(Cell(tc_elm, self))  # type: ignore[arg-type]
+        return cells
+
+    def iter_cells(self) -> Iterator[Cell]:
+        for cell in self.cells_alive:
+            yield cell
+
+    def get_cell_alive(self, idx: int) -> Cell | None:
+        if idx < 0:
+            return None
+        if idx > len(self.cells_alive) - 1:
+            return None
+        return self.cells_alive[idx]
 
 
 class Table(StoryChild[CT_Tbl]):

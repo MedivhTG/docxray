@@ -23,6 +23,7 @@ class TestDocument:
                     for cell in row.iter_cells():
                         part = cell.part
                         cell_fmt = cell.resolver
+                        cell.next_cell_alive
                         for p_or_t in cell.iter_inner_content():
                             if isinstance(p_or_t, Paragraph):
                                 part = p_or_t.part
@@ -42,6 +43,7 @@ class TestDocument:
             elif isinstance(p_or_t, Paragraph):
                 part = p_or_t.part
                 p_fmt = p_or_t.resolver
+                in_list = p_fmt.in_list
                 outl = p_fmt.outline_lvl
                 pPr = p_or_t.element.pPr
                 if pPr is not None:

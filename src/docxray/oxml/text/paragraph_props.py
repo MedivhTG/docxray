@@ -15,12 +15,8 @@ from docxray.oxml.shared import (
     CT_TrackChange,
 )
 from docxray.oxml.text.num_props import CT_NumPr
-from docxray.oxml.text.run_props import CT_RPr, EG_RPrBase
+from docxray.oxml.text.run_props import CT_RPr
 from docxray.oxml.xmlchemy import OxmlElement
-
-
-class EG_ParaRPrTrackChanges(OxmlElement):
-    pass
 
 
 class CT_PBdr(OxmlElement):
@@ -186,7 +182,7 @@ class CT_PPrBase(OxmlElement):
         return self.child_zero_or_one(W.CNF_STYLE, CT_Cnf)
 
 
-class CT_ParaRPrOriginal(EG_ParaRPrTrackChanges, EG_RPrBase):
+class CT_ParaRPrOriginal(OxmlElement):
     pass
 
 
@@ -196,7 +192,7 @@ class CT_ParaRPrChange(CT_TrackChange):
         return CT_ParaRPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
 
 
-class CT_ParaRPr(EG_ParaRPrTrackChanges, EG_RPrBase):
+class CT_ParaRPr(OxmlElement):
     pass
 
 
