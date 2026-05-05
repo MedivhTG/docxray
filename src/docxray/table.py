@@ -96,11 +96,11 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def cell_below(self) -> Cell | None:
-        return self.table.cell_on_grid(self.grid_x, self.grid_y + 1)
+        return self.table.get_cell_on_grid(self.grid_x, self.grid_y + 1)
 
     @cached_property
     def cell_above(self) -> Cell | None:
-        return self.table.cell_on_grid(self.grid_x, self.grid_y - 1)
+        return self.table.get_cell_on_grid(self.grid_x, self.grid_y - 1)
 
     @cached_property
     def vert_merged(self) -> bool:
@@ -169,6 +169,10 @@ class Row(ElementProxy[CT_Row]):
         return [Cell(tc_elm, self) for tc_elm in self.element.tc_lst]  # type: ignore[arg-type]
 
     @cached_property
+    def cells_grid(self) -> dict[int, Cell]:
+        return {cell.grid_x: cell for cell in self.cells}
+
+    @cached_property
     def xml_pos(self) -> XML_POSITION:
         return self.element.xml_pos
 
@@ -182,6 +186,12 @@ class Row(ElementProxy[CT_Row]):
         if idx > len(self.cells) - 1:
             return None
         return self.cells[idx]
+
+    def get_cell_on_grid(self, grid_x: int) -> Cell | None:
+        try:
+            return self.cells_grid[grid_x]
+        except KeyError:
+            return None
 
 
 class Table(StoryChild[CT_Tbl]):
@@ -200,14 +210,11 @@ class Table(StoryChild[CT_Tbl]):
             return None
         return self.rows[idx]
 
-    def cell_on_grid(self, x: int, y: int) -> Cell | None:
-        row = self.get_row(y)
+    def get_cell_on_grid(self, grid_x: int, grid_y: int) -> Cell | None:
+        row = self.get_row(grid_y)
         if row is None:
             return None
-        cell = row.get_cell(x)
-        if cell is None:
-            return None
-        return cell
+        return row.get_cell_on_grid(grid_x)
 
     def iter_rows(self) -> Iterator[Row]:
         for row in self.rows:
