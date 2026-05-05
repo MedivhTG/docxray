@@ -9,6 +9,7 @@ from docxray.enum.word import (
     WD_MERGE,
     WD_MULTILEVEL_TYPE,
     WD_STYLE_TYPE,
+    WD_TABLE_WIDTH,
     WD_TBL_STYLE_OVERRIDE_TYPE,
     WD_UNDERLINE,
     WD_VERTICAL_ALIGN_RUN,
@@ -152,3 +153,9 @@ class ST_MultiLevelType(SimpleType):
     @classmethod
     def validate(cls, obj: Any) -> WD_MULTILEVEL_TYPE:
         return cls.validate_enum(obj, WD_MULTILEVEL_TYPE)
+
+
+class ST_TableWidth(SimpleType):
+    @classmethod
+    def validate(cls, obj: Any) -> WD_TABLE_WIDTH:
+        return cls.validate_enum(obj, WD_TABLE_WIDTH)

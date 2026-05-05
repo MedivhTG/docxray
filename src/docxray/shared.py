@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Self
 
 # docxray stuff
+from docxray.enum.lxml import XML_POSITION
 from docxray.parts.story import StoryPart
 from docxray.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
 
@@ -87,4 +88,116 @@ def safe_get_prop(
         if not hasattr(current, link):
             return default
         current = getattr(current, link)
-    return current
+    return current or default
+
+
+def position(is_first: bool, is_last: bool) -> XML_POSITION:
+    if not is_first and not is_last:
+        return XML_POSITION.MIDDLE
+    if is_first and not is_last:
+        return XML_POSITION.START
+    if not is_first and is_last:
+        return XML_POSITION.END
+    return XML_POSITION.ONE_ITEM
+
+
+class Length(int):
+    """Base class for length constructor classes Inches, Cm, Mm, Px, and Emu.
+
+    Behaves as an int count of English Metric Units, 914,400 to the inch, 36,000 to the
+    mm. Provides convenience unit conversion methods in the form of read-only
+    properties. Immutable.
+    """
+
+    _EMUS_PER_INCH = 914400
+    _EMUS_PER_CM = 360000
+    _EMUS_PER_MM = 36000
+    _EMUS_PER_PT = 12700
+    _EMUS_PER_TWIP = 635
+
+    def __new__(cls, emu: int) -> Self:
+        return int.__new__(cls, emu)
+
+    @property
+    def cm(self) -> float:
+        """The equivalent length expressed in centimeters (float)."""
+        return self / float(self._EMUS_PER_CM)
+
+    @property
+    def emu(self) -> Self:
+        """The equivalent length expressed in English Metric Units (int)."""
+        return self
+
+    @property
+    def inches(self) -> float:
+        """The equivalent length expressed in inches (float)."""
+        return self / float(self._EMUS_PER_INCH)
+
+    @property
+    def mm(self) -> float:
+        """The equivalent length expressed in millimeters (float)."""
+        return self / float(self._EMUS_PER_MM)
+
+    @property
+    def pt(self) -> float:
+        """Floating point length in points."""
+        return self / float(self._EMUS_PER_PT)
+
+    @property
+    def twips(self) -> int:
+        """The equivalent length expressed in twips (int)."""
+        return int(round(self / float(self._EMUS_PER_TWIP)))
+
+    def px(self, dpi: int = 96) -> int:
+        return int(self.inches * dpi)
+
+
+class Inches(Length):
+    """Convenience constructor for length in inches, e.g. ``width = Inches(0.5)``."""
+
+    def __new__(cls, inches: float) -> Self:
+        emu = int(inches * Length._EMUS_PER_INCH)
+        return Length.__new__(cls, emu)
+
+
+class Cm(Length):
+    """Convenience constructor for length in centimeters, e.g. ``height = Cm(12)``."""
+
+    def __new__(cls, cm: float) -> Self:
+        emu = int(cm * Length._EMUS_PER_CM)
+        return Length.__new__(cls, emu)
+
+
+class Emu(Length):
+    """Convenience constructor for length in English Metric Units, e.g. ``width =
+    Emu(457200)``."""
+
+    def __new__(cls, emu: int) -> Self:
+        return Length.__new__(cls, int(emu))
+
+
+class Mm(Length):
+    """Convenience constructor for length in millimeters, e.g. ``width = Mm(240.5)``."""
+
+    def __new__(cls, mm: float) -> Self:
+        emu = int(mm * Length._EMUS_PER_MM)
+        return Length.__new__(cls, emu)
+
+
+class Pt(Length):
+    """Convenience value class for specifying a length in points."""
+
+    def __new__(cls, points: float) -> Self:
+        emu = int(points * Length._EMUS_PER_PT)
+        return Length.__new__(cls, emu)
+
+
+class Twips(Length):
+    """Convenience constructor for length in twips, e.g. ``width = Twips(42)``.
+
+    A twip is a twentieth of a point, 635 EMU.
+    """
+
+    def __new__(cls, twips: float) -> Self:
+        emu = int(twips * Length._EMUS_PER_TWIP)
+        return Length.__new__(cls, emu)

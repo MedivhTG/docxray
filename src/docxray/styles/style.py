@@ -67,51 +67,67 @@ class ParagraphStyle(CharacterStyle):
 class TableStyle(ParagraphStyle):
     @cached_property
     def firstRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FIRST_ROW)
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.HEADER_ROW)
 
     @cached_property
     def lastRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.LAST_ROW)
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FOOTER_ROW)
 
     @cached_property
     def firstCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FIRST_COL)
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.FIRST_COLUMN)
 
     @cached_property
     def lastCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.LAST_COL)
+        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.LAST_COLUMN)
 
     @cached_property
     def band1Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_1_VERT)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.VERTICAL_BAND_EVEN
+        )
 
     @cached_property
     def band2Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_2_VERT)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.VERTICAL_BAND_ODD
+        )
 
     @cached_property
     def band1Horz(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_1_HORZ)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.HORIZONTAL_BAND_EVEN
+        )
 
     @cached_property
     def band2Horz(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.BAND_2_HORZ)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.HORIZONTAL_BAND_ODD
+        )
 
     @cached_property
     def nwCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.NW_CELL)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.TOP_LEFT_CORNER_CELL
+        )
 
     @cached_property
     def neCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.NE_CELL)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.TOP_RIGHT_CORNER_CELL
+        )
 
     @cached_property
     def swCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.SW_CELL)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.BOTTOM_LEFT_CORNER_CELL
+        )
 
     @cached_property
     def seCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_TBL_STYLE_OVERRIDE_TYPE.SE_CELL)
+        return self.tbl_style_prop(
+            WD_TBL_STYLE_OVERRIDE_TYPE.BOTTOM_RIGHT_CORNER_CELL
+        )
 
     def bitwise_table_style_property(
         self, flag: WD_CNF_FORMAT

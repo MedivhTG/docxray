@@ -1,7 +1,7 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_MERGE
+from docxray.enum.word import WD_MERGE, WD_TABLE_WIDTH
 from docxray.oxml.ns import W
 from docxray.oxml.shared import (
     CT_Cnf,
@@ -10,12 +10,18 @@ from docxray.oxml.shared import (
     CT_Shd,
     CT_TextDirection,
 )
-from docxray.oxml.simpletypes import ST_Merge
+from docxray.oxml.simpletypes import ST_DecimalNumber, ST_Merge, ST_TableWidth
 from docxray.oxml.xmlchemy import OxmlElement
 
 
 class CT_TblWidth(OxmlElement):
-    pass
+    @cached_property
+    def w(self) -> int | None:
+        return self.attr_optional(W.W, ST_DecimalNumber)
+
+    @cached_property
+    def type(self) -> WD_TABLE_WIDTH:
+        return self.attr_optional(W.TYPE, ST_TableWidth, WD_TABLE_WIDTH.AUTO)
 
 
 class CT_HMerge(OxmlElement):

@@ -10,19 +10,19 @@ class WD_STYLE_TYPE(StrEnum):
 
 
 class WD_TBL_STYLE_OVERRIDE_TYPE(StrEnum):
-    WHOLE_TABLE = "wholeTable"
-    FIRST_ROW = "firstRow"
-    LAST_ROW = "lastRow"
-    FIRST_COL = "firstCol"
-    LAST_COL = "lastCol"
-    BAND_1_VERT = "band1Vert"
-    BAND_2_VERT = "band2Vert"
-    BAND_1_HORZ = "band1Horz"
-    BAND_2_HORZ = "band2Horz"
-    NE_CELL = "neCell"
-    NW_CELL = "nwCell"
-    SE_CELL = "seCell"
-    SW_CELL = "swCell"
+    ENTIRE_TABLE = "wholeTable"
+    HEADER_ROW = "firstRow"
+    FOOTER_ROW = "lastRow"
+    FIRST_COLUMN = "firstCol"
+    LAST_COLUMN = "lastCol"
+    VERTICAL_BAND_EVEN = "band1Vert"
+    VERTICAL_BAND_ODD = "band2Vert"
+    HORIZONTAL_BAND_EVEN = "band1Horz"
+    HORIZONTAL_BAND_ODD = "band2Horz"
+    TOP_RIGHT_CORNER_CELL = "neCell"
+    TOP_LEFT_CORNER_CELL = "nwCell"
+    BOTTOM_RIGHT_CORNER_CELL = "seCell"
+    BOTTOM_LEFT_CORNER_CELL = "swCell"
 
 
 class WD_CNF_FORMAT(IntFlag):
@@ -119,3 +119,10 @@ class WD_MULTILEVEL_TYPE(StrEnum):
     SINGLE_LEVEL = "singleLevel"
     MULTILEVEL = "multilevel"
     HYBRID_MULTILEVEL = "hybridMultilevel"
+
+
+class WD_TABLE_WIDTH(StrEnum):
+    NONE = "nil"
+    PERCENT = "pct"
+    TWIPS = "dxa"
+    AUTO = "auto"

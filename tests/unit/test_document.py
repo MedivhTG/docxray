@@ -23,7 +23,7 @@ class TestDocument:
                     for cell in row.iter_cells():
                         part = cell.part
                         cell_fmt = cell.resolver
-                        cell.next_cell_alive
+                        cx = cell.grid_x
                         for p_or_t in cell.iter_inner_content():
                             if isinstance(p_or_t, Paragraph):
                                 part = p_or_t.part
