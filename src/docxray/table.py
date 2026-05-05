@@ -7,19 +7,29 @@ from typing import cast
 # docxray stuff
 from docxray.blkcntnr import BlockItemContainer
 from docxray.enum.lxml import XML_POSITION
-from docxray.enum.word import WD_MERGE
+from docxray.enum.word import WD_MERGE, WD_TABLE_WIDTH
+from docxray.oxml.table.cell_props import CT_TblWidth
 from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.resolver.table import CellResolver, RowResolver, TableResolver
 from docxray.shared import (
     ElementProxy,
     PropertyPath,
     StoryChild,
-    position,
+    Twips,
+    normalize_pct,
     safe_get_prop,
 )
 
 
 class Cell(BlockItemContainer[CT_Tc]):
+    """Cell as `<w:tc>` in table.
+
+    Some properties used directly (not from resolver) such as
+    `gridSpan`, `vMerge`, `hMerge` (deprecated) and `tcW` by the reason:
+    those properties affects the table grid and cannot be resolved
+    from styles (it will break document).
+    """
+
     @cached_property
     def resolver(self) -> CellResolver:
         return CellResolver(self.element, self.part.document_part, "tcPr")
@@ -31,6 +41,34 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def table(self) -> Table:
         return self.row.table
+
+    @cached_property
+    def vmerge(self) -> WD_MERGE | None:
+        path = PropertyPath.base("val", "tcPr.vMerge")
+        return safe_get_prop(self.element, path)
+
+    @cached_property
+    def width(self) -> Twips | float | None:
+        """Width as `<w:tcW>` attr of `w:w`.
+
+        Returns:
+            Twips | int | None: If `None` - than
+                it's auto width; elif `float` than it's
+                percentage of table width; else standard
+                Word measure in `Twips`.
+        """
+        path = PropertyPath.base("tcW", "tcPr.tcW")
+        tcW_elm: CT_TblWidth | None = safe_get_prop(self.element, path)
+        if tcW_elm is None:
+            return None
+        if (
+            tcW_elm.type in (WD_TABLE_WIDTH.NONE, WD_TABLE_WIDTH.AUTO)
+            or tcW_elm.w is None
+        ):
+            return None
+        if tcW_elm.type == WD_TABLE_WIDTH.TWIPS:
+            return Twips(tcW_elm.w)
+        return normalize_pct(tcW_elm.w)
 
     @cached_property
     def idx(self) -> int:
@@ -65,11 +103,6 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self.table.cell_on_grid(self.grid_x, self.grid_y - 1)
 
     @cached_property
-    def vmerge(self) -> WD_MERGE | None:
-        path = PropertyPath.base("val", "tcPr.vMerge")
-        return safe_get_prop(self.element, path)
-
-    @cached_property
     def vert_merged(self) -> bool:
         if self.vmerge == WD_MERGE.CONTINUE:
             return True
@@ -94,8 +127,8 @@ class Cell(BlockItemContainer[CT_Tc]):
         return True
 
     @cached_property
-    def pos(self) -> XML_POSITION:
-        return position(self.is_first, self.is_last)
+    def xml_pos(self) -> XML_POSITION:
+        return self.element.xml_position(self.is_first, self.is_last)
 
     @cached_property
     def horz_span(self) -> int:
@@ -134,6 +167,10 @@ class Row(ElementProxy[CT_Row]):
     @cached_property
     def cells(self) -> list[Cell]:
         return [Cell(tc_elm, self) for tc_elm in self.element.tc_lst]  # type: ignore[arg-type]
+
+    @cached_property
+    def xml_pos(self) -> XML_POSITION:
+        return self.element.xml_pos
 
     def iter_cells(self) -> Iterator[Cell]:
         for cell in self.cells:

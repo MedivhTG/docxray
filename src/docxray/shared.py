@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Self
 
 # docxray stuff
-from docxray.enum.lxml import XML_POSITION
+from docxray.constants import PCT_TO_PERCENT_RATIO
 from docxray.parts.story import StoryPart
 from docxray.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
 
@@ -89,16 +89,6 @@ def safe_get_prop(
             return default
         current = getattr(current, link)
     return current or default
-
-
-def position(is_first: bool, is_last: bool) -> XML_POSITION:
-    if not is_first and not is_last:
-        return XML_POSITION.MIDDLE
-    if is_first and not is_last:
-        return XML_POSITION.START
-    if not is_first and is_last:
-        return XML_POSITION.END
-    return XML_POSITION.ONE_ITEM
 
 
 class Length(int):
@@ -201,3 +191,7 @@ class Twips(Length):
     def __new__(cls, twips: float) -> Self:
         emu = int(twips * Length._EMUS_PER_TWIP)
         return Length.__new__(cls, emu)
+
+
+def normalize_pct(pct: int) -> float:
+    return pct / PCT_TO_PERCENT_RATIO

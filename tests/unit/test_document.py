@@ -41,6 +41,7 @@ class TestDocument:
                                     bold = r_fmt.bold
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
+                f = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.resolver
                 in_list = p_fmt.in_list

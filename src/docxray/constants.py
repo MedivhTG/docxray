@@ -9,3 +9,6 @@ class WD_OUTLINE_LEVEL:
     HEADER_8 = 7
     HEADER_9 = 8
     TEXT = 9
+
+
+PCT_TO_PERCENT_RATIO = 50

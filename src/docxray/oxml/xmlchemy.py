@@ -1,6 +1,10 @@
+from functools import cached_property
 from typing import Any, TypeVar
 
+from lxml.etree import QName
+
 # docxray stuff
+from docxray.enum.lxml import XML_POSITION
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.ns import nsmap
@@ -10,10 +14,42 @@ from docxray.types import ELM_T
 ST_T = TypeVar("ST_T", bound=SimpleType)
 T = TypeVar("T")
 
+nsmap_reversed = {v: k for k, v in nsmap.items()}
+
 
 class OxmlElement(BaseOxmlElement):
     def xpath(self, xpath: str) -> Any:  # type: ignore[override]
         return super().xpath(xpath, nsmap)
+
+    @cached_property
+    def is_first(self) -> bool:
+        tag = self.xml_tag(self.tag)
+        return self.xpath(f"not(preceding-sibling::{tag})")
+
+    @cached_property
+    def is_last(self) -> bool:
+        tag = self.xml_tag(self.tag)
+        return self.xpath(f"not(following-sibling::{tag})")
+
+    @cached_property
+    def xml_pos(self) -> XML_POSITION:
+        return self.xml_position(self.is_first, self.is_last)
+
+    def xml_tag(self, qn_tag: Any) -> str:
+        qn = QName(qn_tag)
+        if qn.namespace is None:
+            msg = "No namespace provided for word element"
+            raise InvalidXmlError(msg)
+        return f"{nsmap_reversed[qn.namespace]}:{qn.localname}"
+
+    def xml_position(self, is_first: bool, is_last: bool) -> XML_POSITION:
+        if not is_first and not is_last:
+            return XML_POSITION.MIDDLE
+        if is_first and not is_last:
+            return XML_POSITION.START
+        if not is_first and is_last:
+            return XML_POSITION.END
+        return XML_POSITION.ONE_ITEM
 
     def attr_optional(
         self, elm_qn: str, simple_type: type[ST_T], default: T | None = None

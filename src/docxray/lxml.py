@@ -7,7 +7,7 @@ BASE_ELM_T = TypeVar("BASE_ELM_T", bound="BaseOxmlElement")
 
 
 class BaseOxmlElement(etree.ElementBase):
-    def xpath(self, xpath: str, ns: dict[str, str]) -> Any:  # type: ignore[override]
+    def xpath(self, xpath: str, ns: dict[str, str] | None = None) -> Any:  # type: ignore[override]
         return super().xpath(xpath, namespaces=ns)
 
     def getparent(self, elm_hint: type[BASE_ELM_T]) -> BASE_ELM_T | None:  # type: ignore[override]
