@@ -12,20 +12,18 @@ from docxray.oxml.trans.proxy.resolvers.table import (
     RowResolver,
     TableResolver,
 )
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.shared import CT_TblWidth
+from docxray.oxml.trans.st.enums import SE_Merge
+from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
+
+from .compute import width
+from .shared import (
     ElementProxy,
     PropertyPath,
     StoryChild,
     Twips,
-    normalize_pct,
     safe_get_prop,
 )
-from docxray.oxml.trans.st.enums import (
-    SE_Merge,
-    SE_TblWidth,
-)
-from docxray.oxml.trans.table.cell_props import CT_TblWidth
-from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
 
 class Cell(BlockItemContainer[CT_Tc]):
@@ -64,18 +62,11 @@ class Cell(BlockItemContainer[CT_Tc]):
                 percentage of table width; else standard
                 Word measure in `Twips`.
         """
-        path = PropertyPath.base("tcW", "tcPr.tcW")
+        path = PropertyPath.base("tcW", "tcPr")
         tcW_elm: CT_TblWidth | None = safe_get_prop(self.element, path)
         if tcW_elm is None:
             return None
-        if (
-            tcW_elm.type in (SE_TblWidth.NULL, SE_TblWidth.AUTO)
-            or tcW_elm.w is None
-        ):
-            return None
-        if tcW_elm.type == SE_TblWidth.TWIPS:
-            return Twips(tcW_elm.w)
-        return normalize_pct(tcW_elm.w)
+        return width(tcW_elm)
 
     @cached_property
     def idx(self) -> int:

@@ -86,6 +86,3 @@ class CellResolver(BaseResolver[CT_Tc]):
         if table_val is not None:
             return table_val
         return self._from_cnf_style_cell(tc_elm, property_path)
-
-    def _foo(self):
-        pass

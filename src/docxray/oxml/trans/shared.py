@@ -117,7 +117,7 @@ class CT_Border(OxmlElement):
 
 class CT_TblWidth(OxmlElement):
     @cached_property
-    def w(self):
+    def w(self) -> int | str | None:
         return self.attr_optional(W.W, ST_MeasurementOrPercent)
 
     @cached_property

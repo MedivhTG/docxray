@@ -71,8 +71,8 @@ class XsdSimpleType:
             raise err_raised
 
     def _validate_from_schema(
-        self, xsd_schema: type[XsdPrimitive | XsdSimpleType]
+        self, schema: type[XsdPrimitive | XsdSimpleType]
     ) -> Any:
-        if issubclass(xsd_schema, XsdPrimitive):
-            return xsd_schema.validate(self.xml_obj, **self.FACETS)
-        return xsd_schema(self.xml_obj).validate()
+        if issubclass(schema, XsdPrimitive):
+            return schema.validate(self.xml_obj, **self.FACETS)
+        return schema(self.xml_obj).validate()

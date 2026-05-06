@@ -1,5 +1,5 @@
 # docxray stuff
-from docxray.xsd.facets import EnumerationFacet
+from docxray.xsd.facets import EnumerationFacet, PatternFacet
 from docxray.xsd.primitives import (
     XsdBoolean,
     XsdString,
@@ -29,3 +29,15 @@ class ST_OnOff(XsdSimpleType):
 class ST_VerticalAlignRun(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(SE_VerticalAlignRun)}
+
+
+class ST_UniversalMeasure(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {
+        "pattern": PatternFacet(r"-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)")
+    }
+
+
+class ST_Percentage(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"pattern": PatternFacet(r"-?[0-9]+(\.[0-9]+)?%")}

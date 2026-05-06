@@ -13,6 +13,7 @@ from docxray.xsd.primitives import (
 from docxray.xsd.xsd import (
     XsdRestriction,
     XsdSimpleType,
+    XsdUnion,
 )
 
 from .enums import (
@@ -25,6 +26,7 @@ from .enums import (
     SE_TblWidth,
     SE_Underline,
 )
+from .shared_common import ST_Percentage, ST_UniversalMeasure
 
 
 class ST_DateTime(XsdSimpleType):
@@ -88,5 +90,13 @@ class ST_HexColorAuto(XsdSimpleType):
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_HexColorAuto)}
 
 
+class ST_UnqualifiedPercentage(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdInteger)
+
+
+class ST_DecimalNumberOrPercent(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_UnqualifiedPercentage, ST_Percentage)
+
+
 class ST_MeasurementOrPercent(XsdSimpleType):
-    pass
+    SCHEMA = XsdUnion(ST_DecimalNumberOrPercent, ST_UniversalMeasure)

@@ -23,6 +23,7 @@ from .shared import (
     CT_Shd,
     CT_SignedHpsMeasure,
     CT_String,
+    CT_TblWidth,
     CT_TextDirection,
     CT_TextEffect,
     CT_TextScale,
@@ -167,7 +168,6 @@ register_element_cls("w:trPr", CT_TrPr)
 
 from .table.cell_props import (
     CT_HMerge,
-    CT_TblWidth,
     CT_TcBorders,
     CT_TcMar,
     CT_TcPr,

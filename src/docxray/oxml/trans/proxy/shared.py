@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Self
 
 # docxray stuff
-from docxray.constants import PCT_TO_PERCENT_RATIO
 from docxray.oxml.trans.parts.story import StoryPart
 from docxray.oxml.trans.proxy.types import (
     ProvidesStoryPart,
@@ -195,7 +194,3 @@ class Twips(Length):
     def __new__(cls, twips: float) -> Self:
         emu = int(twips * Length._EMUS_PER_TWIP)
         return Length.__new__(cls, emu)
-
-
-def normalize_pct(pct: int) -> float:
-    return pct / PCT_TO_PERCENT_RATIO
