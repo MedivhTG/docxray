@@ -37,6 +37,10 @@ class CellResolver(BaseResolver[Cell]):
         return RowResolver(self._story.row, self._document_part, "trPr")
 
     @cached_property
+    def table_resolver(self) -> TableResolver:
+        return TableResolver(self._story.table, self._document_part, "tblPr")
+
+    @cached_property
     def width(self) -> Twips | float | None:
         tcW_elm = self._prop("tcW", only_direct=True)
         if tcW_elm is None:
@@ -46,26 +50,6 @@ class CellResolver(BaseResolver[Cell]):
     @cached_property
     def top(self) -> SE_Border | None:
         return self._prop_val("top")
-
-    @cached_property
-    def bottom(self) -> SE_Border | None:
-        return self._prop_val("bottom")
-
-    @cached_property
-    def left(self) -> SE_Border | None:
-        return self._prop_val("left")
-
-    @cached_property
-    def right(self) -> SE_Border | None:
-        return self._prop_val("right")
-
-    @cached_property
-    def inside_horizontal(self) -> SE_Border | None:
-        return self._prop_val("insideH")
-
-    @cached_property
-    def inside_vertical(self) -> SE_Border | None:
-        return self._prop_val("insideV")
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
