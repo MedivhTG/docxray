@@ -2,7 +2,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.ns import W
-from docxray.oxml.trans.shared import CT_Cnf
+from docxray.oxml.trans.shared import CT_Cnf, CT_TblWidth
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 
@@ -11,5 +11,6 @@ class CT_TrPr(OxmlElement):
     def cnfStyle(self) -> CT_Cnf | None:
         return self.child_zero_or_one(W.CNF_STYLE, CT_Cnf)
 
-    # @cached_property
-    # def tblCellSpacing(self) -> CT_TblWidth
+    @cached_property
+    def tblCellSpacing(self) -> CT_TblWidth | None:
+        return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)

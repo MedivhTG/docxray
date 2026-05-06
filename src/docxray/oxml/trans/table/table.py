@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.shared import CT_AltChunk
-from docxray.oxml.trans.table.cell_props import CT_TcPr
-from docxray.oxml.trans.table.row_props import CT_TrPr
-from docxray.oxml.trans.table.table_props import CT_TblPr
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .cell_props import CT_TcPr
+from .row_props import CT_TrPr
+from .table_props import CT_TblPr, CT_TblPrEx
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -38,6 +39,10 @@ class CT_Row(OxmlElement):
     @cached_property
     def trPr(self) -> CT_TrPr | None:
         return self.child_zero_or_one(W.TR_PR, CT_TrPr)
+
+    @cached_property
+    def tblPrEx(self) -> CT_TblPrEx | None:
+        return self.child_zero_or_one(W.TBL_PR_EX, CT_TblPrEx)
 
     @cached_property
     def tc_lst(self) -> list[CT_Tc]:

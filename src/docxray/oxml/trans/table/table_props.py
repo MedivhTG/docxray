@@ -2,8 +2,40 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.ns import W
-from docxray.oxml.trans.shared import CT_Border, CT_String
+from docxray.oxml.trans.shared import CT_Border, CT_String, CT_TblWidth
+from docxray.oxml.trans.st.shared_common import ST_OnOff
+from docxray.oxml.trans.st.wml import ST_ShortHexNumber
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+
+class CT_TblLook(OxmlElement):
+    @cached_property
+    def val(self) -> bytes:
+        return self.attr_optional(W.VAL, ST_ShortHexNumber)
+
+    @cached_property
+    def firstRow(self) -> bool | None:
+        return self.attr_optional(W.FIRST_ROW, ST_OnOff)
+
+    @cached_property
+    def lastRow(self) -> bool | None:
+        return self.attr_optional(W.LAST_ROW, ST_OnOff)
+
+    @cached_property
+    def firstColumn(self) -> bool | None:
+        return self.attr_optional(W.FIRST_COLUMN, ST_OnOff)
+
+    @cached_property
+    def lastColumn(self) -> bool | None:
+        return self.attr_optional(W.LAST_COLUMN, ST_OnOff)
+
+    @cached_property
+    def noHBand(self) -> bool | None:
+        return self.attr_optional(W.NO_H_BAND, ST_OnOff)
+
+    @cached_property
+    def noVBand(self) -> bool | None:
+        return self.attr_optional(W.NO_V_BAND, ST_OnOff)
 
 
 class CT_TblBorders(OxmlElement):
@@ -48,3 +80,29 @@ class CT_TblPr(OxmlElement):
     @cached_property
     def tblBorders(self) -> CT_TblBorders | None:
         return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
+
+    @cached_property
+    def tblCellSpacing(self) -> CT_TblWidth | None:
+        return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)
+
+    @cached_property
+    def tblLook(self) -> CT_TblLook | None:
+        return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)
+
+
+class CT_TblPrEx(OxmlElement):
+    @cached_property
+    def tblStyle(self) -> CT_String | None:
+        return self.child_zero_or_one(W.TBL_STYLE, CT_String)
+
+    @cached_property
+    def tblBorders(self) -> CT_TblBorders | None:
+        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
+
+    @cached_property
+    def tblCellSpacing(self) -> CT_TblWidth | None:
+        return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)
+
+    @cached_property
+    def tblLook(self) -> CT_TblLook | None:
+        return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)

@@ -121,6 +121,15 @@ class W:
     O_MATH = qn("w:oMath")
 
     TBL_PR = qn("w:tblPr")
+    TBL_PR_EX = qn("w:tblPrEx")
+    TBL_LOOK = qn("w:tblLook")
+    FIRST_ROW = qn("w:firstRow")
+    LAST_ROW = qn("w:lastRow")
+    FIRST_COLUMN = qn("w:firstColumn")
+    LAST_COLUMN = qn("w:lastColumn")
+    NO_H_BAND = qn("w:noHBand")
+    NO_V_BAND = qn("w:noVBande")
+    TBL_CELL_SPACING = qn("w:tblCellSpacing")
     TR_PR = qn("w:trPr")
 
     TC_PR = qn("w:tcPr")

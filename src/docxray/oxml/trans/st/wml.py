@@ -100,3 +100,8 @@ class ST_DecimalNumberOrPercent(XsdSimpleType):
 
 class ST_MeasurementOrPercent(XsdSimpleType):
     SCHEMA = XsdUnion(ST_DecimalNumberOrPercent, ST_UniversalMeasure)
+
+
+class ST_ShortHexNumber(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdHexBinary)
+    FACETS = {"length": LengthFacet(value=2)}
