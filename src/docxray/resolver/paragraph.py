@@ -3,9 +3,9 @@ from typing import Any
 
 # docxray stuff
 from docxray.constants import WD_OUTLINE_LEVEL
-from docxray.oxml.table.table import CT_Tc
-from docxray.oxml.text.num_props import CT_NumPr
-from docxray.oxml.text.paragraph import CT_P
+from docxray.oxml.transitional.table.table import CT_Tc
+from docxray.oxml.transitional.text.num_props import CT_NumPr
+from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.resolver.resolver import BaseResolver
 from docxray.shared import PropertyPath, safe_get_prop
 from docxray.styles.style import ParagraphStyle

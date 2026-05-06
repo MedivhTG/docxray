@@ -2,9 +2,9 @@ from collections.abc import Iterator
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.text.hyperlink import CT_Hyperlink
-from docxray.oxml.text.paragraph import CT_P
-from docxray.oxml.text.run import CT_R
+from docxray.oxml.transitional.text.hyperlink import CT_Hyperlink
+from docxray.oxml.transitional.text.paragraph import CT_P
+from docxray.oxml.transitional.text.run import CT_R
 from docxray.resolver.paragraph import ParagraphResolver
 from docxray.shared import StoryChild
 from docxray.text.hyperlink import Hyperlink

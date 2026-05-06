@@ -10,9 +10,9 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
-from docxray.oxml.document import CT_Body
-from docxray.oxml.table.table import CT_Tc
-from docxray.oxml.text.paragraph import CT_P
+from docxray.oxml.transitional.document import CT_Body
+from docxray.oxml.transitional.table.table import CT_Tc
+from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.shared import StoryChild
 from docxray.text.paragraph import Paragraph
 

@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Callable, Generic, Self, Type, TypeVar
 from docxray.opc.packuri import PackURI
 from docxray.opc.rel import Relationships, _Relationship
 from docxray.opc.shared import cls_method_fn
-from docxray.oxml.parser import parse_xml
-from docxray.oxml.xmlchemy import OxmlElement
+from docxray.oxml.transitional.parser import parse_xml
+from docxray.oxml.transitional.xmlchemy import OxmlElement
 from docxray.types import ELM_T
 
 if TYPE_CHECKING:

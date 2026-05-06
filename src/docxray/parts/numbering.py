@@ -5,7 +5,7 @@ from functools import cached_property
 # docxray stuff
 from docxray.numbering.numbering import Numbering
 from docxray.opc.part import XmlPart
-from docxray.oxml.numbering import CT_Numbering
+from docxray.oxml.transitional.numbering import CT_Numbering
 
 
 class NumberingPart(XmlPart[CT_Numbering]):

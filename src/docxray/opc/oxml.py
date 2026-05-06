@@ -1,7 +1,7 @@
 """Temporary stand-in for main oxml module.
 
 This module came across with the PackageReader transplant. Probably much will get
-replaced with objects from the pptx.oxml.core and then this module will either get
+replaced with objects from the pptx.oxml.transitional.core and then this module will either get
 deleted or only hold the package related custom element classes.
 """
 

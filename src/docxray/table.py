@@ -8,8 +8,8 @@ from typing import cast
 from docxray.blkcntnr import BlockItemContainer
 from docxray.enum.lxml import XML_POSITION
 from docxray.enum.word import WD_MERGE, WD_TABLE_WIDTH
-from docxray.oxml.table.cell_props import CT_TblWidth
-from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
+from docxray.oxml.transitional.table.cell_props import CT_TblWidth
+from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.resolver.table import CellResolver, RowResolver, TableResolver
 from docxray.shared import (
     ElementProxy,

@@ -3,9 +3,9 @@ from typing import Any
 
 # docxray stuff
 from docxray.enum.word import WD_UNDERLINE, WD_VERTICAL_ALIGN_RUN
-from docxray.oxml.table.table import CT_Tc
-from docxray.oxml.text.paragraph import CT_P
-from docxray.oxml.text.run import CT_R
+from docxray.oxml.transitional.table.table import CT_Tc
+from docxray.oxml.transitional.text.paragraph import CT_P
+from docxray.oxml.transitional.text.run import CT_R
 from docxray.resolver.resolver import BaseResolver
 from docxray.shared import PropertyPath
 

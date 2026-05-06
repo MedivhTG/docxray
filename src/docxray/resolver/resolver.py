@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
 from docxray.numbering.numbering import OverrideNum
-from docxray.oxml.shared import CT_String
-from docxray.oxml.table.table import CT_Row, CT_Tbl, CT_Tc
-from docxray.oxml.text.num_props import CT_NumPr
-from docxray.oxml.text.paragraph import CT_P
-from docxray.oxml.text.run import CT_R
-from docxray.oxml.xmlchemy import OxmlElement
+from docxray.oxml.transitional.shared import CT_String
+from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
+from docxray.oxml.transitional.text.num_props import CT_NumPr
+from docxray.oxml.transitional.text.paragraph import CT_P
+from docxray.oxml.transitional.text.run import CT_R
+from docxray.oxml.transitional.xmlchemy import OxmlElement
 from docxray.resolver.exceptions import ResolveError
 from docxray.shared import PropertyPath, safe_get_prop
 from docxray.styles.style import CharacterStyle, ParagraphStyle, TableStyle

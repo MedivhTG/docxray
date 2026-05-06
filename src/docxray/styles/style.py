@@ -11,7 +11,7 @@ from docxray.enum.word import (
     WD_STYLE_TYPE,
     WD_TBL_STYLE_OVERRIDE_TYPE,
 )
-from docxray.oxml.styles import CT_Style, CT_Styles, CT_TblStylePr
+from docxray.oxml.transitional.styles import CT_Style, CT_Styles, CT_TblStylePr
 from docxray.shared import ElementProxy
 
 if TYPE_CHECKING:

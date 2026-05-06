@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray.oxml.styles import CT_DocDefaults
+from docxray.oxml.transitional.styles import CT_DocDefaults
 from docxray.shared import ElementProxy
 
 if TYPE_CHECKING:

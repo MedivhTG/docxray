@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
 from docxray.enum.word import WD_STYLE_TYPE
-from docxray.oxml.styles import CT_Styles
-from docxray.oxml.table.table import CT_Tbl
-from docxray.oxml.text.paragraph import CT_P
-from docxray.oxml.text.run import CT_R
+from docxray.oxml.transitional.styles import CT_Styles
+from docxray.oxml.transitional.table.table import CT_Tbl
+from docxray.oxml.transitional.text.paragraph import CT_P
+from docxray.oxml.transitional.text.run import CT_R
 from docxray.shared import ElementProxy, PropertyPath, safe_get_prop
 from docxray.styles.doc_dflts import DocumentDefaults
 from docxray.styles.style import (

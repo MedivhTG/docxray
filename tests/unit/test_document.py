@@ -8,11 +8,12 @@ from docxray.text.run import Run
 
 
 class TestDocument:
-    def test_open(self, test_file: Path) -> D:
-        return Document(test_file)
+    def test_open(self, test_file: Path) -> None:
+        doc = Document(test_file)
+        assert doc is not None
 
     def test_iter_inner_content(self, test_file: Path) -> None:
-        doc = self.test_open(test_file)
+        doc = Document(test_file)
         part = doc.part
         for p_or_t in doc.iter_inner_content():
             if isinstance(p_or_t, Table):

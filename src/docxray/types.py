@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, BinaryIO, Protocol, TypeVar
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
-    from docxray.oxml.xmlchemy import OxmlElement
+    from docxray.oxml.transitional.xmlchemy import OxmlElement
     from docxray.parts.story import StoryPart
 
 ELM_T = TypeVar("ELM_T", bound="OxmlElement")

@@ -4,14 +4,14 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray.oxml.numbering import (
+from docxray.oxml.transitional.numbering import (
     CT_AbstractNum,
     CT_Lvl,
     CT_Num,
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.text.num_props import CT_NumPr
+from docxray.oxml.transitional.text.num_props import CT_NumPr
 from docxray.shared import ElementProxy
 from docxray.types import ProvidesXmlPart
 
