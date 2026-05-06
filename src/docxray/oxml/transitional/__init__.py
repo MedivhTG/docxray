@@ -154,10 +154,11 @@ register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
 
-from .table.table_props import CT_TblPr
+from .table.table_props import CT_TblBorders, CT_TblPr
 
 register_element_cls("w:tblPr", CT_TblPr)
 register_element_cls("w:tblStyle", CT_String)
+register_element_cls("w:tblBorders", CT_TblBorders)
 
 from .table.row_props import CT_TrPr
 

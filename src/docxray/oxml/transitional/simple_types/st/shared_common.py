@@ -1,6 +1,3 @@
-# from docxray.oxml.transitional.simple_types.base import XsdSimpleType
-# from docxray.oxml.transitional.simple_types.primitives import XsdString
-
 # docxray stuff
 from docxray.oxml.transitional.simple_types.facets import EnumerationFacet
 from docxray.oxml.transitional.simple_types.primitives import (
@@ -17,7 +14,7 @@ from .enums import SE_OnOff1, SE_VerticalAlignRun
 
 
 class ST_String(XsdSimpleType):
-    pass
+    SCHEMA = XsdRestriction(XsdString)
 
 
 class ST_OnOff1(XsdSimpleType):

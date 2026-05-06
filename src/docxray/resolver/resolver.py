@@ -45,9 +45,15 @@ class BaseResolver(Generic[ELM_T]):
         return PropertyPath.base(end_name, path_to_name)
 
     def _prop_val(
-        self, name: str, default: DEFAULT_T | None = None, **kwargs: Any
+        self,
+        name: str,
+        default: DEFAULT_T | None = None,
+        path: PropertyPath | None = None,
+        **kwargs: Any,
     ) -> Any | DEFAULT_T:
-        path = self._prop_val_path("val", f"{self._property_base}.{name}")
+        path = path or self._prop_val_path(
+            "val", f"{self._property_base}.{name}"
+        )
         direct_val = safe_get_prop(self._elm, path)
         if direct_val is not None:
             return direct_val

@@ -25,6 +25,7 @@ class TestDocument:
                         is_last = cell.is_last
                         part = cell.part
                         cell_fmt = cell.resolver
+                        top = cell_fmt.top
                         cx = cell.grid_x
                         for p_or_t in cell.iter_inner_content():
                             if isinstance(p_or_t, Paragraph):

@@ -129,6 +129,7 @@ class W:
     H_MERGE = qn("w:hMerge")
     V_MERGE = qn("w:vMerge")
 
+    TBL_BORDERS = qn("w:tblBorders")
     TC_BORDERS = qn("w:tcBorders")
     TOP = qn("w:top")
     LEFT = qn("w:left")
