@@ -7,11 +7,11 @@ from functools import cached_property
 # docxray stuff
 from docxray.opc.constants import RELATIONSHIP_TYPE as RT
 from docxray.oxml.transitional.document import CT_Document
-from docxray.parts.numbering import NumberingPart
-from docxray.parts.story import StoryPart
-from docxray.parts.styles import StylesPart
-from docxray.proxy.document import Document
-from docxray.proxy.styles.styles import Styles
+from docxray.oxml.transitional.parts.numbering import NumberingPart
+from docxray.oxml.transitional.parts.story import StoryPart
+from docxray.oxml.transitional.parts.styles import StylesPart
+from docxray.oxml.transitional.proxy.document import Document
+from docxray.oxml.transitional.proxy.styles.styles import Styles
 
 
 class DocumentPart(StoryPart[CT_Document]):

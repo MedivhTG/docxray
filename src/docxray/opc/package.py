@@ -6,19 +6,16 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Iterator, TypeVar
 
 # docxray stuff
-from docxray.opc.constants import RELATIONSHIP_TYPE as RT
 from docxray.opc.packuri import PACKAGE_URI, PackURI
-from docxray.opc.part import PartFactory
 from docxray.opc.pkgreader import PackageReader
 from docxray.opc.rel import Relationships
-from docxray.parts.document import DocumentPart
 from docxray.types import PkgFile
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     # docxray stuff
-    from docxray.opc.part import Part
+    from docxray.opc.part import Part, PartFactory
     from docxray.opc.rel import _Relationship
 
 PART_T = TypeVar("PART_T", bound="Part")
@@ -98,22 +95,12 @@ class OpcPackage:
         """
         return self.rels.add_relationship(reltype, target, rId, is_external)
 
-    @property
-    def main_document_part(self) -> DocumentPart:
-        """Return a reference to the main document part for this package.
-
-        Examples include a document part for a WordprocessingML package, a presentation
-        part for a PresentationML package, or a workbook part for a SpreadsheetML
-        package.
-        """
-        return self.part_related_by(RT.OFFICE_DOCUMENT, DocumentPart)
-
     @classmethod
-    def open(cls, pkg_file: PkgFile) -> Self:
+    def open(cls, pkg_file: PkgFile, part_factory: type[PartFactory]) -> Self:
         """Return an |OpcPackage| instance loaded with the contents of `pkg_file`."""
         pkg_reader = PackageReader.from_file(pkg_file)
         package = cls()
-        Unmarshaller.unmarshal(pkg_reader, package, PartFactory)
+        Unmarshaller.unmarshal(pkg_reader, package, part_factory)
         return package
 
     def part_related_by(

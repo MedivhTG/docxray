@@ -6,14 +6,13 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
-from docxray.oxml.transitional.simple_types.enums import SE_StyleType
-from docxray.oxml.transitional.styles import CT_Styles
-from docxray.oxml.transitional.table.table import CT_Tbl
-from docxray.oxml.transitional.text.paragraph import CT_P
-from docxray.oxml.transitional.text.run import CT_R
-from docxray.proxy.shared import ElementProxy, PropertyPath, safe_get_prop
-from docxray.proxy.styles.doc_dflts import DocumentDefaults
-from docxray.proxy.styles.style import (
+from docxray.oxml.transitional.proxy.shared import (
+    ElementProxy,
+    PropertyPath,
+    safe_get_prop,
+)
+from docxray.oxml.transitional.proxy.styles.doc_dflts import DocumentDefaults
+from docxray.oxml.transitional.proxy.styles.style import (
     BaseStyle,
     CharacterStyle,
     NumberingStyle,
@@ -21,13 +20,18 @@ from docxray.proxy.styles.style import (
     StyleFactory,
     TableStyle,
 )
-from docxray.proxy.types import ProvidesXmlPart
+from docxray.oxml.transitional.proxy.types import ProvidesXmlPart
+from docxray.oxml.transitional.simple_types.enums import SE_StyleType
+from docxray.oxml.transitional.styles import CT_Styles
+from docxray.oxml.transitional.table.table import CT_Tbl
+from docxray.oxml.transitional.text.paragraph import CT_P
+from docxray.oxml.transitional.text.run import CT_R
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.styles import StylesPart
+    from docxray.oxml.transitional.parts.styles import StylesPart
 
 
 class Styles(ElementProxy[CT_Styles]):

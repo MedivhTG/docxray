@@ -6,8 +6,12 @@ from typing import TYPE_CHECKING, Any, Generic, Self
 
 # docxray stuff
 from docxray.constants import PCT_TO_PERCENT_RATIO
-from docxray.parts.story import StoryPart
-from docxray.proxy.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
+from docxray.oxml.transitional.parts.story import StoryPart
+from docxray.oxml.transitional.proxy.types import (
+    ProvidesStoryPart,
+    ProvidesXmlPart,
+)
+from docxray.oxml.transitional.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff

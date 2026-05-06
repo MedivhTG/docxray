@@ -9,8 +9,8 @@ from lxml import etree
 # docxray stuff
 from docxray.lxml import elm_ns_cls_lookup
 from docxray.oxml.transitional.ns import nsmap
+from docxray.oxml.transitional.types import ELM_T
 from docxray.oxml.transitional.xmlchemy import OxmlElement
-from docxray.proxy.types import ELM_T
 
 # -- configure XML parser --
 lookup = elm_ns_cls_lookup(OxmlElement)

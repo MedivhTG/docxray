@@ -3,12 +3,12 @@ from typing import Any
 
 # docxray stuff
 from docxray.constants import WD_OUTLINE_LEVEL
+from docxray.oxml.transitional.proxy.resolvers.resolver import BaseResolver
+from docxray.oxml.transitional.proxy.shared import PropertyPath, safe_get_prop
+from docxray.oxml.transitional.proxy.styles.style import ParagraphStyle
 from docxray.oxml.transitional.table.table import CT_Tc
 from docxray.oxml.transitional.text.num_props import CT_NumPr
 from docxray.oxml.transitional.text.paragraph import CT_P
-from docxray.proxy.resolvers.resolver import BaseResolver
-from docxray.proxy.shared import PropertyPath, safe_get_prop
-from docxray.proxy.styles.style import ParagraphStyle
 
 
 class ParagraphResolver(BaseResolver[CT_P]):

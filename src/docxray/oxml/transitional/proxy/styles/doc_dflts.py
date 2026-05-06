@@ -3,12 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # docxray stuff
+from docxray.oxml.transitional.proxy.shared import ElementProxy
 from docxray.oxml.transitional.styles import CT_DocDefaults
-from docxray.proxy.shared import ElementProxy
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.styles import StylesPart
+    from docxray.oxml.transitional.parts.styles import StylesPart
 
 
 class DocumentDefaults(ElementProxy[CT_DocDefaults]):

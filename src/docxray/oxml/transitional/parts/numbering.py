@@ -3,12 +3,12 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.opc.part import XmlPart
 from docxray.oxml.transitional.numbering import CT_Numbering
-from docxray.proxy.numbering.numbering import Numbering
+from docxray.oxml.transitional.part import TransitionalPart
+from docxray.oxml.transitional.proxy.numbering.numbering import Numbering
 
 
-class NumberingPart(XmlPart[CT_Numbering]):
+class NumberingPart(TransitionalPart[CT_Numbering]):
     """Proxy for the numbering.xml part containing numbering definitions for a document
     or glossary."""
 

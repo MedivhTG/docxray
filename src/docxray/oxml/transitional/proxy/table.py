@@ -6,19 +6,13 @@ from typing import cast
 
 # docxray stuff
 from docxray.enum.lxml import XML_POSITION
-from docxray.oxml.transitional.simple_types.enums import (
-    SE_Merge,
-    SE_TblWidth,
-)
-from docxray.oxml.transitional.table.cell_props import CT_TblWidth
-from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
-from docxray.proxy.blkcntnr import BlockItemContainer
-from docxray.proxy.resolvers.table import (
+from docxray.oxml.transitional.proxy.blkcntnr import BlockItemContainer
+from docxray.oxml.transitional.proxy.resolvers.table import (
     CellResolver,
     RowResolver,
     TableResolver,
 )
-from docxray.proxy.shared import (
+from docxray.oxml.transitional.proxy.shared import (
     ElementProxy,
     PropertyPath,
     StoryChild,
@@ -26,6 +20,12 @@ from docxray.proxy.shared import (
     normalize_pct,
     safe_get_prop,
 )
+from docxray.oxml.transitional.simple_types.enums import (
+    SE_Merge,
+    SE_TblWidth,
+)
+from docxray.oxml.transitional.table.cell_props import CT_TblWidth
+from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
 
 
 class Cell(BlockItemContainer[CT_Tc]):

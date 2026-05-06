@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.transitional.proxy.shared import ElementProxy
 from docxray.oxml.transitional.simple_types.enums import SE_StyleType
 from docxray.oxml.transitional.styles import CT_Style, CT_Styles, CT_TblStylePr
-from docxray.proxy.shared import ElementProxy
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.styles import StylesPart
+    from docxray.oxml.transitional.parts.styles import StylesPart
 
 
 def StyleFactory(style_elm: CT_Style, part: StylesPart) -> BaseStyle:

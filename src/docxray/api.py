@@ -9,12 +9,15 @@ from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.opc.constants import CONTENT_TYPE as CT
-from docxray.package import Package
+from docxray.opc.part import PartFactory
+from docxray.oxml.transitional.package import TransitionalPackage
 from docxray.types import PkgFile
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.proxy.document import Document as DocumentObject
+    from docxray.oxml.transitional.proxy.document import (
+        Document as DocumentObject,
+    )
 
 
 def Document(docx: PkgFile) -> DocumentObject:
@@ -24,7 +27,9 @@ def Document(docx: PkgFile) -> DocumentObject:
     If `docx` is missing or ``None``, the built-in default document "template" is
     loaded.
     """
-    document_part = Package.open(docx).main_document_part
+    document_part = TransitionalPackage.open(
+        docx, PartFactory
+    ).main_document_part
     if document_part.content_type != CT.WML_DOCUMENT_MAIN:
         tmpl = "file '%s' is not a Word file, content type is '%s'"
         raise ValueError(tmpl % (docx, document_part.content_type))

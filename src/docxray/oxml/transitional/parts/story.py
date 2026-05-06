@@ -6,19 +6,19 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
-from docxray.opc.part import XmlPart
+from docxray.oxml.transitional.part import TransitionalPart
 from docxray.oxml.transitional.simple_types.enums import SE_StyleType
-from docxray.proxy.types import ELM_T
+from docxray.oxml.transitional.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.document import DocumentPart
-    from docxray.proxy.styles.style import BaseStyle
+    from docxray.oxml.transitional.parts.document import DocumentPart
+    from docxray.oxml.transitional.proxy.styles.style import BaseStyle
 
 STYLE_T = TypeVar("STYLE_T", bound="BaseStyle")
 
 
-class StoryPart(XmlPart[ELM_T]):
+class StoryPart(TransitionalPart[ELM_T]):
     """Base class for story parts.
 
     A story part is one that can contain textual content, such as the document-part and

@@ -2,13 +2,15 @@ from collections.abc import Iterator
 from functools import cached_property
 
 # docxray stuff
+from docxray.oxml.transitional.proxy.resolvers.paragraph import (
+    ParagraphResolver,
+)
+from docxray.oxml.transitional.proxy.shared import StoryChild
+from docxray.oxml.transitional.proxy.text.hyperlink import Hyperlink
+from docxray.oxml.transitional.proxy.text.run import Run
 from docxray.oxml.transitional.text.hyperlink import CT_Hyperlink
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.proxy.resolvers.paragraph import ParagraphResolver
-from docxray.proxy.shared import StoryChild
-from docxray.proxy.text.hyperlink import Hyperlink
-from docxray.proxy.text.run import Run
 
 
 class Paragraph(StoryChild[CT_P]):

@@ -2,10 +2,11 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
+from docxray.oxml.transitional.proxy.shared import PropertyPath
 from docxray.oxml.transitional.simple_types.enums import SE_Border
 from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
-from docxray.proxy.resolvers.resolver import BaseResolver
-from docxray.proxy.shared import PropertyPath
+
+from .resolver import BaseResolver
 
 
 class TableResolver(BaseResolver[CT_Tbl]):

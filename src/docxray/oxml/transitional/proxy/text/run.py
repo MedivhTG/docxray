@@ -1,9 +1,9 @@
 from functools import cached_property
 
 # docxray stuff
+from docxray.oxml.transitional.proxy.resolvers.run import RunResolver
+from docxray.oxml.transitional.proxy.shared import StoryChild
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.proxy.resolvers.run import RunResolver
-from docxray.proxy.shared import StoryChild
 
 
 class Run(StoryChild[CT_R]):

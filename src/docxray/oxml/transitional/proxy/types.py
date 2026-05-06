@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
-    from docxray.oxml.transitional.xmlchemy import OxmlElement
-    from docxray.parts.story import StoryPart
-
-ELM_T = TypeVar("ELM_T", bound="OxmlElement")
+    from docxray.oxml.transitional.parts.story import StoryPart
 
 
 class ProvidesStoryPart(Protocol):

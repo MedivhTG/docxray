@@ -8,8 +8,9 @@ from docxray.enum.lxml import XML_POSITION
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.transitional.ns import nsmap
-from docxray.proxy.types import ELM_T
 from docxray.xsd.xsd import XsdSimpleType
+
+from .types import ELM_T
 
 ST_T = TypeVar("ST_T", bound=XsdSimpleType)
 T = TypeVar("T")

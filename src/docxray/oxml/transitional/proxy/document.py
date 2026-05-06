@@ -8,14 +8,15 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.transitional.document import CT_Body, CT_Document
-from docxray.proxy.blkcntnr import BlockItemContainer
-from docxray.proxy.shared import ElementProxy
-from docxray.proxy.table import Table
-from docxray.proxy.text.paragraph import Paragraph
+
+from .blkcntnr import BlockItemContainer
+from .shared import ElementProxy
+from .table import Table
+from .text.paragraph import Paragraph
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.document import DocumentPart
+    from docxray.oxml.transitional.parts.document import DocumentPart
 
 
 class Document(ElementProxy[CT_Document]):

@@ -5,12 +5,12 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.opc.part import XmlPart
+from docxray.oxml.transitional.part import TransitionalPart
+from docxray.oxml.transitional.proxy.styles.styles import Styles
 from docxray.oxml.transitional.styles import CT_Styles
-from docxray.proxy.styles.styles import Styles
 
 
-class StylesPart(XmlPart[CT_Styles]):
+class StylesPart(TransitionalPart[CT_Styles]):
     """Proxy for the styles.xml part containing style definitions for a document or
     glossary."""
 

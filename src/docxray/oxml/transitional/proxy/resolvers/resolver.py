@@ -5,25 +5,25 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.transitional.proxy.numbering.numbering import OverrideNum
+from docxray.oxml.transitional.proxy.resolvers.exceptions import ResolveError
+from docxray.oxml.transitional.proxy.shared import PropertyPath, safe_get_prop
+from docxray.oxml.transitional.proxy.styles.style import (
+    CharacterStyle,
+    ParagraphStyle,
+    TableStyle,
+)
 from docxray.oxml.transitional.shared import CT_String
 from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.transitional.text.num_props import CT_NumPr
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
+from docxray.oxml.transitional.types import ELM_T
 from docxray.oxml.transitional.xmlchemy import OxmlElement
-from docxray.proxy.numbering.numbering import OverrideNum
-from docxray.proxy.resolvers.exceptions import ResolveError
-from docxray.proxy.shared import PropertyPath, safe_get_prop
-from docxray.proxy.styles.style import (
-    CharacterStyle,
-    ParagraphStyle,
-    TableStyle,
-)
-from docxray.proxy.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.document import DocumentPart
+    from docxray.oxml.transitional.parts.document import DocumentPart
 
 PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
 DEFAULT_T = TypeVar("DEFAULT_T")

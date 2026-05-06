@@ -6,12 +6,10 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Callable, Generic, Self, Type, TypeVar
 
 # docxray stuff
+from docxray.opc.package import OpcPackage
 from docxray.opc.packuri import PackURI
 from docxray.opc.rel import Relationships, _Relationship
 from docxray.opc.shared import cls_method_fn
-from docxray.oxml.transitional.parser import parse_xml
-from docxray.oxml.transitional.xmlchemy import OxmlElement
-from docxray.proxy.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -19,9 +17,10 @@ if TYPE_CHECKING:
 
 
 PART_T = TypeVar("PART_T", bound="Part")
+PACKAGE_T = TypeVar("PACKAGE_T", bound="OpcPackage")
 
 
-class Part:
+class Part(Generic[PACKAGE_T]):
     """Base class for package parts.
 
     Provides common properties and methods, but intended to be subclassed in client code
@@ -33,7 +32,7 @@ class Part:
         partname: PackURI,
         content_type: str,
         blob: bytes | None = None,
-        package: OpcPackage | None = None,
+        package: PACKAGE_T | None = None,
     ) -> None:
         self._partname = partname
         self._content_type = content_type
@@ -80,7 +79,7 @@ class Part:
         partname: PackURI,
         content_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: PACKAGE_T,
     ) -> Self:
         return cls(partname, content_type, blob, package)
 
@@ -102,7 +101,7 @@ class Part:
         return self.rels.add_relationship(reltype, target, rId, is_external)
 
     @property
-    def package(self) -> OpcPackage | None:
+    def package(self) -> PACKAGE_T | None:
         """|OpcPackage| instance this part belongs to."""
         return self._package
 
@@ -179,27 +178,12 @@ class PartFactory:
         return cls.default_part_type
 
 
-class XmlPart(Part, Generic[ELM_T]):
+class XmlPart(Part[PACKAGE_T]):
     """Base class for package parts containing an XML payload, which is most of them.
 
     Provides additional methods to the |Part| base class that take care of parsing and
     reserializing the XML payload and managing relationships to other parts.
     """
-
-    def __init__(
-        self,
-        partname: PackURI,
-        content_type: str,
-        element: ELM_T,
-        package: OpcPackage,
-    ) -> None:
-        super().__init__(partname, content_type, package=package)
-        self._element = element
-
-    @property
-    def element(self) -> ELM_T:
-        """The root XML element of this XML part."""
-        return self._element
 
     @classmethod
     def load(
@@ -207,15 +191,9 @@ class XmlPart(Part, Generic[ELM_T]):
         partname: PackURI,
         content_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: PACKAGE_T,
     ) -> Self:
-        element = parse_xml(blob, OxmlElement)
-        return cls(
-            partname,
-            content_type,
-            element,  # type: ignore[arg-type]
-            package,
-        )
+        return super().load(partname, content_type, blob, package)
 
     @property
     def part(self) -> Self:

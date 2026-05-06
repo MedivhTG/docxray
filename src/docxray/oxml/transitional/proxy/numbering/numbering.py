@@ -11,13 +11,13 @@ from docxray.oxml.transitional.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
+from docxray.oxml.transitional.proxy.shared import ElementProxy
+from docxray.oxml.transitional.proxy.types import ProvidesXmlPart
 from docxray.oxml.transitional.text.num_props import CT_NumPr
-from docxray.proxy.shared import ElementProxy
-from docxray.proxy.types import ProvidesXmlPart
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.parts.numbering import NumberingPart
+    from docxray.oxml.transitional.parts.numbering import NumberingPart
 
 
 class LvlDefinition(ElementProxy[CT_Lvl]):
