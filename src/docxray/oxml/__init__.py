@@ -4,10 +4,10 @@
 from docxray.opc.constants import CONTENT_TYPE as CT
 from docxray.opc.constants import RELATIONSHIP_TYPE as RT
 from docxray.opc.part import Part, PartFactory
-from docxray.oxml.transitional.parts.document import DocumentPart
-from docxray.oxml.transitional.parts.image import ImagePart
-from docxray.oxml.transitional.parts.numbering import NumberingPart
-from docxray.oxml.transitional.parts.styles import StylesPart
+from docxray.oxml.trans.parts.document import DocumentPart
+from docxray.oxml.trans.parts.image import ImagePart
+from docxray.oxml.trans.parts.numbering import NumberingPart
+from docxray.oxml.trans.parts.styles import StylesPart
 
 
 class TransitionalPartFactory(PartFactory):

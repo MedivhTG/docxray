@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from docxray import Document
-from docxray.oxml.transitional.proxy.document import Document as D
-from docxray.oxml.transitional.proxy.table import Table
-from docxray.oxml.transitional.proxy.text.paragraph import Paragraph
-from docxray.oxml.transitional.proxy.text.run import Run
+from docxray.oxml.trans.proxy.document import Document as D
+from docxray.oxml.trans.proxy.table import Table
+from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+from docxray.oxml.trans.proxy.text.run import Run
 
 
 class TestDocument:

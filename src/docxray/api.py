@@ -8,8 +8,8 @@ from __future__ import annotations
 # docxray stuff
 from docxray.opc.constants import CONTENT_TYPE as CT
 from docxray.oxml import TransitionalPartFactory
-from docxray.oxml.transitional.package import TransitionalPackage
-from docxray.oxml.transitional.proxy.document import Document as DocumentObject
+from docxray.oxml.trans.package import TransitionalPackage
+from docxray.oxml.trans.proxy.document import Document as DocumentObject
 from docxray.types import PkgFile
 
 
