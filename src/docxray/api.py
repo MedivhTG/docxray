@@ -5,19 +5,12 @@ Provides a syntactically more convenient API for interacting with the OpcPackage
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 # docxray stuff
 from docxray.opc.constants import CONTENT_TYPE as CT
-from docxray.opc.part import PartFactory
+from docxray.oxml import TransitionalPartFactory
 from docxray.oxml.transitional.package import TransitionalPackage
+from docxray.oxml.transitional.proxy.document import Document as DocumentObject
 from docxray.types import PkgFile
-
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.oxml.transitional.proxy.document import (
-        Document as DocumentObject,
-    )
 
 
 def Document(docx: PkgFile) -> DocumentObject:
@@ -28,7 +21,7 @@ def Document(docx: PkgFile) -> DocumentObject:
     loaded.
     """
     document_part = TransitionalPackage.open(
-        docx, PartFactory
+        docx, TransitionalPartFactory
     ).main_document_part
     if document_part.content_type != CT.WML_DOCUMENT_MAIN:
         tmpl = "file '%s' is not a Word file, content type is '%s'"

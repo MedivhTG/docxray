@@ -10,16 +10,20 @@ from docxray.oxml.transitional.parts.numbering import NumberingPart
 from docxray.oxml.transitional.parts.styles import StylesPart
 
 
+class TransitionalPartFactory(PartFactory):
+    pass
+
+
 def part_class_selector(content_type: str, reltype: str) -> type[Part] | None:
     if reltype == RT.IMAGE:
         return ImagePart
     return None
 
 
-PartFactory.part_class_selector = part_class_selector
-PartFactory.part_type_for[CT.WML_DOCUMENT_MAIN] = DocumentPart
-PartFactory.part_type_for[CT.WML_NUMBERING] = NumberingPart
-PartFactory.part_type_for[CT.WML_STYLES] = StylesPart
+TransitionalPartFactory.part_class_selector = part_class_selector
+TransitionalPartFactory.part_type_for[CT.WML_DOCUMENT_MAIN] = DocumentPart
+TransitionalPartFactory.part_type_for[CT.WML_NUMBERING] = NumberingPart
+TransitionalPartFactory.part_type_for[CT.WML_STYLES] = StylesPart
 
 del (
     CT,
