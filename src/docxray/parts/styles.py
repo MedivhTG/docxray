@@ -7,7 +7,7 @@ from functools import cached_property
 # docxray stuff
 from docxray.opc.part import XmlPart
 from docxray.oxml.transitional.styles import CT_Styles
-from docxray.styles.styles import Styles
+from docxray.proxy.styles.styles import Styles
 
 
 class StylesPart(XmlPart[CT_Styles]):

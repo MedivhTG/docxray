@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
 from docxray.opc.part import XmlPart
-from docxray.oxml.transitional.simple_types.st.enums import SE_StyleType
-from docxray.types import ELM_T
+from docxray.oxml.transitional.simple_types.enums import SE_StyleType
+from docxray.proxy.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.parts.document import DocumentPart
-    from docxray.styles.style import BaseStyle
+    from docxray.proxy.styles.style import BaseStyle
 
 STYLE_T = TypeVar("STYLE_T", bound="BaseStyle")
 

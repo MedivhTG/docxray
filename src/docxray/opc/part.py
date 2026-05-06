@@ -11,7 +11,7 @@ from docxray.opc.rel import Relationships, _Relationship
 from docxray.opc.shared import cls_method_fn
 from docxray.oxml.transitional.parser import parse_xml
 from docxray.oxml.transitional.xmlchemy import OxmlElement
-from docxray.types import ELM_T
+from docxray.proxy.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff

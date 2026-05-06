@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Generic, Self
 # docxray stuff
 from docxray.constants import PCT_TO_PERCENT_RATIO
 from docxray.parts.story import StoryPart
-from docxray.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
+from docxray.proxy.types import ELM_T, ProvidesStoryPart, ProvidesXmlPart
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -88,7 +88,7 @@ def safe_get_prop(
         if not hasattr(current, link):
             return default
         current = getattr(current, link)
-    return current or default
+    return default if current is None else current
 
 
 class Length(int):

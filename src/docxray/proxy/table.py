@@ -5,16 +5,20 @@ from functools import cached_property
 from typing import cast
 
 # docxray stuff
-from docxray.blkcntnr import BlockItemContainer
 from docxray.enum.lxml import XML_POSITION
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_Merge,
     SE_TblWidth,
 )
 from docxray.oxml.transitional.table.cell_props import CT_TblWidth
 from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
-from docxray.resolver.table import CellResolver, RowResolver, TableResolver
-from docxray.shared import (
+from docxray.proxy.blkcntnr import BlockItemContainer
+from docxray.proxy.resolvers.table import (
+    CellResolver,
+    RowResolver,
+    TableResolver,
+)
+from docxray.proxy.shared import (
     ElementProxy,
     PropertyPath,
     StoryChild,

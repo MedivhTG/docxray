@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.transitional.simple_types.exceptions import XsdBaseError
+from docxray.xsd.exceptions import XsdBaseError
 
 
 class XsdFacet:

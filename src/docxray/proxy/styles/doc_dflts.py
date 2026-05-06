@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.oxml.transitional.styles import CT_DocDefaults
-from docxray.shared import ElementProxy
+from docxray.proxy.shared import ElementProxy
 
 if TYPE_CHECKING:
     # docxray stuff

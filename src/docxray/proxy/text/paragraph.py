@@ -5,10 +5,10 @@ from functools import cached_property
 from docxray.oxml.transitional.text.hyperlink import CT_Hyperlink
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.resolver.paragraph import ParagraphResolver
-from docxray.shared import StoryChild
-from docxray.text.hyperlink import Hyperlink
-from docxray.text.run import Run
+from docxray.proxy.resolvers.paragraph import ParagraphResolver
+from docxray.proxy.shared import StoryChild
+from docxray.proxy.text.hyperlink import Hyperlink
+from docxray.proxy.text.run import Run
 
 
 class Paragraph(StoryChild[CT_P]):

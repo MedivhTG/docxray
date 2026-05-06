@@ -5,17 +5,21 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
-from docxray.numbering.numbering import OverrideNum
 from docxray.oxml.transitional.shared import CT_String
 from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.transitional.text.num_props import CT_NumPr
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
 from docxray.oxml.transitional.xmlchemy import OxmlElement
-from docxray.resolver.exceptions import ResolveError
-from docxray.shared import PropertyPath, safe_get_prop
-from docxray.styles.style import CharacterStyle, ParagraphStyle, TableStyle
-from docxray.types import ELM_T
+from docxray.proxy.numbering.numbering import OverrideNum
+from docxray.proxy.resolvers.exceptions import ResolveError
+from docxray.proxy.shared import PropertyPath, safe_get_prop
+from docxray.proxy.styles.style import (
+    CharacterStyle,
+    ParagraphStyle,
+    TableStyle,
+)
+from docxray.proxy.types import ELM_T
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -41,7 +45,7 @@ class BaseResolver(Generic[ELM_T]):
             self._numbering = num_part.numbering
         self._property_base = property_base
 
-    def _prop_val_path(self, end_name: str, path_to_name: str) -> PropertyPath:
+    def _prop_path(self, end_name: str, path_to_name: str) -> PropertyPath:
         return PropertyPath.base(end_name, path_to_name)
 
     def _prop_val(
@@ -51,9 +55,7 @@ class BaseResolver(Generic[ELM_T]):
         path: PropertyPath | None = None,
         **kwargs: Any,
     ) -> Any | DEFAULT_T:
-        path = path or self._prop_val_path(
-            "val", f"{self._property_base}.{name}"
-        )
+        path = path or self._prop_path("val", f"{self._property_base}.{name}")
         direct_val = safe_get_prop(self._elm, path)
         if direct_val is not None:
             return direct_val
@@ -109,13 +111,19 @@ class BaseResolver(Generic[ELM_T]):
         table_val = self._from_table_style(tbl_elm, property_path)
         if table_val is not None:
             return table_val
+        return self._from_cnf_style_cell(tc_elm, property_path)
 
+    def _from_cnf_style_cell(
+        self, tc_elm: CT_Tc, property_path: PropertyPath
+    ) -> Any | None:
+        tr_elm = self._elm_parent(tc_elm, CT_Row)
+        tbl_elm = self._elm_parent(tr_elm, CT_Tbl)
         cnf_flags = None
         tr_cnf_flags: WD_CNF_FORMAT | None = safe_get_prop(
-            tr_elm, PropertyPath.base("val", "trPr.cnfStyle")
+            tr_elm, self._prop_path("val", "trPr.cnfStyle")
         )
         tc_cnf_flags: WD_CNF_FORMAT | None = safe_get_prop(
-            tc_elm, PropertyPath.base("val", "tcPr.cnfStyle")
+            tc_elm, self._prop_path("val", "tcPr.cnfStyle")
         )
         if tr_cnf_flags is not None:
             cnf_flags = tr_cnf_flags
@@ -171,7 +179,7 @@ class BaseResolver(Generic[ELM_T]):
             num_style = self._styles.num_style(link.val)
             numPr_elm2: CT_NumPr | None = safe_get_prop(
                 num_style.element,
-                self._prop_val_path("numPr", self._property_base),
+                self._prop_path("numPr", self._property_base),
             )
             if numPr_elm2 is None:
                 return None
@@ -189,7 +197,7 @@ class BaseResolver(Generic[ELM_T]):
             para_style_id = last_para_style.element.styleId
         if para_style_id is None:
             pStyle: CT_String | None = safe_get_prop(
-                self._elm, self._prop_val_path("pStyle", self._property_base)
+                self._elm, self._prop_path("pStyle", self._property_base)
             )
             if pStyle is not None:
                 para_style_id = pStyle.val

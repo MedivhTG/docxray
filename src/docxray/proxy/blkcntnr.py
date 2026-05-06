@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING, TypeVar
 from docxray.oxml.transitional.document import CT_Body
 from docxray.oxml.transitional.table.table import CT_Tc
 from docxray.oxml.transitional.text.paragraph import CT_P
-from docxray.shared import StoryChild
-from docxray.text.paragraph import Paragraph
+from docxray.proxy.shared import StoryChild
+from docxray.proxy.text.paragraph import Paragraph
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.table import Table
+    from docxray.proxy.table import Table
 
 type _BlockItemElement = CT_Body | CT_Tc
 
@@ -36,7 +36,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
     def iter_inner_content(self) -> Iterator[Paragraph | Table]:
         """Generate each `Paragraph` or `Table` in this container in document order."""
         # docxray stuff
-        from docxray.table import Table
+        from docxray.proxy.table import Table
 
         for element in self._element.inner_content_elements:
             yield (

@@ -4,7 +4,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.transitional.ns import W
-from docxray.oxml.transitional.simple_types.st.wml import ST_LongHexNumber
+from docxray.oxml.transitional.simple_types.wml import ST_LongHexNumber
 from docxray.oxml.transitional.text.hyperlink import CT_Hyperlink
 from docxray.oxml.transitional.text.paragraph_props import CT_PPr
 from docxray.oxml.transitional.text.run import CT_R

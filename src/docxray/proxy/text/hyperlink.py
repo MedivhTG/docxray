@@ -3,8 +3,8 @@ from collections.abc import Iterator
 # docxray stuff
 from docxray.oxml.transitional.text.hyperlink import CT_Hyperlink
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.shared import ElementProxy
-from docxray.text.run import Run
+from docxray.proxy.shared import ElementProxy
+from docxray.proxy.text.run import Run
 
 
 class Hyperlink(ElementProxy[CT_Hyperlink]):

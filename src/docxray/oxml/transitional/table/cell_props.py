@@ -10,11 +10,11 @@ from docxray.oxml.transitional.shared import (
     CT_Shd,
     CT_TextDirection,
 )
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_Merge,
     SE_TblWidth,
 )
-from docxray.oxml.transitional.simple_types.st.wml import (
+from docxray.oxml.transitional.simple_types.wml import (
     ST_DecimalNumber,
     ST_Merge,
     ST_TblWidth,
@@ -84,7 +84,7 @@ class CT_VerticalJc(OxmlElement):
     pass
 
 
-class CT_TcPrBase(OxmlElement):
+class CT_TcPr(OxmlElement):
     @cached_property
     def cnfStyle(self) -> CT_Cnf | None:
         return self.child_zero_or_one(W.CNF_STYLE, CT_Cnf)
@@ -136,11 +136,3 @@ class CT_TcPrBase(OxmlElement):
     @cached_property
     def hideMark(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.HIDE_MARK, CT_OnOff)
-
-
-class CT_TcPrInner(CT_TcPrBase):
-    pass
-
-
-class CT_TcPr(CT_TcPrInner):
-    pass

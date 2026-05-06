@@ -3,7 +3,7 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.transitional.ns import W
 from docxray.oxml.transitional.shared import CT_DecimalNumber, CT_TrackChange
-from docxray.oxml.transitional.simple_types.st.shared_common import ST_String
+from docxray.oxml.transitional.simple_types.shared_common import ST_String
 from docxray.oxml.transitional.xmlchemy import OxmlElement
 
 

@@ -13,21 +13,21 @@ from docxray.oxml.transitional.shared import (
     CT_OnOff,
     CT_String,
 )
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_StyleType,
     SE_TblStyleOverrideType,
 )
-from docxray.oxml.transitional.simple_types.st.shared_common import (
+from docxray.oxml.transitional.simple_types.shared_common import (
     ST_OnOff,
     ST_String,
 )
-from docxray.oxml.transitional.simple_types.st.wml import (
+from docxray.oxml.transitional.simple_types.wml import (
     ST_StyleType,
     ST_TblStyleOverrideType,
 )
 from docxray.oxml.transitional.table.cell_props import CT_TcPr
 from docxray.oxml.transitional.table.row_props import CT_TrPr
-from docxray.oxml.transitional.table.table_props import CT_TblPr, CT_TblPrBase
+from docxray.oxml.transitional.table.table_props import CT_TblPr
 from docxray.oxml.transitional.text.paragraph_props import CT_PPr
 from docxray.oxml.transitional.text.run_props import CT_RPr
 from docxray.oxml.transitional.xmlchemy import OxmlElement
@@ -63,8 +63,8 @@ class CT_TblStylePr(OxmlElement):
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
     @cached_property
-    def tblPr(self) -> CT_TblPrBase | None:
-        return self.child_zero_or_one(W.TBL_PR, CT_TblPrBase)
+    def tblPr(self) -> CT_TblPr | None:
+        return self.child_zero_or_one(W.TBL_PR, CT_TblPr)
 
     @cached_property
     def trPr(self) -> CT_TrPr | None:
@@ -184,12 +184,9 @@ class CT_Style(OxmlElement):
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
     @cached_property
-    def tblPr(self) -> CT_TblPrBase | None:
+    def tblPr(self) -> CT_TblPr | None:
         """Style table properties."""
-        tblPr_elm = self.child_zero_or_one(W.TBL_PR, CT_TblPr)
-        if tblPr_elm is None:
-            return None
-        return CT_TblPrBase(tblPr_elm)
+        return self.child_zero_or_one(W.TBL_PR, CT_TblPr)
 
     @cached_property
     def trPr(self) -> CT_TrPr | None:

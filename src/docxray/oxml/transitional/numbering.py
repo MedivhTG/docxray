@@ -9,9 +9,9 @@ from docxray.oxml.transitional.shared import (
     CT_OnOff,
     CT_String,
 )
-from docxray.oxml.transitional.simple_types.st.enums import SE_MultilevelType
-from docxray.oxml.transitional.simple_types.st.shared_common import ST_OnOff
-from docxray.oxml.transitional.simple_types.st.wml import (
+from docxray.oxml.transitional.simple_types.enums import SE_MultilevelType
+from docxray.oxml.transitional.simple_types.shared_common import ST_OnOff
+from docxray.oxml.transitional.simple_types.wml import (
     ST_DecimalNumber,
     ST_LongHexNumber,
     ST_MultiLevelType,

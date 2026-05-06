@@ -4,15 +4,15 @@ from functools import cached_property
 # docxray stuff
 from docxray.enum.word import WD_CNF_FORMAT
 from docxray.oxml.transitional.ns import W
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_Border,
     SE_OnOff1,
 )
-from docxray.oxml.transitional.simple_types.st.shared_common import (
+from docxray.oxml.transitional.simple_types.shared_common import (
     ST_OnOff,
     ST_String,
 )
-from docxray.oxml.transitional.simple_types.st.wml import (
+from docxray.oxml.transitional.simple_types.wml import (
     ST_Border,
     ST_Cnf,
     ST_DateTime,

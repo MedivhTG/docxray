@@ -6,7 +6,11 @@ from enum import StrEnum
 from typing import Any, TypedDict, Unpack
 
 from .exceptions import XsdTypeError
-from .facets import EnumerationFacet, LengthFacet, PatternFacet
+from .facets import (
+    EnumerationFacet,
+    LengthFacet,
+    PatternFacet,
+)
 from .xsd import XsdPrimitive
 
 

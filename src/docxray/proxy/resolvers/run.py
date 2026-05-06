@@ -2,15 +2,15 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_Underline,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.transitional.table.table import CT_Tc
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.resolver.resolver import BaseResolver
-from docxray.shared import PropertyPath
+from docxray.proxy.resolvers.resolver import BaseResolver
+from docxray.proxy.shared import PropertyPath
 
 
 class RunResolver(BaseResolver[CT_R]):

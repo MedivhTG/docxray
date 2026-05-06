@@ -23,14 +23,14 @@ from docxray.oxml.transitional.shared import (
     CT_TextScale,
     CT_TrackChange,
 )
-from docxray.oxml.transitional.simple_types.st.enums import (
+from docxray.oxml.transitional.simple_types.enums import (
     SE_Underline,
     SE_VerticalAlignRun,
 )
-from docxray.oxml.transitional.simple_types.st.shared_common import (
+from docxray.oxml.transitional.simple_types.shared_common import (
     ST_VerticalAlignRun,
 )
-from docxray.oxml.transitional.simple_types.st.wml import ST_Underline
+from docxray.oxml.transitional.simple_types.wml import ST_Underline
 from docxray.oxml.transitional.xmlchemy import OxmlElement
 
 

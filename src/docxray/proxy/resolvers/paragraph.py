@@ -6,9 +6,9 @@ from docxray.constants import WD_OUTLINE_LEVEL
 from docxray.oxml.transitional.table.table import CT_Tc
 from docxray.oxml.transitional.text.num_props import CT_NumPr
 from docxray.oxml.transitional.text.paragraph import CT_P
-from docxray.resolver.resolver import BaseResolver
-from docxray.shared import PropertyPath, safe_get_prop
-from docxray.styles.style import ParagraphStyle
+from docxray.proxy.resolvers.resolver import BaseResolver
+from docxray.proxy.shared import PropertyPath, safe_get_prop
+from docxray.proxy.styles.style import ParagraphStyle
 
 
 class ParagraphResolver(BaseResolver[CT_P]):
@@ -30,7 +30,7 @@ class ParagraphResolver(BaseResolver[CT_P]):
         while numPr is None:
             numPr = safe_get_prop(
                 para_style.element,
-                self._prop_val_path("numPr", f"{self._property_base}"),
+                self._prop_path("numPr", f"{self._property_base}"),
             )
             if numPr is not None:
                 return True
@@ -82,7 +82,7 @@ class ParagraphResolver(BaseResolver[CT_P]):
         while val is None:
             numPr = safe_get_prop(
                 para_style.element,
-                self._prop_val_path("numPr", f"{self._property_base}"),
+                self._prop_path("numPr", f"{self._property_base}"),
             )
             if numPr is not None:
                 return self._from_1_numPr_0_para_style(

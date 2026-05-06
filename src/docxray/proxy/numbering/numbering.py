@@ -12,8 +12,8 @@ from docxray.oxml.transitional.numbering import (
     CT_NumLvl,
 )
 from docxray.oxml.transitional.text.num_props import CT_NumPr
-from docxray.shared import ElementProxy
-from docxray.types import ProvidesXmlPart
+from docxray.proxy.shared import ElementProxy
+from docxray.proxy.types import ProvidesXmlPart
 
 if TYPE_CHECKING:
     # docxray stuff

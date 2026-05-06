@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from docxray import Document
-from docxray.document import Document as D
-from docxray.table import Table
-from docxray.text.paragraph import Paragraph
-from docxray.text.run import Run
+from docxray.proxy.document import Document as D
+from docxray.proxy.table import Table
+from docxray.proxy.text.paragraph import Paragraph
+from docxray.proxy.text.run import Run
 
 
 class TestDocument:

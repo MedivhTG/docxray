@@ -7,11 +7,11 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.blkcntnr import BlockItemContainer
 from docxray.oxml.transitional.document import CT_Body, CT_Document
-from docxray.shared import ElementProxy
-from docxray.table import Table
-from docxray.text.paragraph import Paragraph
+from docxray.proxy.blkcntnr import BlockItemContainer
+from docxray.proxy.shared import ElementProxy
+from docxray.proxy.table import Table
+from docxray.proxy.text.paragraph import Paragraph
 
 if TYPE_CHECKING:
     # docxray stuff

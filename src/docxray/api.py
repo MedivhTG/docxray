@@ -14,7 +14,7 @@ from docxray.types import PkgFile
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.document import Document as DocumentObject
+    from docxray.proxy.document import Document as DocumentObject
 
 
 def Document(docx: PkgFile) -> DocumentObject:

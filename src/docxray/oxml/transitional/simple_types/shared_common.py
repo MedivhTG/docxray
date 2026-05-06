@@ -1,10 +1,10 @@
 # docxray stuff
-from docxray.oxml.transitional.simple_types.facets import EnumerationFacet
-from docxray.oxml.transitional.simple_types.primitives import (
+from docxray.xsd.facets import EnumerationFacet
+from docxray.xsd.primitives import (
     XsdBoolean,
     XsdString,
 )
-from docxray.oxml.transitional.simple_types.xsd import (
+from docxray.xsd.xsd import (
     XsdRestriction,
     XsdSimpleType,
     XsdUnion,

@@ -6,14 +6,14 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
-from docxray.oxml.transitional.simple_types.st.enums import SE_StyleType
+from docxray.oxml.transitional.simple_types.enums import SE_StyleType
 from docxray.oxml.transitional.styles import CT_Styles
 from docxray.oxml.transitional.table.table import CT_Tbl
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
-from docxray.shared import ElementProxy, PropertyPath, safe_get_prop
-from docxray.styles.doc_dflts import DocumentDefaults
-from docxray.styles.style import (
+from docxray.proxy.shared import ElementProxy, PropertyPath, safe_get_prop
+from docxray.proxy.styles.doc_dflts import DocumentDefaults
+from docxray.proxy.styles.style import (
     BaseStyle,
     CharacterStyle,
     NumberingStyle,
@@ -21,7 +21,7 @@ from docxray.styles.style import (
     StyleFactory,
     TableStyle,
 )
-from docxray.types import ProvidesXmlPart
+from docxray.proxy.types import ProvidesXmlPart
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
 

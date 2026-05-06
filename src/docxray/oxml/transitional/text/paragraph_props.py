@@ -43,7 +43,21 @@ class CT_TextboxTightWrap(OxmlElement):
     pass
 
 
-class CT_PPrBase(OxmlElement):
+class CT_ParaRPrOriginal(OxmlElement):
+    pass
+
+
+class CT_ParaRPrChange(CT_TrackChange):
+    @cached_property
+    def rPr(self) -> CT_ParaRPrOriginal:
+        return CT_ParaRPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
+
+
+class CT_ParaRPr(OxmlElement):
+    pass
+
+
+class CT_PPr(OxmlElement):
     @cached_property
     def pStyle(self) -> CT_String | None:
         return self.child_zero_or_one(W.P_STYLE, CT_String)
@@ -181,22 +195,6 @@ class CT_PPrBase(OxmlElement):
     def cnfStyle(self) -> CT_Cnf | None:
         return self.child_zero_or_one(W.CNF_STYLE, CT_Cnf)
 
-
-class CT_ParaRPrOriginal(OxmlElement):
-    pass
-
-
-class CT_ParaRPrChange(CT_TrackChange):
-    @cached_property
-    def rPr(self) -> CT_ParaRPrOriginal:
-        return CT_ParaRPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
-
-
-class CT_ParaRPr(OxmlElement):
-    pass
-
-
-class CT_PPr(CT_PPrBase):
     @cached_property
     def rPr(self) -> CT_ParaRPr | None:
         rPr = self.child_zero_or_one(W.R_PR, CT_RPr)
@@ -211,5 +209,5 @@ class CT_PPr(CT_PPrBase):
 
 class CT_PPrChange(CT_TrackChange):
     @cached_property
-    def pPr(self) -> CT_PPrBase:
-        return CT_PPrBase(self.child_exactly_one(W.P_PR, CT_PPr))
+    def pPr(self) -> CT_PPr:
+        return self.child_exactly_one(W.P_PR, CT_PPr)
