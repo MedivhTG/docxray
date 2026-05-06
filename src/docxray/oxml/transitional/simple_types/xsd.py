@@ -50,12 +50,12 @@ class XsdSimpleType:
 
     @property
     def xml_obj(self) -> Any:
-        return self.xml_obj
+        return self._xml_obj
 
     def validate(self) -> Any:
         if isinstance(self.SCHEMA, XsdRestriction):
-            return self._validate_restriction(self.xml_obj)
-        return self._validate_union(self.xml_obj)
+            return self._validate_restriction(self.SCHEMA)
+        return self._validate_union(self.SCHEMA)
 
     def _validate_restriction(self, restriction: XsdRestriction) -> Any:
         return self._validate_from_schema(restriction.base)

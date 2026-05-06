@@ -47,7 +47,7 @@ class CT_Lvl(OxmlElement):
         return self.attr_required(W.ILVL, ST_DecimalNumber)
 
     @cached_property
-    def tplc(self) -> int | None:
+    def tplc(self) -> bytes | None:
         return self.attr_optional(W.TPLC, ST_LongHexNumber)
 
     @cached_property

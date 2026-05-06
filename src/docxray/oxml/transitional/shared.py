@@ -172,7 +172,7 @@ class CT_Markup(OxmlElement):
 
 class CT_LongHexNumber(OxmlElement):
     @cached_property
-    def val(self) -> int:
+    def val(self) -> bytes:
         return self.attr_required(W.VAL, ST_LongHexNumber)
 
 
