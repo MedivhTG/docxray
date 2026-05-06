@@ -2,16 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import XML_POSITION
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
-from docxray.oxml.trans.proxy.resolvers.table import (
-    CellResolver,
-    RowResolver,
-    TableResolver,
-)
 from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
@@ -25,6 +20,14 @@ from .shared import (
     safe_get_prop,
 )
 
+if TYPE_CHECKING:
+    # docxray stuff
+    from docxray.oxml.trans.proxy.resolvers.table import (
+        CellResolver,
+        RowResolver,
+        TableResolver,
+    )
+
 
 class Cell(BlockItemContainer[CT_Tc]):
     """Cell as `<w:tc>` in table.
@@ -37,7 +40,10 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def resolver(self) -> CellResolver:
-        return CellResolver(self.element, self.part.document_part, "tcPr")
+        # docxray stuff
+        from docxray.oxml.trans.proxy.resolvers.table import CellResolver
+
+        return CellResolver(self, self.part.document_part, "tcPr")
 
     @cached_property
     def row(self) -> Row:
@@ -152,7 +158,10 @@ class Cell(BlockItemContainer[CT_Tc]):
 class Row(ElementProxy[CT_Row]):
     @cached_property
     def resolver(self) -> RowResolver:
-        return RowResolver(self.element, self.part, "trPr")  # type: ignore[arg-type]
+        # docxray stuff
+        from docxray.oxml.trans.proxy.resolvers.table import RowResolver
+
+        return RowResolver(self, self.part, "trPr")  # type: ignore[arg-type]
 
     @cached_property
     def table(self) -> Table:
@@ -195,7 +204,10 @@ class Row(ElementProxy[CT_Row]):
 class Table(StoryChild[CT_Tbl]):
     @cached_property
     def resolver(self) -> TableResolver:
-        return TableResolver(self.element, self.part.document_part, "tblPr")
+        # docxray stuff
+        from docxray.oxml.trans.proxy.resolvers.table import TableResolver
+
+        return TableResolver(self, self.part.document_part, "tblPr")
 
     @cached_property
     def rows(self) -> list[Row]:

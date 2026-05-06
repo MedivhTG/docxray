@@ -3,18 +3,18 @@ from typing import Any
 
 # docxray stuff
 from docxray.oxml.trans.proxy.shared import PropertyPath
+from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import (
     SE_Underline,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.table.table import CT_Tc
 from docxray.oxml.trans.text.paragraph import CT_P
-from docxray.oxml.trans.text.run import CT_R
 
 from .resolver import BaseResolver
 
 
-class RunResolver(BaseResolver[CT_R]):
+class RunResolver(BaseResolver[Run]):
     @cached_property
     def bold(self) -> bool:
         return self._prop_toggled("b")
@@ -59,8 +59,10 @@ class RunResolver(BaseResolver[CT_R]):
         doc_val = self._from_doc_dflts(doc_path)
         if doc_val:
             return True
-        char_val = bool(self._from_char_style(self._elm, property_path))
-        p_elm = self._elm_parent(self._elm, CT_P)
+        char_val = bool(
+            self._from_char_style(self._story.element, property_path)
+        )
+        p_elm = self._elm_parent(self._story.element, CT_P)
         para_val = bool(self._from_para_style(p_elm, property_path))
         tc_elm = p_elm.getparent(CT_Tc)
         if not isinstance(tc_elm, CT_Tc):
@@ -71,10 +73,10 @@ class RunResolver(BaseResolver[CT_R]):
         return para_val ^ char_val ^ table_val
 
     def _from_styles_default(self, property_path: PropertyPath) -> Any | None:
-        char_val = self._from_char_style(self._elm, property_path)
+        char_val = self._from_char_style(self._story.element, property_path)
         if char_val is not None:
             return char_val
-        p_elm = self._elm_parent(self._elm, CT_P)
+        p_elm = self._elm_parent(self._story.element, CT_P)
         para_val = self._from_para_style(p_elm, property_path)
         if para_val is not None:
             return para_val

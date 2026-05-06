@@ -18,7 +18,6 @@ from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.oxml.trans.text.num_props import CT_NumPr
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
-from docxray.oxml.trans.types import ELM_T
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 if TYPE_CHECKING:
@@ -27,16 +26,18 @@ if TYPE_CHECKING:
 
 PARENT_T = TypeVar("PARENT_T", bound=OxmlElement)
 DEFAULT_T = TypeVar("DEFAULT_T")
+PROXY_T = TypeVar("PROXY_T")
 
 
-class BaseResolver(Generic[ELM_T]):
+class BaseResolver(Generic[PROXY_T]):
     def __init__(
         self,
-        story_elm: ELM_T,
+        story: PROXY_T,
         document_part: DocumentPart,
         property_base: str,
     ) -> None:
-        self._elm = story_elm
+        self._story = story
+        self._document_part = document_part
         self._styles = document_part.styles_part.styles
         num_part = document_part.numbering_part
         if num_part is None:
@@ -48,21 +49,34 @@ class BaseResolver(Generic[ELM_T]):
     def _prop_path(self, end_name: str, path_to_name: str) -> PropertyPath:
         return PropertyPath.base(end_name, path_to_name)
 
-    def _prop_val(
+    def _prop(
         self,
         name: str,
         default: DEFAULT_T | None = None,
         path: PropertyPath | None = None,
+        only_direct: bool = False,
         **kwargs: Any,
     ) -> Any | DEFAULT_T:
-        path = path or self._prop_path("val", f"{self._property_base}.{name}")
-        direct_val = safe_get_prop(self._elm, path)
+        path = path or self._prop_path(name, self._property_base)
+        direct_val = safe_get_prop(getattr(self._story, "element"), path)
         if direct_val is not None:
+            return direct_val
+        if only_direct:
             return direct_val
         style_val = self._from_styles_hierarchy(path, **kwargs)
         if style_val is not None:
             return style_val
         return default
+
+    def _prop_val(
+        self,
+        name: str,
+        default: DEFAULT_T | None = None,
+        only_direct: bool = False,
+        **kwargs: Any,
+    ) -> Any | DEFAULT_T:
+        path = self._prop_path("val", f"{self._property_base}.{name}")
+        return self._prop(name, default, path, only_direct, **kwargs)
 
     def _elm_parent(
         self, elm: OxmlElement, parent_type: type[PARENT_T]
@@ -197,7 +211,7 @@ class BaseResolver(Generic[ELM_T]):
             para_style_id = last_para_style.element.styleId
         if para_style_id is None:
             pStyle: CT_String | None = safe_get_prop(
-                self._elm, self._prop_path("pStyle", self._property_base)
+                self._story, self._prop_path("pStyle", self._property_base)
             )
             if pStyle is not None:
                 para_style_id = pStyle.val
