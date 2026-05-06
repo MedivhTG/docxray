@@ -3,7 +3,6 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_UNDERLINE, WD_VERTICAL_ALIGN_RUN
 from docxray.oxml.transitional.ns import W
 from docxray.oxml.transitional.shared import (
     CT_Border,
@@ -24,23 +23,27 @@ from docxray.oxml.transitional.shared import (
     CT_TextScale,
     CT_TrackChange,
 )
-from docxray.oxml.transitional.simpletypes import (
-    ST_Underline,
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_Underline,
+    SE_VerticalAlignRun,
+)
+from docxray.oxml.transitional.simple_types.st.shared_common import (
     ST_VerticalAlignRun,
 )
+from docxray.oxml.transitional.simple_types.st.wml import ST_Underline
 from docxray.oxml.transitional.xmlchemy import OxmlElement
 
 
 class CT_VerticalAlignRun(OxmlElement):
     @cached_property
-    def val(self) -> WD_VERTICAL_ALIGN_RUN:
+    def val(self) -> SE_VerticalAlignRun:
         return self.attr_required(W.VAL, ST_VerticalAlignRun)
 
 
 class CT_Underline(OxmlElement):
     @cached_property
-    def val(self) -> WD_UNDERLINE:
-        return self.attr_optional(W.VAL, ST_Underline, WD_UNDERLINE.SINGLE)
+    def val(self) -> SE_Underline:
+        return self.attr_optional(W.VAL, ST_Underline, SE_Underline.SINGLE)
 
 
 class CT_RPrOriginal(OxmlElement):

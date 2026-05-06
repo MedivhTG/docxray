@@ -6,8 +6,8 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
-from docxray.enum.word import WD_STYLE_TYPE
 from docxray.opc.part import XmlPart
+from docxray.oxml.transitional.simple_types.st.enums import SE_StyleType
 from docxray.types import ELM_T
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class StoryPart(XmlPart[ELM_T]):
     def get_style(
         self,
         style_id: str,
-        style_type: WD_STYLE_TYPE,
+        style_type: SE_StyleType,
         assert_style: type[STYLE_T],
     ) -> BaseStyle:
         """Return the style in this document matching `style_id`."""

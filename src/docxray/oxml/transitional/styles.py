@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_STYLE_TYPE, WD_TBL_STYLE_OVERRIDE_TYPE
+from docxray.enum.word import WD_CNF_FORMAT
 from docxray.oxml.transitional.ns import W
 from docxray.oxml.transitional.shared import (
     CT_DecimalNumber,
@@ -13,9 +13,15 @@ from docxray.oxml.transitional.shared import (
     CT_OnOff,
     CT_String,
 )
-from docxray.oxml.transitional.simpletypes import (
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_StyleType,
+    SE_TblStyleOverrideType,
+)
+from docxray.oxml.transitional.simple_types.st.shared_common import (
     ST_OnOff,
     ST_String,
+)
+from docxray.oxml.transitional.simple_types.st.wml import (
     ST_StyleType,
     ST_TblStyleOverrideType,
 )
@@ -45,7 +51,7 @@ class CT_LatentStyles(OxmlElement):
 
 class CT_TblStylePr(OxmlElement):
     @cached_property
-    def type(self) -> WD_TBL_STYLE_OVERRIDE_TYPE:
+    def type(self) -> SE_TblStyleOverrideType:
         return self.attr_required(W.TYPE, ST_TblStyleOverrideType)
 
     @cached_property
@@ -73,22 +79,20 @@ class CT_Style(OxmlElement):
     """A ``<w:style>`` element, representing a style definition."""
 
     @cached_property
-    def type(self) -> WD_STYLE_TYPE:
-        return self.attr_optional(
-            W.TYPE, ST_StyleType, WD_STYLE_TYPE.PARAGRAPH
-        )
+    def type(self) -> SE_StyleType | None:
+        return self.attr_optional(W.TYPE, ST_StyleType, SE_StyleType.PARAGRAPH)
 
     @cached_property
     def styleId(self) -> str | None:
         return self.attr_optional(W.STYLE_ID, ST_String)
 
     @cached_property
-    def default(self) -> bool:
-        return self.attr_optional(W.DEFAULT, ST_OnOff, False)
+    def default(self) -> bool | None:
+        return self.attr_optional(W.DEFAULT, ST_OnOff)
 
     @cached_property
-    def customStyle(self) -> bool:
-        return self.attr_optional(W.CUSTOM_STYLE, ST_OnOff, False)
+    def customStyle(self) -> bool | None:
+        return self.attr_optional(W.CUSTOM_STYLE, ST_OnOff)
 
     @cached_property
     def name(self) -> CT_String | None:
@@ -201,9 +205,7 @@ class CT_Style(OxmlElement):
     def tblStylePr_lst(self) -> list[CT_TblStylePr]:
         return self.child_zero_or_more(W.TBL_STYLE_PR, CT_TblStylePr)
 
-    def tblStylePr_for(
-        self, type: WD_TBL_STYLE_OVERRIDE_TYPE
-    ) -> CT_TblStylePr | None:
+    def tblStylePr_for(self, type: WD_CNF_FORMAT) -> CT_TblStylePr | None:
         tblStylPr_elm = self.find(
             f"./{W.TBL_STYLE_PR}[@{W.TYPE}='{type}']", CT_TblStylePr
         )

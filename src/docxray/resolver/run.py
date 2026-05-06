@@ -2,7 +2,10 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.enum.word import WD_UNDERLINE, WD_VERTICAL_ALIGN_RUN
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_Underline,
+    SE_VerticalAlignRun,
+)
 from docxray.oxml.transitional.table.table import CT_Tc
 from docxray.oxml.transitional.text.paragraph import CT_P
 from docxray.oxml.transitional.text.run import CT_R
@@ -32,11 +35,11 @@ class RunResolver(BaseResolver[CT_R]):
         return self._prop_toggled("strike")
 
     @cached_property
-    def vertical_align(self) -> WD_VERTICAL_ALIGN_RUN | None:
+    def vertical_align(self) -> SE_VerticalAlignRun | None:
         return self._prop_val("vertAlign")
 
     @cached_property
-    def underline(self) -> WD_UNDERLINE | None:
+    def underline(self) -> SE_Underline | None:
         return self._prop_val("u")
 
     def _prop_toggled(self, name: str) -> bool:

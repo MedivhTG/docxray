@@ -1,7 +1,6 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_MERGE, WD_TABLE_WIDTH
 from docxray.oxml.transitional.ns import W
 from docxray.oxml.transitional.shared import (
     CT_Border,
@@ -11,10 +10,14 @@ from docxray.oxml.transitional.shared import (
     CT_Shd,
     CT_TextDirection,
 )
-from docxray.oxml.transitional.simpletypes import (
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_Merge,
+    SE_TblWidth,
+)
+from docxray.oxml.transitional.simple_types.st.wml import (
     ST_DecimalNumber,
     ST_Merge,
-    ST_TableWidth,
+    ST_TblWidth,
 )
 from docxray.oxml.transitional.xmlchemy import OxmlElement
 
@@ -25,8 +28,8 @@ class CT_TblWidth(OxmlElement):
         return self.attr_optional(W.W, ST_DecimalNumber)
 
     @cached_property
-    def type(self) -> WD_TABLE_WIDTH:
-        return self.attr_optional(W.TYPE, ST_TableWidth, WD_TABLE_WIDTH.AUTO)
+    def type(self) -> SE_TblWidth:
+        return self.attr_optional(W.TYPE, ST_TblWidth, SE_TblWidth.AUTO)
 
 
 class CT_HMerge(OxmlElement):
@@ -35,8 +38,8 @@ class CT_HMerge(OxmlElement):
 
 class CT_VMerge(OxmlElement):
     @cached_property
-    def val(self) -> WD_MERGE:
-        return self.attr_optional(W.VAL, ST_Merge, WD_MERGE.CONTINUE)
+    def val(self) -> SE_Merge:
+        return self.attr_optional(W.VAL, ST_Merge, SE_Merge.CONTINUE)
 
 
 class CT_TcBorders(OxmlElement):

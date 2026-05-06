@@ -8,10 +8,10 @@ from docxray.enum.lxml import XML_POSITION
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.transitional.ns import nsmap
-from docxray.oxml.transitional.simpletypes import SimpleType
+from docxray.oxml.transitional.simple_types.xsd import XsdSimpleType
 from docxray.types import ELM_T
 
-ST_T = TypeVar("ST_T", bound=SimpleType)
+ST_T = TypeVar("ST_T", bound=XsdSimpleType)
 T = TypeVar("T")
 
 nsmap_reversed = {v: k for k, v in nsmap.items()}
@@ -57,7 +57,7 @@ class OxmlElement(BaseOxmlElement):
         attr = self.get(elm_qn)
         if attr is None:
             return default
-        return simple_type.validate(attr)
+        return simple_type(attr).validate()
 
     def attr_required(self, elm_qn: str, simple_type: type[ST_T]) -> Any:
         attr = self.get(elm_qn)
@@ -66,7 +66,7 @@ class OxmlElement(BaseOxmlElement):
                 f"Attribute {elm_qn} was None when one was required for {self}"
             )
             raise InvalidXmlError(msg)
-        return simple_type.validate(attr)
+        return simple_type(attr).validate()
 
     def child_exactly_one(self, elm_qn: str, elm_hint: type[ELM_T]) -> ELM_T:
         """Get child with `minOccurs=1` and `maxOccurs=1`.

@@ -1,7 +1,6 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_MULTILEVEL_TYPE
 from docxray.oxml.transitional.ns import W
 from docxray.oxml.transitional.shared import (
     CT_DecimalNumber,
@@ -10,11 +9,12 @@ from docxray.oxml.transitional.shared import (
     CT_OnOff,
     CT_String,
 )
-from docxray.oxml.transitional.simpletypes import (
+from docxray.oxml.transitional.simple_types.st.enums import SE_MultilevelType
+from docxray.oxml.transitional.simple_types.st.shared_common import ST_OnOff
+from docxray.oxml.transitional.simple_types.st.wml import (
     ST_DecimalNumber,
     ST_LongHexNumber,
     ST_MultiLevelType,
-    ST_OnOff,
 )
 from docxray.oxml.transitional.text.paragraph_props import CT_PPr
 from docxray.oxml.transitional.text.run_props import CT_RPr
@@ -105,7 +105,7 @@ class CT_Lvl(OxmlElement):
 
 class CT_MultiLevelType(OxmlElement):
     @cached_property
-    def val(self) -> WD_MULTILEVEL_TYPE:
+    def val(self) -> SE_MultilevelType:
         return self.attr_required(W.VAL, ST_MultiLevelType)
 
 

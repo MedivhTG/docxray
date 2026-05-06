@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
-from docxray.enum.word import WD_STYLE_TYPE
+from docxray.oxml.transitional.simple_types.st.enums import SE_StyleType
 from docxray.oxml.transitional.styles import CT_Styles
 from docxray.oxml.transitional.table.table import CT_Tbl
 from docxray.oxml.transitional.text.paragraph import CT_P
@@ -65,20 +65,16 @@ class Styles(ElementProxy[CT_Styles]):
         style_id = safe_get_prop(r_elm, PropertyPath.base("val", "rPr.rStyle"))
         if style_id is None:
             return None
-        return self.get_by_id(
-            style_id, WD_STYLE_TYPE.CHARACTER, CharacterStyle
-        )
+        return self.get_by_id(style_id, SE_StyleType.CHARACTER, CharacterStyle)
 
     def para_style(self, p_elm: CT_P) -> ParagraphStyle | None:
         style_id = safe_get_prop(p_elm, PropertyPath.base("val", "pPr.pStyle"))
         if style_id is None:
             return None
-        return self.get_by_id(
-            style_id, WD_STYLE_TYPE.PARAGRAPH, ParagraphStyle
-        )
+        return self.get_by_id(style_id, SE_StyleType.PARAGRAPH, ParagraphStyle)
 
     def num_style(self, style_id: str) -> NumberingStyle:
-        return self.get_by_id(style_id, WD_STYLE_TYPE.LIST, NumberingStyle)
+        return self.get_by_id(style_id, SE_StyleType.NUMBERING, NumberingStyle)
 
     def table_style(self, tbl_elm: CT_Tbl) -> TableStyle | None:
         style_id = safe_get_prop(
@@ -86,12 +82,12 @@ class Styles(ElementProxy[CT_Styles]):
         )
         if style_id is None:
             return None
-        return self.get_by_id(style_id, WD_STYLE_TYPE.TABLE, TableStyle)
+        return self.get_by_id(style_id, SE_StyleType.TABLE, TableStyle)
 
     def get_by_id(
         self,
         style_id: str,
-        style_type: WD_STYLE_TYPE,
+        style_type: SE_StyleType,
         assert_style: type[STYLE_T],
     ) -> STYLE_T:
         """Return the style of `style_type` matching `style_id`."""
@@ -99,9 +95,7 @@ class Styles(ElementProxy[CT_Styles]):
         assert isinstance(style, assert_style)
         return style
 
-    def _get_by_id(
-        self, style_id: str, style_type: WD_STYLE_TYPE
-    ) -> BaseStyle:
+    def _get_by_id(self, style_id: str, style_type: SE_StyleType) -> BaseStyle:
         """Return the style of `style_type` matching `style_id`."""
         style = self._cached_styles.get(style_id)
         if style is not None:

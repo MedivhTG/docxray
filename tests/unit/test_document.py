@@ -22,6 +22,7 @@ class TestDocument:
                 for row in p_or_t.iter_rows():
                     part = row.part
                     for cell in row.iter_cells():
+                        is_last = cell.element.is_last
                         part = cell.part
                         cell_fmt = cell.resolver
                         cx = cell.grid_x

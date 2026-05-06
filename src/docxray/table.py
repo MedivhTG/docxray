@@ -7,7 +7,10 @@ from typing import cast
 # docxray stuff
 from docxray.blkcntnr import BlockItemContainer
 from docxray.enum.lxml import XML_POSITION
-from docxray.enum.word import WD_MERGE, WD_TABLE_WIDTH
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_Merge,
+    SE_TblWidth,
+)
 from docxray.oxml.transitional.table.cell_props import CT_TblWidth
 from docxray.oxml.transitional.table.table import CT_Row, CT_Tbl, CT_Tc
 from docxray.resolver.table import CellResolver, RowResolver, TableResolver
@@ -43,7 +46,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self.row.table
 
     @cached_property
-    def vmerge(self) -> WD_MERGE | None:
+    def vmerge(self) -> SE_Merge | None:
         path = PropertyPath.base("val", "tcPr.vMerge")
         return safe_get_prop(self.element, path)
 
@@ -62,11 +65,11 @@ class Cell(BlockItemContainer[CT_Tc]):
         if tcW_elm is None:
             return None
         if (
-            tcW_elm.type in (WD_TABLE_WIDTH.NONE, WD_TABLE_WIDTH.AUTO)
+            tcW_elm.type in (SE_TblWidth.NULL, SE_TblWidth.AUTO)
             or tcW_elm.w is None
         ):
             return None
-        if tcW_elm.type == WD_TABLE_WIDTH.TWIPS:
+        if tcW_elm.type == SE_TblWidth.TWIPS:
             return Twips(tcW_elm.w)
         return normalize_pct(tcW_elm.w)
 
@@ -104,7 +107,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def vert_merged(self) -> bool:
-        if self.vmerge == WD_MERGE.CONTINUE:
+        if self.vmerge == SE_Merge.CONTINUE:
             return True
         return False
 
@@ -139,7 +142,7 @@ class Cell(BlockItemContainer[CT_Tc]):
     def vert_span(self) -> int:
         if self.vmerge is None:
             return 1
-        if self.vmerge == WD_MERGE.CONTINUE:
+        if self.vmerge == SE_Merge.CONTINUE:
             return -1
         below = self.cell_below
         span = 1

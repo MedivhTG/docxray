@@ -1,19 +1,23 @@
 from datetime import datetime
 from functools import cached_property
-from typing import Literal
 
 # docxray stuff
-from docxray.enum.word import WD_BORDER, WD_CNF_FORMAT
+from docxray.enum.word import WD_CNF_FORMAT
 from docxray.oxml.transitional.ns import W
-from docxray.oxml.transitional.simpletypes import (
+from docxray.oxml.transitional.simple_types.st.enums import (
+    SE_Border,
+    SE_OnOff1,
+)
+from docxray.oxml.transitional.simple_types.st.shared_common import (
+    ST_OnOff,
+    ST_String,
+)
+from docxray.oxml.transitional.simple_types.st.wml import (
     ST_Border,
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
-    ST_HexColor,
     ST_LongHexNumber,
-    ST_OnOff,
-    ST_String,
 )
 from docxray.oxml.transitional.xmlchemy import OxmlElement
 
@@ -26,10 +30,14 @@ class CT_String(OxmlElement):
 
 class CT_OnOff(OxmlElement):
     def __bool__(self) -> bool:
-        return self.val
+        if isinstance(self.val, bool):
+            return self.val
+        if self.val == SE_OnOff1.ON:
+            return True
+        return False
 
     @cached_property
-    def val(self) -> bool:
+    def val(self) -> bool | SE_OnOff1:
         return self.attr_optional(W.VAL, ST_OnOff, True)
 
 
@@ -67,14 +75,14 @@ class CT_TextEffect(OxmlElement):
 
 class CT_Border(OxmlElement):
     @cached_property
-    def val(self) -> WD_BORDER:
+    def val(self) -> SE_Border:
         return self.attr_required(W.VAL, ST_Border)
 
-    @cached_property
-    def color(self) -> Literal["auto"] | str | None:
-        return self.attr_optional(W.COLOR, ST_HexColor)
-
     # TODO: uncomment and do work
+    # @cached_property
+    # def color(self) -> Literal["auto"] | str | None:
+    #     return self.attr_optional(W.COLOR, ST_HexColor)
+
     # @cached_property
     # def themeColor(self):
     #     return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
@@ -153,7 +161,7 @@ class CT_DecimalNumber(OxmlElement):
 class CT_Cnf(OxmlElement):
     @cached_property
     def val(self) -> WD_CNF_FORMAT:
-        return self.attr_required(W.VAL, ST_Cnf)
+        return WD_CNF_FORMAT.from_string(self.attr_required(W.VAL, ST_Cnf))
 
 
 class CT_Markup(OxmlElement):
