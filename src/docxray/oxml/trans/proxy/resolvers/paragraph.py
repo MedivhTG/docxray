@@ -19,11 +19,11 @@ class ParagraphResolver(BaseResolver[Paragraph]):
     @cached_property
     def in_list(self) -> bool:
         numPr: CT_NumPr | None = safe_get_prop(
-            self._story, PropertyPath.base("numPr", "pPr")
+            self._proxy, PropertyPath.base("numPr", "pPr")
         )
         if numPr is not None:
             return True
-        para_style = self._styles.para_style(self._story.element)
+        para_style = self._styles.para_style(self._proxy.element)
         if para_style is None:
             return False
         numPr = None
@@ -42,9 +42,9 @@ class ParagraphResolver(BaseResolver[Paragraph]):
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
     ) -> Any | None:
-        para_style = self._styles.para_style(self._story.element)
+        para_style = self._styles.para_style(self._proxy.element)
         numPr: CT_NumPr | None = safe_get_prop(
-            self._story, PropertyPath.base("numPr", "pPr")
+            self._proxy, PropertyPath.base("numPr", "pPr")
         )
         if numPr is None and para_style is None:
             return self._from_0_numPr_0_para_style(property_path)
@@ -66,9 +66,9 @@ class ParagraphResolver(BaseResolver[Paragraph]):
         self, property_path: PropertyPath
     ) -> Any | None:
         doc_path = property_path.join_left("pPrDefault")
-        if self._story.in_body:
+        if self._proxy.in_body:
             return self._from_doc_dflts(doc_path)
-        tc_elm = cast("CT_Tc", self._story._parent.element)  # type: ignore
+        tc_elm = cast("CT_Tc", self._proxy._parent.element)  # type: ignore
         table_val = self._from_table_style_hierarchy(tc_elm, property_path)
         if table_val is not None:
             return table_val

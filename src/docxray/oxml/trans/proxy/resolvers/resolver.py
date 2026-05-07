@@ -36,7 +36,7 @@ class BaseResolver(Generic[PROXY_T]):
         document_part: DocumentPart,
         property_base: str,
     ) -> None:
-        self._story = story
+        self._proxy = story
         self._document_part = document_part
         self._styles = document_part.styles_part.styles
         num_part = document_part.numbering_part
@@ -58,7 +58,7 @@ class BaseResolver(Generic[PROXY_T]):
         **kwargs: Any,
     ) -> Any | DEFAULT_T:
         path = path or self._prop_path(name, self._property_base)
-        direct_val = safe_get_prop(getattr(self._story, "element"), path)
+        direct_val = safe_get_prop(getattr(self._proxy, "element"), path)
         if direct_val is not None:
             return direct_val
         if only_direct:
@@ -211,7 +211,7 @@ class BaseResolver(Generic[PROXY_T]):
             para_style_id = last_para_style.element.styleId
         if para_style_id is None:
             pStyle: CT_String | None = safe_get_prop(
-                self._story, self._prop_path("pStyle", self._property_base)
+                self._proxy, self._prop_path("pStyle", self._property_base)
             )
             if pStyle is not None:
                 para_style_id = pStyle.val

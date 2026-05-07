@@ -28,17 +28,17 @@ class RowResolver(BaseResolver[Row]):
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
     ) -> Any | None:
-        return self._from_table_style(self._story.table.element, property_path)
+        return self._from_table_style(self._proxy.table.element, property_path)
 
 
 class CellResolver(BaseResolver[Cell]):
     @cached_property
     def row_resolver(self) -> RowResolver:
-        return RowResolver(self._story.row, self._document_part, "trPr")
+        return self._proxy.row.resolver
 
     @cached_property
     def table_resolver(self) -> TableResolver:
-        return TableResolver(self._story.table, self._document_part, "tblPr")
+        return self._proxy.table.resolver
 
     @cached_property
     def width(self) -> Twips | float | None:
