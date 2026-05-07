@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
-from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.proxy.numbering.numbering import OverrideNum
 from docxray.oxml.trans.proxy.resolvers.exceptions import ResolveError
 from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop

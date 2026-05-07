@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import cached_property
 
 # docxray stuff
-from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
     SE_Border,

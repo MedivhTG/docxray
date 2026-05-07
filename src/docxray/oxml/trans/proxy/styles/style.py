@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.enum.word import WD_CNF_FORMAT
+from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.proxy.shared import ElementProxy
 from docxray.oxml.trans.st.enums import SE_StyleType
 from docxray.oxml.trans.styles import CT_Style, CT_Styles, CT_TblStylePr
