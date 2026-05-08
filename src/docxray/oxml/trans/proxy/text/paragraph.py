@@ -15,20 +15,23 @@ from docxray.oxml.trans.text.run import CT_R
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.proxy.resolvers.paragraph import (
-        ParagraphResolver,
+    from docxray.oxml.trans.proxy.h2d.paragraph_h2d import (
+        ParagraphH2D,
     )
 
 
 class Paragraph(StoryChild[CT_P]):
     @cached_property
-    def resolver(self) -> ParagraphResolver:
+    def h2d(self) -> ParagraphH2D:
         # docxray stuff
-        from docxray.oxml.trans.proxy.resolvers.paragraph import (
+        from docxray.oxml.trans.proxy.h2d.paragraph_h2d import ParagraphH2D
+        from docxray.oxml.trans.proxy.h2d.paragraph_rslv import (
             ParagraphResolver,
         )
 
-        return ParagraphResolver(self, self.part.document_part, "pPr")
+        return ParagraphH2D(
+            ParagraphResolver(self, self.part.document_part, "pPr")
+        )
 
     @cached_property
     def in_body(self) -> bool:

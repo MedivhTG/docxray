@@ -21,12 +21,7 @@ from .shared import (
 )
 
 if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.oxml.trans.proxy.resolvers.table import (
-        CellResolver,
-        RowResolver,
-        TableResolver,
-    )
+    from .h2d.table_h2d import CellH2D, RowH2D, TableH2D
 
 
 class Cell(BlockItemContainer[CT_Tc]):
@@ -39,11 +34,11 @@ class Cell(BlockItemContainer[CT_Tc]):
     """
 
     @cached_property
-    def resolver(self) -> CellResolver:
-        # docxray stuff
-        from docxray.oxml.trans.proxy.resolvers.table import CellResolver
+    def h2d(self) -> CellH2D:
+        from .h2d.table_h2d import CellH2D
+        from .h2d.table_rslv import CellResolver
 
-        return CellResolver(self, self.part.document_part, "tcPr")
+        return CellH2D(CellResolver(self, self.part.document_part, "tcPr"))
 
     @cached_property
     def row(self) -> Row:
@@ -157,11 +152,11 @@ class Cell(BlockItemContainer[CT_Tc]):
 
 class Row(ElementProxy[CT_Row]):
     @cached_property
-    def resolver(self) -> RowResolver:
-        # docxray stuff
-        from docxray.oxml.trans.proxy.resolvers.table import RowResolver
+    def h2d(self) -> RowH2D:
+        from .h2d.table_h2d import RowH2D
+        from .h2d.table_rslv import RowResolver
 
-        return RowResolver(self, self.part, "trPr")  # type: ignore[arg-type]
+        return RowH2D(RowResolver(self, self.part, "trPr"))  # type: ignore[arg-type]
 
     @cached_property
     def table(self) -> Table:
@@ -203,11 +198,11 @@ class Row(ElementProxy[CT_Row]):
 
 class Table(StoryChild[CT_Tbl]):
     @cached_property
-    def resolver(self) -> TableResolver:
-        # docxray stuff
-        from docxray.oxml.trans.proxy.resolvers.table import TableResolver
+    def h2d(self) -> TableH2D:
+        from .h2d.table_h2d import TableH2D
+        from .h2d.table_rslv import TableResolver
 
-        return TableResolver(self, self.part.document_part, "tblPr")
+        return TableH2D(TableResolver(self, self.part, "tblPr"))  # type: ignore[arg-type]
 
     @cached_property
     def rows(self) -> list[Row]:

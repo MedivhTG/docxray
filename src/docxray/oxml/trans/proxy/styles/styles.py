@@ -6,26 +6,17 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import (
-    ElementProxy,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.trans.proxy.shared import ElementProxy
 from docxray.oxml.trans.proxy.styles.doc_dflts import DocumentDefaults
 from docxray.oxml.trans.proxy.styles.style import (
     BaseStyle,
     CharacterStyle,
     NumberingStyle,
-    ParagraphStyle,
     StyleFactory,
-    TableStyle,
 )
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.st.enums import SE_StyleType
 from docxray.oxml.trans.styles import CT_Styles
-from docxray.oxml.trans.table.table import CT_Tbl
-from docxray.oxml.trans.text.paragraph import CT_P
-from docxray.oxml.trans.text.run import CT_R
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
 
@@ -52,7 +43,9 @@ class Styles(ElementProxy[CT_Styles]):
             return None
         return DocumentDefaults(doc_dflts, self)
 
-    def base_style(self, style: CharacterStyle) -> BaseStyle | None:
+    def base_style(
+        self, style: CharacterStyle | NumberingStyle
+    ) -> BaseStyle | None:
         basedOn = style.based_on
         if basedOn is None:
             return None
@@ -64,29 +57,6 @@ class Styles(ElementProxy[CT_Styles]):
             self._cached_styles[basedOn] = new_style
             return new_style
         return base_style
-
-    def char_style(self, r_elm: CT_R) -> CharacterStyle | None:
-        style_id = safe_get_prop(r_elm, PropertyPath.base("val", "rPr.rStyle"))
-        if style_id is None:
-            return None
-        return self.get_by_id(style_id, SE_StyleType.CHARACTER, CharacterStyle)
-
-    def para_style(self, p_elm: CT_P) -> ParagraphStyle | None:
-        style_id = safe_get_prop(p_elm, PropertyPath.base("val", "pPr.pStyle"))
-        if style_id is None:
-            return None
-        return self.get_by_id(style_id, SE_StyleType.PARAGRAPH, ParagraphStyle)
-
-    def num_style(self, style_id: str) -> NumberingStyle:
-        return self.get_by_id(style_id, SE_StyleType.NUMBERING, NumberingStyle)
-
-    def table_style(self, tbl_elm: CT_Tbl) -> TableStyle | None:
-        style_id = safe_get_prop(
-            tbl_elm, PropertyPath.base("val", "tblPr.tblStyle")
-        )
-        if style_id is None:
-            return None
-        return self.get_by_id(style_id, SE_StyleType.TABLE, TableStyle)
 
     def get_by_id(
         self,
