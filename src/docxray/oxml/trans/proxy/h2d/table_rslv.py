@@ -37,7 +37,7 @@ class TableResolver(Resolver[Table]):
 class RowResolver(Resolver[Row]):
     @cached_property
     def table_resolver(self) -> TableResolver:
-        return self._proxy.table.h2d._resolver
+        return self._proxy.table.h2d._rslvr
 
     @cached_property
     def table_style(self) -> TableStyle | None:
@@ -54,7 +54,7 @@ class RowResolver(Resolver[Row]):
 class CellResolver(Resolver[Cell]):
     @cached_property
     def row_resolver(self) -> RowResolver:
-        return self._proxy.row.h2d._resolver
+        return self._proxy.row.h2d._rslvr
 
     @cached_property
     def table_resolver(self) -> TableResolver:

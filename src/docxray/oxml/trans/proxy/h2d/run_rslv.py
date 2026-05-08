@@ -1,18 +1,17 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, cast
 
 # docxray stuff
+from docxray.oxml.trans.proxy.h2d.paragraph_rslv import ParagraphResolver
 from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     CharacterStyle,
+    ParagraphStyle,
 )
+from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
-from docxray.oxml.trans.st.enums import (
-    SE_StyleType,
-    SE_Underline,
-    SE_VerticalAlignRun,
-)
+from docxray.oxml.trans.st.enums import SE_StyleType
 
 from .resolver import Resolver
 
@@ -31,32 +30,20 @@ class RunResolver(Resolver[Run]):
         )
 
     @cached_property
-    def bold(self) -> bool:
-        return self._prop_val("b")
+    def paragraph(self) -> Paragraph:
+        return cast("Paragraph", self._proxy._parent)
 
     @cached_property
-    def all_caps(self) -> bool:
-        return self._prop_val("caps")
+    def paragraph_resolver(self) -> ParagraphResolver:
+        return self.paragraph.h2d._rslvr
 
     @cached_property
-    def italic(self) -> bool:
+    def para_style(self) -> ParagraphStyle | None:
+        return self.paragraph_resolver.para_style
+
+    @cached_property
+    def i(self) -> bool | None:
         return self._prop_val("i")
-
-    @cached_property
-    def small_caps(self) -> bool:
-        return self._prop_val("smallCaps")
-
-    @cached_property
-    def strike(self) -> bool:
-        return self._prop_val("strike")
-
-    @cached_property
-    def vertical_align(self) -> SE_VerticalAlignRun | None:
-        return self._prop_val("vertAlign")
-
-    @cached_property
-    def underline(self) -> SE_Underline | None:
-        return self._prop_val("u")
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any

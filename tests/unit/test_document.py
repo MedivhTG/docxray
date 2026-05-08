@@ -38,6 +38,7 @@ class TestDocument:
                                         continue
                                     part = r_or_h.part
                                     r_fmt = r_or_h.h2d
+                                    italic = r_fmt.italic
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 f = p_or_t.element.is_first
@@ -52,4 +53,5 @@ class TestDocument:
                         continue
                     part = r_or_h.part
                     r_fmt = r_or_h.h2d
+                    italic = r_fmt.italic
                     wait = 1

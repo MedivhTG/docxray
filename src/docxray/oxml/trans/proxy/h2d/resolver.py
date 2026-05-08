@@ -33,7 +33,7 @@ class Resolver(Generic[PROXY_T]):
             self._numbering = None
         else:
             self._numbering = num_part.numbering
-        self._property_base = property_base
+        self._path_base = property_base
 
     def _prop_path(self, end_name: str, path_to_name: str) -> PropertyPath:
         return PropertyPath.base(end_name, path_to_name)
@@ -46,7 +46,7 @@ class Resolver(Generic[PROXY_T]):
         only_direct: bool = False,
         **kwargs: Any,
     ) -> Any | DEFAULT_T:
-        path = path or self._prop_path(name, self._property_base)
+        path = path or self._prop_path(name, self._path_base)
         direct_val = safe_get_prop(getattr(self._proxy, "element"), path)
         if direct_val is not None:
             return direct_val
@@ -64,7 +64,7 @@ class Resolver(Generic[PROXY_T]):
         only_direct: bool = False,
         **kwargs: Any,
     ) -> Any | DEFAULT_T:
-        path = self._prop_path("val", f"{self._property_base}.{name}")
+        path = self._prop_path("val", f"{self._path_base}.{name}")
         return self._prop(name, default, path, only_direct, **kwargs)
 
     def _from_doc_dflts(self, property_path: PropertyPath) -> Any | None:
