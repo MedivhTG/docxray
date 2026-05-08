@@ -17,6 +17,10 @@ class RunH2D(How2Display[RunResolver]):
     def italic(self) -> bool:
         return self._display_toggled("i")
 
+    @cached_property
+    def bold(self) -> bool:
+        return self._display_toggled("b")
+
     def _display_toggled(self, prop: str) -> bool:
         path = PropertyPath.base(prop, f"rPrDefault.{self._rslvr._path_base}")
         doc_val = self._rslvr._from_doc_dflts(path)

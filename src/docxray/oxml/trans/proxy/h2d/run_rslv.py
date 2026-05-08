@@ -45,6 +45,10 @@ class RunResolver(Resolver[Run]):
     def i(self) -> bool | None:
         return self._prop_val("i")
 
+    @cached_property
+    def b(self) -> bool | None:
+        return self._prop_val("b")
+
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
     ) -> Any | None:
