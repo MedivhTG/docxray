@@ -19,9 +19,11 @@ from .resolver import Resolver
 
 class RunResolver(Resolver[Run]):
     @cached_property
-    def char_style(self) -> CharacterStyle:
+    def char_style(self) -> CharacterStyle | None:
         path = self._prop_path("val", "rPr.rStyle")
-        style_id = safe_get_prop(self._proxy.element, path)
+        style_id: str | None = safe_get_prop(self._proxy.element, path)
+        if style_id is None:
+            return None
         return self._styles.get_by_id(
             style_id,
             SE_StyleType.CHARACTER,
@@ -59,4 +61,6 @@ class RunResolver(Resolver[Run]):
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
     ) -> Any | None:
+        if self.char_style is None:
+            return None
         return self._from_style_inheritance(self.char_style, property_path)

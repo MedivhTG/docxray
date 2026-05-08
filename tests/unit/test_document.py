@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from docxray import Document
-from docxray.oxml.trans.proxy.document import Document as D
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
