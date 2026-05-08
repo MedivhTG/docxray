@@ -2,6 +2,7 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
+from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
@@ -63,6 +64,10 @@ class CellResolver(Resolver[Cell]):
     @cached_property
     def table_style(self) -> TableStyle | None:
         return self.row_resolver.table_style
+
+    @cached_property
+    def cnf(self) -> WD_CNF_FORMAT | None:
+        return self._prop_val("cnfStyle")
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any

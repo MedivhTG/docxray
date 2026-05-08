@@ -4,11 +4,14 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
+from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import (
     CharacterStyle,
     NumberingStyle,
+    TableStyle,
 )
+from docxray.oxml.trans.styles import CT_TblStylePr
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -66,6 +69,18 @@ class Resolver(Generic[PROXY_T]):
     ) -> Any | DEFAULT_T:
         path = self._prop_path("val", f"{self._path_base}.{name}")
         return self._prop(name, default, path, only_direct, **kwargs)
+
+    def _table_style_props(
+        self, table_style: TableStyle, cnf_flags: WD_CNF_FORMAT
+    ) -> list[CT_TblStylePr]:
+        # TODO: add whole table flag
+        props = []
+        for flag in WD_CNF_FORMAT.ordered_flags():
+            if cnf_flags & flag:
+                tblStylePr_elm = table_style.bitwise_table_style_property(flag)
+                if tblStylePr_elm is not None:
+                    props.append(tblStylePr_elm)
+        return props
 
     def _from_doc_dflts(self, property_path: PropertyPath) -> Any | None:
         doc_dflts = self._styles.document_defaults
