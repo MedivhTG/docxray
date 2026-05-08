@@ -5,7 +5,6 @@ from __future__ import annotations
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.shared import (
     CT_DecimalNumber,
@@ -202,7 +201,9 @@ class CT_Style(OxmlElement):
     def tblStylePr_lst(self) -> list[CT_TblStylePr]:
         return self.child_zero_or_more(W.TBL_STYLE_PR, CT_TblStylePr)
 
-    def tblStylePr_for(self, type: WD_CNF_FORMAT) -> CT_TblStylePr | None:
+    def tblStylePr_for(
+        self, type: SE_TblStyleOverrideType
+    ) -> CT_TblStylePr | None:
         tblStylPr_elm = self.find(
             f"./{W.TBL_STYLE_PR}[@{W.TYPE}='{type}']", CT_TblStylePr
         )

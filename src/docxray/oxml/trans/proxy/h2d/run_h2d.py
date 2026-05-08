@@ -58,21 +58,21 @@ class RunH2D(How2Display[RunResolver]):
         tbl_style_props = cell.h2d._table_style_props
         table_val = self._value_from_cnf_pattern(tbl_style_props, prop_path)
         if table_val is not None:
-            return None
+            return table_val
         # Fallback for edge cases:
         # in common Word will not produce inherited table styles without
         # cnf from basedOn style (always copy and override)
         tbl_style = cell.h2d._rslvr.table_style
         if tbl_style is None:
-            return None
+            return table_val
         tbl_style = cast(
             "TableStyle | None", self._rslvr._styles.base_style(tbl_style)
         )
         if tbl_style is None:
-            return None
+            return table_val
         cnf = cell.h2d._rslvr.cnf
         if cnf is None:
-            return None
+            return table_val
         while table_val is None:
             tbl_style_props = self._rslvr._table_style_props(tbl_style, cnf)
             table_val = self._value_from_cnf_pattern(

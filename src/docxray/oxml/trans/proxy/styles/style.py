@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.proxy.shared import ElementProxy
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_StyleType, SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_Style, CT_Styles, CT_TblStylePr
 
 if TYPE_CHECKING:
@@ -56,51 +56,61 @@ class ParagraphStyle(CharacterStyle):
 class TableStyle(ParagraphStyle):
     @cached_property
     def firstRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.FIRST_ROW)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.HEADER_ROW)
 
     @cached_property
     def lastRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.LAST_ROW)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.FOOTER_ROW)
 
     @cached_property
     def firstCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.FIRST_COLUMN)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.FIRST_COLUMN)
 
     @cached_property
     def lastCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.LAST_COLUMN)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.LAST_COLUMN)
 
     @cached_property
     def band1Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.ODD_VERTICAL_BAND)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.VERTICAL_BAND_ODD)
 
     @cached_property
     def band2Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.EVEN_VERTICAL_BAND)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.VERTICAL_BAND_EVEN)
 
     @cached_property
     def band1Horz(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.ODD_HORIZONTAL_BAND)
+        return self.tbl_style_prop(SE_TblStyleOverrideType.HORIZONTAL_BAND_ODD)
 
     @cached_property
     def band2Horz(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND)
+        return self.tbl_style_prop(
+            SE_TblStyleOverrideType.HORIZONTAL_BAND_EVEN
+        )
 
     @cached_property
     def nwCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN)
+        return self.tbl_style_prop(
+            SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL
+        )
 
     @cached_property
     def neCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN)
+        return self.tbl_style_prop(
+            SE_TblStyleOverrideType.TOP_RIGHT_CORNER_CELL
+        )
 
     @cached_property
     def swCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN)
+        return self.tbl_style_prop(
+            SE_TblStyleOverrideType.BOTTOM_LEFT_CORNER_CELL
+        )
 
     @cached_property
     def seCell(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN)
+        return self.tbl_style_prop(
+            SE_TblStyleOverrideType.BOTTOM_RIGHT_CORNER_CELL
+        )
 
     def bitwise_table_style_property(
         self, flag: WD_CNF_FORMAT
@@ -131,7 +141,9 @@ class TableStyle(ParagraphStyle):
             case WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN:
                 return self.seCell
 
-    def tbl_style_prop(self, type: WD_CNF_FORMAT) -> CT_TblStylePr | None:
+    def tbl_style_prop(
+        self, type: SE_TblStyleOverrideType
+    ) -> CT_TblStylePr | None:
         return self.element.tblStylePr_for(type)
 
 

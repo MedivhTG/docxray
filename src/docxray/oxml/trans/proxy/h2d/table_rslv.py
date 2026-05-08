@@ -27,6 +27,34 @@ class TableResolver(Resolver[Table]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
 
+    def _prop_from_tbl_look(self, prop: str) -> bool:
+        path = self._prop_path(prop, f"{self._path_base}.tblLook")
+        return self._prop(prop, False, path, True)
+
+    @cached_property
+    def first_row_show(self) -> bool:
+        return self._prop_from_tbl_look("firstRow")
+
+    @cached_property
+    def last_row_show(self) -> bool:
+        return self._prop_from_tbl_look("lastRow")
+
+    @cached_property
+    def first_col_show(self) -> bool:
+        return self._prop_from_tbl_look("firstColumn")
+
+    @cached_property
+    def last_col_show(self) -> bool:
+        return self._prop_from_tbl_look("lastColumn")
+
+    @cached_property
+    def no_horizontal_lines(self) -> bool:
+        return self._prop_from_tbl_look("noHBand")
+
+    @cached_property
+    def no_vertical_lines(self) -> bool:
+        return self._prop_from_tbl_look("noVBand")
+
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
     ) -> Any | None:
@@ -43,6 +71,10 @@ class RowResolver(Resolver[Row]):
     @cached_property
     def table_style(self) -> TableStyle | None:
         return self.table_resolver.table_style
+
+    @cached_property
+    def cnf(self) -> WD_CNF_FORMAT | None:
+        return self._prop_val("cnfStyle", only_direct=True)
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
@@ -66,8 +98,12 @@ class CellResolver(Resolver[Cell]):
         return self.row_resolver.table_style
 
     @cached_property
+    def row_cnf(self) -> WD_CNF_FORMAT | None:
+        return self.row_resolver.cnf
+
+    @cached_property
     def cnf(self) -> WD_CNF_FORMAT | None:
-        return self._prop_val("cnfStyle")
+        return self._prop_val("cnfStyle", only_direct=True)
 
     def _from_styles_hierarchy(
         self, property_path: PropertyPath, **kwargs: Any
