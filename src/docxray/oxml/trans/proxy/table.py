@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, cast
 # docxray stuff
 from docxray.enum.lxml import XML_POSITION
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
-from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
 from .compute import width
 from .shared import (
     ElementProxy,
+    NotFound,
     PropertyPath,
     StoryChild,
     Twips,
@@ -51,7 +51,10 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def vmerge(self) -> SE_Merge | None:
         path = PropertyPath.base("val", "tcPr.vMerge")
-        return safe_get_prop(self.element, path)
+        vMerge_val = safe_get_prop(self.element, path)
+        if isinstance(vMerge_val, NotFound):
+            return None
+        return vMerge_val
 
     @cached_property
     def width(self) -> Twips | float | None:
@@ -64,8 +67,8 @@ class Cell(BlockItemContainer[CT_Tc]):
                 Word measure in `Twips`.
         """
         path = PropertyPath.base("tcW", "tcPr")
-        tcW_elm: CT_TblWidth | None = safe_get_prop(self.element, path)
-        if tcW_elm is None:
+        tcW_elm = safe_get_prop(self.element, path)
+        if isinstance(tcW_elm, NotFound) or tcW_elm is None:
             return None
         return width(tcW_elm)
 
@@ -75,11 +78,15 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def grid_x(self) -> int:
-        path = PropertyPath.base("horz_span")
-        return sum(
-            safe_get_prop(self.row.get_cell(i), path, 1)
-            for i in range(self.idx)
-        )
+        x = 0
+        dflt = 1
+        for i in range(self.idx):
+            cell = self.row.get_cell(i)
+            if cell is None:
+                x += dflt
+                continue
+            x += cell.horz_span
+        return x
 
     @cached_property
     def grid_y(self) -> int:
@@ -132,7 +139,10 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def horz_span(self) -> int:
         path = PropertyPath.base("val", "tcPr.gridSpan")
-        return safe_get_prop(self.element, path, 1)
+        gridSpan_val = safe_get_prop(self.element, path)
+        if isinstance(gridSpan_val, NotFound):
+            return 1
+        return gridSpan_val
 
     @cached_property
     def vert_span(self) -> int:

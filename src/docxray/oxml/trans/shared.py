@@ -2,7 +2,6 @@ from datetime import datetime
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.enums import WD_CNF_FORMAT
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
     SE_Border,
@@ -32,16 +31,9 @@ class CT_String(OxmlElement):
 
 
 class CT_OnOff(OxmlElement):
-    def __bool__(self) -> bool:
-        if isinstance(self.val, bool):
-            return self.val
-        if self.val == SE_OnOff1.ON:
-            return True
-        return False
-
     @cached_property
-    def val(self) -> bool | SE_OnOff1:
-        return self.attr_optional(W.VAL, ST_OnOff, True)
+    def val(self) -> bool | None | SE_OnOff1:
+        return self.attr_optional(W.VAL, ST_OnOff)
 
 
 class CT_Fonts(OxmlElement):
@@ -121,8 +113,8 @@ class CT_TblWidth(OxmlElement):
         return self.attr_optional(W.W, ST_MeasurementOrPercent)
 
     @cached_property
-    def type(self) -> SE_TblWidth:
-        return self.attr_optional(W.TYPE, ST_TblWidth, SE_TblWidth.AUTO)
+    def type(self) -> SE_TblWidth | None:
+        return self.attr_optional(W.TYPE, ST_TblWidth)
 
 
 class CT_Shd(OxmlElement):
@@ -173,8 +165,8 @@ class CT_DecimalNumber(OxmlElement):
 
 class CT_Cnf(OxmlElement):
     @cached_property
-    def val(self) -> WD_CNF_FORMAT:
-        return WD_CNF_FORMAT.from_string(self.attr_required(W.VAL, ST_Cnf))
+    def val(self) -> str:
+        return self.attr_required(W.VAL, ST_Cnf)
 
 
 class CT_Markup(OxmlElement):

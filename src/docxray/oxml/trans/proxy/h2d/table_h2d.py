@@ -24,17 +24,24 @@ class CellH2D(How2Display[CellResolver]):
         tbl_style = self._rslvr.table_style
         if tbl_style is None:
             return []
-        cell_cnf = self._rslvr.cnf
-        row_cnf = self._rslvr.row_cnf
-        cnf = cell_cnf
-        if row_cnf is not None and cnf is not None:
-            cnf |= row_cnf
-        else:
-            cnf = row_cnf
-        if cnf is None:
+        cnf_gathered = self._cnf_gathered
+        if cnf_gathered is None:
             return []
-        cnf_looked = self._cnf_from_tbl_look(cnf)
-        return self._rslvr._table_style_props(tbl_style, cnf_looked)
+        return self._rslvr._table_style_props(tbl_style, cnf_gathered)
+
+    @cached_property
+    def _cnf_gathered(self) -> WD_CNF_FORMAT | None:
+        cnf_cell = self._rslvr._cnf
+        cnf_row = self._rslvr._cnf_row
+        cnf = cnf_cell
+        if cnf_row is not None:
+            if cnf is None:
+                cnf = cnf_row
+            else:
+                cnf |= cnf_row
+        if cnf is None:
+            return None
+        return self._cnf_from_tbl_look(cnf)
 
     def _cnf_from_tbl_look(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
         tbl_rslvr = self._rslvr.table_resolver

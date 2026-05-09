@@ -70,28 +70,27 @@ class PropertyPath(str):
         return cls(f"{path_to_prop}.{prop}")
 
 
+class NotFound:
+    def __init__(self, obj: Any, path: PropertyPath) -> None:
+        self.obj = obj
+        self.path = path
+
+
 def safe_get_prop(
-    obj: Any, prop_path: PropertyPath, default: Any = None
-) -> Any:
-    """Get property from object by path safely.
-
-    Args:
-        obj (Any): From python ojbect.
-        prop_path (PropertyPath): Property path like `rPr.i`
-        default (Any, optional): Return default if cannot get property
-            on path. Defaults to None.
-
-    Returns:
-        Any: Value from property or default.
-    """
+    obj: Any, prop_path: PropertyPath, prop_can_be_none: bool = True
+) -> Any | NotFound:
     if obj is None:
-        return default
+        return NotFound(obj, prop_path)
     current = obj
     for link in prop_path.links:
         if not hasattr(current, link):
-            return default
+            return NotFound(obj, prop_path)
         current = getattr(current, link)
-    return default if current is None else current
+    if current is None:
+        if prop_can_be_none:
+            return None
+        return NotFound(obj, prop_path)
+    return current
 
 
 class Length(int):

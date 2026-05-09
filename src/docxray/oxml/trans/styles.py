@@ -79,7 +79,7 @@ class CT_Style(OxmlElement):
 
     @cached_property
     def type(self) -> SE_StyleType | None:
-        return self.attr_optional(W.TYPE, ST_StyleType, SE_StyleType.PARAGRAPH)
+        return self.attr_optional(W.TYPE, ST_StyleType)
 
     @cached_property
     def styleId(self) -> str | None:

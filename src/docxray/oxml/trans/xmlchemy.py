@@ -53,11 +53,11 @@ class OxmlElement(BaseOxmlElement):
         return XML_POSITION.ONE_ITEM
 
     def attr_optional(
-        self, elm_qn: str, simple_type: type[ST_T], default: T | None = None
-    ) -> Any | T:
+        self, elm_qn: str, simple_type: type[ST_T]
+    ) -> Any | None:
         attr = self.get(elm_qn)
         if attr is None:
-            return default
+            return None
         return simple_type(attr).validate()
 
     def attr_required(self, elm_qn: str, simple_type: type[ST_T]) -> Any:

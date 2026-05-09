@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
+from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     ParagraphStyle,
@@ -18,9 +18,8 @@ from .resolver import Resolver
 class ParagraphResolver(Resolver[Paragraph]):
     @cached_property
     def para_style(self) -> ParagraphStyle | None:
-        path = self._prop_path("val", "pPr.pStyle")
-        style_id: str | None = safe_get_prop(self._proxy.element, path)
-        if style_id is None:
+        style_id = self._prop_val("pStyle", only_direct=True)
+        if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
             style_id,
@@ -29,15 +28,15 @@ class ParagraphResolver(Resolver[Paragraph]):
         )
 
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None:
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | Any:
         if self.para_style is None:
-            return None
-        return self._from_style_inheritance(self.para_style, property_path)
+            return NotFound(self, prop_path)
+        return self._from_style_inheritance(self.para_style, prop_path)
 
 
 class _NumberingResolver(Resolver[Paragraph]):
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None:
-        return None
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | Any:
+        return NotFound(self, prop_path)

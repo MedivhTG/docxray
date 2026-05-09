@@ -42,8 +42,8 @@ class CT_VerticalAlignRun(OxmlElement):
 
 class CT_Underline(OxmlElement):
     @cached_property
-    def val(self) -> SE_Underline:
-        return self.attr_optional(W.VAL, ST_Underline, SE_Underline.SINGLE)
+    def val(self) -> SE_Underline | None:
+        return self.attr_optional(W.VAL, ST_Underline)
 
 
 class CT_RPrOriginal(OxmlElement):

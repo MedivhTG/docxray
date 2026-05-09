@@ -3,7 +3,8 @@ from typing import Any
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
+from docxray.oxml.trans.proxy.compute import on_off
+from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     TableStyle,
@@ -17,9 +18,8 @@ from .resolver import Resolver
 class TableResolver(Resolver[Table]):
     @cached_property
     def table_style(self) -> TableStyle | None:
-        path = self._prop_path("val", "tblPr.tblStyle")
-        style_id: str | None = safe_get_prop(self._proxy.element, path)
-        if style_id is None:
+        style_id = self._prop_val("tblStyle", only_direct=True)
+        if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
             style_id,
@@ -27,9 +27,15 @@ class TableResolver(Resolver[Table]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
 
+    # TODO: change for trans
     def _prop_from_tbl_look(self, prop: str) -> bool:
         path = self._prop_path(prop, f"{self._path_base}.tblLook")
-        return self._prop(prop, False, path, True)
+        val = self._prop(
+            prop, path=path, prop_can_be_none=True, only_direct=True
+        )
+        if isinstance(val, NotFound):
+            return False
+        return on_off(val)
 
     @cached_property
     def first_row_show(self) -> bool:
@@ -56,11 +62,11 @@ class TableResolver(Resolver[Table]):
         return self._prop_from_tbl_look("noVBand")
 
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None:
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | None:
         if self.table_style is None:
-            return None
-        return self._from_style_inheritance(self.table_style, property_path)
+            return NotFound(self, prop_path)
+        return self._from_style_inheritance(self.table_style, prop_path)
 
 
 class RowResolver(Resolver[Row]):
@@ -73,15 +79,18 @@ class RowResolver(Resolver[Row]):
         return self.table_resolver.table_style
 
     @cached_property
-    def cnf(self) -> WD_CNF_FORMAT | None:
-        return self._prop_val("cnfStyle", only_direct=True)
+    def _cnf(self) -> WD_CNF_FORMAT | None:
+        cnf = self._prop_val("cnfStyle", only_direct=True)
+        if isinstance(cnf, NotFound):
+            return None
+        return WD_CNF_FORMAT.from_string(cnf)
 
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None:
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | Any:
         if self.table_style is None:
-            return None
-        return self._from_style_inheritance(self.table_style, property_path)
+            return NotFound(self, prop_path)
+        return self._from_style_inheritance(self.table_style, prop_path)
 
 
 class CellResolver(Resolver[Cell]):
@@ -98,16 +107,19 @@ class CellResolver(Resolver[Cell]):
         return self.row_resolver.table_style
 
     @cached_property
-    def row_cnf(self) -> WD_CNF_FORMAT | None:
-        return self.row_resolver.cnf
+    def _cnf_row(self) -> WD_CNF_FORMAT | None:
+        return self.row_resolver._cnf
 
     @cached_property
-    def cnf(self) -> WD_CNF_FORMAT | None:
-        return self._prop_val("cnfStyle", only_direct=True)
+    def _cnf(self) -> WD_CNF_FORMAT | None:
+        cnf = self._prop_val("cnfStyle", only_direct=True)
+        if isinstance(cnf, NotFound):
+            return None
+        return WD_CNF_FORMAT.from_string(cnf)
 
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None:
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | Any:
         if self.table_style is None:
-            return None
-        return self._from_style_inheritance(self.table_style, property_path)
+            return NotFound(self, prop_path)
+        return self._from_style_inheritance(self.table_style, prop_path)

@@ -10,7 +10,7 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 class CT_TblLook(OxmlElement):
     @cached_property
-    def val(self) -> bytes:
+    def val(self) -> bytes | None:
         return self.attr_optional(W.VAL, ST_ShortHexNumber)
 
     @cached_property

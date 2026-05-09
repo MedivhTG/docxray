@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.shared import PropertyPath, safe_get_prop
+from docxray.oxml.trans.proxy.shared import (
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.trans.proxy.styles.style import (
     CharacterStyle,
     NumberingStyle,
@@ -44,31 +48,36 @@ class Resolver(Generic[PROXY_T]):
     def _prop(
         self,
         name: str,
-        default: DEFAULT_T | None = None,
+        prop_can_be_none: bool = False,
         path: PropertyPath | None = None,
         only_direct: bool = False,
         **kwargs: Any,
-    ) -> Any | DEFAULT_T:
+    ) -> NotFound | Any:
         path = path or self._prop_path(name, self._path_base)
-        direct_val = safe_get_prop(getattr(self._proxy, "element"), path)
-        if direct_val is not None:
+        direct_val = safe_get_prop(
+            getattr(self._proxy, "element"), path, prop_can_be_none
+        )
+        if isinstance(direct_val, NotFound):
+            if only_direct:
+                return direct_val
+            style_val = self._from_styles_hierarchy(path, **kwargs)
+            return style_val
+        if not isinstance(direct_val, NotFound):
             return direct_val
         if only_direct:
             return direct_val
         style_val = self._from_styles_hierarchy(path, **kwargs)
-        if style_val is not None:
-            return style_val
-        return default
+        return style_val
 
     def _prop_val(
         self,
         name: str,
-        default: DEFAULT_T | None = None,
+        prop_can_be_none: bool = False,
         only_direct: bool = False,
         **kwargs: Any,
-    ) -> Any | DEFAULT_T:
+    ) -> NotFound | Any:
         path = self._prop_path("val", f"{self._path_base}.{name}")
-        return self._prop(name, default, path, only_direct, **kwargs)
+        return self._prop(name, prop_can_be_none, path, only_direct, **kwargs)
 
     def _table_style_props(
         self, table_style: TableStyle, cnf_flags: WD_CNF_FORMAT
@@ -82,20 +91,25 @@ class Resolver(Generic[PROXY_T]):
                     props.append(tblStylePr_elm)
         return props
 
-    def _from_doc_dflts(self, property_path: PropertyPath) -> Any | None:
+    def _from_doc_dflts(
+        self, property_path: PropertyPath, prop_can_be_none: bool = False
+    ) -> NotFound | Any:
         doc_dflts = self._styles.document_defaults
         if doc_dflts is None:
-            return None
-        return safe_get_prop(doc_dflts.element, property_path)
+            return NotFound(self._styles, property_path)
+        return safe_get_prop(
+            doc_dflts.element, property_path, prop_can_be_none
+        )
 
     def _from_style_inheritance(
         self,
         style: CharacterStyle | NumberingStyle,
         property_path: PropertyPath,
-    ) -> Any | None:
-        val = None
-        while val is None:
-            val = safe_get_prop(style.element, property_path)
+        prop_can_be_none: bool = False,
+    ) -> NotFound | Any:
+        val = NotFound(style, property_path)
+        while isinstance(val, NotFound):
+            val = safe_get_prop(style.element, property_path, prop_can_be_none)
             base_style = self._styles.base_style(style)
             if not isinstance(base_style, style.__class__):
                 return val
@@ -104,5 +118,5 @@ class Resolver(Generic[PROXY_T]):
 
     @abstractmethod
     def _from_styles_hierarchy(
-        self, property_path: PropertyPath, **kwargs: Any
-    ) -> Any | None: ...
+        self, prop_path: PropertyPath, **kwargs: Any
+    ) -> NotFound | Any: ...

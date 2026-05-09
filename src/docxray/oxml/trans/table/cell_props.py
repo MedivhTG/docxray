@@ -22,8 +22,8 @@ class CT_HMerge(OxmlElement):
 
 class CT_VMerge(OxmlElement):
     @cached_property
-    def val(self) -> SE_Merge:
-        return self.attr_optional(W.VAL, ST_Merge, SE_Merge.CONTINUE)
+    def val(self) -> SE_Merge | None:
+        return self.attr_optional(W.VAL, ST_Merge)
 
 
 class CT_TcBorders(OxmlElement):
