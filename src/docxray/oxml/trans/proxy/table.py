@@ -110,7 +110,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def vert_merged(self) -> bool:
-        if self.vmerge == SE_Merge.CONTINUE:
+        if self.vmerge in (None, SE_Merge.CONTINUE):
             return True
         return False
 
