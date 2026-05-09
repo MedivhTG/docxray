@@ -63,8 +63,6 @@ class RunH2D(How2Display[RunResolver]):
             para_style, prop_path, prop_can_be_none
         )
 
-    # TODO: if needed - add fallback for base styles;
-    # normally it's not a problem
     def _value_from_tbl_style(
         self,
         cell: Cell,
