@@ -45,11 +45,16 @@ class TableResolver(Resolver[Table]):
         return WD_CNF_TABLE_LOOK.from_bytes(mask)
 
     def _from_styles_hierarchy(
-        self, prop_path: PropertyPath, **kwargs: Any
+        self,
+        prop_path: PropertyPath,
+        prop_optional: bool = False,
+        **kwargs: Any,
     ) -> NotFound | None:
         if self.table_style is None:
             return NotFound(self, prop_path)
-        return self._from_style_inheritance(self.table_style, prop_path)
+        return self._from_style_inheritance(
+            self.table_style, prop_path, prop_optional
+        )
 
 
 class RowResolver(Resolver[Row]):
@@ -126,11 +131,16 @@ class RowResolver(Resolver[Row]):
         return self._prop_from_tbl_look("noVBand")
 
     def _from_styles_hierarchy(
-        self, prop_path: PropertyPath, **kwargs: Any
+        self,
+        prop_path: PropertyPath,
+        prop_optional: bool = False,
+        **kwargs: Any,
     ) -> NotFound | Any:
         if self.table_style is None:
             return NotFound(self, prop_path)
-        return self._from_style_inheritance(self.table_style, prop_path)
+        return self._from_style_inheritance(
+            self.table_style, prop_path, prop_optional
+        )
 
 
 class CellResolver(Resolver[Cell]):
@@ -158,8 +168,13 @@ class CellResolver(Resolver[Cell]):
         return WD_CNF_FORMAT.from_string(cnf)
 
     def _from_styles_hierarchy(
-        self, prop_path: PropertyPath, **kwargs: Any
+        self,
+        prop_path: PropertyPath,
+        prop_optional: bool = False,
+        **kwargs: Any,
     ) -> NotFound | Any:
         if self.table_style is None:
             return NotFound(self, prop_path)
-        return self._from_style_inheritance(self.table_style, prop_path)
+        return self._from_style_inheritance(
+            self.table_style, prop_path, prop_optional
+        )

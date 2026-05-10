@@ -62,13 +62,13 @@ class Resolver(Generic[PROXY_T]):
         if isinstance(direct_val, NotFound):
             if direct_only:
                 return direct_val
-            style_val = self._from_styles_hierarchy(path, **kwargs)
+            style_val = self._from_styles_hierarchy(path, optional, **kwargs)
             return style_val
         if not isinstance(direct_val, NotFound):
             return direct_val
         if direct_only:
             return direct_val
-        style_val = self._from_styles_hierarchy(path, **kwargs)
+        style_val = self._from_styles_hierarchy(path, optional, **kwargs)
         return style_val
 
     def _prop_val(
@@ -97,7 +97,7 @@ class Resolver(Generic[PROXY_T]):
 
     def _from_doc_dflts(
         self, prop_path: PropertyPath, prop_optional: bool = False
-    ) -> NotFound | Any:
+    ) -> Any:
         doc_dflts = self._styles.document_defaults
         if doc_dflts is None:
             return NotFound(self._styles, prop_path)
@@ -108,7 +108,7 @@ class Resolver(Generic[PROXY_T]):
         style: CharacterStyle | NumberingStyle,
         prop_path: PropertyPath,
         prop_optional: bool = False,
-    ) -> NotFound | Any:
+    ) -> Any:
         val = NotFound(style, prop_path)
         while isinstance(val, NotFound):
             val = safe_get_prop(style.element, prop_path, prop_optional)
@@ -120,5 +120,8 @@ class Resolver(Generic[PROXY_T]):
 
     @abstractmethod
     def _from_styles_hierarchy(
-        self, prop_path: PropertyPath, **kwargs: Any
-    ) -> NotFound | Any: ...
+        self,
+        prop_path: PropertyPath,
+        prop_optional: bool = False,
+        **kwargs: Any,
+    ) -> Any: ...
