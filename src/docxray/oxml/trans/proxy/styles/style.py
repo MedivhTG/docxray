@@ -116,34 +116,10 @@ class TableStyle(ParagraphStyle):
             SE_TblStyleOverrideType.BOTTOM_RIGHT_CORNER_CELL
         )
 
-    def bitwise_table_style_property(
+    def bitwise_tbl_style_prop(
         self, flag: WD_CNF_FORMAT
     ) -> CT_TblStylePr | None:
-        match flag:
-            case WD_CNF_FORMAT.FIRST_ROW:
-                return self.firstRow
-            case WD_CNF_FORMAT.LAST_ROW:
-                return self.lastRow
-            case WD_CNF_FORMAT.FIRST_COLUMN:
-                return self.firstCol
-            case WD_CNF_FORMAT.LAST_COLUMN:
-                return self.lastCol
-            case WD_CNF_FORMAT.ODD_VERTICAL_BAND:
-                return self.band1Vert
-            case WD_CNF_FORMAT.EVEN_VERTICAL_BAND:
-                return self.band2Vert
-            case WD_CNF_FORMAT.ODD_HORIZONTAL_BAND:
-                return self.band1Horz
-            case WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND:
-                return self.band2Horz
-            case WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN:
-                return self.nwCell
-            case WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN:
-                return self.neCell
-            case WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN:
-                return self.swCell
-            case WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN:
-                return self.seCell
+        return getattr(self, flag.format_name(), None)
 
     def tbl_style_prop(
         self, type: SE_TblStyleOverrideType

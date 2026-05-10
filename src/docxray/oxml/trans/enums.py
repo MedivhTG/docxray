@@ -3,6 +3,21 @@ from __future__ import annotations
 from enum import IntFlag
 from typing import Literal, Self
 
+type CnfName = Literal[
+    "firstRow",
+    "lastRow",
+    "firstCol",
+    "lastCol",
+    "band1Vert",
+    "band2Vert",
+    "band1Horz",
+    "band2Horz",
+    "nwCell",
+    "neCell",
+    "swCell",
+    "seCell",
+]
+
 
 class WD_CNF_FORMAT(IntFlag):
     # FirstRow
@@ -46,9 +61,27 @@ class WD_CNF_FORMAT(IntFlag):
 
     @classmethod
     def from_string(cls, string: str) -> Self:
-        bit_mask = int(string[::-1], 2)
-        return cls(bit_mask)
+        mask = int(string[::-1], 2)
+        return cls(mask)
 
+    def format_name(self) -> CnfName:
+        return _CNF_NAMES[self]
+
+
+_CNF_NAMES: dict[WD_CNF_FORMAT, CnfName] = {
+    WD_CNF_FORMAT.FIRST_ROW: "firstRow",
+    WD_CNF_FORMAT.LAST_ROW: "lastRow",
+    WD_CNF_FORMAT.FIRST_COLUMN: "firstCol",
+    WD_CNF_FORMAT.LAST_COLUMN: "lastCol",
+    WD_CNF_FORMAT.ODD_VERTICAL_BAND: "band1Vert",
+    WD_CNF_FORMAT.EVEN_VERTICAL_BAND: "band2Vert",
+    WD_CNF_FORMAT.ODD_HORIZONTAL_BAND: "band1Horz",
+    WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND: "band2Horz",
+    WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN: "nwCell",
+    WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN: "neCell",
+    WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN: "swCell",
+    WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN: "seCell",
+}
 
 # Order from reversed -> from highest to lowest:
 _CNF_PRIORITY = [
@@ -80,8 +113,8 @@ class WD_CNF_TABLE_LOOK(IntFlag):
     NO_COLUMN_BANDING = 0x0400
 
     def has_format(self, name: CnfLookName) -> bool:
-        member = _CNF_LOOK_NAME_TO_MEMBER[name]
-        return bool(self & member)
+        flag = _CNF_LOOK_NAME_TO_MEMBER[name]
+        return bool(self & flag)
 
 
 _CNF_LOOK_NAME_TO_MEMBER = {

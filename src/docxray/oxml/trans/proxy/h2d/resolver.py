@@ -82,12 +82,13 @@ class Resolver(Generic[PROXY_T]):
         return self._prop(name, can_be_none, direct_only, path, **kwargs)
 
     def _table_style_props(
-        self, table_style: TableStyle, cnf_flags: WD_CNF_FORMAT
+        self, table_style: TableStyle, cnf: WD_CNF_FORMAT
     ) -> list[CT_TblStylePr]:
         props = []
         for flag in WD_CNF_FORMAT.ordered_flags():
-            if cnf_flags & flag:
-                tblStylePr_elm = table_style.bitwise_table_style_property(flag)
+            format = cnf & flag
+            if format:
+                tblStylePr_elm = table_style.bitwise_tbl_style_prop(flag)
                 if tblStylePr_elm is not None:
                     props.append(tblStylePr_elm)
         if table_style.wholeTable:
