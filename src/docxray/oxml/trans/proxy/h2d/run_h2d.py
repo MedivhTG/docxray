@@ -31,7 +31,7 @@ class RunH2D(How2Display[RunResolver]):
         if not isinstance(char_direct_val, NotFound):
             return char_direct_val
 
-        char_path = self._rslvr._prop_path("val", "rPr.i")
+        char_path = self._rslvr._prop_path("val", f"rPr.{prop}")
         char_val: NotFound | bool = self._rslvr._from_styles_hierarchy(
             char_path, True
         )
