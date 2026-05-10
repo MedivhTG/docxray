@@ -63,17 +63,17 @@ class RunH2D(How2Display[RunResolver]):
         self,
         para_style: ParagraphStyle,
         prop_path: PropertyPath,
-        prop_can_be_none: bool = False,
+        prop_optional: bool = False,
     ) -> NotFound | None:
         return self._rslvr._from_style_inheritance(
-            para_style, prop_path, prop_can_be_none
+            para_style, prop_path, prop_optional
         )
 
     def _value_from_tbl_style(
         self,
         cell: Cell,
         prop_path: PropertyPath,
-        prop_can_be_none: bool = False,
+        prop_optional: bool = False,
     ) -> NotFound | Any:
         tbl_style_props = cell.h2d._table_style_props
         tbl_style = cell.h2d._rslvr.table_style
@@ -81,18 +81,18 @@ class RunH2D(How2Display[RunResolver]):
         tbl_val = NotFound(cell, prop_path)
         while tbl_style_props and cnf:
             tbl_val = self._value_from_cnf(
-                tbl_style_props, prop_path, prop_can_be_none
+                tbl_style_props, prop_path, prop_optional
             )
-            if tbl_val is None and prop_can_be_none:
+            if tbl_val is None and prop_optional:
                 return tbl_val
             # Usually not called, but in very rare cases..
             tbl_style_props = self._tbl_style_props_from_base(tbl_style, cnf)
-        if tbl_val is None and prop_can_be_none:
+        if tbl_val is None and prop_optional:
             return tbl_val
         if tbl_style is None:
             return tbl_val
         return self._rslvr._from_style_inheritance(
-            tbl_style, prop_path, prop_can_be_none
+            tbl_style, prop_path, prop_optional
         )
 
     def _tbl_style_props_from_base(
@@ -109,12 +109,10 @@ class RunH2D(How2Display[RunResolver]):
         self,
         table_style_props: list[CT_TblStylePr],
         prop_path: PropertyPath,
-        prop_can_be_none: bool = False,
+        prop_optional: bool = False,
     ) -> NotFound | Any:
         for tbl_style_prop in table_style_props:
-            table_val = safe_get_prop(
-                tbl_style_prop, prop_path, prop_can_be_none
-            )
+            table_val = safe_get_prop(tbl_style_prop, prop_path, prop_optional)
             if isinstance(table_val, NotFound):
                 continue
             return table_val

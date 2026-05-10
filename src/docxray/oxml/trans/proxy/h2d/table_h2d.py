@@ -12,8 +12,6 @@ class TableH2D(How2Display[TableResolver]):
     pass
 
 
-# TODO: Some props can be overriden by tblPrEx in row,
-# look for adding this elm it in ECMA-376 documents (do after)
 class RowH2D(How2Display[RowResolver]):
     pass
 
@@ -44,27 +42,27 @@ class CellH2D(How2Display[CellResolver]):
         return self._cnf_from_tbl_look(cnf)
 
     def _cnf_from_tbl_look(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
-        tbl_rslvr = self._rslvr.table_resolver
-        if not tbl_rslvr.first_row_show:
+        row_rslvr = self._rslvr.row_resolver
+        if not row_rslvr.first_row_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
-        if not tbl_rslvr.last_row_show:
+        if not row_rslvr.last_row_show:
             cnf &= ~WD_CNF_FORMAT.LAST_ROW
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if not tbl_rslvr.first_col_show:
+        if not row_rslvr.first_col_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
-        if not tbl_rslvr.last_col_show:
+        if not row_rslvr.last_col_show:
             cnf &= ~WD_CNF_FORMAT.LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if tbl_rslvr.no_horizontal_lines:
+        if row_rslvr.no_horizontal_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_HORIZONTAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND
-        if tbl_rslvr.no_vertical_lines:
+        if row_rslvr.no_vertical_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
         return cnf

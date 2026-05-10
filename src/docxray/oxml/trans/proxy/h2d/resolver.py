@@ -50,14 +50,14 @@ class Resolver(Generic[PROXY_T]):
     def _prop(
         self,
         name: str,
-        can_be_none: bool = False,
+        optional: bool = False,
         direct_only: bool = False,
         path: PropertyPath | None = None,
         **kwargs: Any,
     ) -> Any:
         path = path or self._prop_path(name, self._path_base)
         direct_val = safe_get_prop(
-            getattr(self._proxy, "element"), path, can_be_none
+            getattr(self._proxy, "element"), path, optional
         )
         if isinstance(direct_val, NotFound):
             if direct_only:
@@ -74,12 +74,12 @@ class Resolver(Generic[PROXY_T]):
     def _prop_val(
         self,
         name: str,
-        can_be_none: bool = False,
+        optional: bool = False,
         direct_only: bool = False,
         **kwargs: Any,
     ) -> Any:
         path = self._prop_path("val", f"{self._path_base}.{name}")
-        return self._prop(name, can_be_none, direct_only, path, **kwargs)
+        return self._prop(name, optional, direct_only, path, **kwargs)
 
     def _table_style_props(
         self, table_style: TableStyle, cnf: WD_CNF_FORMAT
@@ -96,24 +96,22 @@ class Resolver(Generic[PROXY_T]):
         return props
 
     def _from_doc_dflts(
-        self, property_path: PropertyPath, prop_can_be_none: bool = False
+        self, prop_path: PropertyPath, prop_optional: bool = False
     ) -> NotFound | Any:
         doc_dflts = self._styles.document_defaults
         if doc_dflts is None:
-            return NotFound(self._styles, property_path)
-        return safe_get_prop(
-            doc_dflts.element, property_path, prop_can_be_none
-        )
+            return NotFound(self._styles, prop_path)
+        return safe_get_prop(doc_dflts.element, prop_path, prop_optional)
 
     def _from_style_inheritance(
         self,
         style: CharacterStyle | NumberingStyle,
-        property_path: PropertyPath,
-        prop_can_be_none: bool = False,
+        prop_path: PropertyPath,
+        prop_optional: bool = False,
     ) -> NotFound | Any:
-        val = NotFound(style, property_path)
+        val = NotFound(style, prop_path)
         while isinstance(val, NotFound):
-            val = safe_get_prop(style.element, property_path, prop_can_be_none)
+            val = safe_get_prop(style.element, prop_path, prop_optional)
             base_style = self._styles.base_style(style)
             if not isinstance(base_style, style.__class__):
                 return val

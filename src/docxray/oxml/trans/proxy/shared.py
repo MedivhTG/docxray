@@ -77,8 +77,19 @@ class NotFound:
 
 
 def safe_get_prop(
-    obj: Any, prop_path: PropertyPath, prop_can_be_none: bool = True
-) -> Any | NotFound:
+    obj: Any, prop_path: PropertyPath, optional: bool = True
+) -> Any:
+    """_summary_
+
+    Args:
+        obj (Any): _description_
+        prop_path (PropertyPath): _description_
+        optional (bool, optional): _description_. Defaults to True.
+
+    Returns:
+        Any: Python value or `NotFound` if property not found; or
+            `optional` set to False and property was `None`.
+    """
     if obj is None:
         return NotFound(obj, prop_path)
     current = obj
@@ -87,7 +98,7 @@ def safe_get_prop(
             return NotFound(obj, prop_path)
         current = getattr(current, link)
     if current is None:
-        if prop_can_be_none:
+        if optional:
             return None
         return NotFound(obj, prop_path)
     return current
