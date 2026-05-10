@@ -59,6 +59,14 @@ class ParagraphResolver(Resolver[Paragraph]):
     def caps(self) -> bool | NotFound:
         return self._prop_val_for_rpr("caps", True)
 
+    @cached_property
+    def smallCaps(self) -> bool | NotFound:
+        return self._prop_val_for_rpr("smallCaps", True)
+
+    @cached_property
+    def strike(self) -> bool | NotFound:
+        return self._prop_val_for_rpr("strike", True)
+
     # ---
 
     def _from_styles_hierarchy(

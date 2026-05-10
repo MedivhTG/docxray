@@ -71,6 +71,14 @@ class CellH2D(How2Display[CellResolver]):
     def _caps(self) -> bool | NotFound:
         return self._prop_val_for_rpr("caps", True)
 
+    @cached_property
+    def _smallCaps(self) -> bool | NotFound:
+        return self._prop_val_for_rpr("smallCaps", True)
+
+    @cached_property
+    def _strike(self) -> bool | NotFound:
+        return self._prop_val_for_rpr("strike", True)
+
     # ---
 
     def _value_from_tbl_style(
@@ -88,8 +96,9 @@ class CellH2D(How2Display[CellResolver]):
             )
             if tbl_val is None and prop_optional:
                 return tbl_val
-            # Usually not called, but in very rare cases..
-            tbl_style_props = self._tbl_style_props_from_base(tbl_style, cnf)
+            tbl_style, tbl_style_props = self._tbl_style_props_from_base(
+                tbl_style, cnf
+            )
         if tbl_val is None and prop_optional:
             return tbl_val
         if tbl_style is None:
@@ -100,13 +109,13 @@ class CellH2D(How2Display[CellResolver]):
 
     def _tbl_style_props_from_base(
         self, tbl_style: TableStyle | None, cnf: WD_CNF_FORMAT
-    ) -> list[CT_TblStylePr]:
+    ) -> tuple[TableStyle | None, list[CT_TblStylePr]]:
         if tbl_style is None:
-            return []
+            return None, []
         base_style = self._rslvr._styles.base_style(tbl_style)
         if not isinstance(base_style, TableStyle):
-            return []
-        return self._rslvr._table_style_props(base_style, cnf)
+            return None, []
+        return base_style, self._rslvr._table_style_props(base_style, cnf)
 
     def _value_from_cnf(
         self,

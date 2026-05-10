@@ -11,6 +11,10 @@ from .run_rslv import RunResolver
 
 class RunH2D(How2Display[RunResolver]):
     @cached_property
+    def cell_h2d(self) -> CellH2D | None:
+        return self._rslvr.paragraph.h2d.cell_h2d
+
+    @cached_property
     def italic(self) -> bool:
         return self._display_toggled("i")
 
@@ -19,12 +23,16 @@ class RunH2D(How2Display[RunResolver]):
         return self._display_toggled("b")
 
     @cached_property
-    def caps(self) -> bool:
+    def all_uppercase(self) -> bool:
         return self._display_toggled("caps")
 
     @cached_property
-    def cell_h2d(self) -> CellH2D | None:
-        return self._rslvr.paragraph.h2d.cell_h2d
+    def all_downcase(self) -> bool:
+        return self._display_toggled("smallCaps")
+
+    @cached_property
+    def single_strike_through(self) -> bool:
+        return self._display_toggled("strike")
 
     def _display_toggled(self, prop: str) -> bool:
         char_direct_val: bool | NotFound = getattr(self._rslvr, prop)
@@ -66,13 +74,7 @@ class RunH2D(How2Display[RunResolver]):
         doc_path = self._rslvr._prop_path(
             prop, f"rPrDefault.{self._rslvr._path_base}"
         )
-        doc_val = self._rslvr._from_doc_dflts(doc_path)
-        if not isinstance(doc_val, NotFound):
-            doc_val = on_off(doc_val)
-            if doc_val is True:
-                return doc_val
-
-        def _on_off(val: bool | NotFound) -> bool:
-            return val if isinstance(val, bool) else False
-
-        return _on_off(tbl_val) ^ _on_off(para_val) ^ _on_off(char_val)
+        doc_val = on_off(self._rslvr._from_doc_dflts(doc_path))
+        if doc_val is True:
+            return doc_val
+        return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)

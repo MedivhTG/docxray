@@ -42,6 +42,7 @@ class TestDocument:
                                     r_fmt = r_or_h.h2d
                                     italic = r_fmt.italic
                                     bold = r_fmt.bold
+                                    caps = r_fmt.all_uppercase
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 f = p_or_t.element.is_first

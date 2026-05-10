@@ -57,6 +57,14 @@ class RunResolver(Resolver[Run]):
     def caps(self) -> bool | NotFound:
         return self._prop_val("caps", True, True)
 
+    @cached_property
+    def smallCaps(self) -> bool | NotFound:
+        return self._prop_val("smallCaps", True, True)
+
+    @cached_property
+    def strike(self) -> bool | NotFound:
+        return self._prop_val("strike", True, True)
+
     def _from_styles_hierarchy(
         self,
         prop_path: PropertyPath,

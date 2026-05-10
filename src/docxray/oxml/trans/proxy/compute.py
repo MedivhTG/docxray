@@ -3,7 +3,7 @@ from docxray.constants import PCT_TO_PERCENT_RATIO
 from docxray.oxml.trans.shared import CT_OnOff, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_OnOff1, SE_TblWidth
 
-from .shared import Twips
+from .shared import NotFound, Twips
 
 
 def normalize_pct(pct: int) -> float:
@@ -24,11 +24,13 @@ def width(width_elm: CT_TblWidth) -> Twips | float | None:
     return normalize_pct(width_int)
 
 
-def on_off(on_off: CT_OnOff | bool | None) -> bool:
+def on_off(on_off: CT_OnOff | bool | NotFound | None) -> bool:
     if isinstance(on_off, bool):
         return on_off
     if on_off is None:
         return True
+    if isinstance(on_off, NotFound):
+        return False
     if isinstance(on_off.val, bool):
         return on_off.val
     if on_off.val is None:
