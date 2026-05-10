@@ -27,11 +27,17 @@ class RunH2D(How2Display[RunResolver]):
     def bold(self) -> bool:
         return self._display_toggled("b")
 
+    @cached_property
+    def caps(self) -> bool:
+        return self._display_toggled("caps")
+
     def _display_toggled(self, prop: str) -> bool:
         path = PropertyPath.base(prop, f"rPrDefault.{self._rslvr._path_base}")
         doc_val = self._rslvr._from_doc_dflts(path)
         if not isinstance(doc_val, NotFound):
-            return on_off(doc_val)
+            doc_val = on_off(doc_val)
+            if doc_val is True:
+                return doc_val
         char_val: bool = getattr(self._rslvr, prop)
         prop_path = PropertyPath.base(
             "val", f"{self._rslvr._path_base}.{prop}"

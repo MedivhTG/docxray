@@ -18,7 +18,7 @@ from .resolver import Resolver
 class ParagraphResolver(Resolver[Paragraph]):
     @cached_property
     def para_style(self) -> ParagraphStyle | None:
-        style_id = self._prop_val("pStyle", only_direct=True)
+        style_id = self._prop_val("pStyle", direct_only=True)
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(

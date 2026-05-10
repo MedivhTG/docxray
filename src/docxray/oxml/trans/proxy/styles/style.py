@@ -55,6 +55,10 @@ class ParagraphStyle(CharacterStyle):
 
 class TableStyle(ParagraphStyle):
     @cached_property
+    def wholeTable(self) -> CT_TblStylePr | None:
+        return self.tbl_style_prop(SE_TblStyleOverrideType.ENTIRE_TABLE)
+
+    @cached_property
     def firstRow(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(SE_TblStyleOverrideType.HEADER_ROW)
 

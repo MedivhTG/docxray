@@ -2,8 +2,11 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.compute import on_off
+from docxray.oxml.trans.enums import (
+    WD_CNF_FORMAT,
+    WD_CNF_TABLE_LOOK,
+    CnfLookName,
+)
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
@@ -11,6 +14,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
 from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.table.table_props import CT_TblPrEx
 
 from .resolver import Resolver
 
@@ -18,7 +22,7 @@ from .resolver import Resolver
 class TableResolver(Resolver[Table]):
     @cached_property
     def table_style(self) -> TableStyle | None:
-        style_id = self._prop_val("tblStyle", only_direct=True)
+        style_id = self._prop_val("tblStyle", direct_only=True)
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
@@ -27,15 +31,17 @@ class TableResolver(Resolver[Table]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
 
-    # TODO: change for trans
-    def _prop_from_tbl_look(self, prop: str) -> bool:
-        path = self._prop_path(prop, f"{self._path_base}.tblLook")
-        val = self._prop(
-            prop, path=path, prop_can_be_none=True, only_direct=True
+    @cached_property
+    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
+        mask: bytes | None = self._prop_val(
+            "tblLook", can_be_none=True, direct_only=True
         )
-        if isinstance(val, NotFound):
-            return False
-        return on_off(val)
+        if mask is None:
+            return WD_CNF_TABLE_LOOK.from_bytes(b"")
+        return WD_CNF_TABLE_LOOK.from_bytes(mask)
+
+    def _prop_from_tbl_look(self, prop: CnfLookName) -> bool:
+        return self._cnf_look.has_format(prop)
 
     @cached_property
     def first_row_show(self) -> bool:
@@ -79,8 +85,17 @@ class RowResolver(Resolver[Row]):
         return self.table_resolver.table_style
 
     @cached_property
+    def _tblPrEx(self) -> CT_TblPrEx | None:
+        name = "tblPrEx"
+        path = self._prop_path(name)
+        prop = self._prop(name, path=path, direct_only=True)
+        if isinstance(prop, NotFound):
+            return None
+        return prop
+
+    @cached_property
     def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._prop_val("cnfStyle", only_direct=True)
+        cnf = self._prop_val("cnfStyle", direct_only=True)
         if isinstance(cnf, NotFound):
             return None
         return WD_CNF_FORMAT.from_string(cnf)
@@ -112,7 +127,7 @@ class CellResolver(Resolver[Cell]):
 
     @cached_property
     def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._prop_val("cnfStyle", only_direct=True)
+        cnf = self._prop_val("cnfStyle", direct_only=True)
         if isinstance(cnf, NotFound):
             return None
         return WD_CNF_FORMAT.from_string(cnf)

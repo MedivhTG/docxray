@@ -20,7 +20,7 @@ from .resolver import Resolver
 class RunResolver(Resolver[Run]):
     @cached_property
     def char_style(self) -> CharacterStyle | None:
-        style_id = self._prop_val("rStyle", only_direct=True)
+        style_id = self._prop_val("rStyle", direct_only=True)
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
@@ -54,6 +54,10 @@ class RunResolver(Resolver[Run]):
     @cached_property
     def b(self) -> bool:
         return self._prop_val_toggled("b")
+
+    @cached_property
+    def caps(self) -> bool:
+        return self._prop_val_toggled("caps")
 
     def _from_styles_hierarchy(
         self, prop_path: PropertyPath, **kwargs: Any

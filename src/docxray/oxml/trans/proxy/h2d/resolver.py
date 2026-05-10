@@ -42,29 +42,31 @@ class Resolver(Generic[PROXY_T]):
             self._numbering = num_part.numbering
         self._path_base = property_base
 
-    def _prop_path(self, end_name: str, path_to_name: str) -> PropertyPath:
+    def _prop_path(
+        self, end_name: str, path_to_name: str = ""
+    ) -> PropertyPath:
         return PropertyPath.base(end_name, path_to_name)
 
     def _prop(
         self,
         name: str,
-        prop_can_be_none: bool = False,
+        can_be_none: bool = False,
+        direct_only: bool = False,
         path: PropertyPath | None = None,
-        only_direct: bool = False,
         **kwargs: Any,
-    ) -> NotFound | Any:
+    ) -> Any:
         path = path or self._prop_path(name, self._path_base)
         direct_val = safe_get_prop(
-            getattr(self._proxy, "element"), path, prop_can_be_none
+            getattr(self._proxy, "element"), path, can_be_none
         )
         if isinstance(direct_val, NotFound):
-            if only_direct:
+            if direct_only:
                 return direct_val
             style_val = self._from_styles_hierarchy(path, **kwargs)
             return style_val
         if not isinstance(direct_val, NotFound):
             return direct_val
-        if only_direct:
+        if direct_only:
             return direct_val
         style_val = self._from_styles_hierarchy(path, **kwargs)
         return style_val
@@ -72,23 +74,24 @@ class Resolver(Generic[PROXY_T]):
     def _prop_val(
         self,
         name: str,
-        prop_can_be_none: bool = False,
-        only_direct: bool = False,
+        can_be_none: bool = False,
+        direct_only: bool = False,
         **kwargs: Any,
-    ) -> NotFound | Any:
+    ) -> Any:
         path = self._prop_path("val", f"{self._path_base}.{name}")
-        return self._prop(name, prop_can_be_none, path, only_direct, **kwargs)
+        return self._prop(name, can_be_none, direct_only, path, **kwargs)
 
     def _table_style_props(
         self, table_style: TableStyle, cnf_flags: WD_CNF_FORMAT
     ) -> list[CT_TblStylePr]:
-        # TODO: add whole table flag
         props = []
         for flag in WD_CNF_FORMAT.ordered_flags():
             if cnf_flags & flag:
                 tblStylePr_elm = table_style.bitwise_table_style_property(flag)
                 if tblStylePr_elm is not None:
                     props.append(tblStylePr_elm)
+        if table_style.wholeTable:
+            props.append(table_style.wholeTable)
         return props
 
     def _from_doc_dflts(

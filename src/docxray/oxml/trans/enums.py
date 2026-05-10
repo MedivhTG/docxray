@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import IntFlag
 from typing import Literal, Self
 
@@ -39,8 +41,8 @@ class WD_CNF_FORMAT(IntFlag):
         `lowest` - standard inheritance (not recommended for fast resolve).
         """
         if order == "highest":
-            return _PRIORITY_FLAGS
-        return list(reversed(_PRIORITY_FLAGS))
+            return _CNF_PRIORITY
+        return list(reversed(_CNF_PRIORITY))
 
     @classmethod
     def from_string(cls, string: str) -> Self:
@@ -49,7 +51,7 @@ class WD_CNF_FORMAT(IntFlag):
 
 
 # Order from reversed -> from highest to lowest:
-_PRIORITY_FLAGS = [
+_CNF_PRIORITY = [
     WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN,
     WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN,
     WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN,
@@ -63,3 +65,30 @@ _PRIORITY_FLAGS = [
     WD_CNF_FORMAT.EVEN_VERTICAL_BAND,
     WD_CNF_FORMAT.ODD_VERTICAL_BAND,
 ]
+
+type CnfLookName = Literal[
+    "firstRow", "lastRow", "firstColumn", "lastColumn", "noHBand", "noVBand"
+]
+
+
+class WD_CNF_TABLE_LOOK(IntFlag):
+    APPLY_FIRST_ROW = 0x0020
+    APPLY_LAST_ROW = 0x0040
+    APPLY_FIRST_COLUMN = 0x0080
+    APPLY_LAST_COLUMN = 0x0100
+    NO_ROW_BANDING = 0x0200
+    NO_COLUMN_BANDING = 0x0400
+
+    def has_format(self, name: CnfLookName) -> bool:
+        member = _CNF_LOOK_NAME_TO_MEMBER[name]
+        return bool(self & member)
+
+
+_CNF_LOOK_NAME_TO_MEMBER = {
+    "firstRow": WD_CNF_TABLE_LOOK.APPLY_FIRST_ROW,
+    "lastRow": WD_CNF_TABLE_LOOK.APPLY_LAST_ROW,
+    "firstColumn": WD_CNF_TABLE_LOOK.APPLY_FIRST_COLUMN,
+    "lastColumn": WD_CNF_TABLE_LOOK.APPLY_LAST_COLUMN,
+    "noHBand": WD_CNF_TABLE_LOOK.NO_ROW_BANDING,
+    "noVBand": WD_CNF_TABLE_LOOK.NO_COLUMN_BANDING,
+}
