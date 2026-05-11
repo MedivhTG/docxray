@@ -43,6 +43,8 @@ class TestDocument:
                                     italic = r_fmt.italic
                                     bold = r_fmt.bold
                                     caps = r_fmt.all_uppercase
+                                    u = r_fmt.underline
+                                    v_algn = r_fmt.vertical_alignment
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 f = p_or_t.element.is_first

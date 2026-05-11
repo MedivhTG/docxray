@@ -42,6 +42,10 @@ class ParagraphResolver(Resolver[Paragraph]):
         path = self.prop_path("val", f"rPr.{name}")
         return self.from_styles_hierarchy(path, True)
 
+    def prop_val_run(self, name: str, optional: bool = True) -> Any:
+        path = self.prop_path("val", f"rPr.{name}")
+        return self.from_styles_hierarchy(path, optional)
+
     def from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
