@@ -12,15 +12,15 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_OnOff1, SE_StyleType
 
-from .resolver import Resolver
+from .resolver import ResolveAlgorithm, Resolver
 
 
 class RunResolver(Resolver[Run]):
     @cached_property
     def char_style(self) -> CharacterStyle | None:
-        style_id = self._prop_val("rStyle", direct_only=True)
+        style_id = self.prop_val("rStyle")
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
@@ -45,34 +45,14 @@ class RunResolver(Resolver[Run]):
     def para_style(self) -> ParagraphStyle | None:
         return self.paragraph_resolver.para_style
 
-    @cached_property
-    def i(self) -> bool | NotFound:
-        return self._prop_val("i", True, True)
+    def _prop_val_toggled(
+        self, name: str, algorithm: ResolveAlgorithm = "direct"
+    ) -> NotFound | None | bool | SE_OnOff1:
+        return self.prop_val(name, True, algorithm)
 
-    @cached_property
-    def b(self) -> bool | NotFound:
-        return self._prop_val("b", True, True)
-
-    @cached_property
-    def caps(self) -> bool | NotFound:
-        return self._prop_val("caps", True, True)
-
-    @cached_property
-    def smallCaps(self) -> bool | NotFound:
-        return self._prop_val("smallCaps", True, True)
-
-    @cached_property
-    def strike(self) -> bool | NotFound:
-        return self._prop_val("strike", True, True)
-
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
-    ) -> NotFound | Any:
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
+    ) -> Any:
         if self.char_style is None:
-            return NotFound(self, prop_path)
-        return self._from_style_inheritance(
-            self.char_style, prop_path, prop_optional
-        )
+            return NotFound(self, path)
+        return self.from_style_inheritance(self.char_style, path, optional)

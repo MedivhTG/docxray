@@ -76,14 +76,12 @@ class NotFound:
         self.path = path
 
 
-def safe_get_prop(
-    obj: Any, prop_path: PropertyPath, optional: bool = True
-) -> Any:
+def safe_get_prop(obj: Any, path: PropertyPath, optional: bool = True) -> Any:
     """_summary_
 
     Args:
         obj (Any): _description_
-        prop_path (PropertyPath): _description_
+        path (PropertyPath): _description_
         optional (bool, optional): _description_. Defaults to True.
 
     Returns:
@@ -91,16 +89,16 @@ def safe_get_prop(
             `optional` set to False and property was `None`.
     """
     if obj is None:
-        return NotFound(obj, prop_path)
+        return NotFound(obj, path)
     current = obj
-    for link in prop_path.links:
+    for link in path.links:
         if not hasattr(current, link):
-            return NotFound(obj, prop_path)
+            return NotFound(obj, path)
         current = getattr(current, link)
     if current is None:
         if optional:
             return None
-        return NotFound(obj, prop_path)
+        return NotFound(obj, path)
     return current
 
 

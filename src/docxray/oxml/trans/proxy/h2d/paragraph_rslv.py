@@ -4,7 +4,6 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.h2d.table_rslv import TableResolver
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
@@ -13,7 +12,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_OnOff1, SE_StyleType
 
 from .resolver import Resolver
 
@@ -21,7 +20,7 @@ from .resolver import Resolver
 class ParagraphResolver(Resolver[Paragraph]):
     @cached_property
     def para_style(self) -> ParagraphStyle | None:
-        style_id = self._prop_val("pStyle", direct_only=True)
+        style_id = self.prop_val("pStyle")
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
@@ -37,56 +36,22 @@ class ParagraphResolver(Resolver[Paragraph]):
             return container.h2d._rslvr.table_resolver
         return None
 
-    # --- Properties for Run
-    def _prop_val_for_rpr(self, name: str, toggled: bool) -> Any:
-        path = self._prop_path("val", f"rPr.{name}")
-        val = self._from_styles_hierarchy(path, toggled)
-        if toggled:
-            if isinstance(val, NotFound):
-                return val
-            return on_off(val)
-        return val
+    def _prop_val_run_toggled(
+        self, name: str
+    ) -> NotFound | None | bool | SE_OnOff1:
+        path = self.prop_path("val", f"rPr.{name}")
+        return self.from_styles_hierarchy(path, True)
 
-    @cached_property
-    def i(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("i", True)
-
-    @cached_property
-    def b(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("b", True)
-
-    @cached_property
-    def caps(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("caps", True)
-
-    @cached_property
-    def smallCaps(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("smallCaps", True)
-
-    @cached_property
-    def strike(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("strike", True)
-
-    # ---
-
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
         if self.para_style is None:
-            return NotFound(self, prop_path)
-        return self._from_style_inheritance(
-            self.para_style, prop_path, prop_optional
-        )
+            return NotFound(self, path)
+        return self.from_style_inheritance(self.para_style, path, optional)
 
 
 class _NumberingResolver(Resolver[Paragraph]):
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
-        return NotFound(self, prop_path)
+        return NotFound(self, path)

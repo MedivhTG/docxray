@@ -2,8 +2,11 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.compute import on_off
+from docxray.oxml.trans.enums import (
+    WD_CNF_FORMAT,
+    WD_CNF_TABLE_LOOK,
+    CnfLookName,
+)
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
     PropertyPath,
@@ -17,28 +20,77 @@ from .table_rslv import CellResolver, RowResolver, TableResolver
 
 
 class TableH2D(How2Display[TableResolver]):
-    pass
+    @cached_property
+    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
+        mask: bytes | None = self._rslvr.prop_val("tblLook", optional=True)
+        if mask is None:
+            return WD_CNF_TABLE_LOOK.from_bytes(b"")
+        return WD_CNF_TABLE_LOOK.from_bytes(mask)
 
 
 class RowH2D(How2Display[RowResolver]):
-    pass
+    @cached_property
+    def first_row_show(self) -> bool:
+        return self._format_from_cnf_look("firstRow")
+
+    @cached_property
+    def last_row_show(self) -> bool:
+        return self._format_from_cnf_look("lastRow")
+
+    @cached_property
+    def first_col_show(self) -> bool:
+        return self._format_from_cnf_look("firstColumn")
+
+    @cached_property
+    def last_col_show(self) -> bool:
+        return self._format_from_cnf_look("lastColumn")
+
+    @cached_property
+    def no_horizontal_lines(self) -> bool:
+        return self._format_from_cnf_look("noHBand")
+
+    @cached_property
+    def no_vertical_lines(self) -> bool:
+        return self._format_from_cnf_look("noVBand")
+
+    def _format_from_cnf_look(self, format_name: CnfLookName) -> bool:
+        return self._cnf_look.has_format(format_name)
+
+    @cached_property
+    def _cnf(self) -> WD_CNF_FORMAT | None:
+        cnf = self._rslvr.prop_val("cnfStyle")
+        if isinstance(cnf, NotFound):
+            return None
+        return WD_CNF_FORMAT.from_string(cnf)
+
+    @cached_property
+    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
+        if self._rslvr.tblPrEx is None:
+            return self._rslvr.table.h2d._cnf_look
+        mask: bytes | None = safe_get_prop(
+            self._rslvr.tblPrEx, self._rslvr.prop_path("val", "tblLook")
+        )
+        if mask is None:
+            return WD_CNF_TABLE_LOOK.from_bytes(b"")
+        return WD_CNF_TABLE_LOOK.from_bytes(mask)
 
 
 class CellH2D(How2Display[CellResolver]):
     @cached_property
-    def _table_style_props(self) -> list[CT_TblStylePr]:
-        tbl_style = self._rslvr.table_style
-        if tbl_style is None:
-            return []
-        cnf_gathered = self._cnf_gathered
-        if cnf_gathered is None:
-            return []
-        return self._rslvr._table_style_props(tbl_style, cnf_gathered)
+    def _cnf(self) -> WD_CNF_FORMAT | None:
+        cnf = self._rslvr.prop_val("cnfStyle")
+        if isinstance(cnf, NotFound):
+            return None
+        return WD_CNF_FORMAT.from_string(cnf)
+
+    @cached_property
+    def _cnf_row(self) -> WD_CNF_FORMAT | None:
+        return self._rslvr.row.h2d._cnf
 
     @cached_property
     def _cnf_gathered(self) -> WD_CNF_FORMAT | None:
-        cnf_cell = self._rslvr._cnf
-        cnf_row = self._rslvr._cnf_row
+        cnf_cell = self._cnf
+        cnf_row = self._cnf_row
         cnf = cnf_cell
         if cnf_row is not None:
             if cnf is None:
@@ -47,111 +99,84 @@ class CellH2D(How2Display[CellResolver]):
                 cnf |= cnf_row
         if cnf is None:
             return None
-        return self._cnf_from_tbl_look(cnf)
-
-    # --- Properties for Run
-    def _prop_val_for_rpr(self, name: str, toggled: bool) -> NotFound | Any:
-        path = self._rslvr._prop_path("val", f"rPr.{name}")
-        val = self._value_from_tbl_style(path, toggled)
-        if toggled:
-            if isinstance(val, NotFound):
-                return val
-            return on_off(val)
-        return val
+        return self._cnf_looked(cnf)
 
     @cached_property
-    def _i(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("i", True)
+    def _has_cond_format(self) -> bool:
+        return False if self._cnf_gathered is None else True
 
     @cached_property
-    def _b(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("b", True)
-
-    @cached_property
-    def _caps(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("caps", True)
-
-    @cached_property
-    def _smallCaps(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("smallCaps", True)
-
-    @cached_property
-    def _strike(self) -> bool | NotFound:
-        return self._prop_val_for_rpr("strike", True)
-
-    # ---
-
-    def _value_from_tbl_style(
+    def _tbl_style_props_deep(
         self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-    ) -> Any:
-        tbl_style_props = self._table_style_props
+    ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
         tbl_style = self._rslvr.table_style
+        props_leveled = []
         cnf = self._cnf_gathered
-        tbl_val = NotFound(self, prop_path)
-        while tbl_style_props and cnf:
-            tbl_val = self._value_from_cnf(
-                tbl_style_props, prop_path, prop_optional
-            )
-            if tbl_val is None and prop_optional:
-                return tbl_val
-            tbl_style, tbl_style_props = self._tbl_style_props_from_base(
-                tbl_style, cnf
-            )
-        if tbl_val is None and prop_optional:
-            return tbl_val
-        if tbl_style is None:
-            return tbl_val
-        return self._rslvr._from_style_inheritance(
-            tbl_style, prop_path, prop_optional
-        )
+        while isinstance(tbl_style, TableStyle):
+            if cnf is not None:
+                tbl_style_props = self._rslvr.table_style_props(tbl_style, cnf)
+            else:
+                tbl_style_props = []
+            props_leveled.append((tbl_style, tbl_style_props))
+            tbl_style = self._rslvr._styles.base_style(tbl_style)  # type: ignore[assignment]
+        return props_leveled
 
-    def _tbl_style_props_from_base(
-        self, tbl_style: TableStyle | None, cnf: WD_CNF_FORMAT
-    ) -> tuple[TableStyle | None, list[CT_TblStylePr]]:
-        if tbl_style is None:
-            return None, []
-        base_style = self._rslvr._styles.base_style(tbl_style)
-        if not isinstance(base_style, TableStyle):
-            return None, []
-        return base_style, self._rslvr._table_style_props(base_style, cnf)
+    def _from_tbl_style_hierarchy(
+        self, path: PropertyPath, optional: bool = False
+    ) -> Any:
+        style_direct_val = NotFound(self, path)
+        for tbl_style, tbl_style_props in self._tbl_style_props_deep:
+            if self._has_cond_format:
+                if isinstance(style_direct_val, NotFound):
+                    style_direct_val = safe_get_prop(
+                        tbl_style.element, path, optional
+                    )
+                tbl_val = self._from_tbl_style_props(
+                    tbl_style_props, path, optional
+                )
+                if not isinstance(tbl_val, NotFound):
+                    return tbl_val
+            else:
+                tbl_val = safe_get_prop(tbl_style.element, path, optional)
+                if not isinstance(tbl_val, NotFound):
+                    return tbl_val
+        return style_direct_val
 
-    def _value_from_cnf(
+    def _from_tbl_style_props(
         self,
         table_style_props: list[CT_TblStylePr],
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
+        path: PropertyPath,
+        optional: bool = False,
     ) -> Any:
         for tbl_style_prop in table_style_props:
-            table_val = safe_get_prop(tbl_style_prop, prop_path, prop_optional)
+            table_val = safe_get_prop(tbl_style_prop, path, optional)
             if isinstance(table_val, NotFound):
                 continue
             return table_val
-        return NotFound(table_style_props, prop_path)
+        return NotFound(table_style_props, path)
 
-    def _cnf_from_tbl_look(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
-        row_rslvr = self._rslvr.row_resolver
-        if not row_rslvr.first_row_show:
+    def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
+        row_h2d = self._rslvr.row.h2d
+        if not row_h2d.first_row_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
-        if not row_rslvr.last_row_show:
+        if not row_h2d.last_row_show:
             cnf &= ~WD_CNF_FORMAT.LAST_ROW
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if not row_rslvr.first_col_show:
+        if not row_h2d.first_col_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
-        if not row_rslvr.last_col_show:
+        if not row_h2d.last_col_show:
             cnf &= ~WD_CNF_FORMAT.LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if row_rslvr.no_horizontal_lines:
+        if row_h2d.no_horizontal_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_HORIZONTAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND
-        if row_rslvr.no_vertical_lines:
+        if row_h2d.no_vertical_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
         return cnf

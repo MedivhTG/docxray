@@ -39,8 +39,8 @@ class RunH2D(How2Display[RunResolver]):
         if not isinstance(char_direct_val, NotFound):
             return char_direct_val
 
-        char_path = self._rslvr._prop_path("val", f"rPr.{prop}")
-        char_val: NotFound | bool = self._rslvr._from_styles_hierarchy(
+        char_path = self._rslvr.prop_path("val", f"rPr.{prop}")
+        char_val: NotFound | bool = self._rslvr.from_styles_hierarchy(
             char_path, True
         )
         para_val: NotFound | bool = getattr(
@@ -71,10 +71,10 @@ class RunH2D(How2Display[RunResolver]):
         para_val: bool | NotFound,
         tbl_val: bool | NotFound,
     ) -> bool:
-        doc_path = self._rslvr._prop_path(
+        doc_path = self._rslvr.prop_path(
             prop, f"rPrDefault.{self._rslvr._path_base}"
         )
-        doc_val = on_off(self._rslvr._from_doc_dflts(doc_path))
+        doc_val = on_off(self._rslvr.from_doc_dflts(doc_path))
         if doc_val is True:
             return doc_val
         return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)

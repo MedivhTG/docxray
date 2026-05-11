@@ -2,11 +2,6 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.enums import (
-    WD_CNF_FORMAT,
-    WD_CNF_TABLE_LOOK,
-    CnfLookName,
-)
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
     PropertyPath,
@@ -26,7 +21,7 @@ from .resolver import Resolver
 class TableResolver(Resolver[Table]):
     @cached_property
     def table_style(self) -> TableStyle | None:
-        style_id = self._prop_val("tblStyle", direct_only=True)
+        style_id = self.prop_val("tblStyle")
         if isinstance(style_id, NotFound):
             return None
         return self._styles.get_by_id(
@@ -35,47 +30,36 @@ class TableResolver(Resolver[Table]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
 
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        mask: bytes | None = self._prop_val(
-            "tblLook", optional=True, direct_only=True
-        )
-        if mask is None:
-            return WD_CNF_TABLE_LOOK.from_bytes(b"")
-        return WD_CNF_TABLE_LOOK.from_bytes(mask)
-
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> NotFound | None:
         if self.table_style is None:
-            return NotFound(self, prop_path)
-        return self._from_style_inheritance(
-            self.table_style, prop_path, prop_optional
-        )
+            return NotFound(self, path)
+        return self.from_style_inheritance(self.table_style, path, optional)
 
 
 class RowResolver(Resolver[Row]):
     @cached_property
-    def table_resolver(self) -> TableResolver:
-        return self._proxy.table.h2d._rslvr
+    def table(self) -> Table:
+        return self._proxy.table
 
     @cached_property
-    def _tblPrEx(self) -> CT_TblPrEx | None:
-        name = "tblPrEx"
-        prop = self._prop(name, path=self._prop_path(name), direct_only=True)
-        if isinstance(prop, NotFound):
+    def table_resolver(self) -> TableResolver:
+        return self.table.h2d._rslvr
+
+    @cached_property
+    def tblPrEx(self) -> CT_TblPrEx | None:
+        tblPrEx_elm = self.prop("tblPrEx")
+        if isinstance(tblPrEx_elm, NotFound):
             return None
-        return prop
+        return tblPrEx_elm
 
     @cached_property
     def table_style(self) -> TableStyle | None:
-        if self._tblPrEx is None:
+        if self.tblPrEx is None:
             return self.table_resolver.table_style
         style_id = safe_get_prop(
-            self._tblPrEx, self._prop_path("val", "tblStyle"), False
+            self.tblPrEx, self.prop_path("val", "tblStyle"), False
         )
         if isinstance(style_id, NotFound):
             return None
@@ -85,68 +69,22 @@ class RowResolver(Resolver[Row]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
 
-    @cached_property
-    def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._prop_val("cnfStyle", direct_only=True)
-        if isinstance(cnf, NotFound):
-            return None
-        return WD_CNF_FORMAT.from_string(cnf)
-
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        if self._tblPrEx is None:
-            return self.table_resolver._cnf_look
-        mask: bytes | None = safe_get_prop(
-            self._tblPrEx, self._prop_path("val", "tblLook")
-        )
-        if mask is None:
-            return WD_CNF_TABLE_LOOK.from_bytes(b"")
-        return WD_CNF_TABLE_LOOK.from_bytes(mask)
-
-    def _prop_from_tbl_look(self, prop: CnfLookName) -> bool:
-        return self._cnf_look.has_format(prop)
-
-    @cached_property
-    def first_row_show(self) -> bool:
-        return self._prop_from_tbl_look("firstRow")
-
-    @cached_property
-    def last_row_show(self) -> bool:
-        return self._prop_from_tbl_look("lastRow")
-
-    @cached_property
-    def first_col_show(self) -> bool:
-        return self._prop_from_tbl_look("firstColumn")
-
-    @cached_property
-    def last_col_show(self) -> bool:
-        return self._prop_from_tbl_look("lastColumn")
-
-    @cached_property
-    def no_horizontal_lines(self) -> bool:
-        return self._prop_from_tbl_look("noHBand")
-
-    @cached_property
-    def no_vertical_lines(self) -> bool:
-        return self._prop_from_tbl_look("noVBand")
-
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
-    ) -> NotFound | Any:
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
+    ) -> Any:
         if self.table_style is None:
-            return NotFound(self, prop_path)
-        return self._from_style_inheritance(
-            self.table_style, prop_path, prop_optional
-        )
+            return NotFound(self, path)
+        return self.from_style_inheritance(self.table_style, path, optional)
 
 
 class CellResolver(Resolver[Cell]):
     @cached_property
+    def row(self) -> Row:
+        return self._proxy.row
+
+    @cached_property
     def row_resolver(self) -> RowResolver:
-        return self._proxy.row.h2d._rslvr
+        return self.row.h2d._rslvr
 
     @cached_property
     def table_resolver(self) -> TableResolver:
@@ -156,25 +94,9 @@ class CellResolver(Resolver[Cell]):
     def table_style(self) -> TableStyle | None:
         return self.row_resolver.table_style
 
-    @cached_property
-    def _cnf_row(self) -> WD_CNF_FORMAT | None:
-        return self.row_resolver._cnf
-
-    @cached_property
-    def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._prop_val("cnfStyle", direct_only=True)
-        if isinstance(cnf, NotFound):
-            return None
-        return WD_CNF_FORMAT.from_string(cnf)
-
-    def _from_styles_hierarchy(
-        self,
-        prop_path: PropertyPath,
-        prop_optional: bool = False,
-        **kwargs: Any,
-    ) -> NotFound | Any:
+    def from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
+    ) -> Any:
         if self.table_style is None:
-            return NotFound(self, prop_path)
-        return self._from_style_inheritance(
-            self.table_style, prop_path, prop_optional
-        )
+            return NotFound(self, path)
+        return self.from_style_inheritance(self.table_style, path, optional)
