@@ -122,6 +122,11 @@ class CellH2D(How2Display[CellResolver]):
         return side_val
 
     # TODO: realize as:
+    # remark) `insideH`/`insideV` about lines inside
+    # grid group with horizontal/vertical borders
+    # without (topmost, botmost)/(leftmost, rightmost) borders rendered -
+    # they are rendered by `top`/`bottom`/`left`/`right` sides instead.
+    #
     # 1) Modify `from_tbl_style_hierarchy` method to return
     # context where property got in tuple (prop and context).
     #
@@ -132,7 +137,7 @@ class CellH2D(How2Display[CellResolver]):
     # 3) Split logic as follows:
     #
     # 3.1) If context is `wholeTable` then pos of cell
-    # derived like in table grid (Horz lines for).
+    # derived like in table grid (look point `remark`)
     #
     # 3.2) If context is `firsRow`/`lastRow`/`band1Horz`/`band2Horz`
     # then pos of cell derived as
@@ -152,10 +157,7 @@ class CellH2D(How2Display[CellResolver]):
     # of cell groups but ommited in all levels then get their
     # fallback analogs (for 1st - top/bottom, for 2nd - left/right).
     #
-    # 5) `insideH`/`insideV` about lines inside
-    # grid group with horizontal/vertical borders
-    # without (topmost, botmost)/(leftmost, rightmost) borders rendered -
-    # they are rendered by `top`/`bottom`/`left`/`right` sides instead.
+
     @cached_property
     def _side_context(self) -> None:
         pass
