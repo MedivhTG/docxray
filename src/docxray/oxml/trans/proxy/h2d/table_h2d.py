@@ -145,6 +145,8 @@ class CellH2D(How2Display[CellResolver]):
     # `insideV` has no meaning in context.
     #
     # 3.4) If context is `nwCell`/`neCell`/`swCell`/`seCell`
+    # then pos of cell derived as single cell (no adjacent cells) and
+    # `insideV` with `insideH` has no meaning in context.
     #
     # 4) If sides as `insideH` or `insideV` has meaning in context
     # of cell groups but ommited in all levels then get their
