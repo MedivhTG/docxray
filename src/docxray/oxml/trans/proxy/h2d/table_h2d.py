@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any
+from typing import Literal
 
 # docxray stuff
 from docxray.oxml.trans.enums import (
@@ -7,13 +7,12 @@ from docxray.oxml.trans.enums import (
     WD_CNF_TABLE_LOOK,
     CnfLookName,
 )
-from docxray.oxml.trans.proxy.shared import (
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.trans.proxy.compute import width
+from docxray.oxml.trans.proxy.shared import NotFound, Twips, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import TableStyle
+from docxray.oxml.trans.st.enums import SE_Border
 from docxray.oxml.trans.styles import CT_TblStylePr
+from docxray.oxml.trans.table.table_props import CT_TblBorders
 
 from .how_to_display import How2Display
 from .table_rslv import CellResolver, RowResolver, TableResolver
@@ -26,6 +25,13 @@ class TableH2D(How2Display[TableResolver]):
         if mask is None:
             return WD_CNF_TABLE_LOOK.from_bytes(b"")
         return WD_CNF_TABLE_LOOK.from_bytes(mask)
+
+    @cached_property
+    def _tblBorders(self) -> CT_TblBorders | None:
+        tblBorders_elm = self._rslvr.prop("tblBorders", algorithm="both")
+        if isinstance(tblBorders_elm, NotFound):
+            return None
+        return tblBorders_elm
 
 
 class RowH2D(How2Display[RowResolver]):
@@ -74,8 +80,109 @@ class RowH2D(How2Display[RowResolver]):
             return WD_CNF_TABLE_LOOK.from_bytes(b"")
         return WD_CNF_TABLE_LOOK.from_bytes(mask)
 
+    @cached_property
+    def _tblBorders(self) -> CT_TblBorders | None:
+        if self._rslvr.tblPrEx is not None:
+            return self._rslvr.tblPrEx.tblBorders
+        return self._rslvr.table.h2d._tblBorders
+
+
+type Border = Literal["top", "bottom", "left", "right"]
+
 
 class CellH2D(How2Display[CellResolver]):
+    # @cached_property
+    # def top(self) -> SE_Border | None:
+    #     spacing = self._rslvr.row.h2d._tblCellSpacing
+    #     side = "top"
+    #     if spacing is not None and spacing > 0:
+    #         return self._side_cell_spacing(side)
+    #     return self._side_no_cell_spacing(side)
+
+    def _side_cell_spacing(self, side: str) -> None:
+        pass
+
+    def _side_no_cell_spacing(self, side: Border) -> None:
+        pass
+
+    def _side_val(self, side: str) -> SE_Border | None:
+        path = self._rslvr.prop_path(
+            "val", f"{self._rslvr._path_base}.tcBorders.{side}"
+        )
+        side_val = self._rslvr.from_tbl_style_hierarchy(
+            self._has_cnf,
+            self._tbl_style_props_deep,
+            path,
+        )
+        if isinstance(side_val, NotFound) or side_val in (
+            SE_Border.NULL,
+            SE_Border.NONE,
+        ):
+            return None
+        return side_val
+
+    # TODO: realize as:
+    # 1) Modify `from_tbl_style_hierarchy` method to return
+    # context where property got in tuple (prop and context).
+    #
+    # 2) If property got in table style direct level or
+    # from row-level `tblBorders` or `tblBorders` then
+    # cell in group of `wholeTable`
+    #
+    # 3) Split logic as follows:
+    #
+    # 3.1) If context is `wholeTable` then pos of cell
+    # derived like in table grid (Horz lines for).
+    #
+    # 3.2) If context is `firsRow`/`lastRow`/`band1Horz`/`band2Horz`
+    # then pos of cell derived as
+    # in single row (cells above and below are not exist) and
+    # `insideH` has no meaning in context.
+    #
+    # 3.3) If context is `firstCol`/`lastCol`/`band1Vert`/`band2Vert`
+    # then pos of cell derived as
+    # in single column (cells prev and next are not exist) and
+    # `insideV` has no meaning in context.
+    #
+    # 3.4) If context is `nwCell`/`neCell`/`swCell`/`seCell`
+    #
+    # 4) If sides as `insideH` or `insideV` has meaning in context
+    # of cell groups but ommited in all levels then get their
+    # fallback analogs (for 1st - top/bottom, for 2nd - left/right).
+    #
+    # 5) `insideH`/`insideV` about lines inside
+    # grid group with horizontal/vertical borders
+    # without (topmost, botmost)/(leftmost, rightmost) borders rendered -
+    # they are rendered by `top`/`bottom`/`left`/`right` sides instead.
+    @cached_property
+    def _side_context(self) -> None:
+        pass
+
+    @cached_property
+    def _tblCellSpacing(self) -> Twips | float | None:
+        # Table level
+        path = self._rslvr.prop_path(
+            "tblCellSpacing", self._rslvr.table_resolver._path_base
+        )
+        spacing_elm = self._rslvr.from_tbl_style_hierarchy(
+            self._has_cnf, self._tbl_style_props_deep, path
+        )
+        if not isinstance(spacing_elm, NotFound) and spacing_elm is not None:
+            return width(spacing_elm)
+        # Row level (exception)
+        tblPrEx_elm = self._rslvr.row_resolver.tblPrEx
+        if tblPrEx_elm is not None:
+            spacing_elm = tblPrEx_elm.tblCellSpacing
+            if spacing_elm is not None:
+                return width(spacing_elm)
+        # Row level
+        spacing_elm = self._rslvr.from_tbl_style_hierarchy(
+            self._has_cnf, self._tbl_style_props_deep, path
+        )
+        if not isinstance(spacing_elm, NotFound):
+            return width(spacing_elm)
+        return None
+
     @cached_property
     def _cnf(self) -> WD_CNF_FORMAT | None:
         cnf = self._rslvr.prop_val("cnfStyle")
@@ -102,7 +209,7 @@ class CellH2D(How2Display[CellResolver]):
         return self._cnf_looked(cnf)
 
     @cached_property
-    def _has_cond_format(self) -> bool:
+    def _has_cnf(self) -> bool:
         return False if self._cnf_gathered is None else True
 
     @cached_property
@@ -120,40 +227,6 @@ class CellH2D(How2Display[CellResolver]):
             props_leveled.append((tbl_style, tbl_style_props))
             tbl_style = self._rslvr._styles.base_style(tbl_style)  # type: ignore[assignment]
         return props_leveled
-
-    def _from_tbl_style_hierarchy(
-        self, path: PropertyPath, optional: bool = False
-    ) -> Any:
-        style_direct_val = NotFound(self, path)
-        for tbl_style, tbl_style_props in self._tbl_style_props_deep:
-            if self._has_cond_format:
-                if isinstance(style_direct_val, NotFound):
-                    style_direct_val = safe_get_prop(
-                        tbl_style.element, path, optional
-                    )
-                tbl_val = self._from_tbl_style_props(
-                    tbl_style_props, path, optional
-                )
-                if not isinstance(tbl_val, NotFound):
-                    return tbl_val
-            else:
-                tbl_val = safe_get_prop(tbl_style.element, path, optional)
-                if not isinstance(tbl_val, NotFound):
-                    return tbl_val
-        return style_direct_val
-
-    def _from_tbl_style_props(
-        self,
-        table_style_props: list[CT_TblStylePr],
-        path: PropertyPath,
-        optional: bool = False,
-    ) -> Any:
-        for tbl_style_prop in table_style_props:
-            table_val = safe_get_prop(tbl_style_prop, path, optional)
-            if isinstance(table_val, NotFound):
-                continue
-            return table_val
-        return NotFound(table_style_props, path)
 
     def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
         row_h2d = self._rslvr.row.h2d

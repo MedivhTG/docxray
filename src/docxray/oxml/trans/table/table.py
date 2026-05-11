@@ -9,8 +9,8 @@ from docxray.oxml.trans.shared import CT_AltChunk
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .cell_props import CT_TcPr
-from .row_props import CT_TrPr
-from .table_props import CT_TblPr, CT_TblPrEx
+from .row_props import CT_TblPrEx, CT_TrPr
+from .table_props import CT_TblPr
 
 if TYPE_CHECKING:
     # docxray stuff

@@ -102,6 +102,44 @@ class Resolver(Generic[PROXY_T]):
             props.append(table_style.wholeTable)
         return props
 
+    def from_tbl_style_hierarchy(
+        self,
+        from_cnf: bool,
+        tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
+        path: PropertyPath,
+        optional: bool = False,
+    ) -> Any:
+        style_direct_val = NotFound(self, path)
+        for tbl_style, tbl_style_props in tbl_style_props_deep:
+            if from_cnf:
+                if isinstance(style_direct_val, NotFound):
+                    style_direct_val = safe_get_prop(
+                        tbl_style.element, path, optional
+                    )
+                tbl_val = self.from_tbl_style_props(
+                    tbl_style_props, path, optional
+                )
+                if not isinstance(tbl_val, NotFound):
+                    return tbl_val
+            else:
+                tbl_val = safe_get_prop(tbl_style.element, path, optional)
+                if not isinstance(tbl_val, NotFound):
+                    return tbl_val
+        return style_direct_val
+
+    def from_tbl_style_props(
+        self,
+        table_style_props: list[CT_TblStylePr],
+        path: PropertyPath,
+        optional: bool = False,
+    ) -> Any:
+        for tbl_style_prop in table_style_props:
+            table_val = safe_get_prop(tbl_style_prop, path, optional)
+            if isinstance(table_val, NotFound):
+                continue
+            return table_val
+        return NotFound(table_style_props, path)
+
     def from_doc_dflts(
         self, path: PropertyPath, optional: bool = False
     ) -> Any:

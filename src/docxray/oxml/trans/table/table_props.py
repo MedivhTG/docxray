@@ -88,21 +88,3 @@ class CT_TblPr(OxmlElement):
     @cached_property
     def tblLook(self) -> CT_TblLook | None:
         return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)
-
-
-class CT_TblPrEx(OxmlElement):
-    @cached_property
-    def tblStyle(self) -> CT_String | None:
-        return self.child_zero_or_one(W.TBL_STYLE, CT_String)
-
-    @cached_property
-    def tblBorders(self) -> CT_TblBorders | None:
-        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
-
-    @cached_property
-    def tblCellSpacing(self) -> CT_TblWidth | None:
-        return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)
-
-    @cached_property
-    def tblLook(self) -> CT_TblLook | None:
-        return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)

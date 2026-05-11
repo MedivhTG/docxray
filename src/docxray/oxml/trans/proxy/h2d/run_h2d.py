@@ -70,8 +70,14 @@ class RunH2D(How2Display[RunResolver]):
         if not isinstance(para_val, NotFound):
             return para_val
         char_path = self._rslvr.prop_path("val", f"rPr.{name}")
-        if self.cell_h2d:
-            return self.cell_h2d._from_tbl_style_hierarchy(char_path, optional)
+        c_h2d = self.cell_h2d
+        if c_h2d:
+            return self._rslvr.from_tbl_style_hierarchy(
+                c_h2d._has_cnf,
+                c_h2d._tbl_style_props_deep,
+                char_path,
+                optional,
+            )
         doc_val_path = self._rslvr.prop_path(
             "val", f"rPrDefault.{self._rslvr._path_base}.{name}"
         )
@@ -85,8 +91,14 @@ class RunH2D(How2Display[RunResolver]):
         para_val = self._rslvr.paragraph_resolver.prop_val_run_toggled(name)
         char_path = self._rslvr.prop_path("val", f"rPr.{name}")
         tbl_val = NotFound(self, char_path)
-        if self.cell_h2d:
-            tbl_val = self.cell_h2d._from_tbl_style_hierarchy(char_path, True)
+        c_h2d = self.cell_h2d
+        if c_h2d:
+            tbl_val = self._rslvr.from_tbl_style_hierarchy(
+                c_h2d._has_cnf,
+                c_h2d._tbl_style_props_deep,
+                char_path,
+                True,
+            )
         found_count = sum(
             1
             for i in [char_val, para_val, tbl_val]

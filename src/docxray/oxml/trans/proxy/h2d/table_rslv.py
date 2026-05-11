@@ -13,7 +13,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
 from docxray.oxml.trans.st.enums import SE_StyleType
-from docxray.oxml.trans.table.table_props import CT_TblPrEx
+from docxray.oxml.trans.table.row_props import CT_TblPrEx
 
 from .resolver import Resolver
 

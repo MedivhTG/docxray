@@ -155,18 +155,18 @@ register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
 
-from .table.table_props import CT_TblBorders, CT_TblLook, CT_TblPr, CT_TblPrEx
+from .table.table_props import CT_TblBorders, CT_TblLook, CT_TblPr
 
 register_element_cls("w:tblPr", CT_TblPr)
-register_element_cls("w:tblPrEx", CT_TblPrEx)
 register_element_cls("w:tblLook", CT_TblLook)
 register_element_cls("w:tblStyle", CT_String)
 register_element_cls("w:tblBorders", CT_TblBorders)
 register_element_cls("w:tblCellSpacing", CT_TblWidth)
 
-from .table.row_props import CT_TrPr
+from .table.row_props import CT_TblPrEx, CT_TrPr
 
 register_element_cls("w:trPr", CT_TrPr)
+register_element_cls("w:tblPrEx", CT_TblPrEx)
 
 
 from .table.cell_props import (
