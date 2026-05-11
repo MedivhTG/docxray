@@ -66,7 +66,6 @@ class Resolver(Generic[PROXY_T]):
         name_or_path: str | PropertyPath,
         optional: bool = False,
         algorithm: ResolveAlgorithm = "direct",
-        **kwargs: Any,
     ) -> Any:
         if isinstance(name_or_path, PropertyPath):
             path = name_or_path

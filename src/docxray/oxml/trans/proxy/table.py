@@ -11,14 +11,7 @@ from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
 from .compute import width
-from .shared import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    StoryChild,
-    Twips,
-    safe_get_prop,
-)
+from .shared import ElementProxy, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
     from .h2d.table_h2d import CellH2D, RowH2D, TableH2D
@@ -49,14 +42,6 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self.row.table
 
     @cached_property
-    def vmerge(self) -> SE_Merge | None:
-        path = PropertyPath.base("val", "tcPr.vMerge")
-        vMerge_val = safe_get_prop(self.element, path)
-        if isinstance(vMerge_val, NotFound):
-            return None
-        return vMerge_val
-
-    @cached_property
     def width(self) -> Twips | float | None:
         """Width as `<w:tcW>` attr of `w:w`.
 
@@ -66,8 +51,7 @@ class Cell(BlockItemContainer[CT_Tc]):
                 percentage of table width; else standard
                 Word measure in `Twips`.
         """
-        path = PropertyPath.base("tcW", "tcPr")
-        tcW_elm = safe_get_prop(self.element, path)
+        tcW_elm = self.h2d._rslvr.prop("tcW")
         if isinstance(tcW_elm, NotFound) or tcW_elm is None:
             return None
         return width(tcW_elm)
@@ -110,7 +94,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def vert_merged(self) -> bool:
-        if self.vmerge in (None, SE_Merge.CONTINUE):
+        if self._vmerge in (None, SE_Merge.CONTINUE):
             return True
         return False
 
@@ -138,17 +122,16 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def horz_span(self) -> int:
-        path = PropertyPath.base("val", "tcPr.gridSpan")
-        gridSpan_val = safe_get_prop(self.element, path)
+        gridSpan_val = self.h2d._rslvr.prop_val("gridSpan")
         if isinstance(gridSpan_val, NotFound):
             return 1
         return gridSpan_val
 
     @cached_property
     def vert_span(self) -> int:
-        if self.vmerge is None:
+        if self._vmerge is None:
             return 1
-        if self.vmerge == SE_Merge.CONTINUE:
+        if self._vmerge == SE_Merge.CONTINUE:
             return -1
         below = self.cell_below
         span = 1
@@ -158,6 +141,10 @@ class Cell(BlockItemContainer[CT_Tc]):
             span += 1
             below = below.cell_below
         return span
+
+    @cached_property
+    def _vmerge(self) -> NotFound | None | SE_Merge:
+        return self.h2d._rslvr.prop_val("vMerge", optional=True)
 
 
 class Row(ElementProxy[CT_Row]):
