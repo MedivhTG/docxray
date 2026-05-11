@@ -45,7 +45,7 @@ class RunResolver(Resolver[Run]):
     def para_style(self) -> ParagraphStyle | None:
         return self.paragraph_resolver.para_style
 
-    def _prop_val_toggled(
+    def prop_val_toggled(
         self, name: str, algorithm: ResolveAlgorithm = "direct"
     ) -> NotFound | None | bool | SE_OnOff1:
         return self.prop_val(name, True, algorithm)

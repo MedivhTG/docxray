@@ -4,9 +4,12 @@ from functools import cached_property
 from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.h2d.table_h2d import CellH2D
 from docxray.oxml.trans.proxy.shared import NotFound
+from docxray.oxml.trans.st.enums import SE_OnOff1
 
 from .how_to_display import How2Display
 from .run_rslv import RunResolver
+
+type _OnOff = NotFound | bool | SE_OnOff1 | None
 
 
 class RunH2D(How2Display[RunResolver]):
@@ -34,47 +37,38 @@ class RunH2D(How2Display[RunResolver]):
     def single_strike_through(self) -> bool:
         return self._display_toggled("strike")
 
-    def _display_toggled(self, prop: str) -> bool:
-        char_direct_val: bool | NotFound = getattr(self._rslvr, prop)
+    def _display_toggled(self, name: str) -> bool:
+        char_direct_val = self._rslvr.prop_val_toggled(name)
         if not isinstance(char_direct_val, NotFound):
-            return char_direct_val
-
-        char_path = self._rslvr.prop_path("val", f"rPr.{prop}")
-        char_val: NotFound | bool = self._rslvr.from_styles_hierarchy(
-            char_path, True
-        )
-        para_val: NotFound | bool = getattr(
-            self._rslvr.paragraph_resolver, prop
-        )
-        tbl_val: NotFound | bool = NotFound(self, char_path)
+            return on_off(char_direct_val)
+        char_val = self._rslvr.prop_val_toggled(name, "style")
+        para_val = self._rslvr.paragraph_resolver.prop_val_run_toggled(name)
+        char_path = self._rslvr.prop_path("val", f"rPr.{name}")
+        tbl_val = NotFound(self, char_path)
         if self.cell_h2d:
-            tbl_val = getattr(self.cell_h2d, f"_{prop}")
-        found_vals_count = sum(
+            tbl_val = self.cell_h2d._from_tbl_style_hierarchy(char_path, True)
+        found_count = sum(
             1
-            for item in [char_val, para_val, tbl_val]
-            if isinstance(item, bool)
+            for i in [char_val, para_val, tbl_val]
+            if not isinstance(i, NotFound)
         )
-        if found_vals_count > 1:
-            return self._effective_toggled(prop, char_val, para_val, tbl_val)
+        if found_count > 1:
+            return self._effective_toggled(name, char_val, para_val, tbl_val)
         if not isinstance(char_val, NotFound):
-            return char_val
+            return on_off(char_val)
         if not isinstance(para_val, NotFound):
-            return para_val
+            return on_off(para_val)
         if not isinstance(tbl_val, NotFound):
-            return tbl_val
+            return on_off(tbl_val)
         return False
 
     def _effective_toggled(
-        self,
-        prop: str,
-        char_val: bool | NotFound,
-        para_val: bool | NotFound,
-        tbl_val: bool | NotFound,
+        self, name: str, char_val: _OnOff, para_val: _OnOff, tbl_val: _OnOff
     ) -> bool:
         doc_path = self._rslvr.prop_path(
-            prop, f"rPrDefault.{self._rslvr._path_base}"
+            "val", f"rPrDefault.{self._rslvr._path_base}.{name}"
         )
-        doc_val = on_off(self._rslvr.from_doc_dflts(doc_path))
+        doc_val = on_off(self._rslvr.from_doc_dflts(doc_path, True))
         if doc_val is True:
             return doc_val
         return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)

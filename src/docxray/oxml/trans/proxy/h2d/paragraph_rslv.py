@@ -36,7 +36,7 @@ class ParagraphResolver(Resolver[Paragraph]):
             return container.h2d._rslvr.table_resolver
         return None
 
-    def _prop_val_run_toggled(
+    def prop_val_run_toggled(
         self, name: str
     ) -> NotFound | None | bool | SE_OnOff1:
         path = self.prop_path("val", f"rPr.{name}")

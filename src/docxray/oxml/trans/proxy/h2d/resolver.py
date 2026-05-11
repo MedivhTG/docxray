@@ -104,12 +104,12 @@ class Resolver(Generic[PROXY_T]):
         return props
 
     def from_doc_dflts(
-        self, prop_path: PropertyPath, prop_optional: bool = False
+        self, path: PropertyPath, optional: bool = False
     ) -> Any:
         doc_dflts = self._styles.document_defaults
         if doc_dflts is None:
-            return NotFound(self._styles, prop_path)
-        return safe_get_prop(doc_dflts.element, prop_path, prop_optional)
+            return NotFound(self._styles, path)
+        return safe_get_prop(doc_dflts.element, path, optional)
 
     def from_style_inheritance(
         self,

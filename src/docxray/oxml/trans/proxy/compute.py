@@ -24,17 +24,19 @@ def width(width_elm: CT_TblWidth) -> Twips | float | None:
     return normalize_pct(width_int)
 
 
-def on_off(on_off: CT_OnOff | bool | NotFound | None) -> bool:
-    if isinstance(on_off, bool):
-        return on_off
-    if on_off is None:
-        return True
+def on_off(on_off: NotFound | None | bool | SE_OnOff1 | CT_OnOff) -> bool:
+    def _val(val: None | bool | SE_OnOff1) -> bool:
+        if val is None:
+            return True
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, SE_OnOff1):
+            if val == SE_OnOff1.ON:
+                return True
+            return False
+
     if isinstance(on_off, NotFound):
         return False
-    if isinstance(on_off.val, bool):
-        return on_off.val
-    if on_off.val is None:
-        return True
-    if on_off.val == SE_OnOff1.ON:
-        return True
-    return False
+    if isinstance(on_off, CT_OnOff):
+        return _val(on_off.val)
+    return _val(on_off)
