@@ -10,8 +10,8 @@ from docxray.oxml.trans.enums import (
 from docxray.oxml.trans.proxy.compute import width
 from docxray.oxml.trans.proxy.shared import NotFound, Twips, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import TableStyle
-from docxray.oxml.trans.st.enums import SE_Border
 from docxray.oxml.trans.styles import CT_TblStylePr
+from docxray.oxml.trans.table.cell_props import CT_TcBorders
 from docxray.oxml.trans.table.table_props import CT_TblBorders
 
 from .how_to_display import How2Display
@@ -91,36 +91,6 @@ type Border = Literal["top", "bottom", "left", "right"]
 
 
 class CellH2D(How2Display[CellResolver]):
-    # @cached_property
-    # def top(self) -> SE_Border | None:
-    #     spacing = self._rslvr.row.h2d._tblCellSpacing
-    #     side = "top"
-    #     if spacing is not None and spacing > 0:
-    #         return self._side_cell_spacing(side)
-    #     return self._side_no_cell_spacing(side)
-
-    def _side_cell_spacing(self, side: str) -> None:
-        pass
-
-    def _side_no_cell_spacing(self, side: Border) -> None:
-        pass
-
-    def _side_val(self, side: str) -> SE_Border | None:
-        path = self._rslvr.prop_path(
-            "val", f"{self._rslvr._path_base}.tcBorders.{side}"
-        )
-        side_val = self._rslvr.from_tbl_style_hierarchy(
-            self._has_cnf,
-            self._tbl_style_props_deep,
-            path,
-        )
-        if isinstance(side_val, NotFound) or side_val in (
-            SE_Border.NULL,
-            SE_Border.NONE,
-        ):
-            return None
-        return side_val
-
     # TODO: realize as:
     # remark) `insideH`/`insideV` about lines inside
     # grid group with horizontal/vertical borders
@@ -159,11 +129,37 @@ class CellH2D(How2Display[CellResolver]):
     #
 
     @cached_property
-    def _side_context(self) -> None:
+    def _foo(self) -> None:
+        spacing = self._tblCellSpacing
+        if spacing is not None and spacing > 0:
+            pass
         pass
 
     @cached_property
+    def _tcBorders(self) -> CT_TcBorders | None:
+        name = "tcBorders"
+        # Direct
+        tcBorders_elm = self._rslvr.prop(name)
+        if not isinstance(tcBorders_elm, CT_TcBorders):
+            return tcBorders_elm
+        # From table style (defined common or exception)
+        # whenever in grid group or directly
+        path = self._rslvr.prop_path(name, self._rslvr._path_base)
+        tcBorders_elm = self._rslvr.from_tbl_style_hierarchy(
+            self._has_cnf, self._tbl_style_props_deep, path
+        )
+        if not isinstance(tcBorders_elm, NotFound):
+            return tcBorders_elm
+        return None
+
+    @cached_property
     def _tblCellSpacing(self) -> Twips | float | None:
+        """Get spacing between cells for current depending on the cell context.
+
+        Returns:
+            Twips | float | None: Measure in `Twips` or set to `None`. `float`
+                type (percents) impossible but written for typing compat.
+        """
         name = "tblCellSpacing"
         row_rslvr = self._rslvr.row_resolver
         tbl_rslvr = row_rslvr.table_resolver
