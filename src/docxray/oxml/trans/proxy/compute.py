@@ -10,7 +10,9 @@ def normalize_pct(pct: int) -> float:
     return pct / PCT_TO_PERCENT_RATIO
 
 
-def width(width_elm: CT_TblWidth) -> Twips | float | None:
+def width(
+    width_elm: CT_TblWidth, ignore_pct: bool = False
+) -> Twips | float | None:
     if (
         width_elm.type in (SE_TblWidth.NULL, SE_TblWidth.AUTO, None)
         or width_elm.w is None
@@ -21,6 +23,8 @@ def width(width_elm: CT_TblWidth) -> Twips | float | None:
     width_int = int(width_elm.w)
     if width_elm.type == SE_TblWidth.TWIPS:
         return Twips(width_int)
+    if ignore_pct:
+        return None
     return normalize_pct(width_int)
 
 

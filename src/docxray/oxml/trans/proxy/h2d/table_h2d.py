@@ -170,17 +170,17 @@ class CellH2D(How2Display[CellResolver]):
         # Row-level direct
         spacing_elm = row_rslvr.prop(name)
         if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm)
+            return width(spacing_elm, True)
         # Row-level exception
         tblPrEx_elm = row_rslvr.tblPrEx
         if tblPrEx_elm is not None:
             spacing_elm = tblPrEx_elm.tblCellSpacing
             if spacing_elm is not None:
-                return width(spacing_elm)
+                return width(spacing_elm, True)
         # Table-level
         spacing_elm = tbl_rslvr.prop(name)
         if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm)
+            return width(spacing_elm, True)
 
         # From table style (defined common or exception)
         path = row_rslvr.prop_path(name, row_rslvr._path_base)
@@ -189,14 +189,14 @@ class CellH2D(How2Display[CellResolver]):
             self._has_cnf, self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm)
+            return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
         path = tbl_rslvr.prop_path(name, tbl_rslvr._path_base)
         spacing_elm = self._rslvr.from_tbl_style_hierarchy(
             self._has_cnf, self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm)
+            return width(spacing_elm, True)
         return None
 
     @cached_property
