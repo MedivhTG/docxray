@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, cast
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
@@ -108,37 +108,39 @@ class Resolver(Generic[PROXY_T]):
         tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
         path: PropertyPath,
         optional: bool = False,
-    ) -> Any:
+    ) -> tuple[Any, TableStyle | CT_TblStylePr | None]:
         style_direct_val = NotFound(self, path)
+        found_in_style = None
         for tbl_style, tbl_style_props in tbl_style_props_deep:
             if from_cnf:
                 if isinstance(style_direct_val, NotFound):
                     style_direct_val = safe_get_prop(
                         tbl_style.element, path, optional
                     )
-                tbl_val = self.from_tbl_style_props(
+                    found_in_style = tbl_style
+                tbl_val, tbl_style_prop = self.from_tbl_style_props(
                     tbl_style_props, path, optional
                 )
                 if not isinstance(tbl_val, NotFound):
-                    return tbl_val
+                    return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
             else:
                 tbl_val = safe_get_prop(tbl_style.element, path, optional)
                 if not isinstance(tbl_val, NotFound):
-                    return tbl_val
-        return style_direct_val
+                    return tbl_val, tbl_style
+        return style_direct_val, found_in_style
 
     def from_tbl_style_props(
         self,
         table_style_props: list[CT_TblStylePr],
         path: PropertyPath,
         optional: bool = False,
-    ) -> Any:
+    ) -> tuple[Any, CT_TblStylePr | None]:
         for tbl_style_prop in table_style_props:
             table_val = safe_get_prop(tbl_style_prop, path, optional)
             if isinstance(table_val, NotFound):
                 continue
-            return table_val
-        return NotFound(table_style_props, path)
+            return table_val, tbl_style_prop
+        return NotFound(table_style_props, path), None
 
     def from_doc_dflts(
         self, path: PropertyPath, optional: bool = False

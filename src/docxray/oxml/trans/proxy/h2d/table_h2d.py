@@ -132,25 +132,33 @@ class CellH2D(How2Display[CellResolver]):
     def _foo(self) -> None:
         spacing = self._tblCellSpacing
         if spacing is not None and spacing > 0:
-            pass
+            return self._spacing_non_zero()
+        return self._spacing_zero()
+
+    def _spacing_non_zero(self) -> None:
+        pass
+
+    def _spacing_zero(self) -> None:
         pass
 
     @cached_property
-    def _tcBorders(self) -> CT_TcBorders | None:
+    def _cell_borders_ctx(
+        self,
+    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
         name = "tcBorders"
         # Direct
         tcBorders_elm = self._rslvr.prop(name)
-        if not isinstance(tcBorders_elm, CT_TcBorders):
-            return tcBorders_elm
+        if not isinstance(tcBorders_elm, NotFound):
+            return tcBorders_elm, None
         # From table style (defined common or exception)
         # whenever in grid group or directly
         path = self._rslvr.prop_path(name, self._rslvr._path_base)
-        tcBorders_elm = self._rslvr.from_tbl_style_hierarchy(
+        tc_ctx = self._rslvr.from_tbl_style_hierarchy(
             self._has_cnf, self._tbl_style_props_deep, path
         )
-        if not isinstance(tcBorders_elm, NotFound):
-            return tcBorders_elm
-        return None
+        if not isinstance(tc_ctx[0], NotFound):
+            return tc_ctx
+        return None, None
 
     @cached_property
     def _tblCellSpacing(self) -> Twips | float | None:
@@ -181,14 +189,14 @@ class CellH2D(How2Display[CellResolver]):
         # From table style (defined common or exception)
         path = row_rslvr.prop_path(name, row_rslvr._path_base)
         # Table style Row-level (in grid group or direct) firstly
-        spacing_elm = self._rslvr.from_tbl_style_hierarchy(
+        spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
             self._has_cnf, self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
         path = tbl_rslvr.prop_path(name, tbl_rslvr._path_base)
-        spacing_elm = self._rslvr.from_tbl_style_hierarchy(
+        spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
             self._has_cnf, self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
