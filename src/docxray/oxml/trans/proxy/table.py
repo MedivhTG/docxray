@@ -129,9 +129,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def vert_span(self) -> int:
-        if self._vmerge is None:
-            return 1
-        if self._vmerge == SE_Merge.CONTINUE:
+        if self.vert_merged:
             return -1
         below = self.cell_below
         span = 1
