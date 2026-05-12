@@ -1,7 +1,7 @@
 from enum import IntEnum
 
 
-class XML_POSITION(IntEnum):
+class POS(IntEnum):
     """Describes the position of an element relative to its siblings."""
 
     START = 0

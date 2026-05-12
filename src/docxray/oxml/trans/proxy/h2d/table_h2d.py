@@ -2,6 +2,7 @@ from functools import cached_property
 from typing import Literal
 
 # docxray stuff
+from docxray.enum.lxml import POS
 from docxray.oxml.trans.enums import (
     WD_CNF_FORMAT,
     WD_CNF_TABLE_LOOK,
@@ -10,6 +11,7 @@ from docxray.oxml.trans.enums import (
 from docxray.oxml.trans.proxy.compute import width
 from docxray.oxml.trans.proxy.shared import NotFound, Twips, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import TableStyle
+from docxray.oxml.trans.st.enums import SE_Border, SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders
 from docxray.oxml.trans.table.table_props import CT_TblBorders
@@ -87,59 +89,191 @@ class RowH2D(How2Display[RowResolver]):
         return self._rslvr.table.h2d._tblBorders
 
 
-type Border = Literal["top", "bottom", "left", "right"]
+type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
+type _TableChild = Literal["row", "cell"]
+
+TBL_POSITIONING: dict[POS, dict[_TableChild, tuple[_Border, _Border]]] = {
+    POS.ONE_ITEM: {
+        "row": ("top", "bottom"),
+        "cell": ("left", "right"),
+    },
+    POS.START: {
+        "row": ("top", "insideH"),
+        "cell": ("left", "insideV"),
+    },
+    POS.MIDDLE: {
+        "row": ("insideH", "insideH"),
+        "cell": ("insideV", "insideV"),
+    },
+    POS.END: {
+        "row": ("insideH", "bottom"),
+        "cell": ("insideV", "right"),
+    },
+}
 
 
 class CellH2D(How2Display[CellResolver]):
-    # TODO: realize as:
-    # remark) `insideH`/`insideV` about lines inside
-    # grid group with horizontal/vertical borders
-    # without (topmost, botmost)/(leftmost, rightmost) borders rendered -
-    # they are rendered by `top`/`bottom`/`left`/`right` sides instead.
-    #
-    # 1) Modify `from_tbl_style_hierarchy` method to return
-    # context where property got in tuple (prop and context).
-    #
-    # 2) If property got in table style direct level or
-    # from row-level `tblBorders` or `tblBorders` then
-    # cell in group of `wholeTable`
-    #
-    # 3) Split logic as follows:
-    #
-    # 3.1) If context is `wholeTable` then pos of cell
-    # derived like in table grid (look point `remark`)
-    #
-    # 3.2) If context is `firsRow`/`lastRow`/`band1Horz`/`band2Horz`
-    # then pos of cell derived as
-    # in single row (cells above and below are not exist) and
-    # `insideH` has no meaning in context.
-    #
-    # 3.3) If context is `firstCol`/`lastCol`/`band1Vert`/`band2Vert`
-    # then pos of cell derived as
-    # in single column (cells prev and next are not exist) and
-    # `insideV` has no meaning in context.
-    #
-    # 3.4) If context is `nwCell`/`neCell`/`swCell`/`seCell`
-    # then pos of cell derived as single cell (no adjacent cells) and
-    # `insideV` with `insideH` has no meaning in context.
-    #
-    # 4) If sides as `insideH` or `insideV` has meaning in context
-    # of cell groups but ommited in all levels then get their
-    # fallback analogs (for 1st - top/bottom, for 2nd - left/right).
-    #
-
     @cached_property
-    def _foo(self) -> None:
+    def borders_info(self) -> dict:
+        """Get info about cell borders.
+
+        Returns:
+            dict: _description_
+        """
         spacing = self._tblCellSpacing
         if spacing is not None and spacing > 0:
             return self._spacing_non_zero()
-        return self._spacing_zero()
+        return self._spacing_non_zero()
 
-    def _spacing_non_zero(self) -> None:
-        pass
+    def _spacing_non_zero(self) -> dict:
+        tcBorders_elm, cell_ctx = self._cell_borders_ctx
+        tblBorders_elm = self._rslvr.row.h2d._tblBorders
+        tbl_horz = self._border(tblBorders_elm, "insideH")
+        tbl_vert = self._border(tblBorders_elm, "insideV")
+        if tcBorders_elm is None and cell_ctx is None:
+            return self._case_1_tc_borders_ommited(tbl_horz, tbl_vert)
+        if tcBorders_elm is not None and cell_ctx is None:
+            return self._case_2_tc_borders_direct(
+                tcBorders_elm, tbl_horz, tbl_vert
+            )
+        if tcBorders_elm is not None and isinstance(cell_ctx, TableStyle):
+            return self._case_3_tc_borders_style_direct(
+                tcBorders_elm, tbl_horz, tbl_vert
+            )
+        if tcBorders_elm is not None and isinstance(cell_ctx, CT_TblStylePr):
+            return self._case_4_tc_borders_grid_group(
+                tcBorders_elm, tbl_horz, tbl_vert, cell_ctx.type
+            )
+        # TODO: Refac
+        raise Exception("Reached Never")
 
-    def _spacing_zero(self) -> None:
-        pass
+    def _case_1_tc_borders_ommited(
+        self, tbl_horz: SE_Border | None, tbl_vert: SE_Border | None
+    ) -> dict:
+        return {
+            "top": tbl_horz,
+            "bottom": tbl_horz,
+            "left": tbl_vert,
+            "right": tbl_vert,
+        }
+
+    def _case_2_tc_borders_direct(
+        self,
+        tcBorders_elm: CT_TcBorders,
+        tbl_horz: SE_Border | None,
+        tbl_vert: SE_Border | None,
+    ) -> dict:
+        return {
+            "top": self._border(tcBorders_elm, "top") or tbl_horz,
+            "bottom": self._border(tcBorders_elm, "bottom") or tbl_horz,
+            "left": self._border(tcBorders_elm, "left") or tbl_vert,
+            "right": self._border(tcBorders_elm, "right") or tbl_vert,
+        }
+
+    def _case_3_tc_borders_style_direct(
+        self,
+        tcBorders_elm: CT_TcBorders,
+        tbl_horz: SE_Border | None,
+        tbl_vert: SE_Border | None,
+    ) -> dict:
+        return self._case_2_tc_borders_direct(
+            tcBorders_elm, tbl_horz, tbl_vert
+        )
+
+    # TODO: refac if needed
+    def _case_4_tc_borders_grid_group(
+        self,
+        tcBorders_elm: CT_TcBorders,
+        tbl_horz: SE_Border | None,
+        tbl_vert: SE_Border | None,
+        grid_group: SE_TblStyleOverrideType,
+    ) -> dict[str, SE_Border | None]:
+        G = SE_TblStyleOverrideType
+        cell = self._rslvr._proxy
+        row = cell.row
+        top = None
+        bottom = None
+        left = None
+        right = None
+        if grid_group == G.ENTIRE_TABLE:
+            top, bottom = self._choose_horz(row.pos, tcBorders_elm, tbl_horz)
+            left, right = self._choose_vert(cell.pos, tcBorders_elm, tbl_vert)
+        elif grid_group in (
+            G.HEADER_ROW,
+            G.FOOTER_ROW,
+            G.HORIZONTAL_BAND_ODD,
+            G.HORIZONTAL_BAND_EVEN,
+        ):
+            top, bottom = self._choose_horz(
+                POS.ONE_ITEM, tcBorders_elm, tbl_horz
+            )
+            left, right = self._choose_vert(cell.pos, tcBorders_elm, tbl_vert)
+        elif grid_group in (
+            G.FIRST_COLUMN,
+            G.LAST_COLUMN,
+            G.VERTICAL_BAND_ODD,
+            G.VERTICAL_BAND_EVEN,
+        ):
+            top, bottom = self._choose_horz(row.pos, tcBorders_elm, tbl_horz)
+            left, right = self._choose_vert(
+                POS.ONE_ITEM, tcBorders_elm, tbl_vert
+            )
+        elif grid_group in (
+            G.TOP_LEFT_CORNER_CELL,
+            G.TOP_RIGHT_CORNER_CELL,
+            G.BOTTOM_LEFT_CORNER_CELL,
+            G.BOTTOM_RIGHT_CORNER_CELL,
+        ):
+            top, bottom = self._choose_horz(
+                POS.ONE_ITEM, tcBorders_elm, tbl_horz
+            )
+            left, right = self._choose_vert(
+                POS.ONE_ITEM, tcBorders_elm, tbl_vert
+            )
+        return {"top": top, "bottom": bottom, "left": left, "right": right}
+
+    def _choose_horz(
+        self,
+        row_pos: POS,
+        tcBorders_elm: CT_TcBorders,
+        tbl_horz: SE_Border | None,
+    ) -> tuple[SE_Border | None, SE_Border | None]:
+        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
+        top = self._border(tcBorders_elm, top_n)
+        if top_n == "insideH" and top is None:
+            top = self._border(tcBorders_elm, "top") or tbl_horz
+        bottom = self._border(tcBorders_elm, bottom_n)
+        if bottom_n == "insideH" and bottom is None:
+            bottom = self._border(tcBorders_elm, "bottom") or tbl_horz
+        return top, bottom
+
+    def _choose_vert(
+        self,
+        cell_pos: POS,
+        tcBorders_elm: CT_TcBorders,
+        tbl_vert: SE_Border | None,
+    ) -> tuple[SE_Border | None, SE_Border | None]:
+        left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
+        left = self._border(tcBorders_elm, left_n)
+        if left_n == "insideV" and left is None:
+            left = self._border(tcBorders_elm, "left") or tbl_vert
+        right = self._border(tcBorders_elm, right_n)
+        if right_n == "insideV" and right is None:
+            right = self._border(tcBorders_elm, "right") or tbl_vert
+        return left, right
+
+    def _border(
+        self, borders_elm: CT_TcBorders | CT_TblBorders | None, border: _Border
+    ) -> SE_Border | None:
+        path = self._rslvr.prop_path("val", border)
+        prop = safe_get_prop(borders_elm, path)
+        if isinstance(prop, NotFound):
+            return None
+        return prop
+
+    # TODO: realize and use in `borders_info`
+    def _spacing_zero(self) -> dict:
+        raise NotImplementedError()
 
     @cached_property
     def _cell_borders_ctx(

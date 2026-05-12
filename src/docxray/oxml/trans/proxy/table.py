@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.enum.lxml import XML_POSITION
+from docxray.enum.lxml import POS
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
@@ -117,7 +117,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         return True
 
     @cached_property
-    def xml_pos(self) -> XML_POSITION:
+    def pos(self) -> POS:
         return self.element.xml_position(self.is_first, self.is_last)
 
     @cached_property
@@ -172,7 +172,7 @@ class Row(ElementProxy[CT_Row]):
         return {cell.grid_x: cell for cell in self.cells}
 
     @cached_property
-    def xml_pos(self) -> XML_POSITION:
+    def pos(self) -> POS:
         return self.element.xml_pos
 
     def iter_cells(self) -> Iterator[Cell]:

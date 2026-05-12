@@ -21,10 +21,11 @@ class TestDocument:
                 for row in p_or_t.iter_rows():
                     part = row.part
                     for cell in row.iter_cells():
+                        cell_fmt = cell.h2d
+                        borders_inf = cell_fmt.borders_info
                         width = cell.width
                         is_last = cell.is_last
                         part = cell.part
-                        cell_fmt = cell.h2d
                         cx = cell.grid_x
                         for p_or_t_inner in cell.iter_inner_content():
                             if isinstance(p_or_t_inner, Paragraph):

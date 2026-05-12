@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 from lxml.etree import QName
 
 # docxray stuff
-from docxray.enum.lxml import XML_POSITION
+from docxray.enum.lxml import POS
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.trans.ns import nsmap
@@ -33,7 +33,7 @@ class OxmlElement(BaseOxmlElement):
         return self.xpath(f"not(following-sibling::{tag})")
 
     @cached_property
-    def xml_pos(self) -> XML_POSITION:
+    def xml_pos(self) -> POS:
         return self.xml_position(self.is_first, self.is_last)
 
     def xml_tag(self, qn_tag: Any) -> str:
@@ -43,14 +43,14 @@ class OxmlElement(BaseOxmlElement):
             raise InvalidXmlError(msg)
         return f"{nsmap_reversed[qn.namespace]}:{qn.localname}"
 
-    def xml_position(self, is_first: bool, is_last: bool) -> XML_POSITION:
+    def xml_position(self, is_first: bool, is_last: bool) -> POS:
         if not is_first and not is_last:
-            return XML_POSITION.MIDDLE
+            return POS.MIDDLE
         if is_first and not is_last:
-            return XML_POSITION.START
+            return POS.START
         if not is_first and is_last:
-            return XML_POSITION.END
-        return XML_POSITION.ONE_ITEM
+            return POS.END
+        return POS.ONE_ITEM
 
     def attr_optional(
         self, elm_qn: str, simple_type: type[ST_T]
