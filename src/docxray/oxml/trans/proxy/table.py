@@ -99,6 +99,19 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def cell_next(self) -> Cell | None:
+        """Return next cell from table grid.
+
+        Next cell always is an reference to common or restarting cell,
+        so if you got cell `restart`, next cell after can be in another row.
+
+        If you want next cell merged use `get_cell_on_grid` instead.
+
+        Raises:
+            TblPosError: If some refs is broken while positioning.
+
+        Returns:
+            Cell | None: Next cell or not.
+        """
         # We want get ref on real (or merged) next cell not horizontally spanned
         grid_x_next = self.grid_x + self.horz_span
         next_ = self.table.get_cell_on_grid(grid_x_next, self.grid_y)
@@ -119,6 +132,19 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def cell_prev(self) -> Cell | None:
+        """Return previous cell from table grid.
+
+        Previous cell always is an reference to common or restarting cell,
+        so if you got cell `restart`, previous cell after can be in another row.
+
+        If you want previous cell merged use `get_cell_on_grid` instead.
+
+        Raises:
+            TblPosError: If some refs is broken while positioning.
+
+        Returns:
+            Cell | None: Previous cell or not.
+        """
         # Saved ref in `cells_grid_x` of parent row will return merged or restart cell
         grid_x_prev = self.grid_x - 1
         prev = self.table.get_cell_on_grid(grid_x_prev, self.grid_y)
@@ -216,8 +242,10 @@ class Row(ElementProxy[CT_Row]):
     def pos(self) -> POS:
         return self.element.xml_pos
 
-    def iter_cells(self) -> Iterator[Cell]:
+    def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
         for cell in self.cells:
+            if skip_merged and cell.vert_merged:
+                continue
             yield cell
 
     def get_cell(self, idx: int) -> Cell | None:
