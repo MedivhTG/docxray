@@ -131,7 +131,7 @@ class CellH2D(How2Display[CellResolver]):
         spacing = self._tblCellSpacing
         if spacing is not None and spacing > 0:
             return self._borders_non_zero_spacing_info
-        return self._spacing_zero()
+        return self._spacing_zero(self._borders_non_zero_spacing_info)
 
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
@@ -293,8 +293,7 @@ class CellH2D(How2Display[CellResolver]):
             return None
         return prop
 
-    def _spacing_zero(self) -> BordersInfo:
-        inf = self._borders_non_zero_spacing_info
+    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
         cell = self._rslvr._proxy
         row = cell.row
         tblBorders_elm = self._rslvr.row.h2d._tblBorders
@@ -492,17 +491,11 @@ class CellH2D(How2Display[CellResolver]):
 
     @cached_property
     def _cnf_gathered(self) -> WD_CNF_FORMAT | None:
-        cnf_cell = self._cnf
-        cnf_row = self._cnf_row
-        cnf = cnf_cell
-        if cnf_row is not None:
-            if cnf is None:
-                cnf = cnf_row
-            else:
-                cnf |= cnf_row
-        if cnf is None:
-            return None
-        return self._cnf_looked(cnf)
+        if self._cnf:
+            return self._cnf_looked(self._cnf)
+        if self._cnf_row:
+            return self._cnf_looked(self._cnf_row)
+        return None
 
     @cached_property
     def _has_cnf(self) -> bool:
