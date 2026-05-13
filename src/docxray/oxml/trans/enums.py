@@ -3,6 +3,8 @@ from __future__ import annotations
 from enum import IntFlag
 from typing import Literal, Self
 
+from docxray.oxml.trans.st.enums import SE_Border
+
 type CnfName = Literal[
     "firstRow",
     "lastRow",
@@ -124,4 +126,62 @@ _CNF_LOOK_NAME_TO_MEMBER = {
     "lastColumn": WD_CNF_TABLE_LOOK.APPLY_LAST_COLUMN,
     "noHBand": WD_CNF_TABLE_LOOK.NO_ROW_BANDING,
     "noVBand": WD_CNF_TABLE_LOOK.NO_COLUMN_BANDING,
+}
+
+_SE_BORDER_TO_ECMA_NUMBER = {
+    SE_Border.SINGLE: 1,
+    SE_Border.THICK: 2,
+    SE_Border.DOUBLE: 3,
+    SE_Border.DOTTED: 4,
+    SE_Border.DASHED: 5,
+    SE_Border.DOT_DASH: 6,
+    SE_Border.DOT_DOT_DASH: 7,
+    SE_Border.TRIPLE: 8,
+    SE_Border.THIN_THICK_SMALL_GAP: 9,
+    SE_Border.THICK_THIN_SMALL_GAP: 10,
+    SE_Border.THIN_THICK_THIN_SMALL_GAP: 11,
+    SE_Border.THIN_THICK_MEDIUM_GAP: 12,
+    SE_Border.THICK_THIN_MEDIUM_GAP: 13,
+    SE_Border.THIN_THICK_THIN_MEDIUM_GAP: 14,
+    SE_Border.THIN_THICK_LARGE_GAP: 15,
+    SE_Border.THICK_THIN_LARGE_GAP: 16,
+    SE_Border.THIN_THICK_THIN_LARGE_GAP: 17,
+    SE_Border.WAVE: 18,
+    SE_Border.DOUBLE_WAVE: 19,
+    SE_Border.DASH_SMALL_GAP: 20,
+    SE_Border.DASH_DOT_STROKED: 21,
+    SE_Border.THREE_D_EMBOSS: 22,
+    SE_Border.THREE_D_ENGRAVE: 23,
+    SE_Border.OUTSET: 24,
+    SE_Border.INSET: 25,
+}
+
+# In ECMA-376 count of lines not mentioned, so
+# this is just my guess..
+_SE_BORDER_TO_LINES_COUNT = {
+    SE_Border.SINGLE: 1,
+    SE_Border.THICK: 1,
+    SE_Border.DOUBLE: 2,
+    SE_Border.DOTTED: 1,
+    SE_Border.DASHED: 1,
+    SE_Border.DOT_DASH: 1,
+    SE_Border.DOT_DOT_DASH: 1,
+    SE_Border.TRIPLE: 3,
+    SE_Border.THIN_THICK_SMALL_GAP: 2,
+    SE_Border.THICK_THIN_SMALL_GAP: 2,
+    SE_Border.THIN_THICK_THIN_SMALL_GAP: 3,
+    SE_Border.THIN_THICK_MEDIUM_GAP: 2,
+    SE_Border.THICK_THIN_MEDIUM_GAP: 2,
+    SE_Border.THIN_THICK_THIN_MEDIUM_GAP: 3,
+    SE_Border.THIN_THICK_LARGE_GAP: 2,
+    SE_Border.THICK_THIN_LARGE_GAP: 2,
+    SE_Border.THIN_THICK_THIN_LARGE_GAP: 3,
+    SE_Border.WAVE: 1,
+    SE_Border.DOUBLE_WAVE: 2,
+    SE_Border.DASH_SMALL_GAP: 1,
+    SE_Border.DASH_DOT_STROKED: 1,
+    SE_Border.THREE_D_EMBOSS: 1,
+    SE_Border.THREE_D_ENGRAVE: 1,
+    SE_Border.OUTSET: 1,
+    SE_Border.INSET: 1,
 }

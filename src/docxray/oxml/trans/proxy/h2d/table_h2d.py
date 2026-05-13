@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 from functools import cached_property
 from typing import Literal
 
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.oxml.trans.enums import (
+    _SE_BORDER_TO_ECMA_NUMBER,
+    _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
     WD_CNF_TABLE_LOOK,
     CnfLookName,
 )
 from docxray.oxml.trans.proxy.compute import width
+from docxray.oxml.trans.proxy.h2d.exceptions import DisplayError
 from docxray.oxml.trans.proxy.shared import NotFound, Twips, safe_get_prop
 from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.st.enums import SE_Border, SE_TblStyleOverrideType
@@ -114,16 +119,17 @@ TBL_POSITIONING: dict[POS, dict[_TableChild, tuple[_Border, _Border]]] = {
 
 class CellH2D(How2Display[CellResolver]):
     @cached_property
-    def borders_info(self) -> dict:
-        """Get info about cell borders.
-
-        Returns:
-            dict: _description_
-        """
+    def borders_info(self):
         spacing = self._tblCellSpacing
         if spacing is not None and spacing > 0:
-            return self._spacing_non_zero()
-        return self._spacing_non_zero()
+            return self._borders_non_zero_spacing_info
+        return self._spacing_zero()
+
+    @cached_property
+    def _borders_non_zero_spacing_info(self) -> dict:
+        inf = self._spacing_non_zero()
+        inf["cell_spacing"] = self._tblCellSpacing
+        return inf
 
     def _spacing_non_zero(self) -> dict:
         tcBorders_elm, cell_ctx = self._cell_borders_ctx
@@ -144,8 +150,8 @@ class CellH2D(How2Display[CellResolver]):
             return self._case_4_tc_borders_grid_group(
                 tcBorders_elm, tbl_horz, tbl_vert, cell_ctx.type
             )
-        # TODO: Refac
-        raise Exception("Reached Never")
+        msg = "Reached code that is never"
+        raise DisplayError(msg)
 
     def _case_1_tc_borders_ommited(
         self, tbl_horz: SE_Border | None, tbl_vert: SE_Border | None
@@ -271,9 +277,90 @@ class CellH2D(How2Display[CellResolver]):
             return None
         return prop
 
-    # TODO: realize and use in `borders_info`
     def _spacing_zero(self) -> dict:
-        raise NotImplementedError()
+        inf = self._borders_non_zero_spacing_info
+        cell = self._rslvr._proxy
+        row = cell.row
+        tblBorders_elm = self._rslvr.row.h2d._tblBorders
+
+        cell_above = cell.cell_above
+        cell_above_h2d = cell_above.h2d if cell_above is not None else None
+        cell_below = cell.cell_below
+        cell_below_h2d = cell_below.h2d if cell_below is not None else None
+        cell_prev = cell.cell_prev
+        cell_next = cell.cell_next
+
+        tbl_top = self._border(tblBorders_elm, "top")
+        tbl_bottom = self._border(tblBorders_elm, "bottom")
+        tbl_left = self._border(tblBorders_elm, "left")
+        tbl_right = self._border(tblBorders_elm, "left")
+
+        self._vert_borders_conflict(
+            inf, row.pos, cell_above_h2d, cell_below_h2d, tbl_top, tbl_bottom
+        )
+
+        return inf
+
+    def _vert_borders_conflict(
+        self,
+        inf: dict,
+        row_pos: POS,
+        cell_above_h2d: CellH2D | None,
+        cell_below_h2d: CellH2D | None,
+        tbl_top: SE_Border | None,
+        tbl_bottom: SE_Border | None,
+    ) -> None:
+        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
+        if top_n == "top":
+            inf["top"] = self._opposing_cell_borders_conflict(
+                inf["top"], tbl_top
+            )
+        elif top_n == "insideH" and cell_above_h2d is not None:
+            above_inf = cell_above_h2d._borders_non_zero_spacing_info
+            inf["top"] = self._opposing_cell_borders_conflict(
+                inf["top"], above_inf["bottom"]
+            )
+        if bottom_n == "bottom":
+            inf["bottom"] = self._opposing_cell_borders_conflict(
+                inf["bottom"], tbl_bottom
+            )
+        elif bottom_n == "insideH" and cell_below_h2d is not None:
+            below_inf = cell_below_h2d._borders_non_zero_spacing_info
+            inf["bottom"] = self._opposing_cell_borders_conflict(
+                inf["bottom"], below_inf["top"]
+            )
+
+    def _opposing_cell_borders_conflict(
+        self, main: SE_Border | None, opposing_to: SE_Border | None
+    ) -> SE_Border | None:
+        if main in (None, SE_Border.NULL, SE_Border.NONE):
+            return opposing_to
+        if opposing_to in (None, SE_Border.NULL, SE_Border.NONE):
+            return main
+        main_weight = self._border_weight(main)
+        opposing_to_weight = self._border_weight(opposing_to)
+        if main_weight is None or opposing_to_weight is None:
+            msg = "Art borders detected in table of story part"
+            raise DisplayError(msg)
+        if main_weight > opposing_to_weight:
+            return main
+        elif main_weight < opposing_to_weight:
+            return opposing_to
+        elif main_weight == opposing_to_weight:
+            main_number = _SE_BORDER_TO_ECMA_NUMBER[main]
+            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[opposing_to]
+            if main_number <= opposing_to_number:
+                return main
+            return opposing_to
+        return None
+
+    def _border_weight(self, border_type: SE_Border):
+        lines_count = _SE_BORDER_TO_LINES_COUNT.get(border_type)
+        border_number = _SE_BORDER_TO_ECMA_NUMBER.get(border_type)
+        if lines_count is None or border_number is None:
+            # It's an art border
+            return None
+        return lines_count * border_number
 
     @cached_property
     def _cell_borders_ctx(
