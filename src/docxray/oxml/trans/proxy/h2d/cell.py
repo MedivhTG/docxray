@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
@@ -9,97 +9,22 @@ from docxray.oxml.trans.enums import (
     _SE_BORDER_TO_ECMA_NUMBER,
     _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
-    WD_CNF_TABLE_LOOK,
-    CnfLookName,
 )
 from docxray.oxml.trans.proxy.compute import width
 from docxray.oxml.trans.proxy.h2d.exceptions import DisplayError
-from docxray.oxml.trans.proxy.shared import NotFound, Twips, safe_get_prop
+from docxray.oxml.trans.proxy.h2d.how2display import How2Display
+from docxray.oxml.trans.proxy.shared import (
+    Length,
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.trans.proxy.styles.style import TableStyle
+from docxray.oxml.trans.proxy.table import Cell, Row, Table
 from docxray.oxml.trans.st.enums import SE_Border, SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders
 from docxray.oxml.trans.table.table_props import CT_TblBorders
-
-from .how_to_display import How2Display
-from .table_rslv import CellResolver, RowResolver, TableResolver
-
-
-class TableH2D(How2Display[TableResolver]):
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        mask: bytes | None = self._rslvr.prop_val("tblLook", optional=True)
-        if mask is None:
-            return WD_CNF_TABLE_LOOK.from_bytes(b"")
-        return WD_CNF_TABLE_LOOK.from_bytes(mask)
-
-    @cached_property
-    def _tblBorders(self) -> CT_TblBorders | None:
-        tblBorders_elm = self._rslvr.prop("tblBorders", algorithm="both")
-        if isinstance(tblBorders_elm, NotFound):
-            return None
-        return tblBorders_elm
-
-    @cached_property
-    def row_band_size(self) -> int:
-        size = self._rslvr.prop_val("tblStyleRowBandSize", algorithm="style")
-        if isinstance(size, NotFound):
-            return 1
-        return size
-
-    @cached_property
-    def col_band_size(self) -> int:
-        size = self._rslvr.prop_val("tblStyleColBandSize", algorithm="style")
-        if isinstance(size, NotFound):
-            return 1
-        return size
-
-
-class RowH2D(How2Display[RowResolver]):
-    @cached_property
-    def first_row_show(self) -> bool:
-        return self._format_from_cnf_look("firstRow")
-
-    @cached_property
-    def last_row_show(self) -> bool:
-        return self._format_from_cnf_look("lastRow")
-
-    @cached_property
-    def first_col_show(self) -> bool:
-        return self._format_from_cnf_look("firstColumn")
-
-    @cached_property
-    def last_col_show(self) -> bool:
-        return self._format_from_cnf_look("lastColumn")
-
-    @cached_property
-    def no_horizontal_lines(self) -> bool:
-        return self._format_from_cnf_look("noHBand")
-
-    @cached_property
-    def no_vertical_lines(self) -> bool:
-        return self._format_from_cnf_look("noVBand")
-
-    def _format_from_cnf_look(self, format_name: CnfLookName) -> bool:
-        return self._cnf_look.has_format(format_name)
-
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        if self._rslvr.tblPrEx is None:
-            return self._rslvr.table.h2d._cnf_look
-        mask: bytes | None = safe_get_prop(
-            self._rslvr.tblPrEx, self._rslvr.prop_path("val", "tblLook")
-        )
-        if mask is None:
-            return WD_CNF_TABLE_LOOK.from_bytes(b"")
-        return WD_CNF_TABLE_LOOK.from_bytes(mask)
-
-    @cached_property
-    def _tblBorders(self) -> CT_TblBorders | None:
-        if self._rslvr.tblPrEx is not None:
-            return self._rslvr.tblPrEx.tblBorders
-        return self._rslvr.table.h2d._tblBorders
-
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
 type _TableChild = Literal["row", "cell"]
@@ -148,16 +73,28 @@ class BordersInfo(TypedDict):
     bottom: SE_Border | None
     left: SE_Border | None
     right: SE_Border | None
-    spacing: Twips | float | None
+    spacing: Length | float | None
 
 
-class CellH2D(How2Display[CellResolver]):
+class CellH2D(How2Display[Cell]):
+    @cached_property
+    def row(self) -> Row:
+        return self._proxy.row
+
+    @cached_property
+    def talbe(self) -> Table:
+        return self.row.table
+
     @cached_property
     def borders_info(self) -> BordersInfo:
         spacing = self._spacing
         if spacing is not None and spacing > 0:
             return self._borders_non_zero_spacing_info
         return self._spacing_zero(self._borders_non_zero_spacing_info)
+
+    @cached_property
+    def _table_style(self) -> TableStyle | None:
+        return self.row.h2d._table_style
 
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
@@ -174,7 +111,7 @@ class CellH2D(How2Display[CellResolver]):
             "spacing": None,
         }
         tcBorders_elm, cell_ctx = self._cell_borders_ctx
-        tblBorders_elm = self._rslvr.row.h2d._tblBorders
+        tblBorders_elm = self.row.h2d._tblBorders
         tbl_horz = self._border(tblBorders_elm, "insideH")
         tbl_vert = self._border(tblBorders_elm, "insideV")
         if tcBorders_elm is None and cell_ctx is None:
@@ -233,7 +170,7 @@ class CellH2D(How2Display[CellResolver]):
         tbl_vert: SE_Border | None,
         grid_group: SE_TblStyleOverrideType,
     ) -> None:
-        cell = self._rslvr._proxy
+        cell = self._proxy
         row = cell.row
         top = None
         bottom = None
@@ -297,16 +234,16 @@ class CellH2D(How2Display[CellResolver]):
     def _border(
         self, borders_elm: CT_TcBorders | CT_TblBorders | None, border: _Border
     ) -> SE_Border | None:
-        path = self._rslvr.prop_path("val", border)
+        path = self._prop_path("val", border)
         prop = safe_get_prop(borders_elm, path)
         if isinstance(prop, NotFound):
             return None
         return prop
 
     def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
-        cell = self._rslvr._proxy
+        cell = self._proxy
         row = cell.row
-        tblBorders_elm = self._rslvr.row.h2d._tblBorders
+        tblBorders_elm = self.row.h2d._tblBorders
 
         cell_above = cell.cell_above
         cell_above_h2d = cell_above.h2d if cell_above is not None else None
@@ -432,13 +369,13 @@ class CellH2D(How2Display[CellResolver]):
     ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
         name = "tcBorders"
         # Direct
-        tcBorders_elm = self._rslvr.prop(name)
+        tcBorders_elm = self._prop(name)
         if not isinstance(tcBorders_elm, NotFound):
             return tcBorders_elm, None
         # From table style (defined common or exception)
         # whenever in grid group or directly
-        path = self._rslvr.prop_path(name, self._rslvr._path_base)
-        tc_ctx = self._rslvr.from_tbl_style_hierarchy(
+        path = self._prop_path(name, self._path_base)
+        tc_ctx = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
         )
         if not isinstance(tc_ctx[0], NotFound):
@@ -446,42 +383,36 @@ class CellH2D(How2Display[CellResolver]):
         return None, None
 
     @cached_property
-    def _spacing(self) -> Twips | float | None:
-        """Get spacing between cells for current depending on the cell context.
-
-        Returns:
-            Twips | float | None: Measure in `Twips` or set to `None`. `float`
-                type (percents) impossible but written for typing compat.
-        """
+    def _spacing(self) -> Length | float | None:
         name = "tblCellSpacing"
-        row_rslvr = self._rslvr.row_resolver
-        tbl_rslvr = row_rslvr.table_resolver
+        row_h2d = self.row.h2d
+        tbl_h2d = row_h2d.table.h2d
         # Row-level direct
-        spacing_elm = row_rslvr.prop(name)
+        spacing_elm = row_h2d._prop(name)
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Row-level exception
-        tblPrEx_elm = row_rslvr.tblPrEx
+        tblPrEx_elm = row_h2d._tblPrEx
         if tblPrEx_elm is not None:
             spacing_elm = tblPrEx_elm.tblCellSpacing
             if spacing_elm is not None:
                 return width(spacing_elm, True)
         # Table-level
-        spacing_elm = tbl_rslvr.prop(name)
+        spacing_elm = tbl_h2d._prop(name)
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
 
         # From table style (defined common or exception)
-        path = row_rslvr.prop_path(name, row_rslvr._path_base)
+        path = row_h2d._prop_path(name, row_h2d._path_base)
         # Table style Row-level (in grid group or direct) firstly
-        spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
+        spacing_elm, _ = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
-        path = tbl_rslvr.prop_path(name, tbl_rslvr._path_base)
-        spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
+        path = tbl_h2d._prop_path(name, tbl_h2d._path_base)
+        spacing_elm, _ = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
@@ -490,18 +421,18 @@ class CellH2D(How2Display[CellResolver]):
 
     @cached_property
     def _row_band_number(self) -> int:
-        cell = self._rslvr._proxy
-        return self._rslvr._proxy.grid_y // cell.table.h2d.row_band_size
+        cell = self._proxy
+        return self._proxy.grid_y // cell.table.h2d.row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
-        cell = self._rslvr._proxy
-        return self._rslvr._proxy.grid_x // cell.table.h2d.col_band_size
+        cell = self._proxy
+        return self._proxy.grid_x // cell.table.h2d.col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:
         _CNF = WD_CNF_FORMAT
-        cell = self._rslvr._proxy
+        cell = self._proxy
         cnf = _CNF(0)
         if cell.grid_y == 0:
             cnf |= _CNF.FIRST_ROW
@@ -533,20 +464,20 @@ class CellH2D(How2Display[CellResolver]):
     def _tbl_style_props_deep(
         self,
     ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
-        tbl_style = self._rslvr.table_style
+        tbl_style = self._table_style
         props_leveled = []
         cnf = self._cnf_latent
         while isinstance(tbl_style, TableStyle):
             if cnf is not None:
-                tbl_style_props = self._rslvr.table_style_props(tbl_style, cnf)
+                tbl_style_props = self._table_style_props(tbl_style, cnf)
             else:
                 tbl_style_props = []
             props_leveled.append((tbl_style, tbl_style_props))
-            tbl_style = self._rslvr._styles.base_style(tbl_style)  # type: ignore[assignment]
+            tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
         return props_leveled
 
     def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
-        row_h2d = self._rslvr.row.h2d
+        row_h2d = self.row.h2d
         if not row_h2d.first_row_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
@@ -570,3 +501,10 @@ class CellH2D(How2Display[CellResolver]):
             cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
         return cnf
+
+    def _from_styles_hierarchy(
+        self, path: PropertyPath, optional: bool = False, **kwargs: Any
+    ) -> Any:
+        if self._table_style is None:
+            return NotFound(self, path)
+        return self._from_style_inheritance(self._table_style, path, optional)

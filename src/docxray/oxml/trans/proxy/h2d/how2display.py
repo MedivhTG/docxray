@@ -21,13 +21,12 @@ if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.parts.document import DocumentPart
 
-DEFAULT_T = TypeVar("DEFAULT_T")
 PROXY_T = TypeVar("PROXY_T")
 
 type ResolveAlgorithm = Literal["direct", "style", "both"]
 
 
-class Resolver(Generic[PROXY_T]):
+class How2Display(Generic[PROXY_T]):
     def __init__(
         self,
         story: PROXY_T,
@@ -44,24 +43,24 @@ class Resolver(Generic[PROXY_T]):
             self._numbering = num_part.numbering
         self._path_base = property_base
 
-    def prop_path(self, name: str, path_base: str = "") -> PropertyPath:
+    def _prop_path(self, name: str, path_base: str = "") -> PropertyPath:
         return PropertyPath.base(name, path_base)
 
-    def prop_direct(self, path: PropertyPath, optional: bool = False) -> Any:
+    def _prop_direct(self, path: PropertyPath, optional: bool = False) -> Any:
         elm = getattr(self._proxy, "element")
         return safe_get_prop(elm, path, optional)
 
-    def prop_style(self, path: PropertyPath, optional: bool = False) -> Any:
-        return self.from_styles_hierarchy(path, optional)
+    def _prop_style(self, path: PropertyPath, optional: bool = False) -> Any:
+        return self._from_styles_hierarchy(path, optional)
 
-    def prop_both(self, path: PropertyPath, optional: bool = False) -> Any:
+    def _prop_both(self, path: PropertyPath, optional: bool = False) -> Any:
         elm = getattr(self._proxy, "element")
         direct_val = safe_get_prop(elm, path, optional)
         if isinstance(direct_val, NotFound):
-            return self.from_styles_hierarchy(path, optional)
+            return self._from_styles_hierarchy(path, optional)
         return direct_val
 
-    def prop(
+    def _prop(
         self,
         name_or_path: str | PropertyPath,
         optional: bool = False,
@@ -70,25 +69,25 @@ class Resolver(Generic[PROXY_T]):
         if isinstance(name_or_path, PropertyPath):
             path = name_or_path
         else:
-            path = self.prop_path(name_or_path, self._path_base)
+            path = self._prop_path(name_or_path, self._path_base)
         match algorithm:
             case "direct":
-                return self.prop_direct(path, optional)
+                return self._prop_direct(path, optional)
             case "style":
-                return self.prop_style(path, optional)
+                return self._prop_style(path, optional)
             case "both":
-                return self.prop_both(path, optional)
+                return self._prop_both(path, optional)
 
-    def prop_val(
+    def _prop_val(
         self,
         name: str,
         optional: bool = False,
         algorithm: ResolveAlgorithm = "direct",
     ) -> Any:
-        path = self.prop_path("val", f"{self._path_base}.{name}")
-        return self.prop(path, optional, algorithm)
+        path = self._prop_path("val", f"{self._path_base}.{name}")
+        return self._prop(path, optional, algorithm)
 
-    def table_style_props(
+    def _table_style_props(
         self, table_style: TableStyle, cnf: WD_CNF_FORMAT
     ) -> list[CT_TblStylePr]:
         props = []
@@ -102,7 +101,7 @@ class Resolver(Generic[PROXY_T]):
             props.append(table_style.wholeTable)
         return props
 
-    def from_tbl_style_hierarchy(
+    def _from_tbl_style_hierarchy(
         self,
         tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
         path: PropertyPath,
@@ -116,14 +115,14 @@ class Resolver(Generic[PROXY_T]):
                     tbl_style.element, path, optional
                 )
                 found_in_style = tbl_style
-            tbl_val, tbl_style_prop = self.from_tbl_style_props(
+            tbl_val, tbl_style_prop = self._from_tbl_style_props(
                 tbl_style_props, path, optional
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
         return style_direct_val, found_in_style
 
-    def from_tbl_style_props(
+    def _from_tbl_style_props(
         self,
         table_style_props: list[CT_TblStylePr],
         path: PropertyPath,
@@ -136,7 +135,7 @@ class Resolver(Generic[PROXY_T]):
             return table_val, tbl_style_prop
         return NotFound(table_style_props, path), None
 
-    def from_doc_dflts(
+    def _from_doc_dflts(
         self, path: PropertyPath, optional: bool = False
     ) -> Any:
         doc_dflts = self._styles.document_defaults
@@ -144,7 +143,7 @@ class Resolver(Generic[PROXY_T]):
             return NotFound(self._styles, path)
         return safe_get_prop(doc_dflts.element, path, optional)
 
-    def from_style_inheritance(
+    def _from_style_inheritance(
         self,
         style: CharacterStyle | NumberingStyle,
         path: PropertyPath,
@@ -160,6 +159,6 @@ class Resolver(Generic[PROXY_T]):
         return val
 
     @abstractmethod
-    def from_styles_hierarchy(
+    def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any: ...

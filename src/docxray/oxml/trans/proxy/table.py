@@ -14,7 +14,9 @@ from .compute import width
 from .shared import ElementProxy, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
-    from .h2d.table_h2d import CellH2D, RowH2D, TableH2D
+    from .h2d.cell import CellH2D
+    from .h2d.row import RowH2D
+    from .h2d.table import TableH2D
 
 
 class TblPosError(Exception):
@@ -24,10 +26,9 @@ class TblPosError(Exception):
 class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def h2d(self) -> CellH2D:
-        from .h2d.table_h2d import CellH2D
-        from .h2d.table_rslv import CellResolver
+        from .h2d.cell import CellH2D
 
-        return CellH2D(CellResolver(self, self.part.document_part, "tcPr"))
+        return CellH2D(self, self.part.document_part, "tcPr")
 
     @cached_property
     def row(self) -> Row:
@@ -39,14 +40,14 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def width(self) -> Twips | float | None:
-        tcW_elm = self.h2d._rslvr.prop("tcW")
+        tcW_elm = self.h2d._prop("tcW")
         if isinstance(tcW_elm, NotFound) or tcW_elm is None:
             return None
         return width(tcW_elm)
 
     @cached_property
     def horz_span(self) -> int:
-        gridSpan_val = self.h2d._rslvr.prop_val("gridSpan")
+        gridSpan_val = self.h2d._prop_val("gridSpan")
         if isinstance(gridSpan_val, NotFound):
             return 1
         return gridSpan_val
@@ -203,16 +204,15 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def _vmerge(self) -> NotFound | None | SE_Merge:
-        return self.h2d._rslvr.prop_val("vMerge", optional=True)
+        return self.h2d._prop_val("vMerge", optional=True)
 
 
 class Row(ElementProxy[CT_Row]):
     @cached_property
     def h2d(self) -> RowH2D:
-        from .h2d.table_h2d import RowH2D
-        from .h2d.table_rslv import RowResolver
+        from .h2d.row import RowH2D
 
-        return RowH2D(RowResolver(self, self.part, "trPr"))  # type: ignore[arg-type]
+        return RowH2D(self, self.part, "trPr")  # type: ignore[arg-type]
 
     @cached_property
     def table(self) -> Table:
@@ -287,10 +287,9 @@ class Row(ElementProxy[CT_Row]):
 class Table(StoryChild[CT_Tbl]):
     @cached_property
     def h2d(self) -> TableH2D:
-        from .h2d.table_h2d import TableH2D
-        from .h2d.table_rslv import TableResolver
+        from .h2d.table import TableH2D
 
-        return TableH2D(TableResolver(self, self.part, "tblPr"))  # type: ignore[arg-type]
+        return TableH2D(self, self.part, "tblPr")  # type: ignore[arg-type]
 
     @cached_property
     def rows(self) -> list[Row]:
