@@ -47,6 +47,17 @@ def width(
 
 
 def width_string(width: str) -> Length | None:
+    """Parse width string to `Length` instance.
+
+    Normally XSD module before will validate string so we return
+    `None` silently.
+
+    Args:
+        width (str): Width string from any width_elm.
+
+    Returns:
+        Length | None: Number instance or it's not parsed.
+    """
     pattern = cast("PatternFacet", ST_UniversalMeasure.FACETS["pattern"]).value
     if pattern is None:
         return None
