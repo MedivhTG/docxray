@@ -162,6 +162,8 @@ register_element_cls("w:tblLook", CT_TblLook)
 register_element_cls("w:tblStyle", CT_String)
 register_element_cls("w:tblBorders", CT_TblBorders)
 register_element_cls("w:tblCellSpacing", CT_TblWidth)
+register_element_cls("w:tblStyleRowBandSize", CT_DecimalNumber)
+register_element_cls("w:tblStyleColBandSize", CT_DecimalNumber)
 
 from .table.row_props import CT_TblPrEx, CT_TrPr
 

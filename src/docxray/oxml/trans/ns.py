@@ -121,6 +121,8 @@ class W:
     O_MATH = qn("w:oMath")
 
     TBL_PR = qn("w:tblPr")
+    TBL_STYLE_ROW_BAND_SIZE = qn("w:tblStyleRowBandSize")
+    TBL_STYLE_COL_BAND_SIZE = qn("w:tblStyleColBandSize")
     TBL_PR_EX = qn("w:tblPrEx")
     TBL_LOOK = qn("w:tblLook")
     FIRST_ROW = qn("w:firstRow")

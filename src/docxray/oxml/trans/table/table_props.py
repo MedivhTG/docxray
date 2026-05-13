@@ -2,7 +2,12 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.ns import W
-from docxray.oxml.trans.shared import CT_Border, CT_String, CT_TblWidth
+from docxray.oxml.trans.shared import (
+    CT_Border,
+    CT_DecimalNumber,
+    CT_String,
+    CT_TblWidth,
+)
 from docxray.oxml.trans.st.shared_common import ST_OnOff
 from docxray.oxml.trans.st.wml import ST_ShortHexNumber
 from docxray.oxml.trans.xmlchemy import OxmlElement
@@ -78,12 +83,24 @@ class CT_TblPr(OxmlElement):
         return self.child_zero_or_one(W.TBL_STYLE, CT_String)
 
     @cached_property
-    def tblBorders(self) -> CT_TblBorders | None:
-        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
+    def tblStyleRowBandSize(self) -> CT_DecimalNumber | None:
+        return self.child_zero_or_one(
+            W.TBL_STYLE_ROW_BAND_SIZE, CT_DecimalNumber
+        )
+
+    @cached_property
+    def tblStyleColBandSize(self) -> CT_DecimalNumber | None:
+        return self.child_zero_or_one(
+            W.TBL_STYLE_COL_BAND_SIZE, CT_DecimalNumber
+        )
 
     @cached_property
     def tblCellSpacing(self) -> CT_TblWidth | None:
         return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)
+
+    @cached_property
+    def tblBorders(self) -> CT_TblBorders | None:
+        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
 
     @cached_property
     def tblLook(self) -> CT_TblLook | None:

@@ -104,7 +104,6 @@ class Resolver(Generic[PROXY_T]):
 
     def from_tbl_style_hierarchy(
         self,
-        from_cnf: bool,
         tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
         path: PropertyPath,
         optional: bool = False,
@@ -112,21 +111,16 @@ class Resolver(Generic[PROXY_T]):
         style_direct_val = NotFound(self, path)
         found_in_style = None
         for tbl_style, tbl_style_props in tbl_style_props_deep:
-            if from_cnf:
-                if isinstance(style_direct_val, NotFound):
-                    style_direct_val = safe_get_prop(
-                        tbl_style.element, path, optional
-                    )
-                    found_in_style = tbl_style
-                tbl_val, tbl_style_prop = self.from_tbl_style_props(
-                    tbl_style_props, path, optional
+            if isinstance(style_direct_val, NotFound):
+                style_direct_val = safe_get_prop(
+                    tbl_style.element, path, optional
                 )
-                if not isinstance(tbl_val, NotFound):
-                    return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
-            else:
-                tbl_val = safe_get_prop(tbl_style.element, path, optional)
-                if not isinstance(tbl_val, NotFound):
-                    return tbl_val, tbl_style
+                found_in_style = tbl_style
+            tbl_val, tbl_style_prop = self.from_tbl_style_props(
+                tbl_style_props, path, optional
+            )
+            if not isinstance(tbl_val, NotFound):
+                return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
         return style_direct_val, found_in_style
 
     def from_tbl_style_props(

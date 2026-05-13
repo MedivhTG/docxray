@@ -40,6 +40,20 @@ class TableH2D(How2Display[TableResolver]):
             return None
         return tblBorders_elm
 
+    @cached_property
+    def row_band_size(self) -> int:
+        size = self._rslvr.prop_val("tblStyleRowBandSize", algorithm="style")
+        if isinstance(size, NotFound):
+            return 1
+        return size
+
+    @cached_property
+    def col_band_size(self) -> int:
+        size = self._rslvr.prop_val("tblStyleColBandSize", algorithm="style")
+        if isinstance(size, NotFound):
+            return 1
+        return size
+
 
 class RowH2D(How2Display[RowResolver]):
     @cached_property
@@ -68,13 +82,6 @@ class RowH2D(How2Display[RowResolver]):
 
     def _format_from_cnf_look(self, format_name: CnfLookName) -> bool:
         return self._cnf_look.has_format(format_name)
-
-    @cached_property
-    def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._rslvr.prop_val("cnfStyle")
-        if isinstance(cnf, NotFound):
-            return None
-        return WD_CNF_FORMAT.from_string(cnf)
 
     @cached_property
     def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
@@ -147,7 +154,7 @@ class BordersInfo(TypedDict):
 class CellH2D(How2Display[CellResolver]):
     @cached_property
     def borders_info(self) -> BordersInfo:
-        spacing = self._tblCellSpacing
+        spacing = self._spacing
         if spacing is not None and spacing > 0:
             return self._borders_non_zero_spacing_info
         return self._spacing_zero(self._borders_non_zero_spacing_info)
@@ -155,7 +162,7 @@ class CellH2D(How2Display[CellResolver]):
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
         inf = self._spacing_non_zero()
-        inf["spacing"] = self._tblCellSpacing
+        inf["spacing"] = self._spacing
         return inf
 
     def _spacing_non_zero(self) -> BordersInfo:
@@ -432,14 +439,14 @@ class CellH2D(How2Display[CellResolver]):
         # whenever in grid group or directly
         path = self._rslvr.prop_path(name, self._rslvr._path_base)
         tc_ctx = self._rslvr.from_tbl_style_hierarchy(
-            self._has_cnf, self._tbl_style_props_deep, path
+            self._tbl_style_props_deep, path
         )
         if not isinstance(tc_ctx[0], NotFound):
             return tc_ctx
         return None, None
 
     @cached_property
-    def _tblCellSpacing(self) -> Twips | float | None:
+    def _spacing(self) -> Twips | float | None:
         """Get spacing between cells for current depending on the cell context.
 
         Returns:
@@ -468,41 +475,59 @@ class CellH2D(How2Display[CellResolver]):
         path = row_rslvr.prop_path(name, row_rslvr._path_base)
         # Table style Row-level (in grid group or direct) firstly
         spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
-            self._has_cnf, self._tbl_style_props_deep, path
+            self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
         path = tbl_rslvr.prop_path(name, tbl_rslvr._path_base)
         spacing_elm, _ = self._rslvr.from_tbl_style_hierarchy(
-            self._has_cnf, self._tbl_style_props_deep, path
+            self._tbl_style_props_deep, path
         )
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         return None
 
     @cached_property
-    def _cnf(self) -> WD_CNF_FORMAT | None:
-        cnf = self._rslvr.prop_val("cnfStyle")
-        if isinstance(cnf, NotFound):
-            return None
-        return WD_CNF_FORMAT.from_string(cnf)
+    def _row_band_number(self) -> int:
+        cell = self._rslvr._proxy
+        return self._rslvr._proxy.grid_y // cell.table.h2d.row_band_size
 
     @cached_property
-    def _cnf_row(self) -> WD_CNF_FORMAT | None:
-        return self._rslvr.row.h2d._cnf
+    def _col_band_number(self) -> int:
+        cell = self._rslvr._proxy
+        return self._rslvr._proxy.grid_x // cell.table.h2d.col_band_size
 
     @cached_property
-    def _cnf_gathered(self) -> WD_CNF_FORMAT | None:
-        if self._cnf:
-            return self._cnf_looked(self._cnf)
-        if self._cnf_row:
-            return self._cnf_looked(self._cnf_row)
-        return None
-
-    @cached_property
-    def _has_cnf(self) -> bool:
-        return False if self._cnf_gathered is None else True
+    def _cnf_latent(self) -> WD_CNF_FORMAT:
+        _CNF = WD_CNF_FORMAT
+        cell = self._rslvr._proxy
+        cnf = _CNF(0)
+        if cell.grid_y == 0:
+            cnf |= _CNF.FIRST_ROW
+        if cell.cell_below is None:
+            cnf |= _CNF.LAST_ROW
+        if cell.grid_x == 0:
+            cnf |= _CNF.FIRST_COLUMN
+        if cell.cell_next is None:
+            cnf |= _CNF.LAST_COLUMN
+        if self._col_band_number % 2 == 0:
+            cnf |= _CNF.ODD_VERTICAL_BAND
+        else:
+            cnf |= _CNF.EVEN_VERTICAL_BAND
+        if self._row_band_number % 2 == 0:
+            cnf |= _CNF.ODD_HORIZONTAL_BAND
+        else:
+            cnf |= _CNF.EVEN_HORIZONTAL_BAND
+        if cnf & (_CNF.FIRST_ROW | _CNF.LAST_COLUMN):
+            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
+        if cnf & (_CNF.FIRST_ROW | _CNF.FIRST_COLUMN):
+            cnf |= _CNF.FIRST_ROW_FIRST_COLUMN
+        if cnf & (_CNF.LAST_ROW | _CNF.LAST_COLUMN):
+            cnf |= _CNF.LAST_ROW_LAST_COLUMN
+        if cnf & (_CNF.LAST_ROW | _CNF.FIRST_COLUMN):
+            cnf |= _CNF.LAST_ROW_FIRST_COLUMN
+        return cnf
 
     @cached_property
     def _tbl_style_props_deep(
@@ -510,7 +535,7 @@ class CellH2D(How2Display[CellResolver]):
     ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
         tbl_style = self._rslvr.table_style
         props_leveled = []
-        cnf = self._cnf_gathered
+        cnf = self._cnf_latent
         while isinstance(tbl_style, TableStyle):
             if cnf is not None:
                 tbl_style_props = self._rslvr.table_style_props(tbl_style, cnf)

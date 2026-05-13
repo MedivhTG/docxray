@@ -73,10 +73,7 @@ class RunH2D(How2Display[RunResolver]):
         c_h2d = self.cell_h2d
         if c_h2d:
             tbl_val, _ = self._rslvr.from_tbl_style_hierarchy(
-                c_h2d._has_cnf,
-                c_h2d._tbl_style_props_deep,
-                char_path,
-                optional,
+                c_h2d._tbl_style_props_deep, char_path, optional
             )
             return tbl_val
         doc_val_path = self._rslvr.prop_path(
@@ -95,10 +92,7 @@ class RunH2D(How2Display[RunResolver]):
         c_h2d = self.cell_h2d
         if c_h2d:
             tbl_val, _ = self._rslvr.from_tbl_style_hierarchy(
-                c_h2d._has_cnf,
-                c_h2d._tbl_style_props_deep,
-                char_path,
-                True,
+                c_h2d._tbl_style_props_deep, char_path, True
             )
         found_count = sum(
             1
