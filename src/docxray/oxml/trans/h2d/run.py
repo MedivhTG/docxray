@@ -2,8 +2,8 @@ from functools import cached_property
 from typing import Any, cast
 
 # docxray stuff
+from docxray.oxml.trans.h2d.how2display import ResolveAlgorithm
 from docxray.oxml.trans.proxy.compute import on_off
-from docxray.oxml.trans.proxy.h2d.how2display import ResolveAlgorithm
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,

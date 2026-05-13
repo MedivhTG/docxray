@@ -14,9 +14,9 @@ from .compute import width
 from .shared import ElementProxy, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
-    from .h2d.cell import CellH2D
-    from .h2d.row import RowH2D
-    from .h2d.table import TableH2D
+    from ..h2d.cell import CellH2D
+    from ..h2d.row import RowH2D
+    from ..h2d.table import TableH2D
 
 
 class TblPosError(Exception):
@@ -26,7 +26,7 @@ class TblPosError(Exception):
 class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def h2d(self) -> CellH2D:
-        from .h2d.cell import CellH2D
+        from ..h2d.cell import CellH2D
 
         return CellH2D(self, self.part.document_part, "tcPr")
 
@@ -210,7 +210,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 class Row(ElementProxy[CT_Row]):
     @cached_property
     def h2d(self) -> RowH2D:
-        from .h2d.row import RowH2D
+        from ..h2d.row import RowH2D
 
         return RowH2D(self, self.part, "trPr")  # type: ignore[arg-type]
 
@@ -287,7 +287,7 @@ class Row(ElementProxy[CT_Row]):
 class Table(StoryChild[CT_Tbl]):
     @cached_property
     def h2d(self) -> TableH2D:
-        from .h2d.table import TableH2D
+        from ..h2d.table import TableH2D
 
         return TableH2D(self, self.part, "tblPr")  # type: ignore[arg-type]
 

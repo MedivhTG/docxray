@@ -10,9 +10,9 @@ from docxray.oxml.trans.enums import (
     _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
 )
+from docxray.oxml.trans.h2d.exceptions import DisplayError
+from docxray.oxml.trans.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.compute import width
-from docxray.oxml.trans.proxy.h2d.exceptions import DisplayError
-from docxray.oxml.trans.proxy.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.shared import (
     Length,
     NotFound,

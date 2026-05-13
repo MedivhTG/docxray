@@ -14,10 +14,10 @@ from docxray.oxml.trans.text.run import CT_R
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.proxy.document import Body
-    from docxray.oxml.trans.proxy.h2d.paragraph import (
+    from docxray.oxml.trans.h2d.paragraph import (
         ParagraphH2D,
     )
+    from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell
 
 
@@ -25,7 +25,7 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def h2d(self) -> ParagraphH2D:
         # docxray stuff
-        from docxray.oxml.trans.proxy.h2d.paragraph import ParagraphH2D
+        from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
 
         return ParagraphH2D(self, self.part.document_part, "pPr")
 
