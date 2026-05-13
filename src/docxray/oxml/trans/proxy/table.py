@@ -17,15 +17,11 @@ if TYPE_CHECKING:
     from .h2d.table_h2d import CellH2D, RowH2D, TableH2D
 
 
+class TblPosError(Exception):
+    pass
+
+
 class Cell(BlockItemContainer[CT_Tc]):
-    """Cell as `<w:tc>` in table.
-
-    Some properties used directly (not from resolver) such as
-    `gridSpan`, `vMerge`, `hMerge` (deprecated) and `tcW` by the reason:
-    those properties affects the table grid and cannot be resolved
-    from styles (it will break document).
-    """
-
     @cached_property
     def h2d(self) -> CellH2D:
         from .h2d.table_h2d import CellH2D
@@ -43,18 +39,17 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def width(self) -> Twips | float | None:
-        """Width as `<w:tcW>` attr of `w:w`.
-
-        Returns:
-            Twips | int | None: If `None` - than
-                it's auto width; elif `float` than it's
-                percentage of table width; else standard
-                Word measure in `Twips`.
-        """
         tcW_elm = self.h2d._rslvr.prop("tcW")
         if isinstance(tcW_elm, NotFound) or tcW_elm is None:
             return None
         return width(tcW_elm)
+
+    @cached_property
+    def horz_span(self) -> int:
+        gridSpan_val = self.h2d._rslvr.prop_val("gridSpan")
+        if isinstance(gridSpan_val, NotFound):
+            return 1
+        return gridSpan_val
 
     @cached_property
     def idx(self) -> int:
@@ -77,67 +72,107 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self.row.idx
 
     @cached_property
-    def next_cell(self) -> Cell | None:
-        return self.row.get_cell(self.idx + 1)
-
-    @cached_property
-    def prev_cell(self) -> Cell | None:
-        return self.row.get_cell(self.idx - 1)
-
-    @cached_property
-    def cell_below(self) -> Cell | None:
-        return self.table.get_cell_on_grid(self.grid_x, self.grid_y + 1)
-
-    @cached_property
-    def cell_above(self) -> Cell | None:
-        return self.table.get_cell_on_grid(self.grid_x, self.grid_y - 1)
-
-    @cached_property
     def vert_merged(self) -> bool:
         if self._vmerge in (None, SE_Merge.CONTINUE):
             return True
         return False
 
     @cached_property
+    def cell_above(self) -> Cell | None:
+        above = self.table.get_cell_on_grid(self.grid_x, self.grid_y - 1)
+        while above:
+            # Skip vert merged cells to get origin reference
+            if not above.vert_merged:
+                return above
+            above = self.table.get_cell_on_grid(self.grid_x, above.grid_y - 1)
+        return None
+
+    @cached_property
+    def cell_below(self) -> Cell | None:
+        below = self.table.get_cell_on_grid(self.grid_x, self.grid_y + 1)
+        while below:
+            # Skip vert merged cells to get origin reference
+            if not below.vert_merged:
+                return below
+            below = self.table.get_cell_on_grid(self.grid_x, below.grid_y + 1)
+        return None
+
+    @cached_property
+    def cell_next(self) -> Cell | None:
+        # We want get ref on real (or merged) next cell not horizontally spanned
+        grid_x_next = self.grid_x + self.horz_span
+        next_ = self.table.get_cell_on_grid(grid_x_next, self.grid_y)
+        if next_ is None:
+            return None
+        # Don't return merged cell, return restarting cell instead
+        if next_.vert_merged:
+            above = self.table.get_cell_on_grid(grid_x_next, self.grid_y - 1)
+            while above:
+                if not above.vert_merged:
+                    return above
+                above = self.table.get_cell_on_grid(
+                    grid_x_next, above.grid_y - 1
+                )
+            msg = "Cannot get next cell: refs broken"
+            raise TblPosError(msg)
+        return next_
+
+    @cached_property
+    def cell_prev(self) -> Cell | None:
+        # Saved ref in `cells_grid_x` of parent row will return merged or restart cell
+        grid_x_prev = self.grid_x - 1
+        prev = self.table.get_cell_on_grid(grid_x_prev, self.grid_y)
+        if prev is None:
+            return None
+        # Don't return merged cell, return restarting cell instead
+        if prev.vert_merged:
+            above = self.table.get_cell_on_grid(grid_x_prev, self.grid_y - 1)
+            while above:
+                if not above.vert_merged:
+                    return above
+                above = self.table.get_cell_on_grid(
+                    grid_x_prev, above.grid_y - 1
+                )
+            msg = "Cannot get previous cell: refs broken"
+            raise TblPosError(msg)
+        return prev
+
+    @cached_property
     def is_first(self) -> bool:
-        prev_cell = self.prev_cell
-        while prev_cell:
-            if not prev_cell.vert_merged:
-                return False
-            prev_cell = prev_cell.prev_cell
-        return True
+        return self.cell_prev is None
 
     @cached_property
     def is_last(self) -> bool:
-        next_cell = self.next_cell
-        while next_cell:
-            if not next_cell.vert_merged:
-                return False
-            next_cell = next_cell.next_cell
-        return True
+        return self.cell_next is None
 
     @cached_property
     def pos(self) -> POS:
+        """Cell position on table grid relative to row."""
         return self.element.xml_position(self.is_first, self.is_last)
 
     @cached_property
-    def horz_span(self) -> int:
-        gridSpan_val = self.h2d._rslvr.prop_val("gridSpan")
-        if isinstance(gridSpan_val, NotFound):
-            return 1
-        return gridSpan_val
+    def vert_span(self) -> int | None:
+        """Cells vertical span value like in HTML.
 
-    @cached_property
-    def vert_span(self) -> int:
+        Returns:
+            int | None: Vertical span or None if it's
+                vertically merged cell.
+        """
         if self.vert_merged:
-            return -1
-        below = self.cell_below
+            return None
+        if not self._vmerge == SE_Merge.RESTART:
+            return 1
         span = 1
-        while below:
-            if not below.vert_merged:
+        merged_below = self.table.get_cell_on_grid(
+            self.grid_x, self.grid_y + span
+        )
+        while merged_below:
+            if not merged_below.vert_merged:
                 return span
             span += 1
-            below = below.cell_below
+            merged_below = self.table.get_cell_on_grid(
+                self.grid_x, self.grid_y + span
+            )
         return span
 
     @cached_property
@@ -166,8 +201,16 @@ class Row(ElementProxy[CT_Row]):
         return [Cell(tc_elm, self) for tc_elm in self.element.tc_lst]  # type: ignore[arg-type]
 
     @cached_property
-    def cells_grid(self) -> dict[int, Cell]:
-        return {cell.grid_x: cell for cell in self.cells}
+    def cells_grid_x(self) -> dict[int, Cell]:
+        grid = {}
+        for cell in self.cells:
+            # Save reference for right positioning adjacent cells
+            if cell.horz_span > 1:
+                for x in range(cell.grid_x, cell.grid_x + cell.horz_span):
+                    grid[x] = cell
+            else:
+                grid[cell.grid_x] = cell
+        return grid
 
     @cached_property
     def pos(self) -> POS:
@@ -185,8 +228,21 @@ class Row(ElementProxy[CT_Row]):
         return self.cells[idx]
 
     def get_cell_on_grid(self, grid_x: int) -> Cell | None:
+        """Get cell on grid by Ox (columns).
+
+        Returned cell can be vertically merged (prop `vert_merged`),
+        so don't use it on your calculations. Or cell can be a reference
+        to  horizontally spanned cell (you will see real xy pos).
+        Else it will be an common cell.
+
+        Args:
+            grid_x (int): Ox pos of the cell in table grid.
+
+        Returns:
+            Cell | None: Cell on table grid or None if not found.
+        """
         try:
-            return self.cells_grid[grid_x]
+            return self.cells_grid_x[grid_x]
         except KeyError:
             return None
 
@@ -211,6 +267,20 @@ class Table(StoryChild[CT_Tbl]):
         return self.rows[idx]
 
     def get_cell_on_grid(self, grid_x: int, grid_y: int) -> Cell | None:
+        """Get cell on grid by Ox (columns) and Oy (rows).
+
+        Returned cell can be vertically merged (prop `vert_merged`),
+        so don't use it on your calculations. Or cell can be a reference
+        to horizontally spanned cell (you will see real xy pos).
+        Else it will be an common cell.
+
+        Args:
+            grid_x (int): Ox pos of the cell in table grid.
+            grid_y (int): Oy pos of the cell in table grid.
+
+        Returns:
+            Cell | None: Cell on table grid or None if not found.
+        """
         row = self.get_row(grid_y)
         if row is None:
             return None

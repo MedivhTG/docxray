@@ -21,6 +21,18 @@ class TestDocument:
                 for row in p_or_t.iter_rows():
                     part = row.part
                     for cell in row.iter_cells():
+                        # _f = cell.cell_below.cell_next
+                        # _f_1 = _f.grid_x
+                        # _f_2 = _f.grid_y
+                        # _f_3 = _f.cell_above
+                        # _f_4 = _f.cell_below
+                        # _f_5 = _f.cell_next
+                        # _f_6 = _f.cell_prev
+                        # _f_7 = _f.idx
+                        # _f_8 = _f.is_first
+                        # _f_9 = _f.is_last
+                        # _f_10 = _f.vert_span
+                        # _f_11 = _f.horz_span
                         cell_fmt = cell.h2d
                         borders_inf = cell_fmt.borders_info
                         width = cell.width
