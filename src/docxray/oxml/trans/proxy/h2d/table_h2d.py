@@ -115,6 +115,25 @@ TBL_POSITIONING: dict[POS, dict[_TableChild, tuple[_Border, _Border]]] = {
         "cell": ("insideV", "right"),
     },
 }
+_G = SE_TblStyleOverrideType
+HORZ_GROUP = {
+    _G.HEADER_ROW,
+    _G.FOOTER_ROW,
+    _G.HORIZONTAL_BAND_ODD,
+    _G.HORIZONTAL_BAND_EVEN,
+}
+VERT_GROUP = {
+    _G.FIRST_COLUMN,
+    _G.LAST_COLUMN,
+    _G.VERTICAL_BAND_ODD,
+    _G.VERTICAL_BAND_EVEN,
+}
+CORNER_GROUP = {
+    _G.TOP_LEFT_CORNER_CELL,
+    _G.TOP_RIGHT_CORNER_CELL,
+    _G.BOTTOM_LEFT_CORNER_CELL,
+    _G.BOTTOM_RIGHT_CORNER_CELL,
+}
 
 
 class BordersInfo(TypedDict):
@@ -207,42 +226,26 @@ class CellH2D(How2Display[CellResolver]):
         tbl_vert: SE_Border | None,
         grid_group: SE_TblStyleOverrideType,
     ) -> None:
-        G = SE_TblStyleOverrideType
         cell = self._rslvr._proxy
         row = cell.row
         top = None
         bottom = None
         left = None
         right = None
-        if grid_group == G.ENTIRE_TABLE:
+        if grid_group == SE_TblStyleOverrideType.ENTIRE_TABLE:
             top, bottom = self._choose_horz(row.pos, tcBorders_elm, tbl_horz)
             left, right = self._choose_vert(cell.pos, tcBorders_elm, tbl_vert)
-        elif grid_group in (
-            G.HEADER_ROW,
-            G.FOOTER_ROW,
-            G.HORIZONTAL_BAND_ODD,
-            G.HORIZONTAL_BAND_EVEN,
-        ):
+        elif grid_group in HORZ_GROUP:
             top, bottom = self._choose_horz(
                 POS.ONE_ITEM, tcBorders_elm, tbl_horz
             )
             left, right = self._choose_vert(cell.pos, tcBorders_elm, tbl_vert)
-        elif grid_group in (
-            G.FIRST_COLUMN,
-            G.LAST_COLUMN,
-            G.VERTICAL_BAND_ODD,
-            G.VERTICAL_BAND_EVEN,
-        ):
+        elif grid_group in VERT_GROUP:
             top, bottom = self._choose_horz(row.pos, tcBorders_elm, tbl_horz)
             left, right = self._choose_vert(
                 POS.ONE_ITEM, tcBorders_elm, tbl_vert
             )
-        elif grid_group in (
-            G.TOP_LEFT_CORNER_CELL,
-            G.TOP_RIGHT_CORNER_CELL,
-            G.BOTTOM_LEFT_CORNER_CELL,
-            G.BOTTOM_RIGHT_CORNER_CELL,
-        ):
+        elif grid_group in CORNER_GROUP:
             top, bottom = self._choose_horz(
                 POS.ONE_ITEM, tcBorders_elm, tbl_horz
             )
