@@ -115,6 +115,7 @@ class Length(int):
     _EMUS_PER_MM = 36000
     _EMUS_PER_PT = 12700
     _EMUS_PER_TWIP = 635
+    _EMUS_PER_PICA = 152400
 
     def __new__(cls, emu: int) -> Self:
         return int.__new__(cls, emu)
@@ -148,6 +149,11 @@ class Length(int):
     def twips(self) -> int:
         """The equivalent length expressed in twips (int)."""
         return int(round(self / float(self._EMUS_PER_TWIP)))
+
+    @property
+    def pica(self) -> float:
+        """The equivalent length expressed in picas (float)."""
+        return self / float(self._EMUS_PER_PICA)
 
     def px(self, dpi: int = 96) -> int:
         return int(self.inches * dpi)
@@ -201,4 +207,15 @@ class Twips(Length):
 
     def __new__(cls, twips: float) -> Self:
         emu = int(twips * Length._EMUS_PER_TWIP)
+        return Length.__new__(cls, emu)
+
+
+class Pica(Length):
+    """Convenience constructor for length in picas (pc).
+
+    A pica is one-sixth of an inch, 152400 EMU.
+    """
+
+    def __new__(cls, pica: float) -> Self:
+        emu = int(pica * cls._EMUS_PER_PICA)
         return Length.__new__(cls, emu)
