@@ -313,7 +313,7 @@ class CellH2D(How2Display[CellResolver]):
         tbl_top = self._border(tblBorders_elm, "top")
         tbl_bottom = self._border(tblBorders_elm, "bottom")
         tbl_left = self._border(tblBorders_elm, "left")
-        tbl_right = self._border(tblBorders_elm, "left")
+        tbl_right = self._border(tblBorders_elm, "right")
 
         self._vert_borders_conflict(
             inf, cell.pos, cell_prev_h2d, cell_next_h2d, tbl_left, tbl_right
