@@ -243,6 +243,15 @@ class Row(ElementProxy[CT_Row]):
         return self.element.xml_pos
 
     def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
+        """Iterate over xml-cell proxies in a row.
+
+        Args:
+            skip_merged (bool, optional): Skip vertically merged
+                cells. Defaults to True.
+
+        Yields:
+            Iterator[Cell]: Next cell in a row.
+        """
         for cell in self.cells:
             if skip_merged and cell.vert_merged:
                 continue
