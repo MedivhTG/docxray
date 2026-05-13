@@ -91,7 +91,7 @@ class RunH2D(How2Display[Run]):
         para_val = self.paragraph.h2d._prop_val_run(name, optional)
         if not isinstance(para_val, NotFound):
             return para_val
-        char_path = self._prop_path("val", f"rPr.{name}")
+        char_path = self._prop_path("val", f"{self._path_base}.{name}")
         cell = self.cell
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
@@ -109,7 +109,7 @@ class RunH2D(How2Display[Run]):
             return on_off(char_direct_val)
         char_val = self._prop_val_toggled(name, "style")
         para_val = self.paragraph.h2d._prop_val_run_toggled(name)
-        char_path = self._prop_path("val", f"rPr.{name}")
+        char_path = self._prop_path("val", f"{self._path_base}.{name}")
         tbl_val = NotFound(self, char_path)
         cell = self.cell
         if cell:
