@@ -314,44 +314,15 @@ class CellH2D(How2Display[CellResolver]):
         tbl_right = self._border(tblBorders_elm, "left")
 
         self._vert_borders_conflict(
-            inf, row.pos, cell_above_h2d, cell_below_h2d, tbl_top, tbl_bottom
+            inf, cell.pos, cell_prev_h2d, cell_next_h2d, tbl_left, tbl_right
         )
         self._horz_borders_conflict(
-            inf, cell.pos, cell_prev_h2d, cell_next_h2d, tbl_left, tbl_right
+            inf, row.pos, cell_above_h2d, cell_below_h2d, tbl_top, tbl_bottom
         )
 
         return inf
 
     def _vert_borders_conflict(
-        self,
-        inf: BordersInfo,
-        row_pos: POS,
-        cell_above_h2d: CellH2D | None,
-        cell_below_h2d: CellH2D | None,
-        tbl_top: SE_Border | None,
-        tbl_bottom: SE_Border | None,
-    ) -> None:
-        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
-        if top_n == "top":
-            inf["top"] = self._opposing_cell_borders_conflict(
-                inf["top"], tbl_top
-            )
-        elif top_n == "insideH" and cell_above_h2d is not None:
-            above_inf = cell_above_h2d._borders_non_zero_spacing_info
-            inf["top"] = self._opposing_cell_borders_conflict(
-                inf["top"], above_inf["bottom"]
-            )
-        if bottom_n == "bottom":
-            inf["bottom"] = self._opposing_cell_borders_conflict(
-                inf["bottom"], tbl_bottom
-            )
-        elif bottom_n == "insideH" and cell_below_h2d is not None:
-            below_inf = cell_below_h2d._borders_non_zero_spacing_info
-            inf["bottom"] = self._opposing_cell_borders_conflict(
-                inf["bottom"], below_inf["top"]
-            )
-
-    def _horz_borders_conflict(
         self,
         inf: BordersInfo,
         cell_pos: POS,
@@ -378,6 +349,35 @@ class CellH2D(How2Display[CellResolver]):
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
             inf["right"] = self._opposing_cell_borders_conflict(
                 inf["right"], next_inf["left"]
+            )
+
+    def _horz_borders_conflict(
+        self,
+        inf: BordersInfo,
+        row_pos: POS,
+        cell_above_h2d: CellH2D | None,
+        cell_below_h2d: CellH2D | None,
+        tbl_top: SE_Border | None,
+        tbl_bottom: SE_Border | None,
+    ) -> None:
+        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
+        if top_n == "top":
+            inf["top"] = self._opposing_cell_borders_conflict(
+                inf["top"], tbl_top
+            )
+        elif top_n == "insideH" and cell_above_h2d is not None:
+            above_inf = cell_above_h2d._borders_non_zero_spacing_info
+            inf["top"] = self._opposing_cell_borders_conflict(
+                inf["top"], above_inf["bottom"]
+            )
+        if bottom_n == "bottom":
+            inf["bottom"] = self._opposing_cell_borders_conflict(
+                inf["bottom"], tbl_bottom
+            )
+        elif bottom_n == "insideH" and cell_below_h2d is not None:
+            below_inf = cell_below_h2d._borders_non_zero_spacing_info
+            inf["bottom"] = self._opposing_cell_borders_conflict(
+                inf["bottom"], below_inf["top"]
             )
 
     def _opposing_cell_borders_conflict(
