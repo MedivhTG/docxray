@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import IntFlag
 from typing import Literal, Self
 
+# docxray stuff
 from docxray.oxml.trans.st.enums import SE_Border
 
 type CnfName = Literal[
