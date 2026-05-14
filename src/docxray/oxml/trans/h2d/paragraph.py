@@ -9,7 +9,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.st.enums import SE_OnOff1, SE_StyleType
+from docxray.oxml.trans.st.enums import SE_StyleType
 
 from .how2display import How2Display
 
@@ -32,12 +32,6 @@ class ParagraphH2D(How2Display[Paragraph]):
             SE_StyleType.PARAGRAPH,
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
-
-    def _prop_val_run_toggled(
-        self, name: str
-    ) -> NotFound | None | bool | SE_OnOff1:
-        path = self._prop_path("val", f"rPr.{name}")
-        return self._from_styles_hierarchy(path, True)
 
     def _prop_val_run(self, name: str, optional: bool = True) -> Any:
         path = self._prop_path("val", f"rPr.{name}")

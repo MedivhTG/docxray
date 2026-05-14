@@ -2,7 +2,6 @@ from functools import cached_property
 from typing import Any, cast
 
 # docxray stuff
-from docxray.oxml.trans.h2d.how2display import ResolveAlgorithm
 from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
@@ -104,11 +103,11 @@ class RunH2D(How2Display[Run]):
         return self._from_doc_dflts(doc_val_path, optional)
 
     def _display_val_toggled(self, name: str) -> bool:
-        char_direct_val = self._prop_val_toggled(name)
+        char_direct_val = self._prop_val(name, True)
         if not isinstance(char_direct_val, NotFound):
             return on_off(char_direct_val)
-        char_val = self._prop_val_toggled(name, "style")
-        para_val = self.paragraph.h2d._prop_val_run_toggled(name)
+        char_val = self._prop_val(name, True, "style")
+        para_val = self.paragraph.h2d._prop_val_run(name)
         char_path = self._prop_path("val", f"{self._path_base}.{name}")
         tbl_val = NotFound(self, char_path)
         cell = self.cell
@@ -141,11 +140,6 @@ class RunH2D(How2Display[Run]):
         if doc_val is True:
             return doc_val
         return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)
-
-    def _prop_val_toggled(
-        self, name: str, algorithm: ResolveAlgorithm = "direct"
-    ) -> NotFound | None | bool | SE_OnOff1:
-        return self._prop_val(name, True, algorithm)
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
