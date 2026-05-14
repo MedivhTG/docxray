@@ -24,6 +24,10 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def _para_style(self) -> ParagraphStyle | None:
+        return self._para_style_init
+
+    @cached_property
+    def _para_style_init(self) -> ParagraphStyle | None:
         style_id = self._prop_val("pStyle")
         if isinstance(style_id, NotFound):
             return None
@@ -40,6 +44,8 @@ class ParagraphH2D(How2Display[Paragraph]):
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
-        if self._para_style is None:
+        if self._para_style_init is None:
             return NotFound(self, path)
-        return self._from_style_inheritance(self._para_style, path, optional)
+        return self._from_style_inheritance(
+            self._para_style_init, path, optional
+        )
