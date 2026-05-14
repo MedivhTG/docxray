@@ -208,15 +208,11 @@ class CT_Numbering(OxmlElement):
             W.NUM_ID_MAC_AT_CLEANUP, CT_DecimalNumber
         )
 
-    def num_by_id(self, numId_val: int) -> CT_Num | None:
-        return self.child_zero_or_one(
-            f"./{W.NUM}[@{W.NUM_ID}='{numId_val}']", CT_Num
-        )
+    def num_by_id(self, id: int) -> CT_Num | None:
+        return self.child_zero_or_one(f"./{W.NUM}[@{W.NUM_ID}='{id}']", CT_Num)
 
-    def abstract_num_by_id(
-        self, abstract_num_id_val: int
-    ) -> CT_AbstractNum | None:
+    def abstract_num_by_id(self, id: int) -> CT_AbstractNum | None:
         return self.child_zero_or_one(
-            f"./{W.ABSTRACT_NUM}[@{W.ABSTRACT_NUM_ID}='{abstract_num_id_val}']",
+            f"./{W.ABSTRACT_NUM}[@{W.ABSTRACT_NUM_ID}='{id}']",
             CT_AbstractNum,
         )

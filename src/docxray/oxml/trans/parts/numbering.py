@@ -6,6 +6,7 @@ from functools import cached_property
 from docxray.oxml.trans.numbering import CT_Numbering
 from docxray.oxml.trans.part import TransitionalPart
 from docxray.oxml.trans.proxy.numbering.numbering import Numbering
+from docxray.oxml.trans.proxy.styles.styles import Styles
 
 
 class NumberingPart(TransitionalPart[CT_Numbering]):
@@ -15,3 +16,10 @@ class NumberingPart(TransitionalPart[CT_Numbering]):
     @cached_property
     def numbering(self) -> Numbering:
         return Numbering(self.element, self)
+
+    @cached_property
+    def styles(self) -> Styles:
+        """|DocumentPart| object for this package."""
+        package = self.package
+        assert package is not None
+        return package.main_document_part.styles

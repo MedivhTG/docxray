@@ -36,7 +36,7 @@ class DocumentPart(StoryPart[CT_Document]):
         except KeyError:
             return None
 
-    @property
+    @cached_property
     def styles(self) -> Styles:
         """A |Styles| object providing access to the styles in the styles part of this
         document."""
