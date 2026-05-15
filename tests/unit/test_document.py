@@ -60,6 +60,7 @@ class TestDocument:
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 f = p_or_t.element.is_first
+                lvl = p_or_t.h2d._associated_level
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
                 pPr = p_or_t.element.pPr

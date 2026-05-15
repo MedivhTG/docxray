@@ -51,14 +51,28 @@ class AbstractNum(ElementProxy[CT_AbstractNum]):
             style_id.val, SE_StyleType.NUMBERING, NumberingStyle
         )
 
-    def lvl_by_ilvl(self, ilvl: int):
+    def lvl_by_ilvl(self, ilvl: int) -> Level:
         if lvl := self._cached_lvls.get(ilvl):
             return lvl
         lvl_elm = self.element.lvl_by_ilvl(ilvl)
         if lvl_elm is None:
-            return None
+            msg = f"No associated level for {ilvl}"
+            raise InvalidXmlError(msg)
         lvl = Level(lvl_elm, self)
         self._cached_lvls[ilvl] = lvl
+        return lvl
+
+    def lvl_by_para_style(self, style_id: str) -> Level:
+        for lvl in self._cached_lvls.values():
+            pStyle_elm = lvl.element.pStyle
+            if pStyle_elm is not None and pStyle_elm.val == style_id:
+                return lvl
+        lvl_elm = self.element.lvl_by_para_style(style_id)
+        if lvl_elm is None:
+            msg = f"No associated level for {style_id}"
+            raise InvalidXmlError(msg)
+        lvl = Level(lvl_elm, self)
+        self._cached_lvls[lvl_elm.ilvl] = lvl
         return lvl
 
 
@@ -108,6 +122,6 @@ class Numbering(ElementProxy[CT_Numbering]):
         self._cached_abstract_nums[abstract_num_id] = abstract_num
         return abstract_num
 
-    def associated_lvl(self, num_id: int, ilvl: int) -> Level | None:
+    def associated_lvl(self, num_id: int, ilvl: int) -> Level:
         num = self.get_num(num_id)
         return num.abstract_num.lvl_by_ilvl(ilvl)

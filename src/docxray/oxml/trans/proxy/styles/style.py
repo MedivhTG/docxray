@@ -6,14 +6,21 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
+from docxray.exceptions import InvalidXmlError
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.shared import (
+    ElementProxy,
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.trans.st.enums import SE_StyleType, SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_Style, CT_Styles, CT_TblStylePr
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.parts.styles import StylesPart
+    from docxray.oxml.trans.proxy.numbering.numbering import Num, Numbering
 
 
 def StyleFactory(style_elm: CT_Style, part: StylesPart) -> BaseStyle:
@@ -25,6 +32,10 @@ class BaseStyle(ElementProxy[CT_Style]):
     @property
     def part(self) -> StylesPart:
         return cast("StylesPart", self._parent)
+
+    @property
+    def numbering(self) -> Numbering | None:
+        return self.part.numbering
 
 
 class CharacterStyle(BaseStyle):
@@ -147,6 +158,17 @@ class NumberingStyle(BaseStyle):
         if style_elm is None:
             return None
         return StyleFactory(style_elm, self.part)
+
+    @cached_property
+    def num(self) -> Num:
+        err = InvalidXmlError("No associated Num instance for NumberingStyle")
+        if self.numbering is None:
+            raise err
+        path = PropertyPath.base("val", "pPr.numPr.numId")
+        num_id = safe_get_prop(self.element, path, False)
+        if isinstance(num_id, NotFound):
+            raise err
+        return self.numbering.get_num(num_id)
 
 
 S_TYPE_TO_STYLE_CLS: dict[SE_StyleType | None, Any] = {

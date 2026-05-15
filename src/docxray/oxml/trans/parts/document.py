@@ -11,6 +11,7 @@ from docxray.oxml.trans.parts.numbering import NumberingPart
 from docxray.oxml.trans.parts.story import StoryPart
 from docxray.oxml.trans.parts.styles import StylesPart
 from docxray.oxml.trans.proxy.document import Document
+from docxray.oxml.trans.proxy.numbering.numbering import Numbering
 from docxray.oxml.trans.proxy.styles.styles import Styles
 
 
@@ -37,10 +38,10 @@ class DocumentPart(StoryPart[CT_Document]):
             return None
 
     @cached_property
-    def styles(self) -> Styles:
-        """A |Styles| object providing access to the styles in the styles part of this
-        document."""
-        return self.styles_part.styles
+    def numbering(self) -> Numbering | None:
+        if self.numbering_part is None:
+            return None
+        return self.numbering_part.numbering
 
     @cached_property
     def styles_part(self) -> StylesPart:
@@ -49,3 +50,9 @@ class DocumentPart(StoryPart[CT_Document]):
         Creates an empty styles part if one is not present.
         """
         return self.part_related_by(RT.STYLES, StylesPart)
+
+    @cached_property
+    def styles(self) -> Styles:
+        """A |Styles| object providing access to the styles in the styles part of this
+        document."""
+        return self.styles_part.styles

@@ -147,9 +147,9 @@ class CT_AbstractNum(OxmlElement):
             f"./{W.LVL}[@{W.ILVL}='{ilvl_val}']", CT_Lvl
         )
 
-    def lvl_by_pStyle(self, pStyle_val: str) -> CT_Lvl | None:
+    def lvl_by_para_style(self, style_id: str) -> CT_Lvl | None:
         lvl_elms: list[CT_Lvl] = self.xpath(
-            f"./w:lvl[w:pStyle[@w:val='{pStyle_val}']]"
+            f"./w:lvl[w:pStyle[@w:val='{style_id}']]"
         )
         if lvl_elms:
             return lvl_elms[0]
