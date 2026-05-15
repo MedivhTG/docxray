@@ -32,25 +32,38 @@ class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def _associated_level(self) -> Level | None:
         numPr_elm_direct = self._numPr_para_direct
-        para_style_direct = self._para_style_direct
 
-        if numPr_elm_direct is None and para_style_direct is None:
-            return None
-        if numPr_elm_direct is not None and para_style_direct is None:
-            return self._case_1_num_pr_direct(numPr_elm_direct)
-        if numPr_elm_direct is None and para_style_direct is not None:
+        if numPr_elm_direct is None:
             numPr_elm_style = self._numPr_para_style
-            # Never
-            if self._para_style_numbering is None:
-                return None
             if numPr_elm_style is not None:
+                para_style_numbering = self._para_style_numbering
+                # Never
+                if para_style_numbering is None:
+                    return None
+
                 return self._case_2_num_pr_style(
-                    numPr_elm_style, self._para_style_numbering
+                    numPr_elm_style, para_style_numbering
                 )
-        if numPr_elm_direct is not None and para_style_direct is not None:
-            # TODO: do work
-            return None
-        return None
+        else:
+            return self._case_1_num_pr_direct(numPr_elm_direct)
+
+        # if numPr_elm_direct is None and para_style_direct is None:
+        #     return None
+        # if numPr_elm_direct is not None and para_style_direct is None:
+        #     return self._case_1_num_pr_direct(numPr_elm_direct)
+        # if numPr_elm_direct is None and para_style_numbering is not None:
+        #     numPr_elm_style = self._numPr_para_style
+        #     # Never
+        #     if self._para_style_numbering is None:
+        #         return None
+        #     if numPr_elm_style is not None:
+        #         return self._case_2_num_pr_style(
+        #             numPr_elm_style, self._para_style_numbering
+        #         )
+        # if numPr_elm_direct is not None and para_style_direct is not None:
+        #     # TODO: do work
+        #     return None
+        # return None
 
     # TODO: if numId or ilvl omitted, then there is no numbering reference?
     def _case_1_num_pr_direct(self, numPr_elm: CT_NumPr) -> Level:
