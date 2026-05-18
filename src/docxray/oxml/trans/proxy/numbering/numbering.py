@@ -43,9 +43,9 @@ class Level(ElementProxy[CT_Lvl]):
         style = self.abstract_num.numbering.styles.get_by_id(
             pStyle_elm.val, SE_StyleType.PARAGRAPH, ParagraphStyle
         )
-        pPr = style.element.pPr
-        if pPr is not None:
-            if pPr.numPr is not None:
+        pPr_elm = style.element.pPr
+        if pPr_elm is not None:
+            if pPr_elm.numPr is not None:
                 return None
         return style
 
