@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class TransitionalPackage(OpcPackage):
-    @property
+    @cached_property
     def main_document_part(self) -> DocumentPart:
         """Return a reference to the main document part for this package.
 

@@ -60,9 +60,10 @@ class TestDocument:
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 f = p_or_t.element.is_first
-                lvl = p_or_t.h2d._associated_level
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
+                lvl = p_fmt._associated_level
+                para_Style_num = p_fmt._para_style_numbering
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
                     spacing = pPr.spacing
@@ -73,4 +74,5 @@ class TestDocument:
                     part = r_or_h.part
                     r_fmt = r_or_h.h2d
                     italic = r_fmt.italic
+                    bold = r_fmt.bold
                     wait = 1

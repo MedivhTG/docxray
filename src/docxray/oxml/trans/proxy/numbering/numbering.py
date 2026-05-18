@@ -12,7 +12,10 @@ from docxray.oxml.trans.numbering import (
     CT_Numbering,
 )
 from docxray.oxml.trans.proxy.shared import ElementProxy
-from docxray.oxml.trans.proxy.styles.style import NumberingStyle
+from docxray.oxml.trans.proxy.styles.style import (
+    NumberingStyle,
+    ParagraphStyle,
+)
 from docxray.oxml.trans.proxy.styles.styles import Styles
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.st.enums import SE_StyleType
@@ -23,7 +26,32 @@ if TYPE_CHECKING:
 
 
 class Level(ElementProxy[CT_Lvl]):
-    pass
+    @cached_property
+    def paragraph_style(self) -> ParagraphStyle | None:
+        """Paragraph style linked to level itself.
+
+        If here is pStyle element inside, but referenced paragraph
+        style has numPr element, than `None` returned instead
+        (numbering cannot related to para style with back ref).
+
+        Returns:
+            ParagraphStyle | None: Paragraph style or None of not exist (or other case).
+        """
+        pStyle_elm = self.element.pStyle
+        if pStyle_elm is None:
+            return None
+        style = self.abstract_num.numbering.styles.get_by_id(
+            pStyle_elm.val, SE_StyleType.PARAGRAPH, ParagraphStyle
+        )
+        pPr = style.element.pPr
+        if pPr is not None:
+            if pPr.numPr is not None:
+                return None
+        return style
+
+    @cached_property
+    def abstract_num(self) -> AbstractNum:
+        return cast("AbstractNum", self._parent)
 
 
 class AbstractNum(ElementProxy[CT_AbstractNum]):
@@ -94,7 +122,7 @@ class Numbering(ElementProxy[CT_Numbering]):
 
     @property
     def part(self) -> NumberingPart:
-        return self.part
+        return cast("NumberingPart", self._parent)
 
     @cached_property
     def styles(self) -> Styles:

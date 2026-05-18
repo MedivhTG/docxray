@@ -3,7 +3,7 @@ from typing import Any
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
-from docxray.oxml.trans.proxy.numbering.numbering import Level
+from docxray.oxml.trans.proxy.numbering.numbering import AbstractNum, Level
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
     PropertyPath,
@@ -36,34 +36,17 @@ class ParagraphH2D(How2Display[Paragraph]):
         if numPr_elm_direct is None:
             numPr_elm_style = self._numPr_para_style
             if numPr_elm_style is not None:
-                para_style_numbering = self._para_style_numbering
+                para_style_num_ref = self._para_style_num_ref
                 # Never
-                if para_style_numbering is None:
+                if para_style_num_ref is None:
                     return None
 
-                return self._case_2_num_pr_style(
-                    numPr_elm_style, para_style_numbering
+                return self._case_2_num_pr_style_ref(
+                    numPr_elm_style, para_style_num_ref
                 )
         else:
             return self._case_1_num_pr_direct(numPr_elm_direct)
-
-        # if numPr_elm_direct is None and para_style_direct is None:
-        #     return None
-        # if numPr_elm_direct is not None and para_style_direct is None:
-        #     return self._case_1_num_pr_direct(numPr_elm_direct)
-        # if numPr_elm_direct is None and para_style_numbering is not None:
-        #     numPr_elm_style = self._numPr_para_style
-        #     # Never
-        #     if self._para_style_numbering is None:
-        #         return None
-        #     if numPr_elm_style is not None:
-        #         return self._case_2_num_pr_style(
-        #             numPr_elm_style, self._para_style_numbering
-        #         )
-        # if numPr_elm_direct is not None and para_style_direct is not None:
-        #     # TODO: do work
-        #     return None
-        # return None
+        return None
 
     # TODO: if numId or ilvl omitted, then there is no numbering reference?
     def _case_1_num_pr_direct(self, numPr_elm: CT_NumPr) -> Level:
@@ -76,9 +59,10 @@ class ParagraphH2D(How2Display[Paragraph]):
             raise err
         if self._numbering is None:
             raise err
-        return self._numbering.associated_lvl(numId_elm.val, ilvl_elm.val)
+        abstract_num = self._find_real_abstract_num(numId_elm.val)
+        return abstract_num.lvl_by_ilvl(ilvl_elm.val)
 
-    def _case_2_num_pr_style(
+    def _case_2_num_pr_style_ref(
         self, numPr_elm: CT_NumPr, para_style: ParagraphStyle
     ) -> Level:
         numId_elm = numPr_elm.numId
@@ -87,23 +71,36 @@ class ParagraphH2D(How2Display[Paragraph]):
             raise err
         if self._numbering is None:
             raise err
-        abstract_num = self._numbering.get_num(numId_elm.val).abstract_num
-        num_style = abstract_num.numbering_style
-        # Real abstract num can be hidden in deep inheritance
-        while num_style:
-            abstract_num = num_style.num.abstract_num
-            num_style = abstract_num.numbering_style
+        abstract_num = self._find_real_abstract_num(numId_elm.val)
         style_id = para_style.element.name
         if style_id is None:
             raise err
         return abstract_num.lvl_by_para_style(style_id.val)
 
+    def _find_real_abstract_num(self, num_id: int) -> AbstractNum:
+        if self._numbering is None:
+            raise InvalidXmlError(f"Wrong numbering for {num_id}")
+        abstract_num = self._numbering.get_num(num_id).abstract_num
+        num_style = abstract_num.numbering_style
+        # Real abstract num can be hidden in deep inheritance
+        while num_style:
+            abstract_num = num_style.num.abstract_num
+            num_style = abstract_num.numbering_style
+        return abstract_num
+
+    @cached_property
+    def _para_style_numbering(self) -> ParagraphStyle | None:
+        level = self._associated_level
+        if level is None:
+            return None
+        return level.paragraph_style
+
     @cached_property
     def _numPr_para_style(self) -> CT_NumPr | None:
-        if self._para_style_numbering is None:
+        if self._para_style_num_ref is None:
             return None
         path = self._prop_path("numPr", self._path_base)
-        numPr_elm = safe_get_prop(self._para_style_numbering.element, path)
+        numPr_elm = safe_get_prop(self._para_style_num_ref.element, path)
         if numPr_elm is None:
             return None
         return numPr_elm
@@ -116,10 +113,10 @@ class ParagraphH2D(How2Display[Paragraph]):
         return numPr_elm
 
     @cached_property
-    def _para_style_numbering(self) -> ParagraphStyle | None:
+    def _para_style_num_ref(self) -> ParagraphStyle | None:
         if self._para_style_direct is None:
             return None
-        para_style = self._para_style_direct.base_style
+        para_style: Any = self._para_style_direct
         path = self._prop_path("numPr", self._path_base)
         while isinstance(para_style, ParagraphStyle):
             numPr_elm = safe_get_prop(para_style.element, path)
@@ -148,6 +145,13 @@ class ParagraphH2D(How2Display[Paragraph]):
     ) -> Any:
         if self._para_style_direct is None:
             return NotFound(self, path)
-        return self._from_style_inheritance(
+        style_val = self._from_style_inheritance(
             self._para_style_direct, path, optional
+        )
+        if not isinstance(style_val, NotFound):
+            return style_val
+        if self._para_style_numbering is None:
+            return style_val
+        return self._from_style_inheritance(
+            self._para_style_numbering, path, optional
         )
