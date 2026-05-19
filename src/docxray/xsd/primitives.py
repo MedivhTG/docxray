@@ -107,7 +107,7 @@ class XsdUnsignedLong(XsdPrimitive):
     MAX_UINT64 = 18446744073709551615
 
     @classmethod
-    def validate(cls, xml_obj: str, **facets: Any) -> Any:
+    def validate(cls, xml_obj: str, **facets: Any) -> int:
         try:
             num = int(xml_obj)
             if cls.MIN_UINT64 > num > cls.MAX_UINT64:
