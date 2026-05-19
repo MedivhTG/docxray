@@ -14,6 +14,8 @@ from docxray.oxml.trans.shared import (
     CT_TextDirection,
     CT_TrackChange,
 )
+from docxray.oxml.trans.st.shared_common import ST_TwipsMeasure
+from docxray.oxml.trans.st.wml import ST_DecimalNumber, ST_SignedTwipsMeasure
 from docxray.oxml.trans.text.num_props import CT_NumPr
 from docxray.oxml.trans.text.run_props import CT_RPr
 from docxray.oxml.trans.xmlchemy import OxmlElement
@@ -32,7 +34,53 @@ class CT_Spacing(OxmlElement):
 
 
 class CT_Ind(OxmlElement):
-    pass
+    @cached_property
+    def start(self) -> int | str | None:
+        return self.attr_optional(W.START, ST_SignedTwipsMeasure)
+
+    @cached_property
+    def startChars(self) -> int | None:
+        return self.attr_optional(W.START_CHARS, ST_DecimalNumber)
+
+    @cached_property
+    def end(self) -> int | str | None:
+        return self.attr_optional(W.END, ST_SignedTwipsMeasure)
+
+    @cached_property
+    def endChars(self) -> int | None:
+        return self.attr_optional(W.END_CHARS, ST_DecimalNumber)
+
+    @cached_property
+    def left(self) -> int | str | None:
+        return self.attr_optional(W.LEFT, ST_SignedTwipsMeasure)
+
+    @cached_property
+    def leftChars(self) -> int | None:
+        return self.attr_optional(W.LEFT_CHARS, ST_DecimalNumber)
+
+    @cached_property
+    def right(self) -> int | str | None:
+        return self.attr_optional(W.RIGHT, ST_SignedTwipsMeasure)
+
+    @cached_property
+    def rightChars(self) -> int | None:
+        return self.attr_optional(W.RIGHT_CHARS, ST_DecimalNumber)
+
+    @cached_property
+    def hanging(self) -> int | str | None:
+        return self.attr_optional(W.HANGING, ST_TwipsMeasure)
+
+    @cached_property
+    def hangingChars(self) -> int | None:
+        return self.attr_optional(W.HANGING_CHARS, ST_DecimalNumber)
+
+    @cached_property
+    def firstLine(self) -> int | str | None:
+        return self.attr_optional(W.FIRST_LINE, ST_TwipsMeasure)
+
+    @cached_property
+    def firstLineChars(self) -> int | None:
+        return self.attr_optional(W.FIRST_LINE_CHARS, ST_DecimalNumber)
 
 
 class CT_TextAlignment(OxmlElement):

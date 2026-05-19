@@ -67,7 +67,18 @@ class W:
     AUTO_SPACE_DN = qn("w:autoSpaceDN")
     BIDI = qn("w:bidi")
     ADJUST_RIGHT_IND = qn("w:adjustRightInd")
+
     IND = qn("w:ind")
+    START_CHARS = qn("w:startChars")
+    END = qn("w:end")
+    END_CHARS = qn("w:endChars")
+    LEFT_CHARS = qn("w:leftChars")
+    RIGHT_CHARS = qn("w:rightChars")
+    HANGING = qn("w:hanging")
+    HANGING_CHARS = qn("w:hangingChars")
+    FIRST_LINE = qn("w:firstLine")
+    FIRST_LINE_CHARS = qn("w:firstLineChars")
+
     CONTEXTUAL_SPACING = qn("w:contextualSpacing")
     MIRROR_INDENTS = qn("w:mirrorIndents")
     SUPPRESS_OVERLAP = qn("w:suppressOverlap")

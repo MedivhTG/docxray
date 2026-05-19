@@ -5,7 +5,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, TypedDict, Unpack
 
-from .exceptions import XsdTypeError
+from dateutil import parser
+
 from .facets import (
     EnumerationFacet,
     LengthFacet,
@@ -26,24 +27,18 @@ class XsdString(XsdPrimitive):
         cls, xml_obj: Any, **facets: Unpack[StringFacets]
     ) -> str | StrEnum:
         if not isinstance(xml_obj, str):
-            raise XsdTypeError.construct(xml_obj, cls)
+            cls.xsd_err(xml_obj)
         enum = facets.pop("enum", EnumerationFacet())
         if enum._members:
             members = enum._members
             if xml_obj not in members:
-                raise XsdTypeError.construct(
-                    xml_obj, cls, f"expected members `{members}`"
-                )
+                cls.xsd_err(xml_obj, f"expected members `{members}`")
         length = facets.pop("length", LengthFacet())
         if length.value and len(xml_obj) != length.value:
-            raise XsdTypeError.construct(
-                xml_obj, cls, f"length expected {length.value}"
-            )
+            cls.xsd_err(xml_obj, f"length expected {length.value}")
         pattern = facets.pop("pattern", PatternFacet())
         if pattern.value and not re.match(pattern.value, xml_obj):
-            raise XsdTypeError.construct(
-                xml_obj, cls, f"pattern mismatch {pattern.value}"
-            )
+            cls.xsd_err(xml_obj, f"pattern mismatch {pattern.value}")
         enum_cls = enum.enum_cls
         if enum_cls:
             return enum_cls(xml_obj)
@@ -54,18 +49,21 @@ class XsdDateTime(XsdPrimitive):
     @classmethod
     def validate(cls, xml_obj: str, **facets: Any) -> datetime:
         try:
-            return datetime.fromisoformat(xml_obj.replace("Z", "+00:00"))
-        except Exception:
-            raise XsdTypeError.construct(xml_obj, cls, "ISO format")
+            return parser.isoparse(xml_obj)
+        except Exception as e:
+            cls.xsd_err(
+                xml_obj,
+                f"internal error while converting str to datetime [{e}]",
+            )
 
 
 class XsdInteger(XsdPrimitive):
-    INT_RE: str = r"^-?(0|[1-9][0-9]*)$"
+    INT_RE: str = r"^[+-]?\d+$"
 
     @classmethod
     def validate(cls, xml_obj: str, **facets: Any) -> int:
         if not re.match(cls.INT_RE, xml_obj):
-            raise XsdTypeError.construct(xml_obj, cls, f"pattern {cls.INT_RE}")
+            cls.xsd_err(xml_obj, f"pattern mismatch {cls.INT_RE}")
         return int(xml_obj)
 
 
@@ -74,7 +72,7 @@ class HexBinaryFacets(TypedDict, total=False):
 
 
 class XsdHexBinary(XsdPrimitive):
-    HEX_RE: str = r"^[0-9A-Fa-f]*$"
+    HEX_RE: str = r"^[0-9a-fA-F]*$"
 
     @classmethod
     def validate(
@@ -82,12 +80,10 @@ class XsdHexBinary(XsdPrimitive):
     ) -> bytes:
         length = facets.pop("length", LengthFacet())
         if not re.match(cls.HEX_RE, xml_obj):
-            raise XsdTypeError.construct(xml_obj, cls, f"pattern {cls.HEX_RE}")
+            cls.xsd_err(xml_obj, f"pattern mismatch {cls.HEX_RE}")
         binary = bytes.fromhex(xml_obj)
         if length.value and len(binary) != length.value:
-            raise XsdTypeError.construct(
-                binary, cls, f"expected length {length.value}"
-            )
+            cls.xsd_err(binary, f"expected length {length.value}")
         return binary
 
 
@@ -101,6 +97,26 @@ class XsdBoolean(XsdPrimitive):
             return False
         if xml_obj in cls.TRUE:
             return True
-        raise XsdTypeError.construct(
-            xml_obj, cls, f"expected true `{cls.TRUE}` or false `{cls.FALSE}`"
+        cls.xsd_err(
+            xml_obj, f"expected true `{cls.TRUE}` or false `{cls.FALSE}`"
         )
+
+
+class XsdUnsignedLong(XsdPrimitive):
+    MIN_UINT64 = 0
+    MAX_UINT64 = 18446744073709551615
+
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Any) -> Any:
+        try:
+            num = int(xml_obj)
+            if cls.MIN_UINT64 > num > cls.MAX_UINT64:
+                cls.xsd_err(
+                    num,
+                    f"Number must be between {cls.MIN_UINT64} and {cls.MAX_UINT64}",
+                )
+            return num
+        except ValueError as e:
+            cls.xsd_err(
+                xml_obj, f"internal error while converting str to int [{e}]"
+            )

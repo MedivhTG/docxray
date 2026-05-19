@@ -3,6 +3,7 @@ from docxray.xsd.facets import EnumerationFacet, PatternFacet
 from docxray.xsd.primitives import (
     XsdBoolean,
     XsdString,
+    XsdUnsignedLong,
 )
 from docxray.xsd.xsd import (
     XsdRestriction,
@@ -41,3 +42,16 @@ class ST_UniversalMeasure(XsdSimpleType):
 class ST_Percentage(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"pattern": PatternFacet(r"-?[0-9]+(\.[0-9]+)?%")}
+
+
+class ST_UnsignedDecimalNumber(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdUnsignedLong)
+
+
+class ST_PositiveUniversalMeasure(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_UniversalMeasure)
+    FACETS = {"pattern": PatternFacet(r"[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)")}
+
+
+class ST_TwipsMeasure(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_UnsignedDecimalNumber, ST_PositiveUniversalMeasure)

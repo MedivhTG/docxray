@@ -105,3 +105,7 @@ class ST_MeasurementOrPercent(XsdSimpleType):
 class ST_ShortHexNumber(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdHexBinary)
     FACETS = {"length": LengthFacet(value=2)}
+
+
+class ST_SignedTwipsMeasure(XsdSimpleType):
+    SCHEMA = XsdUnion(XsdInteger, ST_UniversalMeasure)

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any
+from typing import Any, NoReturn
 
 # docxray stuff
-from docxray.xsd.exceptions import XsdBaseError
+from docxray.xsd.exceptions import XsdBaseError, XsdTypeError
 
 
 class XsdFacet:
@@ -12,6 +12,10 @@ class XsdFacet:
 
 
 class XsdPrimitive:
+    @classmethod
+    def xsd_err(cls, obj: Any, extra: str = "") -> NoReturn:
+        raise XsdTypeError.construct(obj, cls, extra)
+
     @classmethod
     @abstractmethod
     def validate(cls, xml_obj: Any, **facets: Any) -> Any: ...
