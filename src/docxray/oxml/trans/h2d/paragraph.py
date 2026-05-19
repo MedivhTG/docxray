@@ -34,6 +34,10 @@ class ParagraphH2D(How2Display[Paragraph]):
         return None
 
     @cached_property
+    def is_list_item(self) -> bool:
+        return self._associated_level is not None
+
+    @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
