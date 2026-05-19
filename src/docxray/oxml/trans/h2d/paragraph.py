@@ -3,6 +3,7 @@ from typing import Any
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
+from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.numbering.numbering import (
     Level,
     LevelOverride,
@@ -38,6 +39,32 @@ class ParagraphH2D(How2Display[Paragraph]):
         return self._associated_level is not None
 
     @cached_property
+    def header_level(self) -> WD_HEADER_LEVEL:
+        outlineLevel_val: int = self._display_val("outlineLvl")
+        if isinstance(outlineLevel_val, NotFound):
+            return WD_HEADER_LEVEL.TEXT
+        return WD_HEADER_LEVEL(outlineLevel_val)
+
+    def _display_val(self, name: str, optional: bool = True) -> Any:
+        if self.is_list_item:
+            return self._prop_val(name, optional, algorithm="both")
+        para_val = self._prop_val(name, optional, algorithm="both")
+        if not isinstance(para_val, NotFound):
+            return para_val
+        cell = self.cell
+        para_path = self._prop_path("val", f"{self._path_base}.{name}")
+        if cell:
+            tbl_val, _ = self._from_tbl_style_hierarchy(
+                cell.h2d._tbl_style_props_deep, para_path, optional
+            )
+            if not isinstance(tbl_val, NotFound):
+                return tbl_val
+        doc_val_path = self._prop_path(
+            "val", f"pPrDefault.{self._path_base}.{name}"
+        )
+        return self._from_doc_dflts(doc_val_path, optional)
+
+    @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
@@ -56,7 +83,6 @@ class ParagraphH2D(How2Display[Paragraph]):
             return self._case_1_num_pr_direct(numPr_elm_direct)
         return None
 
-    # TODO: if numId or ilvl omitted, then there is no numbering reference?
     def _case_1_num_pr_direct(
         self, numPr_elm: CT_NumPr
     ) -> Level | LevelOverride:
@@ -158,7 +184,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     def _prop_val_run(self, name: str, optional: bool = True) -> Any:
         path = self._prop_path("val", f"rPr.{name}")
-        return self._from_styles_hierarchy(path, optional)
+        return self._from_styles_hierarchy(path, optional, for_run=True)
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
@@ -169,6 +195,9 @@ class ParagraphH2D(How2Display[Paragraph]):
             self._para_style_direct, path, optional
         )
         if not isinstance(style_val, NotFound):
+            return style_val
+        for_run: bool | None = kwargs.pop("for_run", None)
+        if for_run is True:
             return style_val
         if self._para_style_numbering is None:
             return style_val

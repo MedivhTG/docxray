@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import IntFlag
+from enum import IntEnum, IntFlag
 from typing import Literal, Self
 
 # docxray stuff
@@ -186,3 +186,16 @@ _SE_BORDER_TO_LINES_COUNT = {
     SE_Border.OUTSET: 1,
     SE_Border.INSET: 1,
 }
+
+
+class WD_HEADER_LEVEL(IntEnum):
+    HEADER_1 = 0
+    HEADER_2 = 1
+    HEADER_3 = 2
+    HEADER_4 = 3
+    HEADER_5 = 4
+    HEADER_6 = 5
+    HEADER_7 = 6
+    HEADER_8 = 7
+    HEADER_9 = 8
+    TEXT = 9

@@ -62,7 +62,7 @@ class TestDocument:
                 f = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
-                lvl = p_fmt._associated_level
+                lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
