@@ -183,9 +183,9 @@ class CT_Num(OxmlElement):
     def lvlOverride_lst(self) -> list[CT_NumLvl]:
         return self.child_zero_or_n(W.LVL_OVERRIDE, CT_NumLvl, 9)
 
-    def override_num_by_ilvl(self, ilvl_val: int) -> CT_NumLvl | None:
+    def override_num_by_ilvl(self, ilvl: int) -> CT_NumLvl | None:
         return self.child_zero_or_one(
-            f"./{W.LVL_OVERRIDE}[@{W.ILVL}='{ilvl_val}']", CT_NumLvl
+            f"./{W.LVL_OVERRIDE}[@{W.ILVL}='{ilvl}']", CT_NumLvl
         )
 
 

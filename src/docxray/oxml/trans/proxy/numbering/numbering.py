@@ -10,6 +10,7 @@ from docxray.oxml.trans.numbering import (
     CT_Lvl,
     CT_Num,
     CT_Numbering,
+    CT_NumLvl,
 )
 from docxray.oxml.trans.proxy.shared import ElementProxy
 from docxray.oxml.trans.proxy.styles.style import (
@@ -40,7 +41,7 @@ class Level(ElementProxy[CT_Lvl]):
         pStyle_elm = self.element.pStyle
         if pStyle_elm is None:
             return None
-        style = self.abstract_num.numbering.styles.get_by_id(
+        style = self.parent.numbering.styles.get_by_id(
             pStyle_elm.val, SE_StyleType.PARAGRAPH, ParagraphStyle
         )
         pPr_elm = style.element.pPr
@@ -50,8 +51,32 @@ class Level(ElementProxy[CT_Lvl]):
         return style
 
     @cached_property
-    def abstract_num(self) -> AbstractNum:
-        return cast("AbstractNum", self._parent)
+    def parent(self) -> AbstractNum | LevelOverride:
+        return cast("AbstractNum | LevelOverride", self._parent)
+
+
+class LevelOverride(ElementProxy[CT_NumLvl]):
+    @cached_property
+    def num(self) -> Num:
+        return cast("Num", self._parent)
+
+    @cached_property
+    def numbering(self) -> Numbering:
+        return self.num.numbering
+
+    @cached_property
+    def restart_from(self) -> int | None:
+        startOverride_elm = self.element.startOverride
+        if startOverride_elm is None:
+            return None
+        return startOverride_elm.val
+
+    @cached_property
+    def lvl(self) -> Level | None:
+        lvl_elm = self.element.lvl
+        if lvl_elm is None:
+            return None
+        return Level(lvl_elm, self)
 
 
 class AbstractNum(ElementProxy[CT_AbstractNum]):
@@ -105,6 +130,10 @@ class AbstractNum(ElementProxy[CT_AbstractNum]):
 
 
 class Num(ElementProxy[CT_Num]):
+    def __init__(self, element: CT_Num, parent: ProvidesXmlPart) -> None:
+        super().__init__(element, parent)
+        self._cached_lvl_overrides: dict[int, LevelOverride] = {}
+
     @cached_property
     def numbering(self) -> Numbering:
         return cast("Numbering", self._parent)
@@ -112,6 +141,16 @@ class Num(ElementProxy[CT_Num]):
     @cached_property
     def abstract_num(self) -> AbstractNum:
         return self.numbering.get_abstract_num(self.element.abstractNumId.val)
+
+    def associated_lvl_override(self, ilvl: int) -> LevelOverride | None:
+        if lvl_override := self._cached_lvl_overrides.get(ilvl):
+            return lvl_override
+        overrideLvl_elm = self.element.override_num_by_ilvl(ilvl)
+        if overrideLvl_elm is None:
+            return None
+        lvl_override = LevelOverride(overrideLvl_elm, self)
+        self._cached_lvl_overrides[ilvl] = lvl_override
+        return lvl_override
 
 
 class Numbering(ElementProxy[CT_Numbering]):
@@ -152,4 +191,9 @@ class Numbering(ElementProxy[CT_Numbering]):
 
     def associated_lvl(self, num_id: int, ilvl: int) -> Level:
         num = self.get_num(num_id)
+        lvl_override = num.associated_lvl_override(ilvl)
+        if lvl_override is not None:
+            lvl = lvl_override.lvl
+            if lvl is not None:
+                return lvl
         return num.abstract_num.lvl_by_ilvl(ilvl)

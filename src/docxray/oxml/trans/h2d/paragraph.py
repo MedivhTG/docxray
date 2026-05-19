@@ -3,7 +3,11 @@ from typing import Any
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
-from docxray.oxml.trans.proxy.numbering.numbering import AbstractNum, Level
+from docxray.oxml.trans.proxy.numbering.numbering import (
+    Level,
+    LevelOverride,
+    Num,
+)
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
     PropertyPath,
@@ -30,7 +34,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         return None
 
     @cached_property
-    def _associated_level(self) -> Level | None:
+    def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
         if numPr_elm_direct is None:
@@ -49,7 +53,9 @@ class ParagraphH2D(How2Display[Paragraph]):
         return None
 
     # TODO: if numId or ilvl omitted, then there is no numbering reference?
-    def _case_1_num_pr_direct(self, numPr_elm: CT_NumPr) -> Level:
+    def _case_1_num_pr_direct(
+        self, numPr_elm: CT_NumPr
+    ) -> Level | LevelOverride:
         numId_elm = numPr_elm.numId
         err = InvalidXmlError(f"Wrong numbering for {numPr_elm}")
         if numId_elm is None:
@@ -59,8 +65,11 @@ class ParagraphH2D(How2Display[Paragraph]):
             raise err
         if self._numbering is None:
             raise err
-        abstract_num = self._find_real_abstract_num(numId_elm.val)
-        return abstract_num.lvl_by_ilvl(ilvl_elm.val)
+        num = self._find_real_num(numId_elm.val)
+        lvl = num.associated_lvl_override(ilvl_elm.val)
+        if lvl is not None:
+            return lvl
+        return num.abstract_num.lvl_by_ilvl(ilvl_elm.val)
 
     def _case_2_num_pr_style_ref(
         self, numPr_elm: CT_NumPr, para_style: ParagraphStyle
@@ -71,29 +80,36 @@ class ParagraphH2D(How2Display[Paragraph]):
             raise err
         if self._numbering is None:
             raise err
-        abstract_num = self._find_real_abstract_num(numId_elm.val)
+        num = self._find_real_num(numId_elm.val)
         style_id = para_style.element.name
         if style_id is None:
             raise err
-        return abstract_num.lvl_by_para_style(style_id.val)
+        return num.abstract_num.lvl_by_para_style(style_id.val)
 
-    def _find_real_abstract_num(self, num_id: int) -> AbstractNum:
+    def _find_real_num(self, num_id: int) -> Num:
         if self._numbering is None:
             raise InvalidXmlError(f"Wrong numbering for {num_id}")
-        abstract_num = self._numbering.get_num(num_id).abstract_num
+        num = self._numbering.get_num(num_id)
+        abstract_num = num.abstract_num
         num_style = abstract_num.numbering_style
         # Real abstract num can be hidden in deep inheritance
         while num_style:
-            abstract_num = num_style.num.abstract_num
+            num = num_style.num
+            abstract_num = num.abstract_num
             num_style = abstract_num.numbering_style
-        return abstract_num
+        return num
 
     @cached_property
     def _para_style_numbering(self) -> ParagraphStyle | None:
         level = self._associated_level
         if level is None:
             return None
-        return level.paragraph_style
+        if isinstance(level, LevelOverride):
+            if level.lvl is not None:
+                return level.lvl.paragraph_style
+        else:
+            return level.paragraph_style
+        return None
 
     @cached_property
     def _numPr_para_style(self) -> CT_NumPr | None:
