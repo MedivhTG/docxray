@@ -18,6 +18,7 @@ from docxray.xsd.xsd import (
 
 from .enums import (
     SE_JC,
+    SE_TEXT_ALIGNMENT,
     SE_Border,
     SE_HexColorAuto,
     SE_Merge,
@@ -115,3 +116,8 @@ class ST_SignedTwipsMeasure(XsdSimpleType):
 class ST_Jc(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_JC)}
+
+
+class ST_TextAlignment(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_ALIGNMENT)}

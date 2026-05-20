@@ -26,7 +26,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.st.enums import SE_JC, SE_StyleType
+from docxray.oxml.trans.st.enums import SE_JC, SE_TEXT_ALIGNMENT, SE_StyleType
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
@@ -171,6 +171,13 @@ class ParagraphH2D(How2Display[Paragraph]):
         if isinstance(jc, NotFound):
             return SE_JC.LEFT
         return jc
+
+    @cached_property
+    def vert_alignment(self) -> SE_TEXT_ALIGNMENT:
+        v_align = self._display_val("textAlignment", False)
+        if isinstance(v_align, NotFound):
+            return SE_TEXT_ALIGNMENT.BASELINE
+        return v_align
 
     @cached_property
     def word_wrap(self) -> bool:

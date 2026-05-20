@@ -14,8 +14,13 @@ from docxray.oxml.trans.shared import (
     CT_TextDirection,
     CT_TrackChange,
 )
+from docxray.oxml.trans.st.enums import SE_TEXT_ALIGNMENT
 from docxray.oxml.trans.st.shared_common import ST_TwipsMeasure
-from docxray.oxml.trans.st.wml import ST_DecimalNumber, ST_SignedTwipsMeasure
+from docxray.oxml.trans.st.wml import (
+    ST_DecimalNumber,
+    ST_SignedTwipsMeasure,
+    ST_TextAlignment,
+)
 from docxray.oxml.trans.text.num_props import CT_NumPr
 from docxray.oxml.trans.text.run_props import CT_RPr
 from docxray.oxml.trans.xmlchemy import OxmlElement
@@ -84,7 +89,9 @@ class CT_Ind(OxmlElement):
 
 
 class CT_TextAlignment(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_TEXT_ALIGNMENT:
+        return self.attr_required(W.VAL, ST_TextAlignment)
 
 
 class CT_TextboxTightWrap(OxmlElement):

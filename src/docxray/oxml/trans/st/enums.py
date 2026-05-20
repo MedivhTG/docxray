@@ -287,3 +287,11 @@ class SE_JC(StrEnum):
     THAI_DISTRIBUTE = "thaiDistribute"
     LEFT = "left"
     RIGHT = "right"
+
+
+class SE_TEXT_ALIGNMENT(StrEnum):
+    TOP = "top"
+    CENTER = "center"
+    BASELINE = "baseline"
+    BOTTOM = "bottom"
+    AUTO = "auto"
