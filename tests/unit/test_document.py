@@ -62,11 +62,10 @@ class TestDocument:
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
                 no_hanging = p_fmt.no_hanging
-                ind = p_fmt.indentation
                 left = (
-                    ind["margin_inline_start"].cm
-                    if isinstance(ind["margin_inline_start"], Length)
-                    else None
+                    p_fmt.margin_line_start.cm
+                    if isinstance(p_fmt.margin_line_start, Length)
+                    else p_fmt.margin_line_start
                 )
                 lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering

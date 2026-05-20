@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
@@ -37,13 +37,6 @@ type _DirectCase = Literal[
 ]
 
 
-class Indentation(TypedDict):
-    direction: _Dir
-    margin_inline_start: int | Length | None
-    margin_inline_end: int | Length | None
-    text_indent: int | Length | None
-
-
 class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def cell(self) -> Cell | None:
@@ -63,74 +56,7 @@ class ParagraphH2D(How2Display[Paragraph]):
             return WD_HEADER_LEVEL.TEXT
         return WD_HEADER_LEVEL(outlineLevel_val)
 
-    # TODO: add fallback on `start` and `end`` properties;
-    # look for textDirection and textAlignment too;
-    @cached_property
-    def indentation(self) -> Indentation:
-        """Get indetation properties for paragraph.
-
-        If properties (excluding direction) has `int` type, than
-        it's measured in Chars (HTML `ch` measure analogue), else
-        if it's `Length` than it's measured in twips (get your own measure),
-        else if None than there is not indentation for selected property.
-
-        Returns:
-            Indentation: Typed dictionary of properties.
-        """
-        # Margin start for para
-        margin_inline_start = None
-        left_chars: int | NotFound = self._display_ind_prop("leftChars")
-        if not isinstance(left_chars, NotFound):
-            margin_inline_start = left_chars
-        else:
-            left: int | str | NotFound = self._display_ind_prop("left", False)
-            if not isinstance(left, NotFound):
-                margin_inline_start = signed_twips_measure(left)
-        # Margin end for para
-        margin_inline_end = None
-        right_chars: int | NotFound = self._display_ind_prop("rightChars")
-        if not isinstance(right_chars, NotFound):
-            margin_inline_end = right_chars
-        else:
-            right: int | str | NotFound = self._display_ind_prop(
-                "right", False
-            )
-            if not isinstance(right, NotFound):
-                margin_inline_end = signed_twips_measure(right)
-        # Indentation for first para line
-        text_indent = None
-        hanging_chars: int | NotFound = self._display_ind_prop("hangingChars")
-        if not isinstance(hanging_chars, NotFound):
-            text_indent = (
-                hanging_chars if hanging_chars < 0 else -hanging_chars
-            )
-        else:
-            hanging: int | str | NotFound = self._display_ind_prop(
-                "hanging", False
-            )
-            if not isinstance(hanging, NotFound):
-                twips = twips_measure(hanging)
-                text_indent = twips if twips < 0 else -twips
-        # Hanging has higher priority over firstLine elms
-        if text_indent is None:
-            first_line_chars: int | NotFound = self._display_ind_prop(
-                "firstLineChars"
-            )
-            if not isinstance(first_line_chars, NotFound):
-                text_indent = first_line_chars
-            else:
-                first_line: int | str | NotFound = self._display_ind_prop(
-                    "firstLine", False
-                )
-                if not isinstance(first_line, NotFound):
-                    text_indent = twips_measure(first_line)
-        return {
-            "direction": "rtl" if self._bidi is True else "ltr",
-            "margin_inline_start": margin_inline_start,
-            "margin_inline_end": margin_inline_end,
-            "text_indent": text_indent,
-        }
-
+    # --- Page properties
     @cached_property
     def no_hanging(self) -> bool:
         widow_control = self._display_val("widowControl")
@@ -158,37 +84,128 @@ class ParagraphH2D(How2Display[Paragraph]):
     def supress_auto_hyphens(self) -> bool:
         return on_off(self._display_val("suppressAutoHyphens"))
 
-    def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
-        para_path = self._prop_path(name, f"{self._path_base}.ind")
-        return self._display_val(para_path, optional)
+    # --- Page properties (end)
+
+    # --- Indentation/interval properties
+    # TODO: if no need -> use only in indentation property and delete it
+    @cached_property
+    def mirror_indents(self) -> bool:
+        return on_off(self._display_val("mirrorIndents"))
 
     @cached_property
-    def _bidi(self) -> bool:
-        return on_off(self._display_val("bidi"))
+    def context_spacing(self) -> bool:
+        return on_off(self._display_val("contextualSpacing"))
 
-    def _display_val(
-        self, name_or_path: str | PropertyPath, optional: bool = True
-    ) -> Any:
-        if self.is_list_item:
-            return self._prop_val(name_or_path, optional, "both")
-        para_val = self._prop_val(name_or_path, optional, "both")
-        if not isinstance(para_val, NotFound):
-            return para_val
-        cell = self.cell
-        para_path = (
-            name_or_path
-            if isinstance(name_or_path, PropertyPath)
-            else self._prop_path("val", f"{self._path_base}.{name_or_path}")
-        )
-        if cell:
-            tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell.h2d._tbl_style_props_deep, para_path, optional
+    # TODO: look for textDirection too
+    @cached_property
+    def direction(self) -> _Dir:
+        val = on_off(self._display_val("bidi"))
+        return "rtl" if val is True else "ltr"
+
+    # TODO: add fallback on `start` and `startChars` properties
+    @cached_property
+    def margin_line_start(self) -> Length | int | None:
+        margin_inline_start = None
+        left_chars: int | NotFound = self._display_ind_prop("leftChars")
+        if not isinstance(left_chars, NotFound):
+            margin_inline_start = left_chars
+        else:
+            left: int | str | NotFound = self._display_ind_prop("left", False)
+            if not isinstance(left, NotFound):
+                margin_inline_start = signed_twips_measure(left)
+        return margin_inline_start
+
+    # TODO: add fallback on `end` and `endChars` properties
+    @cached_property
+    def margin_line_end(self) -> Length | int | None:
+        margin_inline_end = None
+        right_chars: int | NotFound = self._display_ind_prop("rightChars")
+        if not isinstance(right_chars, NotFound):
+            margin_inline_end = right_chars
+        else:
+            right: int | str | NotFound = self._display_ind_prop(
+                "right", False
             )
-            if not isinstance(tbl_val, NotFound):
-                return tbl_val
-        return self._from_doc_dflts(
-            self._prop_path(para_path.join_left("pPrDefault")), optional
-        )
+            if not isinstance(right, NotFound):
+                margin_inline_end = signed_twips_measure(right)
+        return margin_inline_end
+
+    @cached_property
+    def text_indent(self) -> Length | int | None:
+        text_indent = None
+        hanging_chars: int | NotFound = self._display_ind_prop("hangingChars")
+        if not isinstance(hanging_chars, NotFound):
+            text_indent = (
+                hanging_chars if hanging_chars < 0 else -hanging_chars
+            )
+        else:
+            hanging: int | str | NotFound = self._display_ind_prop(
+                "hanging", False
+            )
+            if not isinstance(hanging, NotFound):
+                twips = twips_measure(hanging)
+                text_indent = twips if twips < 0 else -twips
+        # Hanging has higher priority over firstLine elms
+        if text_indent is None:
+            first_line_chars: int | NotFound = self._display_ind_prop(
+                "firstLineChars"
+            )
+            if not isinstance(first_line_chars, NotFound):
+                text_indent = first_line_chars
+            else:
+                first_line: int | str | NotFound = self._display_ind_prop(
+                    "firstLine", False
+                )
+                if not isinstance(first_line, NotFound):
+                    text_indent = twips_measure(first_line)
+        return text_indent
+
+    # --- Indentation/interval properties (end)
+
+    # TODO: some properties can be deleted and used in methods after
+    # --- General/specific properties
+
+    @cached_property
+    def word_wrap(self) -> bool:
+        return on_off(self._display_val("wordWrap"))
+
+    @cached_property
+    def justify_inter_character(self) -> bool:
+        return on_off(self._display_val("adjustRightInd"))
+
+    @cached_property
+    def supress_overflow(self) -> bool:
+        return on_off(self._display_val("supressOverlap"))
+
+    @cached_property
+    def kinsoku(self) -> bool:
+        return on_off(self._display_val("kinsoku"))
+
+    @cached_property
+    def autospace_asian_latin(self) -> bool:
+        return on_off(self._display_val("autospaceDN"))
+
+    @cached_property
+    def autospace_asian_numbers(self) -> bool:
+        return on_off(self._display_val("autospaceDE"))
+
+    @cached_property
+    def overflow_punct_asian(self) -> bool:
+        return on_off(self._display_val("overflowPunct"))
+
+    @cached_property
+    def start_line_punct_asian(self) -> bool:
+        return on_off(self._display_val("topLinePunct"))
+
+    @cached_property
+    def snap_to_grid(self) -> bool:
+        return on_off(self._display_val("snapToGrid"))
+
+    @cached_property
+    def textbox_tight_wrap(self) -> bool:
+        return on_off(self._display_val("textboxTightWrap"))
+
+    # --- General/specific properties (end)
 
     @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
@@ -208,52 +225,6 @@ class ParagraphH2D(How2Display[Paragraph]):
         else:
             return self._case_1_num_pr_direct(numPr_elm_direct)
         return None
-
-    def _case_1_num_pr_direct(
-        self, numPr_elm: CT_NumPr
-    ) -> Level | LevelOverride:
-        numId_elm = numPr_elm.numId
-        err = InvalidXmlError(f"Wrong numbering for {numPr_elm}")
-        if numId_elm is None:
-            raise err
-        ilvl_elm = numPr_elm.ilvl
-        if ilvl_elm is None:
-            raise err
-        if self._numbering is None:
-            raise err
-        num = self._find_real_num(numId_elm.val)
-        lvl = num.associated_lvl_override(ilvl_elm.val)
-        if lvl is not None:
-            return lvl
-        return num.abstract_num.lvl_by_ilvl(ilvl_elm.val)
-
-    def _case_2_num_pr_style_ref(
-        self, numPr_elm: CT_NumPr, para_style: ParagraphStyle
-    ) -> Level:
-        numId_elm = numPr_elm.numId
-        err = InvalidXmlError(f"Wrong numbering for {numPr_elm}")
-        if numId_elm is None:
-            raise err
-        if self._numbering is None:
-            raise err
-        num = self._find_real_num(numId_elm.val)
-        style_id = para_style.element.name
-        if style_id is None:
-            raise err
-        return num.abstract_num.lvl_by_para_style(style_id.val)
-
-    def _find_real_num(self, num_id: int) -> Num:
-        if self._numbering is None:
-            raise InvalidXmlError(f"Wrong numbering for {num_id}")
-        num = self._numbering.get_num(num_id)
-        abstract_num = num.abstract_num
-        num_style = abstract_num.numbering_style
-        # Real abstract num can be hidden in deep inheritance
-        while num_style:
-            num = num_style.num
-            abstract_num = num.abstract_num
-            num_style = abstract_num.numbering_style
-        return num
 
     @cached_property
     def _direct_case(self) -> _DirectCase:
@@ -317,6 +288,80 @@ class ParagraphH2D(How2Display[Paragraph]):
             SE_StyleType.PARAGRAPH,
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
+
+    def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
+        para_path = self._prop_path(name, f"{self._path_base}.ind")
+        return self._display_val(para_path, optional)
+
+    def _display_val(
+        self, name_or_path: str | PropertyPath, optional: bool = True
+    ) -> Any:
+        if self.is_list_item:
+            return self._prop_val(name_or_path, optional, "both")
+        para_val = self._prop_val(name_or_path, optional, "both")
+        if not isinstance(para_val, NotFound):
+            return para_val
+        cell = self.cell
+        para_path = (
+            name_or_path
+            if isinstance(name_or_path, PropertyPath)
+            else self._prop_path("val", f"{self._path_base}.{name_or_path}")
+        )
+        if cell:
+            tbl_val, _ = self._from_tbl_style_hierarchy(
+                cell.h2d._tbl_style_props_deep, para_path, optional
+            )
+            if not isinstance(tbl_val, NotFound):
+                return tbl_val
+        return self._from_doc_dflts(
+            self._prop_path(para_path.join_left("pPrDefault")), optional
+        )
+
+    def _case_1_num_pr_direct(
+        self, numPr_elm: CT_NumPr
+    ) -> Level | LevelOverride:
+        numId_elm = numPr_elm.numId
+        err = InvalidXmlError(f"Wrong numbering for {numPr_elm}")
+        if numId_elm is None:
+            raise err
+        ilvl_elm = numPr_elm.ilvl
+        if ilvl_elm is None:
+            raise err
+        if self._numbering is None:
+            raise err
+        num = self._find_real_num(numId_elm.val)
+        lvl = num.associated_lvl_override(ilvl_elm.val)
+        if lvl is not None:
+            return lvl
+        return num.abstract_num.lvl_by_ilvl(ilvl_elm.val)
+
+    def _case_2_num_pr_style_ref(
+        self, numPr_elm: CT_NumPr, para_style: ParagraphStyle
+    ) -> Level:
+        numId_elm = numPr_elm.numId
+        err = InvalidXmlError(f"Wrong numbering for {numPr_elm}")
+        if numId_elm is None:
+            raise err
+        if self._numbering is None:
+            raise err
+        num = self._find_real_num(numId_elm.val)
+        style_id = para_style.element.name
+        if style_id is None:
+            raise err
+        return num.abstract_num.lvl_by_para_style(style_id.val)
+
+    def _find_real_num(self, num_id: int) -> Num:
+        if self._numbering is None:
+            raise InvalidXmlError(f"Wrong numbering for {num_id}")
+        num = self._numbering.get_num(num_id)
+        abstract_num = num.abstract_num
+        num_style = abstract_num.numbering_style
+        # Real abstract num can be hidden in deep inheritance
+        while num_style:
+            num = num_style.num
+            abstract_num = num.abstract_num
+            num_style = abstract_num.numbering_style
+        return num
 
     def _prop_val_run(self, name: str, optional: bool = True) -> Any:
         path = self._prop_path("val", f"rPr.{name}")
