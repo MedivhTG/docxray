@@ -16,6 +16,22 @@ UPPER_ROMAN = [
     chr(0x0044),
     chr(0x004D),
 ]
+LOWER_ROMAN = [
+    chr(0x0069),
+    chr(0x0076),
+    chr(0x0078),
+    chr(0x006C),
+    chr(0x0063),
+    chr(0x0064),
+    chr(0x006D),
+]
+UPPER_LETTER_LATIN = [
+    *charset(0x0041, 0x005A),
+    chr(0x00C6),
+    chr(0x00D8),
+    chr(0x00C5),
+]
+UPPER_LETTER_OTHER = charset(0x0041, 0x005A)
 AIUEO = [
     *charset(0xFF71, 0xFF9D),
     chr(0xFF9D),
@@ -23,14 +39,16 @@ AIUEO = [
 ]
 
 
-class Charset(StrEnum):
+class CharsetName(StrEnum):
     DECIMAL = "decimal"
-    UPPER_ROMAN = "upper_roman"
+    UPPER_ROMAN = "upperRoman"
+    LOWER_ROMAN = "lowerRoman"
     AIUEO = "aiueo"
 
 
 NAME_TO_CHARSET = {
-    Charset.AIUEO: AIUEO,
-    Charset.DECIMAL: DECIMAL,
-    Charset.UPPER_ROMAN: UPPER_ROMAN,
+    CharsetName.AIUEO: AIUEO,
+    CharsetName.DECIMAL: DECIMAL,
+    CharsetName.UPPER_ROMAN: UPPER_ROMAN,
+    CharsetName.LOWER_ROMAN: LOWER_ROMAN,
 }

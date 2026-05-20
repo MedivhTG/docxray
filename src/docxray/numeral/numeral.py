@@ -1,27 +1,53 @@
-from .charset import NAME_TO_CHARSET, Charset
+from typing import Literal
+
+from .bcp47 import BCP47
+from .charset import (
+    NAME_TO_CHARSET,
+    UPPER_LETTER_LATIN,
+    UPPER_LETTER_OTHER,
+    CharsetName,
+)
 
 
 class Numeral:
     @classmethod
     def decimal(cls, ord: int) -> str:
-        """Foolish method to validate decimals required in numbering format.
-
-        Args:
-            ord (int): 1-based position of char in decimal charset.
-
-        Raises:
-            ValueError: If given ord is less than 1.
-
-        Returns:
-            str: String representation of integer.
-        """
         if ord < 1:
             raise ValueError(f"Given ord {ord} is less than 1")
         return str(ord)
 
     @classmethod
     def upper_roman(cls, ord: int) -> str:
-        charset = cls._charset(ord, Charset.UPPER_ROMAN)
+        return cls._roman(ord, CharsetName.UPPER_ROMAN)
+
+    @classmethod
+    def lower_roman(cls, ord: int) -> str:
+        return cls._roman(ord, CharsetName.LOWER_ROMAN)
+
+    @classmethod
+    def upper_letter(cls, ord: int, lang: str) -> str:
+        if ord < 1:
+            raise ValueError(f"Given ord {ord} is less than 1")
+        if cls._is_latin_based(lang):
+            charset = UPPER_LETTER_LATIN
+        else:
+            charset = UPPER_LETTER_OTHER
+        pos = ord - 1
+        repeat = pos // len(charset) + 1
+        char = charset[pos % len(charset)]
+        return char * repeat
+
+    @classmethod
+    def _is_latin_based(cls, lang: str) -> bool:
+        return BCP47.script(lang) == "Latn"
+
+    @classmethod
+    def _roman(
+        cls,
+        ord: int,
+        roman_name: Literal[CharsetName.UPPER_ROMAN, CharsetName.LOWER_ROMAN],
+    ) -> str:
+        charset = cls._charset(ord, roman_name)
         I, V, X, L, C, D, M = charset  # noqa: E741
         RULES = [
             (1000, lambda: M),  # M
@@ -54,7 +80,7 @@ class Numeral:
         return "".join(result)
 
     @classmethod
-    def _cyclic(cls, ord: int, charset_name: Charset) -> str:
+    def _cyclic(cls, ord: int, charset_name: CharsetName) -> str:
         """Get symbol from charset by position.
 
         If ord is outside of charset index than ord is equal to
@@ -70,7 +96,9 @@ class Numeral:
         return charset[pos]
 
     @classmethod
-    def _charset(cls, ord_validate: int, charset_name: Charset) -> list[str]:
+    def _charset(
+        cls, ord_validate: int, charset_name: CharsetName
+    ) -> list[str]:
         if ord_validate < 1:
             raise ValueError(f"Given ord {ord_validate} is less than 1")
         charset = NAME_TO_CHARSET.get(charset_name)
