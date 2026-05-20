@@ -9,12 +9,13 @@ from docxray.oxml.trans.shared import (
     CT_OnOff,
     CT_String,
 )
-from docxray.oxml.trans.st.enums import SE_MultilevelType
-from docxray.oxml.trans.st.shared_common import ST_OnOff
+from docxray.oxml.trans.st.enums import SE_NUMBER_FORMAT, SE_MultilevelType
+from docxray.oxml.trans.st.shared_common import ST_OnOff, ST_String
 from docxray.oxml.trans.st.wml import (
     ST_DecimalNumber,
     ST_LongHexNumber,
     ST_MultiLevelType,
+    ST_NumberFormat,
 )
 from docxray.oxml.trans.text.paragraph_props import CT_PPr
 from docxray.oxml.trans.text.run_props import CT_RPr
@@ -26,7 +27,13 @@ class CT_NumPicBullet(OxmlElement):
 
 
 class CT_NumFmt(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_NUMBER_FORMAT:
+        return self.attr_required(W.VAL, ST_NumberFormat)
+
+    @cached_property
+    def format(self) -> str | None:
+        return self.attr_optional(W.FORMAT, ST_String)
 
 
 class CT_LevelSuffix(OxmlElement):

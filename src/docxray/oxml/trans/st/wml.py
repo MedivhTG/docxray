@@ -18,6 +18,7 @@ from docxray.xsd.xsd import (
 
 from .enums import (
     SE_JC,
+    SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_Border,
     SE_HexColorAuto,
@@ -121,3 +122,8 @@ class ST_Jc(XsdSimpleType):
 class ST_TextAlignment(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_ALIGNMENT)}
+
+
+class ST_NumberFormat(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_NUMBER_FORMAT)}

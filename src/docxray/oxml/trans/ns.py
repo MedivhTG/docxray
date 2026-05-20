@@ -228,7 +228,10 @@ class W:
     TPLC = qn("w:tplc")
     TENTATIVE = qn("w:tentative")
     START = qn("w:start")
+
     NUM_FMT = qn("w:numFmt")
+    FORMAT = qn("w:format")
+
     LVL_RESTART = qn("w:lvlRestart")
     IS_LGL = qn("w:isLgl")
     SUFF = qn("w:suff")
