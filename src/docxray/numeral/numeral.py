@@ -1,12 +1,12 @@
+import unicodedata
+from functools import lru_cache
 from typing import Literal
 
-from .bcp47 import BCP47
-from .charset import (
-    NAME_TO_CHARSET,
-    UPPER_LETTER_LATIN,
-    UPPER_LETTER_OTHER,
-    CharsetName,
-)
+import homoglyphs
+from unicode_rbnf.engine import RbnfEngine
+
+from .bcp47 import script
+from .charset import NAME_TO_CHARSET, CharsetName
 
 
 class Numeral:
@@ -25,21 +25,58 @@ class Numeral:
         return cls._roman(ord, CharsetName.LOWER_ROMAN)
 
     @classmethod
-    def upper_letter(cls, ord: int, lang: str) -> str:
+    def upper_letter(cls, ord: int) -> str:
+        return cls._letter(ord, CharsetName.UPPER_LETTER)
+
+    @classmethod
+    def lower_letter(cls, ord: int) -> str:
+        return cls._letter(ord, CharsetName.LOWER_LETTER)
+
+    @classmethod
+    def ordinal(cls, ord: int, locale: str = "en-US") -> str:
         if ord < 1:
             raise ValueError(f"Given ord {ord} is less than 1")
-        if cls._is_latin_based(lang):
-            charset = UPPER_LETTER_LATIN
+        engine = cls._rbnf_engine(locale)
+        return engine.format_number(ord, ruleset_names=["digits-ordinal"]).text
+
+    @classmethod
+    def cardinal_text(cls, ord: int, locale: str = "en-US") -> str:
+        if ord < 1:
+            raise ValueError(f"Given ord {ord} is less than 1")
+        engine = cls._rbnf_engine(locale)
+        return engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+
+    @classmethod
+    def ordinal_text(cls, ord: int, locale: str = "en-US") -> str:
+        if ord < 1:
+            raise ValueError(f"Given ord {ord} is less than 1")
+        engine = cls._rbnf_engine(locale)
+        return engine.format_number(
+            ord, ruleset_names=["spellout-ordinal"]
+        ).text
+
+    @classmethod
+    def _letter(
+        cls,
+        ord: int,
+        letter_name: Literal[
+            CharsetName.UPPER_LETTER, CharsetName.LOWER_LETTER
+        ],
+        locale: str = "en-US",
+    ) -> str:
+        if cls._is_latin_based(locale):
+            case = (
+                "upper" if letter_name == CharsetName.UPPER_LETTER else "lower"
+            )
+            charset = cls._alphabet(locale, case)
         else:
-            charset = UPPER_LETTER_OTHER
+            charset = cls._charset(ord, letter_name)
         pos = ord - 1
         repeat = pos // len(charset) + 1
         char = charset[pos % len(charset)]
         return char * repeat
-
-    @classmethod
-    def _is_latin_based(cls, lang: str) -> bool:
-        return BCP47.script(lang) == "Latn"
 
     @classmethod
     def _roman(
@@ -105,3 +142,29 @@ class Numeral:
         if charset is None:
             raise ValueError(f"No charset for given name {charset_name}")
         return charset
+
+    @lru_cache
+    @classmethod
+    def _alphabet(
+        cls, locale: str = "en-US", case: Literal["lower", "upper"] = "upper"
+    ) -> list[str]:
+        code, _ = locale.split("-")
+        alphabet = homoglyphs.Languages.get_alphabet([code])
+        if case == "upper":
+            return sorted(
+                [chr for chr in alphabet if unicodedata.category(chr) == "Lu"]
+            )
+        return sorted(
+            [chr for chr in alphabet if unicodedata.category(chr) == "Ll"]
+        )
+
+    @lru_cache
+    @classmethod
+    def _rbnf_engine(cls, locale: str = "en-US") -> RbnfEngine:
+        code, _ = locale.split("-")
+        return RbnfEngine.for_language(code)
+
+    @lru_cache
+    @classmethod
+    def _is_latin_based(cls, locale: str = "en-US") -> bool:
+        return script(locale) == "Latn"

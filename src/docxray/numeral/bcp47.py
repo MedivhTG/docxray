@@ -21,18 +21,15 @@ with open(_ICIDS_PATH_, "r", encoding="utf-8") as f:
         )
 
 
-# TODO: add typing
-class BCP47:
-    @staticmethod
-    def script(lang: str) -> str:
-        key = tuple(lang.split("-"))
-        inf = _ISO639_ICIDS_.get(key)  # type: ignore[arg-type]
-        if inf is None:
-            raise ValueError(f"No such script for lang `{lang}`")
-        tag3, script = inf
-        if script:
-            return script
-        script = _ISO639_DEFAULT_SCRIPT_.get(tag3)
-        if script is None:
-            raise ValueError(f"No such script for lang `{lang}`")
+def script(locale: str) -> str:
+    key = tuple(locale.split("-"))
+    inf = _ISO639_ICIDS_.get(key)  # type: ignore[arg-type]
+    if inf is None:
+        raise ValueError(f"No such script for lang `{locale}`")
+    tag3, script = inf
+    if script:
         return script
+    script = _ISO639_DEFAULT_SCRIPT_.get(tag3)
+    if script is None:
+        raise ValueError(f"No such script for lang `{locale}`")
+    return script
