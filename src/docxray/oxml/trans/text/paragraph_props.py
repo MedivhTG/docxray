@@ -190,12 +190,13 @@ class CT_PPr(OxmlElement):
     def snapToGrid(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SNAP_TO_GRID, CT_OnOff)
 
-    @cached_property
-    def spacing(self) -> CT_Spacing | None:
-        spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
-        if spacing_elm is None:
-            return None
-        return CT_Spacing(spacing_elm)
+    # TODO: write factory method for right instantiate customized elements
+    # @cached_property
+    # def spacing(self) -> CT_Spacing | None:
+    #     spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
+    #     if spacing_elm is None:
+    #         return None
+    #     return CT_Spacing(spacing_elm)
 
     @cached_property
     def ind(self) -> CT_Ind | None:

@@ -43,8 +43,6 @@ class TestDocument:
                                 part = p_or_t_inner.part
                                 p_fmt = p_or_t_inner.h2d
                                 pPr = p_or_t_inner.element.pPr
-                                if pPr is not None:
-                                    spacing = pPr.spacing
                                 for (
                                     r_or_h
                                 ) in p_or_t_inner.iter_inner_content():
@@ -62,11 +60,11 @@ class TestDocument:
                 f = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
+                ind = p_fmt.indentation
                 lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
-                    spacing = pPr.spacing
                     w = 1
                 for r_or_h in p_or_t.iter_inner_content():
                     if not isinstance(r_or_h, Run):

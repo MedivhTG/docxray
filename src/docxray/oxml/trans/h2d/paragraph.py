@@ -1,15 +1,21 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
+from docxray.oxml.trans.proxy.compute import (
+    on_off,
+    signed_twips_measure,
+    twips_measure,
+)
 from docxray.oxml.trans.proxy.numbering.numbering import (
     Level,
     LevelOverride,
     Num,
 )
 from docxray.oxml.trans.proxy.shared import (
+    Length,
     NotFound,
     PropertyPath,
     safe_get_prop,
@@ -24,6 +30,15 @@ from docxray.oxml.trans.st.enums import SE_StyleType
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
+
+type _Dir = Literal["rtl", "ltr"]
+
+
+class Indentation(TypedDict):
+    direction: _Dir
+    margin_inline_start: int | Length | None
+    margin_inline_end: int | Length | None
+    text_indent: int | Length | None
 
 
 class ParagraphH2D(How2Display[Paragraph]):
@@ -40,29 +55,109 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def header_level(self) -> WD_HEADER_LEVEL:
-        outlineLevel_val: int = self._display_val("outlineLvl")
+        outlineLevel_val: int = self._display_val("outlineLvl", False)
         if isinstance(outlineLevel_val, NotFound):
             return WD_HEADER_LEVEL.TEXT
         return WD_HEADER_LEVEL(outlineLevel_val)
 
-    def _display_val(self, name: str, optional: bool = True) -> Any:
+    # TODO: add fallback on `start` and `end`` properties
+    @cached_property
+    def indentation(self) -> Indentation:
+        """Get indetation properties for paragraph.
+
+        If properties (excluding direction) has `int` type, than
+        it's measured in Chars (HTML `ch` measure analogue), else
+        if it's `Length` than it's measured in twips (get your own measure),
+        else if None than there is not indentation for selected property.
+
+        Returns:
+            Indentation: Typed dictionary of properties.
+        """
+        # Margin start for para
+        margin_inline_start = None
+        left_chars: int | NotFound = self._display_ind_prop("leftChars")
+        if not isinstance(left_chars, NotFound):
+            margin_inline_start = left_chars
+        else:
+            left: int | str | NotFound = self._display_ind_prop("left", False)
+            if not isinstance(left, NotFound):
+                margin_inline_start = signed_twips_measure(left)
+        # Margin end for para
+        margin_inline_end = None
+        right_chars: int | NotFound = self._display_ind_prop("rightChars")
+        if not isinstance(right_chars, NotFound):
+            margin_inline_end = right_chars
+        else:
+            right: int | str | NotFound = self._display_ind_prop(
+                "right", False
+            )
+            if not isinstance(right, NotFound):
+                margin_inline_end = signed_twips_measure(right)
+        # Indentation for first para line
+        text_indent = None
+        hanging_chars: int | NotFound = self._display_ind_prop("hangingChars")
+        if not isinstance(hanging_chars, NotFound):
+            text_indent = (
+                hanging_chars if hanging_chars < 0 else -hanging_chars
+            )
+        else:
+            hanging: int | str | NotFound = self._display_ind_prop(
+                "hanging", False
+            )
+            if not isinstance(hanging, NotFound):
+                twips = twips_measure(hanging)
+                text_indent = twips if twips < 0 else -twips
+        # Hanging has higher priority over firstLine elms
+        if text_indent is None:
+            first_line_chars: int | NotFound = self._display_ind_prop(
+                "firstLineChars"
+            )
+            if not isinstance(first_line_chars, NotFound):
+                text_indent = first_line_chars
+            else:
+                first_line: int | str | NotFound = self._display_ind_prop(
+                    "firstLine", False
+                )
+                if not isinstance(first_line, NotFound):
+                    text_indent = twips_measure(first_line)
+        return {
+            "direction": "rtl" if self._bidi is True else "ltr",
+            "margin_inline_start": margin_inline_start,
+            "margin_inline_end": margin_inline_end,
+            "text_indent": text_indent,
+        }
+
+    def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
+        para_path = self._prop_path(name, f"{self._path_base}.ind")
+        return self._display_val(para_path, optional)
+
+    @cached_property
+    def _bidi(self) -> bool:
+        return on_off(self._display_val("bidi"))
+
+    def _display_val(
+        self, name_or_path: str | PropertyPath, optional: bool = True
+    ) -> Any:
         if self.is_list_item:
-            return self._prop_val(name, optional, algorithm="both")
-        para_val = self._prop_val(name, optional, algorithm="both")
+            return self._prop_val(name_or_path, optional, "both")
+        para_val = self._prop_val(name_or_path, optional, "both")
         if not isinstance(para_val, NotFound):
             return para_val
         cell = self.cell
-        para_path = self._prop_path("val", f"{self._path_base}.{name}")
+        para_path = (
+            name_or_path
+            if isinstance(name_or_path, PropertyPath)
+            else self._prop_path("val", f"{self._path_base}.{name_or_path}")
+        )
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
                 cell.h2d._tbl_style_props_deep, para_path, optional
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
-        doc_val_path = self._prop_path(
-            "val", f"pPrDefault.{self._path_base}.{name}"
+        return self._from_doc_dflts(
+            self._prop_path(para_path.join_left("pPrDefault")), optional
         )
-        return self._from_doc_dflts(doc_val_path, optional)
 
     @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
@@ -199,6 +294,12 @@ class ParagraphH2D(How2Display[Paragraph]):
         for_run: bool | None = kwargs.pop("for_run", None)
         if for_run is True:
             return style_val
+        if self._associated_level is not None:
+            numbering_val = safe_get_prop(
+                self._associated_level.element, path, optional
+            )
+            if not isinstance(numbering_val, NotFound):
+                return numbering_val
         if self._para_style_numbering is None:
             return style_val
         return self._from_style_inheritance(

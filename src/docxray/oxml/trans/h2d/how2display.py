@@ -80,11 +80,15 @@ class How2Display(Generic[PROXY_T]):
 
     def _prop_val(
         self,
-        name: str,
+        name_or_path: str | PropertyPath,
         optional: bool = False,
         algorithm: ResolveAlgorithm = "direct",
     ) -> Any:
-        path = self._prop_path("val", f"{self._path_base}.{name}")
+        path = (
+            name_or_path
+            if isinstance(name_or_path, PropertyPath)
+            else self._prop_path("val", f"{self._path_base}.{name_or_path}")
+        )
         return self._prop(path, optional, algorithm)
 
     def _table_style_props(

@@ -98,10 +98,9 @@ class RunH2D(How2Display[Run]):
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
-        doc_val_path = self._prop_path(
-            "val", f"rPrDefault.{self._path_base}.{name}"
+        return self._from_doc_dflts(
+            char_path.join_left("rPrDefault"), optional
         )
-        return self._from_doc_dflts(doc_val_path, optional)
 
     def _display_val_toggled(self, name: str) -> bool:
         char_direct_val = self._prop_val(name, True)
@@ -122,7 +121,9 @@ class RunH2D(How2Display[Run]):
             if not isinstance(i, NotFound)
         )
         if found_count > 1:
-            return self._effective_toggled(name, char_val, para_val, tbl_val)
+            return self._effective_toggled(
+                char_path, char_val, para_val, tbl_val
+            )
         if not isinstance(char_val, NotFound):
             return on_off(char_val)
         if not isinstance(para_val, NotFound):
@@ -132,12 +133,15 @@ class RunH2D(How2Display[Run]):
         return False
 
     def _effective_toggled(
-        self, name: str, char_val: _OnOff, para_val: _OnOff, tbl_val: _OnOff
+        self,
+        char_path: PropertyPath,
+        char_val: _OnOff,
+        para_val: _OnOff,
+        tbl_val: _OnOff,
     ) -> bool:
-        doc_val_path = self._prop_path(
-            "val", f"rPrDefault.{self._path_base}.{name}"
+        doc_val = on_off(
+            self._from_doc_dflts(char_path.join_left("rPrDefault"), True)
         )
-        doc_val = on_off(self._from_doc_dflts(doc_val_path, True))
         if doc_val is True:
             return doc_val
         return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)
