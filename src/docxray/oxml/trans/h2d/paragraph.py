@@ -31,7 +31,7 @@ from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
 
-type _Dir = Literal["rtl", "ltr"]
+type Direction = Literal["rtl", "ltr"]
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
@@ -98,7 +98,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     # TODO: look for textDirection too
     @cached_property
-    def direction(self) -> _Dir:
+    def direction(self) -> Direction:
         val = on_off(self._display_val("bidi"))
         return "rtl" if val is True else "ltr"
 
