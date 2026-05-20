@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from docxray import Document
+from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
@@ -61,6 +62,11 @@ class TestDocument:
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
                 ind = p_fmt.indentation
+                left = (
+                    ind["margin_inline_start"].cm
+                    if isinstance(ind["margin_inline_start"], Length)
+                    else None
+                )
                 lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering
                 pPr = p_or_t.element.pPr

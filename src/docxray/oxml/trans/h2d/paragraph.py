@@ -32,6 +32,9 @@ from docxray.oxml.trans.text.num_props import CT_NumPr
 from .how2display import How2Display
 
 type _Dir = Literal["rtl", "ltr"]
+type _DirectCase = Literal[
+    "numbering_first", "paragraph_first", "up_to_hierarchy"
+]
 
 
 class Indentation(TypedDict):
@@ -225,6 +228,16 @@ class ParagraphH2D(How2Display[Paragraph]):
         return num
 
     @cached_property
+    def _direct_case(self) -> _DirectCase:
+        if self._numPr_para_direct and self._para_style_direct:
+            return "numbering_first"
+        if self._numPr_para_direct and not self._para_style_direct:
+            return "numbering_first"
+        if not self._numPr_para_direct and self._para_style_direct:
+            return "paragraph_first"
+        return "up_to_hierarchy"
+
+    @cached_property
     def _para_style_numbering(self) -> ParagraphStyle | None:
         level = self._associated_level
         if level is None:
@@ -284,24 +297,46 @@ class ParagraphH2D(How2Display[Paragraph]):
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
-        if self._para_style_direct is None:
-            return NotFound(self, path)
-        style_val = self._from_style_inheritance(
-            self._para_style_direct, path, optional
-        )
-        if not isinstance(style_val, NotFound):
-            return style_val
         for_run: bool | None = kwargs.pop("for_run", None)
-        if for_run is True:
-            return style_val
-        if self._associated_level is not None:
-            numbering_val = safe_get_prop(
-                self._associated_level.element, path, optional
-            )
-            if not isinstance(numbering_val, NotFound):
-                return numbering_val
-        if self._para_style_numbering is None:
-            return style_val
-        return self._from_style_inheritance(
-            self._para_style_numbering, path, optional
-        )
+        if self._direct_case == "numbering_first":
+            if self._associated_level is not None and not for_run:
+                numbering_val = safe_get_prop(
+                    self._associated_level.element, path, optional
+                )
+                if not isinstance(numbering_val, NotFound):
+                    return numbering_val
+            if self._para_style_direct:
+                style_val = self._from_style_inheritance(
+                    self._para_style_direct, path, optional
+                )
+                if not isinstance(style_val, NotFound):
+                    return style_val
+            if self._para_style_numbering and not for_run:
+                style_val = self._from_style_inheritance(
+                    self._para_style_numbering, path, optional
+                )
+                if not isinstance(style_val, NotFound):
+                    return style_val
+        # Even if it's list item, we must follow the logic of Word renderer that
+        # getting firstly property from paragraph styles in styles.xml then
+        # we go to numbering
+        elif self._direct_case == "paragraph_first":
+            if self._para_style_direct:
+                style_val = self._from_style_inheritance(
+                    self._para_style_direct, path, optional
+                )
+                if not isinstance(style_val, NotFound):
+                    return style_val
+            if self._para_style_numbering and not for_run:
+                style_val = self._from_style_inheritance(
+                    self._para_style_numbering, path, optional
+                )
+                if not isinstance(style_val, NotFound):
+                    return style_val
+            if self._associated_level is not None and not for_run:
+                numbering_val = safe_get_prop(
+                    self._associated_level.element, path, optional
+                )
+                if not isinstance(numbering_val, NotFound):
+                    return numbering_val
+        return NotFound(self, path)
