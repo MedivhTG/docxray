@@ -183,11 +183,11 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def autospace_asian_latin(self) -> bool:
-        return on_off(self._display_val("autospaceDN"))
+        return on_off(self._display_val("autospaceDE"))
 
     @cached_property
     def autospace_asian_numbers(self) -> bool:
-        return on_off(self._display_val("autospaceDE"))
+        return on_off(self._display_val("autospaceDN"))
 
     @cached_property
     def overflow_punct_asian(self) -> bool:
