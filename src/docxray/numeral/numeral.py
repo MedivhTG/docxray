@@ -72,6 +72,19 @@ class Numeral:
         digits = str(ord)
         return "".join(charset[int(d)] for d in digits)
 
+    # TODO: realize
+    @classmethod
+    def japanese_counting(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def aiueo(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.AIUEO)
+
+    @classmethod
+    def iroha(cls, ord: int) -> str:
+        return cls._cyclic(ord, CharsetName.IROHA)
+
     @classmethod
     def _letter(
         cls,
@@ -135,10 +148,20 @@ class Numeral:
         return cls._repeated_compute(ord, charset)
 
     @classmethod
+    def _cyclic(cls, ord: int, charset_name: CharsetName) -> str:
+        charset = cls._charset(ord, charset_name)
+        return cls._cyclic_compute(ord, charset)
+
+    @classmethod
     def _repeated_compute(cls, ord: int, charset: list[str]) -> str:
         repeat = (ord - 1) // len(charset)
         pos = (ord - 1) % len(charset)
         return charset[pos] * repeat
+
+    @classmethod
+    def _cyclic_compute(cls, ord: int, charset: list[str]) -> str:
+        pos = (ord - 1) % len(charset)
+        return charset[pos]
 
     @classmethod
     def _charset(

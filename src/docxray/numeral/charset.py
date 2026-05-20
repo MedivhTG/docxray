@@ -47,6 +47,56 @@ AIUEO = [
     chr(0xFF9D),
     chr(0xFF9D),
 ]
+IROHA = [
+    chr(0xFF72),
+    chr(0xFF9B),
+    chr(0xFF8A),
+    chr(0xFF86),
+    chr(0xFF8E),
+    chr(0xFF8D),
+    chr(0xFF84),
+    chr(0xFF81),
+    chr(0xFF98),
+    chr(0xFF87),
+    chr(0xFF99),
+    chr(0xFF66),
+    chr(0xFF9C),
+    chr(0xFF76),
+    chr(0xFF96),
+    chr(0xFF80),
+    chr(0xFF9A),
+    chr(0xFF7F),
+    chr(0xFF82),
+    chr(0xFF88),
+    chr(0xFF85),
+    chr(0xFF97),
+    chr(0xFF91),
+    chr(0xFF73),
+    chr(0x30F0),
+    chr(0xFF89),
+    chr(0xFF75),
+    chr(0xFF78),
+    chr(0xFF94),
+    chr(0xFF8F),
+    chr(0xFF79),
+    chr(0xFF8C),
+    chr(0xFF7A),
+    chr(0xFF74),
+    chr(0xFF83),
+    chr(0xFF71),
+    chr(0xFF7B),
+    chr(0xFF77),
+    chr(0xFF95),
+    chr(0xFF92),
+    chr(0xFF90),
+    chr(0xFF7C),
+    chr(0x30F1),
+    chr(0xFF8B),
+    chr(0xFF93),
+    chr(0xFF7E),
+    chr(0xFF7D),
+    chr(0xFF9D),
+]
 
 
 class CharsetName(StrEnum):
@@ -58,6 +108,7 @@ class CharsetName(StrEnum):
     CHICAGO = "chicago"
     IDEOGRAPH_DIGITAL = "ideographDigital"
     AIUEO = "aiueo"
+    IROHA = "iroha"
 
 
 NAME_TO_CHARSET = {
@@ -69,4 +120,5 @@ NAME_TO_CHARSET = {
     CharsetName.LOWER_LETTER: LOWER_LETTER,
     CharsetName.CHICAGO: CHICAGO,
     CharsetName.IDEOGRAPH_DIGITAL: IDEOGRAPH_DIGITAL,
+    CharsetName.IROHA: IROHA,
 }
