@@ -63,7 +63,8 @@ class ParagraphH2D(How2Display[Paragraph]):
             return WD_HEADER_LEVEL.TEXT
         return WD_HEADER_LEVEL(outlineLevel_val)
 
-    # TODO: add fallback on `start` and `end`` properties
+    # TODO: add fallback on `start` and `end`` properties;
+    # look for textDirection and textAlignment too;
     @cached_property
     def indentation(self) -> Indentation:
         """Get indetation properties for paragraph.
@@ -129,6 +130,33 @@ class ParagraphH2D(How2Display[Paragraph]):
             "margin_inline_end": margin_inline_end,
             "text_indent": text_indent,
         }
+
+    @cached_property
+    def no_hanging(self) -> bool:
+        widow_control = self._display_val("widowControl")
+        if isinstance(widow_control, NotFound):
+            return True
+        return on_off(widow_control)
+
+    @cached_property
+    def keep_next(self) -> bool:
+        return on_off(self._display_val("keepNext"))
+
+    @cached_property
+    def keep_lines(self) -> bool:
+        return on_off(self._display_val("keepLines"))
+
+    @cached_property
+    def page_break_before(self) -> bool:
+        return on_off(self._display_val("pageBreakBefore"))
+
+    @cached_property
+    def supress_line_numbers(self) -> bool:
+        return on_off(self._display_val("suppressLineNumbers"))
+
+    @cached_property
+    def supress_auto_hyphens(self) -> bool:
+        return on_off(self._display_val("suppressAutoHyphens"))
 
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
         para_path = self._prop_path(name, f"{self._path_base}.ind")
