@@ -59,6 +59,20 @@ class Numeral:
         return format(ord, "X")
 
     @classmethod
+    def chicago(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.CHICAGO)
+
+    @classmethod
+    def ideograph_digital(cls, ord: int) -> str:
+        if ord < 0:
+            raise ValueError(f"Given ord `{ord}` is less than 0")
+        charset = cls._charset(ord, CharsetName.IDEOGRAPH_DIGITAL, False)
+        if ord == 0:
+            return charset[ord]
+        digits = str(ord)
+        return "".join(charset[int(d)] for d in digits)
+
+    @classmethod
     def _letter(
         cls,
         ord: int,
@@ -75,10 +89,7 @@ class Numeral:
             charset = cls._alphabet(locale, case)
         else:
             charset = cls._charset(ord, letter_name)
-        pos = ord - 1
-        repeat = pos // len(charset) + 1
-        char = charset[pos % len(charset)]
-        return char * repeat
+        return cls._repeated_compute(ord, charset)
 
     @classmethod
     def _roman(
@@ -119,24 +130,22 @@ class Numeral:
         return "".join(result)
 
     @classmethod
-    def _cyclic(cls, ord: int, charset_name: CharsetName) -> str:
-        """Get symbol from charset by position.
-
-        If ord is outside of charset index than ord is equal to
-        the ramined of the division of charset length
-
-        Args:
-            ord (int): 1-based position of char in `charset`
-            charset_name (Charset): Named charset saved in memory.
-        """
+    def _repeated(cls, ord: int, charset_name: CharsetName) -> str:
         charset = cls._charset(ord, charset_name)
-        ord_next = ord % len(charset)
-        pos = ord_next - 1
-        return charset[pos]
+        return cls._repeated_compute(ord, charset)
 
     @classmethod
-    def _charset(cls, ord: int, charset_name: CharsetName) -> list[str]:
-        cls._ord_validate(ord)
+    def _repeated_compute(cls, ord: int, charset: list[str]) -> str:
+        repeat = (ord - 1) // len(charset)
+        pos = (ord - 1) % len(charset)
+        return charset[pos] * repeat
+
+    @classmethod
+    def _charset(
+        cls, ord: int, charset_name: CharsetName, validate_ord: bool = True
+    ) -> list[str]:
+        if validate_ord:
+            cls._ord_validate(ord)
         charset = NAME_TO_CHARSET.get(charset_name)
         if charset is None:
             raise ValueError(f"No charset for given name {charset_name}")
