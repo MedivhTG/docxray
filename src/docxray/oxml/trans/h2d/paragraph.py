@@ -49,13 +49,6 @@ class ParagraphH2D(How2Display[Paragraph]):
     def is_list_item(self) -> bool:
         return self._associated_level is not None
 
-    @cached_property
-    def header_level(self) -> WD_HEADER_LEVEL:
-        outlineLevel_val: int = self._display_val("outlineLvl", False)
-        if isinstance(outlineLevel_val, NotFound):
-            return WD_HEADER_LEVEL.TEXT
-        return WD_HEADER_LEVEL(outlineLevel_val)
-
     # --- Page properties
     @cached_property
     def no_hanging(self) -> bool:
@@ -164,6 +157,13 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     # TODO: some properties can be deleted and used in methods after
     # --- General/specific properties
+
+    @cached_property
+    def header_level(self) -> WD_HEADER_LEVEL:
+        outlineLevel_val: int = self._display_val("outlineLvl", False)
+        if isinstance(outlineLevel_val, NotFound):
+            return WD_HEADER_LEVEL.TEXT
+        return WD_HEADER_LEVEL(outlineLevel_val)
 
     @cached_property
     def alignment(self) -> SE_JC:
