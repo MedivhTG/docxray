@@ -69,8 +69,7 @@ class Numeral:
         charset = cls._charset(ord, CharsetName.IDEOGRAPH_DIGITAL, False)
         if ord == 0:
             return charset[ord]
-        digits = str(ord)
-        return "".join(charset[int(d)] for d in digits)
+        return cls._decimal_compute(ord, charset)
 
     # TODO: realize
     @classmethod
@@ -84,6 +83,13 @@ class Numeral:
     @classmethod
     def iroha(cls, ord: int) -> str:
         return cls._cyclic(ord, CharsetName.IROHA)
+
+    @classmethod
+    def decimal_full_width(cls, ord: int):
+        if ord < 0:
+            raise ValueError(f"Given ord `{ord}` is less than 0")
+        charset = cls._charset(ord, CharsetName.DECIMAL_FULL_WIDTH, False)
+        return cls._decimal_compute(ord, charset)
 
     @classmethod
     def _letter(
@@ -162,6 +168,11 @@ class Numeral:
     def _cyclic_compute(cls, ord: int, charset: list[str]) -> str:
         pos = (ord - 1) % len(charset)
         return charset[pos]
+
+    @classmethod
+    def _decimal_compute(cls, ord: int, charset: list[str]) -> str:
+        digits = str(ord)
+        return "".join(charset[int(d)] for d in digits)
 
     @classmethod
     def _charset(

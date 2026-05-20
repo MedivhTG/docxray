@@ -97,6 +97,7 @@ IROHA = [
     chr(0xFF7D),
     chr(0xFF9D),
 ]
+DECIMAL_FULL_WIDTH = charset(0xFF10, 0xFF19)
 
 
 class CharsetName(StrEnum):
@@ -109,6 +110,7 @@ class CharsetName(StrEnum):
     IDEOGRAPH_DIGITAL = "ideographDigital"
     AIUEO = "aiueo"
     IROHA = "iroha"
+    DECIMAL_FULL_WIDTH = "decimalFullWidth"
 
 
 NAME_TO_CHARSET = {
@@ -121,4 +123,5 @@ NAME_TO_CHARSET = {
     CharsetName.CHICAGO: CHICAGO,
     CharsetName.IDEOGRAPH_DIGITAL: IDEOGRAPH_DIGITAL,
     CharsetName.IROHA: IROHA,
+    CharsetName.DECIMAL_FULL_WIDTH: DECIMAL_FULL_WIDTH,
 }
