@@ -98,6 +98,7 @@ IROHA = [
     chr(0xFF9D),
 ]
 DECIMAL_FULL_WIDTH = charset(0xFF10, 0xFF19)
+DECIMAL_HALF_WIDTH = DECIMAL
 
 
 class CharsetName(StrEnum):
@@ -111,6 +112,7 @@ class CharsetName(StrEnum):
     AIUEO = "aiueo"
     IROHA = "iroha"
     DECIMAL_FULL_WIDTH = "decimalFullWidth"
+    DECIMAL_HALF_WIDTH = "decimalHalfWidth"
 
 
 NAME_TO_CHARSET = {
@@ -124,4 +126,5 @@ NAME_TO_CHARSET = {
     CharsetName.IDEOGRAPH_DIGITAL: IDEOGRAPH_DIGITAL,
     CharsetName.IROHA: IROHA,
     CharsetName.DECIMAL_FULL_WIDTH: DECIMAL_FULL_WIDTH,
+    CharsetName.DECIMAL_HALF_WIDTH: DECIMAL_HALF_WIDTH,
 }

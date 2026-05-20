@@ -85,11 +85,15 @@ class Numeral:
         return cls._cyclic(ord, CharsetName.IROHA)
 
     @classmethod
-    def decimal_full_width(cls, ord: int):
+    def decimal_full_width(cls, ord: int) -> str:
         if ord < 0:
             raise ValueError(f"Given ord `{ord}` is less than 0")
         charset = cls._charset(ord, CharsetName.DECIMAL_FULL_WIDTH, False)
         return cls._decimal_compute(ord, charset)
+
+    @classmethod
+    def decimal_half_width(cls, ord: int) -> str:
+        return cls.decimal(ord)
 
     @classmethod
     def _letter(
