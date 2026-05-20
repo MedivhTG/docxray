@@ -327,16 +327,16 @@ class ParagraphH2D(How2Display[Paragraph]):
                 )
                 if not isinstance(style_val, NotFound):
                     return style_val
-            if self._para_style_numbering and not for_run:
-                style_val = self._from_style_inheritance(
-                    self._para_style_numbering, path, optional
-                )
-                if not isinstance(style_val, NotFound):
-                    return style_val
             if self._associated_level is not None and not for_run:
                 numbering_val = safe_get_prop(
                     self._associated_level.element, path, optional
                 )
                 if not isinstance(numbering_val, NotFound):
                     return numbering_val
+            if self._para_style_numbering and not for_run:
+                style_val = self._from_style_inheritance(
+                    self._para_style_numbering, path, optional
+                )
+                if not isinstance(style_val, NotFound):
+                    return style_val
         return NotFound(self, path)
