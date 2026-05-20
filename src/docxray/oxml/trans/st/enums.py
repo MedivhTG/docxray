@@ -272,3 +272,18 @@ class SE_Border(StrEnum):
 
 class SE_HexColorAuto(StrEnum):
     AUTO = "auto"
+
+
+class SE_JC(StrEnum):
+    START = "start"
+    CENTER = "center"
+    END = "end"
+    BOTH = "both"
+    MEDIUM_KASHIDA = "mediumKashida"
+    DISTRIBUTE = "distribute"
+    NUM_TAB = "numTab"
+    HIGH_KASHIDA = "highKashida"
+    LOW_KASHIDA = "lowKashida"
+    THAI_DISTRIBUTE = "thaiDistribute"
+    LEFT = "left"
+    RIGHT = "right"

@@ -61,6 +61,7 @@ class TestDocument:
                 f = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
+                align = p_fmt.alignment
                 no_hanging = p_fmt.no_hanging
                 left = (
                     p_fmt.margin_line_start.cm

@@ -51,8 +51,8 @@ class CT_Lvl(OxmlElement):
         return self.attr_optional(W.TPLC, ST_LongHexNumber)
 
     @cached_property
-    def tentaive(self) -> bool | None:
-        return self.attr_optional(W.TENTAIVE, ST_OnOff)
+    def tentative(self) -> bool | None:
+        return self.attr_optional(W.TENTATIVE, ST_OnOff)
 
     @cached_property
     def start(self) -> CT_DecimalNumber | None:

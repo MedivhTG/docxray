@@ -226,7 +226,7 @@ class W:
 
     LVL = qn("w:lvl")
     TPLC = qn("w:tplc")
-    TENTAIVE = qn("w:tentaive")
+    TENTATIVE = qn("w:tentative")
     START = qn("w:start")
     NUM_FMT = qn("w:numFmt")
     LVL_RESTART = qn("w:lvlRestart")

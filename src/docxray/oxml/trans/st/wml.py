@@ -17,6 +17,7 @@ from docxray.xsd.xsd import (
 )
 
 from .enums import (
+    SE_JC,
     SE_Border,
     SE_HexColorAuto,
     SE_Merge,
@@ -109,3 +110,8 @@ class ST_ShortHexNumber(XsdSimpleType):
 
 class ST_SignedTwipsMeasure(XsdSimpleType):
     SCHEMA = XsdUnion(XsdInteger, ST_UniversalMeasure)
+
+
+class ST_Jc(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_JC)}

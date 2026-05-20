@@ -4,6 +4,7 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
+    SE_JC,
     SE_Border,
     SE_OnOff1,
     SE_TblWidth,
@@ -17,6 +18,7 @@ from docxray.oxml.trans.st.wml import (
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
+    ST_Jc,
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
     ST_TblWidth,
@@ -126,7 +128,9 @@ class CT_FitText(OxmlElement):
 
 
 class CT_Jc(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_JC:
+        return self.attr_required(W.VAL, ST_Jc)
 
 
 class CT_Em(OxmlElement):

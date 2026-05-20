@@ -26,7 +26,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_JC, SE_StyleType
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
@@ -164,6 +164,13 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     # TODO: some properties can be deleted and used in methods after
     # --- General/specific properties
+
+    @cached_property
+    def alignment(self) -> SE_JC:
+        jc = self._display_val("jc", False)
+        if isinstance(jc, NotFound):
+            return SE_JC.LEFT
+        return jc
 
     @cached_property
     def word_wrap(self) -> bool:
