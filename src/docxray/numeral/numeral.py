@@ -12,8 +12,7 @@ from .charset import NAME_TO_CHARSET, CharsetName
 class Numeral:
     @classmethod
     def decimal(cls, ord: int) -> str:
-        if ord < 1:
-            raise ValueError(f"Given ord {ord} is less than 1")
+        cls._ord_validate(ord)
         return str(ord)
 
     @classmethod
@@ -34,15 +33,13 @@ class Numeral:
 
     @classmethod
     def ordinal(cls, ord: int, locale: str = "en-US") -> str:
-        if ord < 1:
-            raise ValueError(f"Given ord {ord} is less than 1")
+        cls._ord_validate(ord)
         engine = cls._rbnf_engine(locale)
         return engine.format_number(ord, ruleset_names=["digits-ordinal"]).text
 
     @classmethod
     def cardinal_text(cls, ord: int, locale: str = "en-US") -> str:
-        if ord < 1:
-            raise ValueError(f"Given ord {ord} is less than 1")
+        cls._ord_validate(ord)
         engine = cls._rbnf_engine(locale)
         return engine.format_number(
             ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
@@ -50,12 +47,16 @@ class Numeral:
 
     @classmethod
     def ordinal_text(cls, ord: int, locale: str = "en-US") -> str:
-        if ord < 1:
-            raise ValueError(f"Given ord {ord} is less than 1")
+        cls._ord_validate(ord)
         engine = cls._rbnf_engine(locale)
         return engine.format_number(
             ord, ruleset_names=["spellout-ordinal"]
         ).text
+
+    @classmethod
+    def hex(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        return format(ord, "X")
 
     @classmethod
     def _letter(
@@ -67,6 +68,7 @@ class Numeral:
         locale: str = "en-US",
     ) -> str:
         if cls._is_latin_based(locale):
+            cls._ord_validate(ord)
             case = (
                 "upper" if letter_name == CharsetName.UPPER_LETTER else "lower"
             )
@@ -133,15 +135,17 @@ class Numeral:
         return charset[pos]
 
     @classmethod
-    def _charset(
-        cls, ord_validate: int, charset_name: CharsetName
-    ) -> list[str]:
-        if ord_validate < 1:
-            raise ValueError(f"Given ord {ord_validate} is less than 1")
+    def _charset(cls, ord: int, charset_name: CharsetName) -> list[str]:
+        cls._ord_validate(ord)
         charset = NAME_TO_CHARSET.get(charset_name)
         if charset is None:
             raise ValueError(f"No charset for given name {charset_name}")
         return charset
+
+    @classmethod
+    def _ord_validate(cls, ord: int) -> None:
+        if ord < 1:
+            raise ValueError(f"Given ord `{ord}` is less than 1")
 
     @lru_cache
     @classmethod
