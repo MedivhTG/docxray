@@ -10,6 +10,14 @@ from .charset import NAME_TO_CHARSET, CharsetName
 
 
 class Numeral:
+    """Class for translating ordinal position (int) to symbol from
+    chosen word chracter set.
+
+    `NOTE`:
+        1) Some character sets are not fully supported or implemented for a while.
+        2) Bullet character set is missing because it depends on hierarchy level.
+    """
+
     @classmethod
     def decimal(cls, ord: int) -> str:
         cls._ord_validate(ord)
@@ -118,10 +126,6 @@ class Numeral:
         if len(decimal) == 1:
             return f"0{decimal}"
         return decimal
-
-    # No need (determined by hierarchy level)
-    # @classmethod
-    # def bullet(cls, ord: int) -> str: ...
 
     @classmethod
     def ganada(cls, ord: int) -> str:
