@@ -426,7 +426,7 @@ class Numeral:
 
     @classmethod
     def _repeated_compute(cls, ord: int, charset: list[str]) -> str:
-        repeat = (ord - 1) // len(charset)
+        repeat = (ord - 1) // len(charset) + 1
         pos = (ord - 1) % len(charset)
         return charset[pos] * repeat
 

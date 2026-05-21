@@ -439,8 +439,6 @@ class ParagraphH2D(How2Display[Paragraph]):
         num_id_ilvl = self._num_id_ilvl
         if num_id_ilvl is None:
             return None
-        if self._num_ilvl_ord is None:
-            return None
 
         _, ilvl = num_id_ilvl
         level = self._associated_level
@@ -526,6 +524,9 @@ class ParagraphH2D(How2Display[Paragraph]):
             if numFmt_elm.format is None:
                 return None
             return Numeral.custom(ord, numFmt_elm.format)
+        to_decimal = on_off(lvl.element.isLgl)
+        if to_decimal:
+            return Numeral.decimal(ord)
         if numFmt_elm.val in NUMERAL_WITH_LOCALE:
             # TODO: change for written locale
             return NUMERAL_RULES[numFmt_elm.val](ord, "en-US")  # type: ignore[operator]
