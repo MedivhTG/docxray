@@ -22,14 +22,20 @@ with open(_ICIDS_PATH_, "r", encoding="utf-8") as f:
 
 
 def script(locale: str) -> str:
-    key = tuple(locale.split("-"))
+    locale_split = locale.split("-")
+    if len(locale_split) == 2:
+        key = tuple(locale_split)
+    elif len(locale_split) == 1:
+        key = locale_split[0], ""
+    else:
+        raise ValueError("Wrong locale")
     inf = _ISO639_ICIDS_.get(key)  # type: ignore[arg-type]
     if inf is None:
-        raise ValueError(f"No such script for lang `{locale}`")
+        raise ValueError(f"No such script for locale `{locale}`")
     tag3, script = inf
     if script:
         return script
     script = _ISO639_DEFAULT_SCRIPT_.get(tag3)
     if script is None:
-        raise ValueError(f"No such script for lang `{locale}`")
+        raise ValueError(f"No such script for locale `{locale}`")
     return script
