@@ -28,7 +28,7 @@ def script(locale: str) -> str:
     elif len(locale_split) == 1:
         key = locale_split[0], ""
     else:
-        raise ValueError("Wrong locale")
+        raise ValueError(f"Wrong locale `{locale}`")
     inf = _ISO639_ICIDS_.get(key)  # type: ignore[arg-type]
     if inf is None:
         raise ValueError(f"No such script for locale `{locale}`")
