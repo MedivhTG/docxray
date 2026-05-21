@@ -165,6 +165,39 @@ class Numeral:
     def ideograph_zodiac_traditional(cls, ord: int) -> str:
         return cls._cyclic(ord, CharsetName.IDEOGRAPH_ZODIAC_TRADITIONAL)
 
+    # TODO: realize
+    @classmethod
+    def taiwanise_counting(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    # TODO: realize
+    @classmethod
+    def ideograph_legal_traditional(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    # TODO: realize
+    @classmethod
+    def taiwanese_counting_thousand(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def taiwanese_digital(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.TAIWANESE_DIGITAL)
+
+    @classmethod
+    def chinese_counting(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.CHINESE_COUNTING)
+
+    # TODO: realize
+    @classmethod
+    def chinese_legal_simplified(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    # TODO: realize
+    @classmethod
+    def chinese_counting_thousand(cls, ord: int) -> str:
+        raise NotImplementedError()
+
     @classmethod
     def _letter(
         cls,

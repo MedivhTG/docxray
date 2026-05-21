@@ -398,6 +398,31 @@ IDEOGRAPH_ZODIAC_TRADITIONAL = [
     chr(0x7678),
     chr(0x4EA5),
 ]
+TAIWANESE_DIGITAL = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+CHINESE_COUNTING = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+    chr(0x5341),
+]
 
 
 class CharsetName(StrEnum):
@@ -426,6 +451,8 @@ class CharsetName(StrEnum):
     IDEOGRAPH_TRADITIONAL = "ideographTraditional"
     IDEOGRAPH_ZODIAC = "ideographZodiac"
     IDEOGRAPH_ZODIAC_TRADITIONAL = "ideographZodiacTraditional"
+    TAIWANESE_DIGITAL = "taiwaneseDigital"
+    CHINESE_COUNTING = "chineseCounting"
 
 
 NAME_TO_CHARSET = {
@@ -454,4 +481,6 @@ NAME_TO_CHARSET = {
     CharsetName.IDEOGRAPH_TRADITIONAL: IDEOGRAPH_TRADITIONAL,
     CharsetName.IDEOGRAPH_ZODIAC: IDEOGRAPH_ZODIAC,
     CharsetName.IDEOGRAPH_ZODIAC_TRADITIONAL: IDEOGRAPH_ZODIAC_TRADITIONAL,
+    CharsetName.TAIWANESE_DIGITAL: TAIWANESE_DIGITAL,
+    CharsetName.CHINESE_COUNTING: CHINESE_COUNTING,
 }
