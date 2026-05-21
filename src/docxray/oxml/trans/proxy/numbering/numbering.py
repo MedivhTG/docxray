@@ -59,18 +59,6 @@ class Level(ElementProxy[CT_Lvl]):
     def ilvl(self) -> int:
         return self._element.ilvl
 
-    # TODO: refac this (all cases support)
-    def display_level_text(self, ord: int):
-        lvlText_elm = self.element.lvlText
-        # TODO: think here
-        if lvlText_elm is None:
-            return ""
-        pattern = lvlText_elm.val
-        if pattern is None:
-            has_null = on_off(lvlText_elm.null)
-            if has_null:
-                return "\0"
-
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
     @cached_property

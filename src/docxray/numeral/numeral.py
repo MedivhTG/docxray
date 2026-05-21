@@ -146,7 +146,7 @@ class Numeral:
         return cls._decimal_fallback(ord, CharsetName.DECIMAL_ENCLOSED_PAREN)
 
     @classmethod
-    def decimal_enclosed_circle_chines(cls, ord: int) -> str:
+    def decimal_enclosed_circle_chinese(cls, ord: int) -> str:
         return cls._decimal_fallback(
             ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE_CHINESE
         )

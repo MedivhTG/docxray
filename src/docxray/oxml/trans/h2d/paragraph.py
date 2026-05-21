@@ -3,6 +3,8 @@ from typing import Any, Literal
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
+from docxray.numeral.charset import DECIMAL
+from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.compute import (
     on_off,
@@ -26,15 +28,22 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.st.enums import SE_JC, SE_TEXT_ALIGNMENT, SE_StyleType
+from docxray.oxml.trans.st.enums import (
+    SE_JC,
+    SE_NUMBER_FORMAT,
+    SE_TEXT_ALIGNMENT,
+    SE_StyleType,
+)
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
+from .numeral_rules import NUMERAL_RULES
 
 type Direction = Literal["rtl", "ltr"]
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
+_ILVL_ALLOWED = set(DECIMAL[1:])
 
 
 class ParagraphH2D(How2Display[Paragraph]):
@@ -419,6 +428,80 @@ class ParagraphH2D(How2Display[Paragraph]):
             SE_StyleType.PARAGRAPH,
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
+
+    @cached_property
+    def _level_text(self):
+        num_id_ilvl = self._num_id_ilvl
+        if num_id_ilvl is None:
+            return None
+        if self._num_ilvl_ord is None:
+            return None
+
+        num_id, ilvl = num_id_ilvl
+        level = self._associated_level
+        if level is None:
+            return None
+        if isinstance(level, LevelOverride):
+            if level.lvl is None:
+                return None
+            lvl = level.lvl
+        else:
+            lvl = level
+        numFmt_elm = lvl.element.numFmt
+        if numFmt_elm is None:
+            return None
+        if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
+            return None
+
+        lvlText_elm = lvl.element.lvlText
+
+        if lvlText_elm is None:
+            return ""
+        pattern = lvlText_elm.val
+        if pattern is None:
+            has_null = on_off(lvlText_elm.null)
+            if has_null:
+                return "\0"
+            return ""
+
+        text = ""
+        percentage_followed = False
+        for ch in pattern:
+            if ch == "%":
+                percentage_followed = True
+                continue
+            if percentage_followed and ch in _ILVL_ALLOWED:
+                ilvl_found = int(ch)
+                if ilvl_found == ilvl:
+                    if self._level_char is not None:
+                        text += self._level_char
+                if ilvl_found < ilvl:
+                    # TODO: implement
+                    pass
+                # If more than current -> ignore
+            else:
+                text += ch
+            percentage_followed = False
+
+    @cached_property
+    def _level_char(self) -> str | None:
+        if self._num_ilvl_ord is None:
+            return None
+        if self._associated_level is None:
+            return None
+        level = self._associated_level
+        if isinstance(level, LevelOverride):
+            if level.lvl is None:
+                return None
+            lvl = level.lvl
+        else:
+            lvl = level
+        numFmt_elm = lvl.element.numFmt
+        if numFmt_elm is None:
+            return None
+        ord = self._num_ilvl_ord
+        numeral_method = NUMERAL_RULES[numFmt_elm.val]
+        return numeral_method(ord)
 
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
         para_path = self._prop_path(name, f"{self._path_base}.ind")
