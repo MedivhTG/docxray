@@ -429,6 +429,11 @@ class ParagraphH2D(How2Display[Paragraph]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
 
+    # TODO: implement (for _level_char too):
+    # 1) Realize numerals
+    # 2) Specific rules from lvl elms
+    # 3) Locale dependant numerals
+    # 4) Suffix if needed
     @cached_property
     def _level_text(self) -> str | None:
         num_id_ilvl = self._num_id_ilvl
@@ -466,7 +471,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 percentage_followed = True
                 continue
             if percentage_followed and ch in _ILVL_ALLOWED:
-                ilvl_found = int(ch)
+                ilvl_found = int(ch) - 1
                 if ilvl_found == ilvl:
                     if self._level_char is not None:
                         text += self._level_char

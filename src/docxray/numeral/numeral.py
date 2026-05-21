@@ -3,6 +3,7 @@ from functools import lru_cache
 from typing import Literal
 
 import homoglyphs
+import num2words
 from unicode_rbnf.engine import RbnfEngine
 
 from .bcp47 import script
@@ -42,24 +43,20 @@ class Numeral:
     @classmethod
     def ordinal(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
-        engine = cls._rbnf_engine(locale)
-        return engine.format_number(ord, ruleset_names=["digits-ordinal"]).text
+        code, _ = cls._locale_split(locale)
+        return num2words.num2words(ord, lang=code, to="ordinal_num")
 
     @classmethod
     def cardinal_text(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
-        engine = cls._rbnf_engine(locale)
-        return engine.format_number(
-            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
-        ).text
+        code, _ = cls._locale_split(locale)
+        return num2words.num2words(ord, lang=code, to="cardinal")
 
     @classmethod
     def ordinal_text(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
-        engine = cls._rbnf_engine(locale)
-        return engine.format_number(
-            ord, ruleset_names=["spellout-ordinal"]
-        ).text
+        code, _ = cls._locale_split(locale)
+        return num2words.num2words(ord, lang=code, to="ordinal")
 
     @classmethod
     def hex(cls, ord: int) -> str:
@@ -456,11 +453,21 @@ class Numeral:
             raise ValueError(f"Given ord `{ord}` is less than 1")
 
     @classmethod
+    def _locale_split(cls, locale: str) -> tuple[str, str]:
+        locale_split = locale.split("-")
+        if len(locale_split) == 2:
+            return locale_split[0], locale_split[1]
+        elif len(locale_split) == 1:
+            return locale_split[0], ""
+        else:
+            raise ValueError(f"Wrong locale `{locale}`")
+
+    @classmethod
     @lru_cache
     def _alphabet(
         cls, locale: str = "en-US", case: Literal["lower", "upper"] = "upper"
     ) -> list[str]:
-        code, _ = locale.split("-")
+        code, _ = cls._locale_split(locale)
         alphabet = homoglyphs.Languages.get_alphabet([code])
         if case == "upper":
             return sorted(
@@ -473,13 +480,7 @@ class Numeral:
     @classmethod
     @lru_cache
     def _rbnf_engine(cls, locale: str = "en-US") -> RbnfEngine:
-        locale_split = locale.split("-")
-        if len(locale_split) == 2:
-            code, _ = locale_split
-        elif len(locale_split) == 1:
-            code = locale_split[0]
-        else:
-            raise ValueError("No locale set")
+        code, _ = cls._locale_split(locale)
         return RbnfEngine.for_language(code)
 
     @classmethod
