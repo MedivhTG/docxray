@@ -148,6 +148,24 @@ class Numeral:
         )
 
     @classmethod
+    def ideograph_enclosed_circle(cls, ord: int) -> str:
+        return cls._decimal_fallback(
+            ord, CharsetName.IDEOGRAPH_ENCLOSED_CIRCLE
+        )
+
+    @classmethod
+    def ideograph_traditional(cls, ord: int) -> str:
+        return cls._decimal_fallback(ord, CharsetName.IDEOGRAPH_TRADITIONAL)
+
+    @classmethod
+    def ideograph_zodiac(cls, ord: int) -> str:
+        return cls._decimal_fallback(ord, CharsetName.IDEOGRAPH_ZODIAC)
+
+    @classmethod
+    def ideograph_zodiac_traditional(cls, ord: int) -> str:
+        return cls._cyclic(ord, CharsetName.IDEOGRAPH_ZODIAC_TRADITIONAL)
+
+    @classmethod
     def _letter(
         cls,
         ord: int,
