@@ -99,6 +99,19 @@ IROHA = [
 ]
 DECIMAL_FULL_WIDTH = charset(0xFF10, 0xFF19)
 DECIMAL_HALF_WIDTH = DECIMAL
+JAPANESE_DIGITAL_TEN_THOUSAND = [
+    chr(0x3007),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+DECIMAL_ENCLOSED_CIRCLE = charset(0x2460, 0x2473)
 
 
 class CharsetName(StrEnum):
@@ -113,6 +126,8 @@ class CharsetName(StrEnum):
     IROHA = "iroha"
     DECIMAL_FULL_WIDTH = "decimalFullWidth"
     DECIMAL_HALF_WIDTH = "decimalHalfWidth"
+    JAPANESE_DIGITAL_TEN_THOUSAND = "japaneseDigitalTenThousand"
+    DECIMAL_ENCLOSED_CIRCLE = "decimalEnclosedCircle"
 
 
 NAME_TO_CHARSET = {
@@ -127,4 +142,6 @@ NAME_TO_CHARSET = {
     CharsetName.IROHA: IROHA,
     CharsetName.DECIMAL_FULL_WIDTH: DECIMAL_FULL_WIDTH,
     CharsetName.DECIMAL_HALF_WIDTH: DECIMAL_HALF_WIDTH,
+    CharsetName.JAPANESE_DIGITAL_TEN_THOUSAND: JAPANESE_DIGITAL_TEN_THOUSAND,
+    CharsetName.DECIMAL_ENCLOSED_CIRCLE: DECIMAL_ENCLOSED_CIRCLE,
 }

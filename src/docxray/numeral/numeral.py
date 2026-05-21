@@ -64,12 +64,7 @@ class Numeral:
 
     @classmethod
     def ideograph_digital(cls, ord: int) -> str:
-        if ord < 0:
-            raise ValueError(f"Given ord `{ord}` is less than 0")
-        charset = cls._charset(ord, CharsetName.IDEOGRAPH_DIGITAL, False)
-        if ord == 0:
-            return charset[ord]
-        return cls._decimal_compute(ord, charset)
+        return cls._digital(ord, CharsetName.IDEOGRAPH_DIGITAL)
 
     # TODO: realize
     @classmethod
@@ -94,6 +89,24 @@ class Numeral:
     @classmethod
     def decimal_half_width(cls, ord: int) -> str:
         return cls.decimal(ord)
+
+    # TODO: realize
+    @classmethod
+    def japanese_legal(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def japanese_digital_ten_thousand(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.JAPANESE_DIGITAL_TEN_THOUSAND)
+
+    @classmethod
+    def decimal_enclosed_circle(cls, ord: int) -> str:
+        charset = cls._charset(ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE)
+        overhead = (ord - 1) // len(charset)
+        if overhead > 0:
+            return cls.decimal(ord)
+        pos = ord - 1
+        return charset[pos]
 
     @classmethod
     def _letter(
@@ -172,6 +185,15 @@ class Numeral:
     def _cyclic_compute(cls, ord: int, charset: list[str]) -> str:
         pos = (ord - 1) % len(charset)
         return charset[pos]
+
+    @classmethod
+    def _digital(cls, ord: int, charset_name: CharsetName) -> str:
+        if ord < 0:
+            raise ValueError(f"Given ord `{ord}` is less than 0")
+        charset = cls._charset(ord, charset_name, False)
+        if ord == 0:
+            return charset[ord]
+        return cls._decimal_compute(ord, charset)
 
     @classmethod
     def _decimal_compute(cls, ord: int, charset: list[str]) -> str:
