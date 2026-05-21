@@ -214,6 +214,38 @@ IROHA_FULL_WIDTH = [
     chr(0x30B9),
     chr(0x30F3),
 ]
+GANADA = [
+    chr(0xAC00),
+    chr(0xB098),
+    chr(0xB2E4),
+    chr(0xB77C),
+    chr(0xB9C8),
+    chr(0xBC14),
+    chr(0xC0AC),
+    chr(0xC544),
+    chr(0xC790),
+    chr(0xCC28),
+    chr(0xCE74),
+    chr(0xD0C0),
+    chr(0xD30C),
+    chr(0xD558),
+]
+CHOSUNG = [
+    chr(0x3131),
+    chr(0x3134),
+    chr(0x3137),
+    chr(0x3139),
+    chr(0x3141),
+    chr(0x3142),
+    chr(0x3145),
+    chr(0x3147),
+    chr(0x3148),
+    chr(0x314A),
+    chr(0x314B),
+    chr(0x314C),
+    chr(0x314D),
+    chr(0x314E),
+]
 
 
 class CharsetName(StrEnum):
@@ -233,6 +265,8 @@ class CharsetName(StrEnum):
     DECIMAL_FULL_WIDTH_2 = "decimalFullWidth2"
     AIUEO_FULL_WIDTH = "aiueoFullWidth"
     IROHA_FULL_WIDTH = "irohaFullWidth"
+    GANADA = "ganada"
+    CHOSUNG = "chosung"
 
 
 NAME_TO_CHARSET = {
@@ -252,4 +286,6 @@ NAME_TO_CHARSET = {
     CharsetName.DECIMAL_FULL_WIDTH_2: DECIMAL_FULL_WIDTH_2,
     CharsetName.AIUEO_FULL_WIDTH: AIUEO_FULL_WIDTH,
     CharsetName.IROHA_FULL_WIDTH: IROHA_FULL_WIDTH,
+    CharsetName.GANADA: GANADA,
+    CharsetName.CHOSUNG: CHOSUNG,
 }

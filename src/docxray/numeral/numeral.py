@@ -119,6 +119,25 @@ class Numeral:
         return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
 
     @classmethod
+    def decimal_zero(cls, ord: int) -> str:
+        decimal = cls.decimal(ord)
+        if len(decimal) == 1:
+            return f"0{decimal}"
+        return decimal
+
+    # No need (determined by hierarchy level)
+    # @classmethod
+    # def bullet(cls, ord: int) -> str: ...
+
+    @classmethod
+    def ganada(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.GANADA)
+
+    @classmethod
+    def chosung(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.CHOSUNG)
+
+    @classmethod
     def _letter(
         cls,
         ord: int,
