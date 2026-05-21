@@ -12,6 +12,7 @@ from docxray.oxml.trans.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
+from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import ElementProxy
 from docxray.oxml.trans.proxy.styles.style import (
     NumberingStyle,
@@ -57,6 +58,18 @@ class Level(ElementProxy[CT_Lvl]):
     @cached_property
     def ilvl(self) -> int:
         return self._element.ilvl
+
+    # TODO: refac this (all cases support)
+    def display_level_text(self, ord: int):
+        lvlText_elm = self.element.lvlText
+        # TODO: think here
+        if lvlText_elm is None:
+            return ""
+        pattern = lvlText_elm.val
+        if pattern is None:
+            has_null = on_off(lvlText_elm.null)
+            if has_null:
+                return "\0"
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):

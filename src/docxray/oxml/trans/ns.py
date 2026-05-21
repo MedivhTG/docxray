@@ -253,5 +253,6 @@ class W:
 
     TYPE = qn("w:type")
     VAL = qn("w:val")
+    NULL = qn("w:null")
     ID = qn("w:id")
     ORIGINAL = qn("w:original")
