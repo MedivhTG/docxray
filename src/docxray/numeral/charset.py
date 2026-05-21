@@ -214,6 +214,8 @@ IROHA_FULL_WIDTH = [
     chr(0x30B9),
     chr(0x30F3),
 ]
+# TODO: temporary - need research
+BULLET = [chr(0x2022), chr(0x25E6), chr(0x25AA)]
 GANADA = [
     chr(0xAC00),
     chr(0xB098),
@@ -592,6 +594,7 @@ class CharsetName(StrEnum):
     DECIMAL_FULL_WIDTH_2 = "decimalFullWidth2"
     AIUEO_FULL_WIDTH = "aiueoFullWidth"
     IROHA_FULL_WIDTH = "irohaFullWidth"
+    BULLET = "bullet"
     GANADA = "ganada"
     CHOSUNG = "chosung"
     DECIMAL_ENCLOSED_FULLSTOP = "decimalEnclosedFullstop"
@@ -634,6 +637,7 @@ NAME_TO_CHARSET = {
     CharsetName.DECIMAL_FULL_WIDTH_2: DECIMAL_FULL_WIDTH_2,
     CharsetName.AIUEO_FULL_WIDTH: AIUEO_FULL_WIDTH,
     CharsetName.IROHA_FULL_WIDTH: IROHA_FULL_WIDTH,
+    CharsetName.BULLET: BULLET,
     CharsetName.GANADA: GANADA,
     CharsetName.CHOSUNG: CHOSUNG,
     CharsetName.DECIMAL_ENCLOSED_FULLSTOP: DECIMAL_ENCLOSED_FULLSTOP,

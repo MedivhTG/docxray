@@ -16,7 +16,7 @@ class Numeral:
 
     `NOTE`:
         1) Some character sets are not fully supported or implemented for a while.
-        2) Bullet character set is missing because it depends on hierarchy level.
+        2) Caution with bullet (it's default display)
     """
 
     @classmethod
@@ -116,6 +116,10 @@ class Numeral:
     @classmethod
     def iroha_full_width(cls, ord: int) -> str:
         return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
+
+    @classmethod
+    def bullet(cls, ilvl: int) -> str:
+        return cls._cyclic(ilvl + 1, CharsetName.BULLET)
 
     @classmethod
     def decimal_zero(cls, ord: int) -> str:

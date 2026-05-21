@@ -499,6 +499,8 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def _level_char(self) -> str | None:
+        if self._num_id_ilvl is None:
+            return None
         if self._num_ilvl_ord is None:
             return None
         if self._associated_level is None:
@@ -517,14 +519,9 @@ class ParagraphH2D(How2Display[Paragraph]):
             return None
         ord = self._num_ilvl_ord
         if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
-            lvlText_elm = lvl.element.lvlText
-            if lvlText_elm is None:
-                return None
-            if lvlText_elm.val is None:
-                if on_off(lvlText_elm.null):
-                    return "\0"
-            else:
-                return lvlText_elm.val
+            # TODO: plug for a while (or not)
+            _, ilvl = self._num_id_ilvl
+            return Numeral.bullet(ilvl)
         if numFmt_elm.val == SE_NUMBER_FORMAT.CUSTOM:
             if numFmt_elm.format is None:
                 return None
