@@ -46,6 +46,7 @@ type _DirectCase = Literal[
 _ILVL_ALLOWED = set(DECIMAL[1:])
 
 
+# TODO: need to think about numbering refac
 class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def cell(self) -> Cell | None:
