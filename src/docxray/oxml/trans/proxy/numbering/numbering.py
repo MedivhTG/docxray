@@ -12,7 +12,6 @@ from docxray.oxml.trans.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import ElementProxy
 from docxray.oxml.trans.proxy.styles.style import (
     NumberingStyle,

@@ -1,3 +1,4 @@
+# docxray stuff
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.st.enums import SE_NUMBER_FORMAT
 
@@ -93,3 +94,4 @@ NUMERAL_WITH_LOCALE = {
     F.ORDINAL_TEXT,
     F.DOLLAR_TEXT,
 }
+NUMERAL_SPECIFIC = {F.NONE, F.BULLET, F.CUSTOM}

@@ -37,7 +37,7 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
-from .numeral_rules import NUMERAL_RULES
+from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
 
 type Direction = Literal["rtl", "ltr"]
 type _DirectCase = Literal[
@@ -430,14 +430,14 @@ class ParagraphH2D(How2Display[Paragraph]):
         )
 
     @cached_property
-    def _level_text(self):
+    def _level_text(self) -> str | None:
         num_id_ilvl = self._num_id_ilvl
         if num_id_ilvl is None:
             return None
         if self._num_ilvl_ord is None:
             return None
 
-        num_id, ilvl = num_id_ilvl
+        _, ilvl = num_id_ilvl
         level = self._associated_level
         if level is None:
             return None
@@ -450,19 +450,14 @@ class ParagraphH2D(How2Display[Paragraph]):
         numFmt_elm = lvl.element.numFmt
         if numFmt_elm is None:
             return None
-        if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
-            return None
-
+        if numFmt_elm.val in NUMERAL_SPECIFIC:
+            return self._level_char
         lvlText_elm = lvl.element.lvlText
-
         if lvlText_elm is None:
-            return ""
+            return None
         pattern = lvlText_elm.val
         if pattern is None:
-            has_null = on_off(lvlText_elm.null)
-            if has_null:
-                return "\0"
-            return ""
+            return None
 
         text = ""
         percentage_followed = False
@@ -476,12 +471,25 @@ class ParagraphH2D(How2Display[Paragraph]):
                     if self._level_char is not None:
                         text += self._level_char
                 if ilvl_found < ilvl:
-                    # TODO: implement
-                    pass
+                    prev_para = self._prev_num_para_full_search
+                    while prev_para:
+                        prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
+                        if prev_num_id_ilvl is None:
+                            prev_para = (
+                                prev_para.h2d._prev_num_para_full_search
+                            )
+                            continue
+                        _, prev_ilvl = prev_num_id_ilvl
+                        if prev_ilvl == ilvl_found:
+                            found_lvl_ch = prev_para.h2d._level_char
+                            if found_lvl_ch is not None:
+                                text += found_lvl_ch
+                        prev_para = prev_para.h2d._prev_num_para_full_search
                 # If more than current -> ignore
             else:
                 text += ch
             percentage_followed = False
+        return text
 
     @cached_property
     def _level_char(self) -> str | None:
@@ -499,9 +507,26 @@ class ParagraphH2D(How2Display[Paragraph]):
         numFmt_elm = lvl.element.numFmt
         if numFmt_elm is None:
             return None
+        if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
+            return None
         ord = self._num_ilvl_ord
-        numeral_method = NUMERAL_RULES[numFmt_elm.val]
-        return numeral_method(ord)
+        if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
+            lvlText_elm = lvl.element.lvlText
+            if lvlText_elm is None:
+                return None
+            if lvlText_elm.val is None:
+                if on_off(lvlText_elm.null):
+                    return "\0"
+            else:
+                return lvlText_elm.val
+        if numFmt_elm.val == SE_NUMBER_FORMAT.CUSTOM:
+            if numFmt_elm.format is None:
+                return None
+            return Numeral.custom(ord, numFmt_elm.format)
+        if numFmt_elm.val in NUMERAL_WITH_LOCALE:
+            # TODO: change for written locale
+            return NUMERAL_RULES[numFmt_elm.val](ord, "en-US")  # type: ignore[operator]
+        return NUMERAL_RULES[numFmt_elm.val](ord)  # type: ignore[operator]
 
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
         para_path = self._prop_path(name, f"{self._path_base}.ind")
