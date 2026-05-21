@@ -541,6 +541,7 @@ HINDI_CONSONANTS = [
     chr(0x0905) + chr(0x0903),
 ]
 HINDI_NUMBERS = [
+    chr(0x0966),
     chr(0x0967),
     chr(0x0968),
     chr(0x0969),
@@ -550,6 +551,27 @@ HINDI_NUMBERS = [
     chr(0x096D),
     chr(0x096E),
     chr(0x096F),
+]
+THAI_LETTERS = [
+    chr(0x0E01),
+    chr(0x0E02),
+    chr(0x0E04),
+    *charset(0x0E07, 0x0E23),
+    chr(0x0E23),
+    chr(0x0E25),
+    *charset(0x0E27, 0x0E2E),
+]
+THAI_NUMBERS = [
+    chr(0x0E50),
+    chr(0x0E51),
+    chr(0x0E52),
+    chr(0x0E53),
+    chr(0x0E54),
+    chr(0x0E55),
+    chr(0x0E56),
+    chr(0x0E57),
+    chr(0x0E58),
+    chr(0x0E59),
 ]
 
 
@@ -591,6 +613,8 @@ class CharsetName(StrEnum):
     HINDI_VOWELS = "hindiVowels"
     HINDI_CONSONANTS = "hindiConsonants"
     HINDI_NUMBERS = "hindiNumbers"
+    THAI_LETTERS = "thaiLetters"
+    THAI_NUMBERS = "thaiNumbers"
 
 
 NAME_TO_CHARSET = {
@@ -631,4 +655,6 @@ NAME_TO_CHARSET = {
     CharsetName.HINDI_VOWELS: HINDI_VOWELS,
     CharsetName.HINDI_CONSONANTS: HINDI_CONSONANTS,
     CharsetName.HINDI_NUMBERS: HINDI_NUMBERS,
+    CharsetName.THAI_LETTERS: THAI_LETTERS,
+    CharsetName.THAI_NUMBERS: THAI_NUMBERS,
 }

@@ -277,7 +277,7 @@ class Numeral:
 
     @classmethod
     def hindi_numbers(cls, ord: int) -> str:
-        return cls._decimal(ord, CharsetName.HINDI_NUMBERS)
+        return cls._digital(ord, CharsetName.HINDI_NUMBERS)
 
     @classmethod
     def hindi_counting(cls, ord: int) -> str:
@@ -286,6 +286,46 @@ class Numeral:
         return engine.format_number(
             ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
         ).text
+
+    @classmethod
+    def thai_letters(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.THAI_LETTERS)
+
+    @classmethod
+    def thai_numbers(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.THAI_NUMBERS)
+
+    @classmethod
+    def thai_counting(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        engine = cls._rbnf_engine("th-TH")
+        return engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+
+    @classmethod
+    def baht_text(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        engine = cls._rbnf_engine("th-TH")
+        thai_number = engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+        return f"{thai_number}บาทถ้วน"
+
+    @classmethod
+    def dollar_text(cls, ord: int, locale: str = "en-US") -> str:
+        cls._ord_validate(ord)
+        engine = cls._rbnf_engine(locale)
+        cardinal = engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+        return f"{cardinal} and 00/100"
+
+    # TODO: i'm not sure what we must use, research later
+    @classmethod
+    def custom(cls, ord: int, pattern: str) -> str:
+        cls._ord_validate(ord)
+        return format(ord, pattern)
 
     @classmethod
     def _letter(
