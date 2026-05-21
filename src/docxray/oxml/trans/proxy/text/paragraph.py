@@ -38,6 +38,10 @@ class Paragraph(StoryChild[CT_P]):
         return self.h2d._is_list_item
 
     @cached_property
+    def list_item_text(self) -> str | None:
+        return self.h2d._level_text
+
+    @cached_property
     def next_list_item(self) -> Paragraph | None:
         """Get next paragraph in the same list.
 

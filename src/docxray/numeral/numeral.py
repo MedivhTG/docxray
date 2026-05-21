@@ -455,8 +455,8 @@ class Numeral:
         if ord < 1:
             raise ValueError(f"Given ord `{ord}` is less than 1")
 
-    @lru_cache
     @classmethod
+    @lru_cache
     def _alphabet(
         cls, locale: str = "en-US", case: Literal["lower", "upper"] = "upper"
     ) -> list[str]:
@@ -470,8 +470,8 @@ class Numeral:
             [chr for chr in alphabet if unicodedata.category(chr) == "Ll"]
         )
 
-    @lru_cache
     @classmethod
+    @lru_cache
     def _rbnf_engine(cls, locale: str = "en-US") -> RbnfEngine:
         locale_split = locale.split("-")
         if len(locale_split) == 2:
@@ -482,7 +482,7 @@ class Numeral:
             raise ValueError("No locale set")
         return RbnfEngine.for_language(code)
 
-    @lru_cache
     @classmethod
+    @lru_cache
     def _is_latin_based(cls, locale: str = "en-US") -> bool:
         return script(locale) == "Latn"

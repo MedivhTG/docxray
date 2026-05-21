@@ -71,6 +71,7 @@ class TestDocument:
                 )
                 lvl = p_fmt.header_level
                 key = p_fmt._num_id_ilvl
+                lvl_txt = p_or_t.list_item_text
                 para_Style_num = p_fmt._para_style_numbering
                 pPr = p_or_t.element.pPr
                 prev_num_para = p_or_t.prev_list_item
