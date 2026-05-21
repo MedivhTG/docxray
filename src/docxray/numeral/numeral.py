@@ -268,6 +268,26 @@ class Numeral:
         return cls._repeated(ord, CharsetName.ARABIC_ABJAD)
 
     @classmethod
+    def hindi_vowels(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.HINDI_VOWELS)
+
+    @classmethod
+    def hindi_consonants(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.HINDI_CONSONANTS)
+
+    @classmethod
+    def hindi_numbers(cls, ord: int) -> str:
+        return cls._decimal(ord, CharsetName.HINDI_NUMBERS)
+
+    @classmethod
+    def hindi_counting(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        engine = cls._rbnf_engine("hi-IN")
+        return engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+
+    @classmethod
     def _letter(
         cls,
         ord: int,
@@ -333,6 +353,11 @@ class Numeral:
     def _cyclic(cls, ord: int, charset_name: CharsetName) -> str:
         charset = cls._charset(ord, charset_name)
         return cls._cyclic_compute(ord, charset)
+
+    @classmethod
+    def _decimal(cls, ord: int, charset_name: CharsetName) -> str:
+        charset = cls._charset(ord, charset_name)
+        return cls._decimal_compute(ord, charset)
 
     @classmethod
     def _digital(cls, ord: int, charset_name: CharsetName) -> str:
@@ -409,7 +434,13 @@ class Numeral:
     @lru_cache
     @classmethod
     def _rbnf_engine(cls, locale: str = "en-US") -> RbnfEngine:
-        code, _ = locale.split("-")
+        locale_split = locale.split("-")
+        if len(locale_split) == 2:
+            code, _ = locale_split
+        elif len(locale_split) == 1:
+            code = locale_split[0]
+        else:
+            raise ValueError("No locale set")
         return RbnfEngine.for_language(code)
 
     @lru_cache

@@ -534,6 +534,23 @@ ARABIC_ABJAD = [
     chr(0x063A),
     chr(0x0638),
 ]
+HINDI_VOWELS = charset(0x0915, 0x0939)
+HINDI_CONSONANTS = [
+    *charset(0x0905, 0x0914),
+    chr(0x0905) + chr(0x0902),
+    chr(0x0905) + chr(0x0903),
+]
+HINDI_NUMBERS = [
+    chr(0x0967),
+    chr(0x0968),
+    chr(0x0969),
+    chr(0x096A),
+    chr(0x096B),
+    chr(0x096C),
+    chr(0x096D),
+    chr(0x096E),
+    chr(0x096F),
+]
 
 
 class CharsetName(StrEnum):
@@ -571,6 +588,9 @@ class CharsetName(StrEnum):
     HEBREW_2 = "hebrew2"
     ARABIC_ALPHA = "arabicAlpha"
     ARABIC_ABJAD = "arabicAbjad"
+    HINDI_VOWELS = "hindiVowels"
+    HINDI_CONSONANTS = "hindiConsonants"
+    HINDI_NUMBERS = "hindiNumbers"
 
 
 NAME_TO_CHARSET = {
@@ -608,4 +628,7 @@ NAME_TO_CHARSET = {
     CharsetName.HEBREW_2: HEBREW_2,
     CharsetName.ARABIC_ALPHA: ARABIC_ALPHA,
     CharsetName.ARABIC_ABJAD: ARABIC_ABJAD,
+    CharsetName.HINDI_VOWELS: HINDI_VOWELS,
+    CharsetName.HINDI_CONSONANTS: HINDI_CONSONANTS,
+    CharsetName.HINDI_NUMBERS: HINDI_NUMBERS,
 }
