@@ -423,6 +423,48 @@ CHINESE_COUNTING = [
     chr(0x4E5D),
     chr(0x5341),
 ]
+KOREAN_DIGITAL = [
+    chr(0xC601),
+    chr(0xC77C),
+    chr(0xC774),
+    chr(0xC0BC),
+    chr(0xC0AC),
+    chr(0xC624),
+    chr(0xC721),
+    chr(0xCE60),
+    chr(0xD314),
+    chr(0xAD6C),
+]
+KOREAN_DIGITAL_2 = [
+    chr(0x96F6),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+RUSSIAN_LOWER = [
+    *charset(0x0430, 0x0438),
+    *charset(0x043A, 0x043F),
+    *charset(0x0440, 0x0449),
+    chr(0x044B),
+    chr(0x044D),
+    chr(0x044E),
+    chr(0x044F),
+]
+RUSSIAN_UPPER = [
+    *charset(0x0410, 0x0418),
+    *charset(0x041A, 0x041F),
+    *charset(0x0420, 0x0429),
+    chr(0x042B),
+    chr(0x042D),
+    chr(0x042E),
+    chr(0x042F),
+]
 
 
 class CharsetName(StrEnum):
@@ -453,6 +495,10 @@ class CharsetName(StrEnum):
     IDEOGRAPH_ZODIAC_TRADITIONAL = "ideographZodiacTraditional"
     TAIWANESE_DIGITAL = "taiwaneseDigital"
     CHINESE_COUNTING = "chineseCounting"
+    KOREAN_DIGITAL = "koreanDigital"
+    KOREAN_DIGITAL_2 = "koreanDigital2"
+    RUSSIAN_LOWER = "russianLower"
+    RUSSIAN_UPPER = "russianUpper"
 
 
 NAME_TO_CHARSET = {
@@ -483,4 +529,8 @@ NAME_TO_CHARSET = {
     CharsetName.IDEOGRAPH_ZODIAC_TRADITIONAL: IDEOGRAPH_ZODIAC_TRADITIONAL,
     CharsetName.TAIWANESE_DIGITAL: TAIWANESE_DIGITAL,
     CharsetName.CHINESE_COUNTING: CHINESE_COUNTING,
+    CharsetName.KOREAN_DIGITAL: KOREAN_DIGITAL,
+    CharsetName.KOREAN_DIGITAL_2: KOREAN_DIGITAL_2,
+    CharsetName.RUSSIAN_LOWER: RUSSIAN_LOWER,
+    CharsetName.RUSSIAN_UPPER: RUSSIAN_UPPER,
 }

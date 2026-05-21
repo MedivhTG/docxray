@@ -199,6 +199,40 @@ class Numeral:
         raise NotImplementedError()
 
     @classmethod
+    def korean_digital(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.KOREAN_DIGITAL)
+
+    # TODO: realize
+    @classmethod
+    def korean_counting(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    # TODO: realize
+    @classmethod
+    def korean_legal(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def korean_digital_2(cls, ord: int) -> str:
+        return cls._digital(ord, CharsetName.KOREAN_DIGITAL_2)
+
+    @classmethod
+    def vietnamese_counting(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        engine = cls._rbnf_engine("vi-VN")
+        return engine.format_number(
+            ord, ruleset_names=["spellout-numbering", "spellout-cardinal"]
+        ).text
+
+    @classmethod
+    def russian_lower(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.RUSSIAN_LOWER)
+
+    @classmethod
+    def russian_upper(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.RUSSIAN_UPPER)
+
+    @classmethod
     def _letter(
         cls,
         ord: int,
