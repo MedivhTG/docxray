@@ -233,6 +233,41 @@ class Numeral:
         return cls._repeated(ord, CharsetName.RUSSIAN_UPPER)
 
     @classmethod
+    def none(cls) -> str:
+        return ""
+
+    @classmethod
+    def number_in_dash(cls, ord: int) -> str:
+        decimal = cls.decimal(ord)
+        return f"-{decimal}-"
+
+    # TODO: realize
+    @classmethod
+    def hebrew1(cls, ord: int) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def hebrew2(cls, ord: int) -> str:
+        cls._ord_validate(ord)
+        charset = cls._charset(ord, CharsetName.HEBREW_2)
+        if ord <= len(charset):
+            return charset[ord - 1]
+        remainder = ord
+        repeat = 0
+        while remainder > len(charset):
+            remainder -= len(charset)
+            repeat += 1
+        return charset[remainder - 1] + charset[-1] * repeat
+
+    @classmethod
+    def arabic_alpha(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.ARABIC_ALPHA)
+
+    @classmethod
+    def arabic_abjad(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.ARABIC_ABJAD)
+
+    @classmethod
     def _letter(
         cls,
         ord: int,

@@ -465,6 +465,75 @@ RUSSIAN_UPPER = [
     chr(0x042E),
     chr(0x042F),
 ]
+HEBREW_2 = [
+    *charset(0x05D0, 0x05D9),
+    chr(0x05DB),
+    chr(0x05DC),
+    chr(0x05DE),
+    *charset(0x05E0, 0x05E2),
+    chr(0x05E4),
+    *charset(0x05E6, 0x05EA),
+]
+ARABIC_ALPHA = [
+    chr(0x0623),
+    chr(0x0628),
+    chr(0x062A),
+    chr(0x062B),
+    chr(0x062C),
+    chr(0x062D),
+    chr(0x062E),
+    chr(0x062F),
+    chr(0x0630),
+    chr(0x0631),
+    chr(0x0632),
+    chr(0x0633),
+    chr(0x0634),
+    chr(0x0635),
+    chr(0x0636),
+    chr(0x0637),
+    chr(0x0638),
+    chr(0x0639),
+    chr(0x063A),
+    chr(0x0641),
+    chr(0x0642),
+    chr(0x0643),
+    chr(0x0644),
+    chr(0x0645),
+    chr(0x0646),
+    chr(0x0647),
+    chr(0x0648),
+    chr(0x064A),
+]
+ARABIC_ABJAD = [
+    chr(0x0623),
+    chr(0x0628),
+    chr(0x062C),
+    chr(0x062F),
+    chr(0x0647),
+    chr(0x0648),
+    chr(0x0632),
+    chr(0x062D),
+    chr(0x0637),
+    chr(0x064A),
+    chr(0x0643),
+    chr(0x0644),
+    chr(0x0645),
+    chr(0x0646),
+    chr(0x0633),
+    chr(0x0639),
+    chr(0x0641),
+    chr(0x0635),
+    chr(0x0642),
+    chr(0x0631),
+    chr(0x0634),
+    chr(0x062A),
+    chr(0x062B),
+    chr(0x062E),
+    chr(0x0630),
+    chr(0x0636),
+    chr(0x063A),
+    chr(0x0638),
+]
 
 
 class CharsetName(StrEnum):
@@ -499,6 +568,9 @@ class CharsetName(StrEnum):
     KOREAN_DIGITAL_2 = "koreanDigital2"
     RUSSIAN_LOWER = "russianLower"
     RUSSIAN_UPPER = "russianUpper"
+    HEBREW_2 = "hebrew2"
+    ARABIC_ALPHA = "arabicAlpha"
+    ARABIC_ABJAD = "arabicAbjad"
 
 
 NAME_TO_CHARSET = {
@@ -533,4 +605,7 @@ NAME_TO_CHARSET = {
     CharsetName.KOREAN_DIGITAL_2: KOREAN_DIGITAL_2,
     CharsetName.RUSSIAN_LOWER: RUSSIAN_LOWER,
     CharsetName.RUSSIAN_UPPER: RUSSIAN_UPPER,
+    CharsetName.HEBREW_2: HEBREW_2,
+    CharsetName.ARABIC_ALPHA: ARABIC_ALPHA,
+    CharsetName.ARABIC_ABJAD: ARABIC_ABJAD,
 }
