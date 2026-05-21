@@ -54,6 +54,10 @@ class Level(ElementProxy[CT_Lvl]):
     def parent(self) -> AbstractNum | LevelOverride:
         return cast("AbstractNum | LevelOverride", self._parent)
 
+    @cached_property
+    def ilvl(self) -> int:
+        return self._element.ilvl
+
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
     @cached_property

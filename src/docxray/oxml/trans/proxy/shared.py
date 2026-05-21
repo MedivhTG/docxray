@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Generic, Self
 
 # docxray stuff
@@ -45,6 +46,24 @@ class StoryChild(Generic[ELM_T]):
     def part(self) -> StoryPart:
         """The package part containing this object."""
         return self._parent.part
+
+    @cached_property
+    def prev_sibling(self) -> Self | None:
+        sibling_list = self._element.xpath(
+            f"preceding-sibling::{self._element.xml_tag_self}[1]"
+        )
+        if len(sibling_list) == 0:
+            return None
+        return self.__class__(sibling_list[0], self._parent)
+
+    @cached_property
+    def next_sibling(self) -> Self | None:
+        sibling_list = self._element.xpath(
+            f"following-sibling::{self._element.xml_tag_self}[1]"
+        )
+        if len(sibling_list) == 0:
+            return None
+        return self.__class__(sibling_list[0], self._parent)
 
 
 class PropertyPath(str):

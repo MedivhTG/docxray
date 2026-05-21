@@ -222,6 +222,29 @@ class ParagraphH2D(How2Display[Paragraph]):
     # --- General/specific properties (end)
 
     @cached_property
+    def _num_id_ilvl(self) -> tuple[int, int] | None:
+        err = InvalidXmlError("Cannot determine associated numbering")
+        numPr_elm = self._associated_numPr
+        if numPr_elm is None:
+            return None
+        if numPr_elm.numId is None:
+            raise err
+        num_id = numPr_elm.numId.val
+        if numPr_elm.ilvl is not None:
+            ilvl = numPr_elm.ilvl.val
+        else:
+            level = self._associated_level
+            if level is None:
+                raise err
+            if isinstance(level, LevelOverride):
+                if level.lvl is None:
+                    raise err
+                ilvl = level.lvl.ilvl
+            else:
+                ilvl = level.ilvl
+        return num_id, ilvl
+
+    @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
@@ -238,6 +261,18 @@ class ParagraphH2D(How2Display[Paragraph]):
                 )
         else:
             return self._case_1_num_pr_direct(numPr_elm_direct)
+        return None
+
+    @cached_property
+    def _associated_numPr(self) -> CT_NumPr | None:
+        if self._numPr_para_direct:
+            return self._numPr_para_direct
+        style = self._para_style_num_ref
+        if style is not None:
+            path = self._prop_path("numPr", self._path_base)
+            numPr_elm = safe_get_prop(style.element, path)
+            if not isinstance(numPr_elm, NotFound):
+                return numPr_elm
         return None
 
     @cached_property

@@ -24,17 +24,19 @@ class OxmlElement(BaseOxmlElement):
 
     @cached_property
     def is_first(self) -> bool:
-        tag = self.xml_tag(self.tag)
-        return self.xpath(f"not(preceding-sibling::{tag})")
+        return self.xpath(f"not(preceding-sibling::{self.xml_tag_self})")
 
     @cached_property
     def is_last(self) -> bool:
-        tag = self.xml_tag(self.tag)
-        return self.xpath(f"not(following-sibling::{tag})")
+        return self.xpath(f"not(following-sibling::{self.xml_tag_self})")
 
     @cached_property
     def xml_pos(self) -> POS:
         return self.xml_position(self.is_first, self.is_last)
+
+    @cached_property
+    def xml_tag_self(self) -> str:
+        return self.xml_tag(self.tag)
 
     def xml_tag(self, qn_tag: Any) -> str:
         qn = QName(qn_tag)
