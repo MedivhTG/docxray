@@ -81,10 +81,7 @@ class Numeral:
 
     @classmethod
     def decimal_full_width(cls, ord: int) -> str:
-        if ord < 0:
-            raise ValueError(f"Given ord `{ord}` is less than 0")
-        charset = cls._charset(ord, CharsetName.DECIMAL_FULL_WIDTH, False)
-        return cls._decimal_compute(ord, charset)
+        return cls._decimal_full_width(ord, CharsetName.DECIMAL_FULL_WIDTH)
 
     @classmethod
     def decimal_half_width(cls, ord: int) -> str:
@@ -104,9 +101,22 @@ class Numeral:
         charset = cls._charset(ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE)
         overhead = (ord - 1) // len(charset)
         if overhead > 0:
+            # Fallback
             return cls.decimal(ord)
         pos = ord - 1
         return charset[pos]
+
+    @classmethod
+    def decimal_full_width_2(cls, ord: int) -> str:
+        return cls._decimal_full_width(ord, CharsetName.DECIMAL_FULL_WIDTH_2)
+
+    @classmethod
+    def aiueo_full_width(cls, ord: int) -> str:
+        return cls._repeated(ord, CharsetName.AIUEO_FULL_WIDTH)
+
+    @classmethod
+    def iroha_full_width(cls, ord: int) -> str:
+        return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
 
     @classmethod
     def _letter(
@@ -176,6 +186,22 @@ class Numeral:
         return cls._cyclic_compute(ord, charset)
 
     @classmethod
+    def _digital(cls, ord: int, charset_name: CharsetName) -> str:
+        if ord < 0:
+            raise ValueError(f"Given ord `{ord}` is less than 0")
+        charset = cls._charset(ord, charset_name, False)
+        if ord == 0:
+            return charset[ord]
+        return cls._decimal_compute(ord, charset)
+
+    @classmethod
+    def _decimal_full_width(cls, ord: int, charset_name: CharsetName) -> str:
+        if ord < 0:
+            raise ValueError(f"Given ord `{ord}` is less than 0")
+        charset = cls._charset(ord, charset_name, False)
+        return cls._decimal_compute(ord, charset)
+
+    @classmethod
     def _repeated_compute(cls, ord: int, charset: list[str]) -> str:
         repeat = (ord - 1) // len(charset)
         pos = (ord - 1) % len(charset)
@@ -185,15 +211,6 @@ class Numeral:
     def _cyclic_compute(cls, ord: int, charset: list[str]) -> str:
         pos = (ord - 1) % len(charset)
         return charset[pos]
-
-    @classmethod
-    def _digital(cls, ord: int, charset_name: CharsetName) -> str:
-        if ord < 0:
-            raise ValueError(f"Given ord `{ord}` is less than 0")
-        charset = cls._charset(ord, charset_name, False)
-        if ord == 0:
-            return charset[ord]
-        return cls._decimal_compute(ord, charset)
 
     @classmethod
     def _decimal_compute(cls, ord: int, charset: list[str]) -> str:
