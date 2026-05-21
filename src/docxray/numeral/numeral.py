@@ -395,11 +395,6 @@ class Numeral:
         return cls._cyclic_compute(ord, charset)
 
     @classmethod
-    def _decimal(cls, ord: int, charset_name: CharsetName) -> str:
-        charset = cls._charset(ord, charset_name)
-        return cls._decimal_compute(ord, charset)
-
-    @classmethod
     def _digital(cls, ord: int, charset_name: CharsetName) -> str:
         if ord < 0:
             raise ValueError(f"Given ord `{ord}` is less than 0")
