@@ -98,13 +98,7 @@ class Numeral:
 
     @classmethod
     def decimal_enclosed_circle(cls, ord: int) -> str:
-        charset = cls._charset(ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE)
-        overhead = (ord - 1) // len(charset)
-        if overhead > 0:
-            # Fallback
-            return cls.decimal(ord)
-        pos = ord - 1
-        return charset[pos]
+        return cls._decimal_fallback(ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE)
 
     @classmethod
     def decimal_full_width_2(cls, ord: int) -> str:
@@ -136,6 +130,22 @@ class Numeral:
     @classmethod
     def chosung(cls, ord: int) -> str:
         return cls._repeated(ord, CharsetName.CHOSUNG)
+
+    @classmethod
+    def decimal_enclosed_fullstop(cls, ord: int) -> str:
+        return cls._decimal_fallback(
+            ord, CharsetName.DECIMAL_ENCLOSED_FULLSTOP
+        )
+
+    @classmethod
+    def decimal_enclosed_paren(cls, ord: int) -> str:
+        return cls._decimal_fallback(ord, CharsetName.DECIMAL_ENCLOSED_PAREN)
+
+    @classmethod
+    def decimal_enclosed_circle_chines(cls, ord: int) -> str:
+        return cls._decimal_fallback(
+            ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE_CHINESE
+        )
 
     @classmethod
     def _letter(
@@ -219,6 +229,15 @@ class Numeral:
             raise ValueError(f"Given ord `{ord}` is less than 0")
         charset = cls._charset(ord, charset_name, False)
         return cls._decimal_compute(ord, charset)
+
+    @classmethod
+    def _decimal_fallback(cls, ord: int, charset_name: CharsetName) -> str:
+        charset = cls._charset(ord, charset_name)
+        overhead = (ord - 1) // len(charset)
+        if overhead > 0:
+            return cls.decimal(ord)
+        pos = ord - 1
+        return charset[pos]
 
     @classmethod
     def _repeated_compute(cls, ord: int, charset: list[str]) -> str:
