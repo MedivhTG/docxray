@@ -45,10 +45,6 @@ class ParagraphH2D(How2Display[Paragraph]):
             return container
         return None
 
-    @cached_property
-    def is_list_item(self) -> bool:
-        return self._associated_level is not None
-
     # --- Page properties
     @cached_property
     def no_hanging(self) -> bool:
@@ -222,6 +218,88 @@ class ParagraphH2D(How2Display[Paragraph]):
     # --- General/specific properties (end)
 
     @cached_property
+    def _num_ord(self) -> int | None:
+        if not self._is_list_item:
+            return None
+        prev_num_para = self._prev_num_para_full_search
+        count = 1
+        while prev_num_para:
+            count += 1
+            prev_num_para = prev_num_para.h2d._prev_num_para_full_search
+        return count
+
+    @cached_property
+    def _next_num_para_full_search(self) -> Paragraph | None:
+        if self._num_id_ilvl is None:
+            return None
+        next_para: Paragraph | None = self._proxy.next_sibling
+        num_id, _ = self._num_id_ilvl
+        while next_para:
+            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
+                return next_para
+            next_num_id_ilvl = next_para.h2d._num_id_ilvl
+            if next_num_id_ilvl is None:
+                next_para = next_para.next_sibling
+                continue
+            num_id_next, _ = next_num_id_ilvl
+            if num_id == num_id_next:
+                return next_para
+            next_para = next_para.next_sibling
+        return None
+
+    @cached_property
+    def _prev_num_para_full_search(self) -> Paragraph | None:
+        if self._num_id_ilvl is None:
+            return None
+        next_para: Paragraph | None = self._proxy.prev_sibling
+        num_id, _ = self._num_id_ilvl
+        while next_para:
+            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
+                return next_para
+            next_num_id_ilvl = next_para.h2d._num_id_ilvl
+            if next_num_id_ilvl is None:
+                next_para = next_para.prev_sibling
+                continue
+            num_id_next, _ = next_num_id_ilvl
+            if num_id == num_id_next:
+                return next_para
+            next_para = next_para.prev_sibling
+        return None
+
+    @cached_property
+    def _num_ilvl_ord(self) -> int | None:
+        if not self._is_list_item:
+            return None
+        prev_num_para = self._prev_num_para
+        count = 1
+        while prev_num_para:
+            count += 1
+            prev_num_para = prev_num_para.h2d._prev_num_para
+        return count
+
+    @cached_property
+    def _next_num_para(self) -> Paragraph | None:
+        if self._num_id_ilvl is None:
+            return None
+        next_para: Paragraph | None = self._proxy.next_sibling
+        while next_para:
+            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
+                return next_para
+            next_para = next_para.next_sibling
+        return None
+
+    @cached_property
+    def _prev_num_para(self) -> Paragraph | None:
+        if self._num_id_ilvl is None:
+            return None
+        next_para: Paragraph | None = self._proxy.prev_sibling
+        while next_para:
+            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
+                return next_para
+            next_para = next_para.prev_sibling
+        return None
+
+    @cached_property
     def _num_id_ilvl(self) -> tuple[int, int] | None:
         err = InvalidXmlError("Cannot determine associated numbering")
         numPr_elm = self._associated_numPr
@@ -243,6 +321,10 @@ class ParagraphH2D(How2Display[Paragraph]):
             else:
                 ilvl = level.ilvl
         return num_id, ilvl
+
+    @cached_property
+    def _is_list_item(self) -> bool:
+        return self._associated_level is not None
 
     @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
@@ -345,7 +427,7 @@ class ParagraphH2D(How2Display[Paragraph]):
     def _display_val(
         self, name_or_path: str | PropertyPath, optional: bool = True
     ) -> Any:
-        if self.is_list_item:
+        if self._is_list_item:
             return self._prop_val(name_or_path, optional, "both")
         para_val = self._prop_val(name_or_path, optional, "both")
         if not isinstance(para_val, NotFound):
