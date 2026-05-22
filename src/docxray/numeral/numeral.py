@@ -17,6 +17,8 @@ class Numeral:
     `NOTE`:
         1) Some character sets are not fully supported or implemented for a while.
         2) Caution with bullet (it's default display)
+        3) Some methods like `ordinal` can return fallback decimals or other if not
+        in site-package tables (third-party libraries).
     """
 
     @classmethod
@@ -44,19 +46,25 @@ class Numeral:
     def ordinal(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
-        return num2words.num2words(ord, lang=code, to="ordinal_num")
+        # num2word do not support russian ordinal numerals
+        if code == "ru":
+            return f"{ord}-й"
+        # Stringify for safety
+        return str(num2words.num2words(ord, lang=code, to="ordinal_num"))
 
     @classmethod
     def cardinal_text(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
-        return num2words.num2words(ord, lang=code, to="cardinal")
+        # Stringify for safety
+        return str(num2words.num2words(ord, lang=code, to="cardinal"))
 
     @classmethod
     def ordinal_text(cls, ord: int, locale: str = "en-US") -> str:
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
-        return num2words.num2words(ord, lang=code, to="ordinal")
+        # Stringify for safety
+        return str(num2words.num2words(ord, lang=code, to="ordinal"))
 
     @classmethod
     def hex(cls, ord: int) -> str:

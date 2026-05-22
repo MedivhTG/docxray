@@ -7,6 +7,7 @@ from docxray.opc.part import Part, PartFactory
 from docxray.oxml.trans.parts.document import DocumentPart
 from docxray.oxml.trans.parts.image import ImagePart
 from docxray.oxml.trans.parts.numbering import NumberingPart
+from docxray.oxml.trans.parts.settings import SettingsPart
 from docxray.oxml.trans.parts.styles import StylesPart
 
 
@@ -24,6 +25,7 @@ TransitionalPartFactory.part_class_selector = part_class_selector
 TransitionalPartFactory.part_type_for[CT.WML_DOCUMENT_MAIN] = DocumentPart
 TransitionalPartFactory.part_type_for[CT.WML_NUMBERING] = NumberingPart
 TransitionalPartFactory.part_type_for[CT.WML_STYLES] = StylesPart
+TransitionalPartFactory.part_type_for[CT.WML_SETTINGS] = SettingsPart
 
 del (
     CT,
@@ -31,5 +33,6 @@ del (
     NumberingPart,
     PartFactory,
     StylesPart,
+    SettingsPart,
     part_class_selector,
 )
