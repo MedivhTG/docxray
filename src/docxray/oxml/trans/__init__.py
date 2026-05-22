@@ -274,3 +274,8 @@ register_element_cls("w:lvlText", CT_LevelText)
 register_element_cls("w:lvlPicBulletId", CT_DecimalNumber)
 register_element_cls("w:legacy", CT_LvlLegacy)
 register_element_cls("w:lvlJc", CT_Jc)
+
+from .settings import CT_Settings
+
+register_element_cls("w:settings", CT_Settings)
+register_element_cls("w:themeFontLang", CT_Language)

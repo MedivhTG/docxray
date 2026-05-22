@@ -251,6 +251,9 @@ class W:
     RSID_P = qn("w:rsidP")
     RSID_R_DEFAULT = qn("w:rsidRDefault")
 
+    THEME_FONT_LANG = qn("w:themeFontLang")
+    EAST_ASIA = qn("w:eastAsia")
+
     TYPE = qn("w:type")
     VAL = qn("w:val")
     NULL = qn("w:null")

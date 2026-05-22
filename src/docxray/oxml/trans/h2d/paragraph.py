@@ -469,6 +469,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def _level_char(self) -> str | None:
+        # Simple check for None values
         if self._num_id_ilvl is None:
             return None
         num_id, ilvl = self._num_id_ilvl
@@ -476,6 +477,8 @@ class ParagraphH2D(How2Display[Paragraph]):
             return None
         if self._associated_level is None:
             return None
+
+        # Get start and level
         level = self._associated_level
         start = 0
         if isinstance(level, LevelOverride):
@@ -494,6 +497,8 @@ class ParagraphH2D(How2Display[Paragraph]):
             lvl = level
             if lvl.element.start is not None:
                 start = lvl.element.start.val
+
+        # Numbering format
         numFmt_elm = lvl.element.numFmt
         if numFmt_elm is None:
             return None

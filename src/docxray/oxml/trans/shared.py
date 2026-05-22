@@ -10,6 +10,7 @@ from docxray.oxml.trans.st.enums import (
     SE_TblWidth,
 )
 from docxray.oxml.trans.st.shared_common import (
+    ST_Lang,
     ST_OnOff,
     ST_String,
 )
@@ -138,7 +139,17 @@ class CT_Em(OxmlElement):
 
 
 class CT_Language(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> str | None:
+        return self.attr_optional(W.VAL, ST_Lang)
+
+    @cached_property
+    def eastAsia(self) -> str | None:
+        return self.attr_optional(W.EAST_ASIA, ST_Lang)
+
+    @cached_property
+    def bidi(self) -> str | None:
+        return self.attr_optional(W.BIDI, ST_Lang)
 
 
 class CT_EastAsianLayout(OxmlElement):

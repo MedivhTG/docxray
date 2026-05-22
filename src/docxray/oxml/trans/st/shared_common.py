@@ -55,3 +55,7 @@ class ST_PositiveUniversalMeasure(XsdSimpleType):
 
 class ST_TwipsMeasure(XsdSimpleType):
     SCHEMA = XsdUnion(ST_UnsignedDecimalNumber, ST_PositiveUniversalMeasure)
+
+
+class ST_Lang(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
