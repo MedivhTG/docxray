@@ -465,39 +465,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         pattern = lvlText_elm.val
         if pattern is None:
             return None
-
-        text = ""
-        percentage_followed = False
-        for ch in pattern:
-            if ch == "%":
-                percentage_followed = True
-                continue
-            if percentage_followed and ch in _ILVL_ALLOWED:
-                ilvl_found = int(ch) - 1
-                if ilvl_found == ilvl:
-                    if self._level_char is not None:
-                        text += self._level_char
-                if ilvl_found < ilvl:
-                    prev_para = self._prev_num_para_full_search
-                    while prev_para:
-                        prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
-                        if prev_num_id_ilvl is None:
-                            prev_para = (
-                                prev_para.h2d._prev_num_para_full_search
-                            )
-                            # Never
-                            break
-                        _, prev_ilvl = prev_num_id_ilvl
-                        if prev_ilvl == ilvl_found:
-                            found_lvl_ch = prev_para.h2d._level_char
-                            if found_lvl_ch is not None:
-                                text += found_lvl_ch
-                        prev_para = prev_para.h2d._prev_num_para_full_search
-                # If more than current -> ignore
-            else:
-                text += ch
-            percentage_followed = False
-        return text
+        return self._parse_num_pattern(pattern, ilvl)
 
     @cached_property
     def _level_char(self) -> str | None:
@@ -550,6 +518,40 @@ class ParagraphH2D(How2Display[Paragraph]):
             # TODO: change for written locale
             return NUMERAL_RULES[numFmt_elm.val](ord, "en-US")  # type: ignore[operator]
         return NUMERAL_RULES[numFmt_elm.val](ord)  # type: ignore[operator]
+
+    def _parse_num_pattern(self, pattern: str, ilvl: int) -> str:
+        text = ""
+        percentage_followed = False
+        for ch in pattern:
+            if ch == "%":
+                percentage_followed = True
+                continue
+            if percentage_followed and ch in _ILVL_ALLOWED:
+                ilvl_found = int(ch) - 1
+                if ilvl_found == ilvl:
+                    if self._level_char is not None:
+                        text += self._level_char
+                if ilvl_found < ilvl:
+                    prev_para = self._prev_num_para_full_search
+                    while prev_para:
+                        prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
+                        if prev_num_id_ilvl is None:
+                            prev_para = (
+                                prev_para.h2d._prev_num_para_full_search
+                            )
+                            # Never
+                            break
+                        _, prev_ilvl = prev_num_id_ilvl
+                        if prev_ilvl == ilvl_found:
+                            found_lvl_ch = prev_para.h2d._level_char
+                            if found_lvl_ch is not None:
+                                text += found_lvl_ch
+                        prev_para = prev_para.h2d._prev_num_para_full_search
+                # If more than current -> ignore
+            else:
+                text += ch
+            percentage_followed = False
+        return text
 
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
         para_path = self._prop_path(name, f"{self._path_base}.ind")
