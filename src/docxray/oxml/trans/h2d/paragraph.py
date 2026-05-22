@@ -499,7 +499,44 @@ class ParagraphH2D(How2Display[Paragraph]):
             return None
         if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
             return None
-        ord = self._num_ilvl_ord + start - 1
+
+        # Get right ord
+        if ilvl == 0:
+            # Never restarts (highest level)
+            ord = self._num_ilvl_ord + start - 1
+        else:
+            if lvl.element.lvlRestart is None:
+                restart_lvl = None
+                upper_lvl = ilvl - 1
+            else:
+                restart_lvl = lvl.element.lvlRestart.val
+                upper_lvl = ilvl - restart_lvl
+
+            if restart_lvl == 0:
+                # Never restarts (restart level is 0)
+                ord = self._num_ilvl_ord + start - 1
+            else:
+                restart = False
+                same_level_count = 1
+                prev_para = self._prev_num_para_full_search
+                while prev_para:
+                    prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
+                    if prev_num_id_ilvl is None:
+                        continue
+                    _, prev_ilvl = prev_num_id_ilvl
+                    if prev_ilvl == ilvl:
+                        same_level_count += 1
+                    if prev_ilvl <= upper_lvl:
+                        restart = True
+                        break
+                    prev_para = prev_para.h2d._prev_num_para_full_search
+                if restart:
+                    # Restart with count of the same level found before
+                    ord = same_level_count + start - 1
+                else:
+                    # Not restarts (not found higher level)
+                    ord = self._num_ilvl_ord + start - 1
+
         if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
             # TODO: plug for a while (or not)
             return Numeral.bullet(ilvl)
@@ -546,6 +583,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                             found_lvl_ch = prev_para.h2d._level_char
                             if found_lvl_ch is not None:
                                 text += found_lvl_ch
+                                break
                         prev_para = prev_para.h2d._prev_num_para_full_search
                 # If more than current -> ignore
             else:
