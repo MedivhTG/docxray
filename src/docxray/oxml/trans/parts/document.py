@@ -8,10 +8,12 @@ from functools import cached_property
 from docxray.opc.constants import RELATIONSHIP_TYPE as RT
 from docxray.oxml.trans.document import CT_Document
 from docxray.oxml.trans.parts.numbering import NumberingPart
+from docxray.oxml.trans.parts.settings import SettingsPart
 from docxray.oxml.trans.parts.story import StoryPart
 from docxray.oxml.trans.parts.styles import StylesPart
 from docxray.oxml.trans.proxy.document import Document
 from docxray.oxml.trans.proxy.numbering.numbering import Numbering
+from docxray.oxml.trans.proxy.settings import Settings
 from docxray.oxml.trans.proxy.styles.styles import Styles
 
 
@@ -56,3 +58,11 @@ class DocumentPart(StoryPart[CT_Document]):
         """A |Styles| object providing access to the styles in the styles part of this
         document."""
         return self.styles_part.styles
+
+    @cached_property
+    def settings_part(self) -> SettingsPart:
+        return self.part_related_by(RT.SETTINGS, SettingsPart)
+
+    @cached_property
+    def settings(self) -> Settings:
+        return self.settings_part.settings

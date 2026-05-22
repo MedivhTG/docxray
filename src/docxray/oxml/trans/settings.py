@@ -1,5 +1,6 @@
 from functools import cached_property
 
+# docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.shared import CT_Language
 from docxray.oxml.trans.xmlchemy import OxmlElement

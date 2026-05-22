@@ -12,7 +12,12 @@ from docxray.oxml.trans.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.shared import (
+    ElementProxy,
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.trans.proxy.styles.style import (
     NumberingStyle,
     ParagraphStyle,
@@ -57,6 +62,15 @@ class Level(ElementProxy[CT_Lvl]):
     @cached_property
     def ilvl(self) -> int:
         return self._element.ilvl
+
+    @cached_property
+    def locale(self) -> str | None:
+        locale = safe_get_prop(
+            self._element, PropertyPath.base("val", "rPr.lang"), False
+        )
+        if isinstance(locale, NotFound):
+            return None
+        return locale
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):

@@ -35,7 +35,8 @@ class How2Display(Generic[PROXY_T]):
     ) -> None:
         self._proxy = story
         self._document_part = document_part
-        self._styles = document_part.styles_part.styles
+        self._styles = document_part.styles
+        self._settings = document_part.settings_part.settings
         num_part = document_part.numbering_part
         if num_part is None:
             self._numbering = None

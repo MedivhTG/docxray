@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.shared import (
+    ElementProxy,
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.trans.styles import CT_DocDefaults
 
 if TYPE_CHECKING:
@@ -15,3 +21,14 @@ class DocumentDefaults(ElementProxy[CT_DocDefaults]):
     @property
     def part(self) -> StylesPart:
         return self.part
+
+    @cached_property
+    def locale(self) -> str | None:
+        locale = safe_get_prop(
+            self.element,
+            PropertyPath.base("val", "rPrDefault.rPr.lang"),
+            False,
+        )
+        if isinstance(locale, NotFound):
+            return None
+        return locale

@@ -35,6 +35,7 @@ from docxray.oxml.trans.st.enums import (
     SE_StyleType,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
+from docxray.shared import os_locale
 
 from .how2display import How2Display
 from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
@@ -337,6 +338,22 @@ class ParagraphH2D(How2Display[Paragraph]):
         return self._associated_level is not None
 
     @cached_property
+    def _associated_level_definition(self) -> Level | None:
+        if self._associated_level is None:
+            return None
+        if self._num_id_ilvl is None:
+            return None
+        level = self._associated_level
+        num_id, ilvl = self._num_id_ilvl
+        if isinstance(level, LevelOverride):
+            if level.lvl is None:
+                if self._numbering is None:
+                    return None
+                return self._numbering.associated_lvl(num_id, ilvl)
+            return level.lvl
+        return level
+
+    @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
@@ -440,20 +457,10 @@ class ParagraphH2D(How2Display[Paragraph]):
         num_id_ilvl = self._num_id_ilvl
         if num_id_ilvl is None:
             return None
-
-        num_id, ilvl = num_id_ilvl
-        level = self._associated_level
-        if level is None:
+        _, ilvl = num_id_ilvl
+        lvl = self._associated_level_definition
+        if lvl is None:
             return None
-        if isinstance(level, LevelOverride):
-            if level.lvl is None:
-                if self._numbering is None:
-                    return None
-                lvl = self._numbering.associated_lvl(num_id, ilvl)
-            else:
-                lvl = level.lvl
-        else:
-            lvl = level
         numFmt_elm = lvl.element.numFmt
         if numFmt_elm is None:
             return None
@@ -466,6 +473,19 @@ class ParagraphH2D(How2Display[Paragraph]):
         if pattern is None:
             return None
         return self._parse_num_pattern(pattern, ilvl)
+
+    @cached_property
+    def _num_locale(self) -> str | None:
+        lvl = self._associated_level_definition
+        if lvl is None:
+            return None
+        if lvl.locale is not None:
+            return lvl.locale
+        if self._styles.document_defaults is not None:
+            locale = self._styles.document_defaults.locale
+            if locale is not None:
+                return locale
+        return os_locale()
 
     @cached_property
     def _level_char(self) -> str | None:
@@ -558,8 +578,8 @@ class ParagraphH2D(How2Display[Paragraph]):
         if to_decimal:
             return Numeral.decimal(ord)
         if numFmt_elm.val in NUMERAL_WITH_LOCALE:
-            # TODO: change for written locale
-            return NUMERAL_RULES[numFmt_elm.val](ord, "en-US")  # type: ignore[operator]
+            locale = self._num_locale or "en-US"
+            return NUMERAL_RULES[numFmt_elm.val](ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[numFmt_elm.val](ord)  # type: ignore[operator]
 
     def _parse_num_pattern(self, pattern: str, ilvl: int) -> str:
