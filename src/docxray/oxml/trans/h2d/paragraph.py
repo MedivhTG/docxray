@@ -441,14 +441,17 @@ class ParagraphH2D(How2Display[Paragraph]):
         if num_id_ilvl is None:
             return None
 
-        _, ilvl = num_id_ilvl
+        num_id, ilvl = num_id_ilvl
         level = self._associated_level
         if level is None:
             return None
         if isinstance(level, LevelOverride):
             if level.lvl is None:
-                return None
-            lvl = level.lvl
+                if self._numbering is None:
+                    return None
+                lvl = self._numbering.associated_lvl(num_id, ilvl)
+            else:
+                lvl = level.lvl
         else:
             lvl = level
         numFmt_elm = lvl.element.numFmt
@@ -500,6 +503,7 @@ class ParagraphH2D(How2Display[Paragraph]):
     def _level_char(self) -> str | None:
         if self._num_id_ilvl is None:
             return None
+        num_id, ilvl = self._num_id_ilvl
         if self._num_ilvl_ord is None:
             return None
         if self._associated_level is None:
@@ -508,8 +512,11 @@ class ParagraphH2D(How2Display[Paragraph]):
         start = 0
         if isinstance(level, LevelOverride):
             if level.lvl is None:
-                return None
-            lvl = level.lvl
+                if self._numbering is None:
+                    return None
+                lvl = self._numbering.associated_lvl(num_id, ilvl)
+            else:
+                lvl = level.lvl
             startOverride = level.element.startOverride
             if startOverride is not None:
                 start = startOverride.val
@@ -527,13 +534,16 @@ class ParagraphH2D(How2Display[Paragraph]):
         ord = self._num_ilvl_ord + start - 1
         if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
             # TODO: plug for a while (or not)
-            _, ilvl = self._num_id_ilvl
             return Numeral.bullet(ilvl)
         if numFmt_elm.val == SE_NUMBER_FORMAT.CUSTOM:
             if numFmt_elm.format is None:
                 return None
             return Numeral.custom(ord, numFmt_elm.format)
-        to_decimal = on_off(lvl.element.isLgl)
+        to_decimal = (
+            on_off(lvl.element.isLgl)
+            if lvl.element.isLgl is not None
+            else False
+        )
         if to_decimal:
             return Numeral.decimal(ord)
         if numFmt_elm.val in NUMERAL_WITH_LOCALE:
