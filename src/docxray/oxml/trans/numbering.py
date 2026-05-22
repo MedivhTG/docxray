@@ -10,6 +10,7 @@ from docxray.oxml.trans.shared import (
     CT_String,
 )
 from docxray.oxml.trans.st.enums import (
+    SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_MultilevelType,
     SE_OnOff1,
@@ -17,6 +18,7 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.st.shared_common import ST_OnOff, ST_String
 from docxray.oxml.trans.st.wml import (
     ST_DecimalNumber,
+    ST_LevelSuffix,
     ST_LongHexNumber,
     ST_MultiLevelType,
     ST_NumberFormat,
@@ -41,7 +43,9 @@ class CT_NumFmt(OxmlElement):
 
 
 class CT_LevelSuffix(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_LEVEL_SUFFIX:
+        return self.attr_required(W.VAL, ST_LevelSuffix)
 
 
 class CT_LevelText(OxmlElement):

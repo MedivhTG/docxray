@@ -24,7 +24,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.styles.styles import Styles
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_JC, SE_LEVEL_SUFFIX, SE_StyleType
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -71,6 +71,18 @@ class Level(ElementProxy[CT_Lvl]):
         if isinstance(locale, NotFound):
             return None
         return locale
+
+    @cached_property
+    def alignment(self) -> SE_JC:
+        if self._element.lvlJc is None:
+            return SE_JC.LEFT
+        return self._element.lvlJc.val
+
+    @cached_property
+    def separator(self) -> SE_LEVEL_SUFFIX:
+        if self._element.suff is None:
+            return SE_LEVEL_SUFFIX.TAB
+        return self._element.suff.val
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):

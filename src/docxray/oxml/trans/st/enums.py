@@ -361,3 +361,9 @@ class SE_NUMBER_FORMAT(StrEnum):
     BAHT_TEXT = "bahtText"
     DOLLAR_TEXT = "dollarText"
     CUSTOM = "custom"
+
+
+class SE_LEVEL_SUFFIX(StrEnum):
+    TAB = "tab"
+    SPACE = "space"
+    NOTHING = "nothing"

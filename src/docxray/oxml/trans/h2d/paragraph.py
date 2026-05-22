@@ -30,6 +30,7 @@ from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,
+    SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_StyleType,
@@ -472,7 +473,13 @@ class ParagraphH2D(How2Display[Paragraph]):
         pattern = lvlText_elm.val
         if pattern is None:
             return None
-        return self._parse_num_pattern(pattern, ilvl)
+        text = self._parse_num_pattern(pattern, ilvl)
+        if lvl.separator == SE_LEVEL_SUFFIX.TAB:
+            # TODO: it's not a tab as in WORD, but reproducing tab width.. is challenge
+            text += "\t"
+        elif lvl.separator == SE_LEVEL_SUFFIX.SPACE:
+            text += " "
+        return text
 
     @cached_property
     def _num_locale(self) -> str | None:
@@ -487,6 +494,8 @@ class ParagraphH2D(How2Display[Paragraph]):
                 return locale
         return os_locale()
 
+    # TODO: here can be an Image instance along with common chars -
+    # implement after
     @cached_property
     def _level_char(self) -> str | None:
         # Simple check for None values
