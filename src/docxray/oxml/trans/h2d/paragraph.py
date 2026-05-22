@@ -522,6 +522,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 while prev_para:
                     prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
                     if prev_num_id_ilvl is None:
+                        prev_para = prev_para.h2d._prev_num_para_full_search
                         continue
                     _, prev_ilvl = prev_num_id_ilvl
                     if prev_ilvl == ilvl:
