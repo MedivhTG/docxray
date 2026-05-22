@@ -505,18 +505,26 @@ class ParagraphH2D(How2Display[Paragraph]):
         if self._associated_level is None:
             return None
         level = self._associated_level
+        start = 0
         if isinstance(level, LevelOverride):
             if level.lvl is None:
                 return None
             lvl = level.lvl
+            startOverride = level.element.startOverride
+            if startOverride is not None:
+                start = startOverride.val
+            elif lvl.element.start is not None:
+                start = lvl.element.start.val
         else:
             lvl = level
+            if lvl.element.start is not None:
+                start = lvl.element.start.val
         numFmt_elm = lvl.element.numFmt
         if numFmt_elm is None:
             return None
         if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
             return None
-        ord = self._num_ilvl_ord
+        ord = self._num_ilvl_ord + start - 1
         if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
             # TODO: plug for a while (or not)
             _, ilvl = self._num_id_ilvl
