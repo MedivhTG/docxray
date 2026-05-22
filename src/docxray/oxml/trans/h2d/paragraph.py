@@ -450,9 +450,6 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     # TODO: implement (for _level_char too):
     # 1) Realize numerals
-    # 2) Specific rules from lvl elms
-    # 3) Locale dependant numerals
-    # 4) Suffix if needed
     @cached_property
     def _level_text(self) -> str | None:
         num_id_ilvl = self._num_id_ilvl
