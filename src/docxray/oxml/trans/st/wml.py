@@ -17,11 +17,13 @@ from docxray.xsd.xsd import (
 )
 
 from .enums import (
+    SE_HINT,
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
+    SE_THEME,
     SE_Border,
     SE_HexColorAuto,
     SE_Merge,
@@ -139,3 +141,13 @@ class ST_LevelSuffix(XsdSimpleType):
 class ST_TextDirection(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_DIRECTION)}
+
+
+class ST_Hint(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HINT)}
+
+
+class ST_Theme(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_THEME)}

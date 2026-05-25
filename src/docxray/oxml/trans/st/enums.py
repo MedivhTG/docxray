@@ -381,3 +381,19 @@ class SE_TEXT_DIRECTION(StrEnum):
     LEFT_TO_RIGHT_TOP_TO_BOTTOM_VERTICAL = "lrTbV"
     TOP_TO_BOTTOM_RIGHT_TO_LEFT = "tbRl"
     TOP_TO_BOTTOM_RIGHT_TO_LEFT_VERTICAL = "tbRlV"
+
+
+class SE_HINT(StrEnum):
+    DEFAULT = "default"
+    EAST_ASIA = "eastASia"
+
+
+class SE_THEME(StrEnum):
+    MAJOR_EAST_ASIA = "majorEastAsia"
+    MAJOR_BIDI = "majorBidi"
+    MAJOR_ASCII = "majorAscii"
+    MAJOR_H_ANSI = "majorHAnsi"
+    MINOR_EAST_ASIA = "minorEastAsia"
+    MINOR_BIDI = "minorBidi"
+    MINOR_ASCII = "minorAscii"
+    MINOR_H_ANSI = "minorHAnsi"

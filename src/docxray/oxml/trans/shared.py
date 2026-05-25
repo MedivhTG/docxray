@@ -4,8 +4,10 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
+    SE_HINT,
     SE_JC,
     SE_TEXT_DIRECTION,
+    SE_THEME,
     SE_Border,
     SE_OnOff1,
     SE_TblWidth,
@@ -20,11 +22,13 @@ from docxray.oxml.trans.st.wml import (
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
+    ST_Hint,
     ST_Jc,
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
     ST_TblWidth,
     ST_TextDirection,
+    ST_Theme,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
@@ -42,7 +46,41 @@ class CT_OnOff(OxmlElement):
 
 
 class CT_Fonts(OxmlElement):
-    pass
+    @cached_property
+    def hint(self) -> SE_HINT | None:
+        return self.attr_optional(W.HINT, ST_Hint)
+
+    @cached_property
+    def ascii(self) -> str | None:
+        return self.attr_optional(W.ASCII, ST_String)
+
+    @cached_property
+    def hAnsi(self) -> str | None:
+        return self.attr_optional(W.H_ANSI, ST_String)
+
+    @cached_property
+    def eastAsia(self) -> str | None:
+        return self.attr_optional(W.EAST_ASIA, ST_String)
+
+    @cached_property
+    def cs(self) -> str | None:
+        return self.attr_optional(W.CS, ST_String)
+
+    @cached_property
+    def asciiTheme(self) -> SE_THEME | None:
+        return self.attr_optional(W.ASCII_THEME, ST_Theme)
+
+    @cached_property
+    def hAnsiTheme(self) -> SE_THEME | None:
+        return self.attr_optional(W.H_ANSI_THEME, ST_Theme)
+
+    @cached_property
+    def eastAsiaTheme(self) -> SE_THEME | None:
+        return self.attr_optional(W.EAST_ASIA_THEME, ST_Theme)
+
+    @cached_property
+    def cstheme(self) -> SE_THEME | None:
+        return self.attr_optional(W.CSTHEME, ST_Theme)
 
 
 class CT_Color(OxmlElement):

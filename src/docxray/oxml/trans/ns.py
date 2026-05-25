@@ -95,7 +95,16 @@ class W:
     INS = qn("w:ins")
 
     R_PR = qn("w:rPr")
+
     R_FONTS = qn("w:rFonts")
+    HINT = qn("w:hint")
+    ASCII = qn("w:ascii")
+    H_ANSI = qn("w:hAnsi")
+    ASCII_THEME = qn("w:asciiTheme")
+    H_ANSI_THEME = qn("w:hAnsiTheme")
+    EAST_ASIA_THEME = qn("w:eastAsiaTheme")
+    CSTHEME = qn("w:cstheme")
+
     B = qn("w:b")
     B_CS = qn("w:bCs")
     I_CS = qn("w:iCs")

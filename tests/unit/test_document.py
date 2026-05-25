@@ -58,7 +58,7 @@ class TestDocument:
                                     v_algn = r_fmt.vertical_alignment
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
-                f = p_or_t.element.is_first
+                lvl_text = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d
                 align = p_fmt.alignment
@@ -72,7 +72,7 @@ class TestDocument:
                 lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering
                 li = p_or_t.list_item
-                f = li.level_text if li is not None else None
+                lvl_text = li.level_text if li is not None else None
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
                     w = 1

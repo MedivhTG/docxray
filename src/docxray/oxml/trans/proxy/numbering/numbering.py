@@ -24,6 +24,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     ParagraphStyle,
 )
 from docxray.oxml.trans.proxy.styles.styles import Styles
+from docxray.oxml.trans.proxy.text.font import Font
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.st.enums import (
     SE_JC,
@@ -130,6 +131,14 @@ class Level(ElementProxy[CT_Lvl]):
         return (
             False if self.element.isLgl is None else on_off(self.element.isLgl)
         )
+
+    @cached_property
+    def font(self) -> Font | None:
+        if self.element.rPr is None:
+            return None
+        if self.element.rPr.rFonts is None:
+            return None
+        return Font(self.element.rPr.rFonts, self)
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):

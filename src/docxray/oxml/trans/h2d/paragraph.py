@@ -55,6 +55,10 @@ class ListItemError(Exception):
     pass
 
 
+# TODO: Global problem [GP_1]: need text processor
+# to know char positions dynmically (for tabs for example) and count pages
+
+
 class ListItem:
     """Represents `Paragraph` instance as list item in numbering."""
 
@@ -270,8 +274,11 @@ class ListItem:
         if format == SE_NUMBER_FORMAT.NONE:
             return ""
         if format == SE_NUMBER_FORMAT.BULLET:
-            # TODO: plug for a while (or not)
-            return Numeral.bullet(self.ilvl)
+            if self.level.font is None:
+                font = "Symbol"
+            else:
+                font = self.level.font.font_name
+            return Numeral.bullet(self.level.pattern, font)
         if format == SE_NUMBER_FORMAT.CUSTOM:
             return Numeral.custom(
                 self.char_ord, self.level.numbering_custom_pattern
@@ -307,8 +314,6 @@ class ListItem:
         return text
 
 
-# TODO: Global problem [GP_1]: need text processor
-# to know char positions dynmically (for tabs for example) and count pages
 class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def cell(self) -> Cell | None:

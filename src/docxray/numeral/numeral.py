@@ -7,7 +7,7 @@ import num2words
 from unicode_rbnf.engine import RbnfEngine
 
 from .bcp47 import script
-from .charset import NAME_TO_CHARSET, CharsetName
+from .charset import DINGBAT_MAPPINGS, NAME_TO_CHARSET, CharsetName
 
 
 class Numeral:
@@ -126,8 +126,16 @@ class Numeral:
         return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
 
     @classmethod
-    def bullet(cls, ilvl: int) -> str:
-        return cls._cyclic(ilvl + 1, CharsetName.BULLET)
+    def bullet(cls, char: str, font: str) -> str:
+        if not isinstance(char, str) and len(char) != 1:
+            raise ValueError("There's must be single char")
+        if not cls._in_private_use_char(char):
+            return char
+        alt_code = ord(char) - 0xF000
+
+        if font in DINGBAT_MAPPINGS and alt_code in DINGBAT_MAPPINGS[font]:
+            return chr(DINGBAT_MAPPINGS[font][alt_code])
+        return chr(alt_code) if 0x20 <= alt_code <= 0x7E else char
 
     @classmethod
     def decimal_zero(cls, ord: int) -> str:
@@ -473,6 +481,20 @@ class Numeral:
             return locale_split[0], ""
         else:
             raise ValueError(f"Wrong locale `{locale}`")
+
+    @classmethod
+    def _in_private_use_char(cls, char_or_code: int | str) -> bool:
+        if isinstance(char_or_code, str):
+            code = ord(char_or_code)
+        else:
+            code = char_or_code
+        if 0xE000 <= code <= 0xF8FF:
+            return True
+        if 0xF0000 <= code <= 0xFFFFD:
+            return True
+        if 0x100000 <= code <= 0x10FFFD:
+            return True
+        return False
 
     @classmethod
     @lru_cache
