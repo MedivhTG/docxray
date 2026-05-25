@@ -76,6 +76,7 @@ class BordersInfo(TypedDict):
     spacing: Length | float | None
 
 
+# TODO: borders info refac needed after
 class CellH2D(How2Display[Cell]):
     @cached_property
     def row(self) -> Row:

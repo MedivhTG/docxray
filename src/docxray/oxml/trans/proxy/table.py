@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
+from docxray.oxml.trans.h2d.cell import BordersInfo
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
@@ -31,15 +32,23 @@ class Cell(BlockItemContainer[CT_Tc]):
         return CellH2D(self, self.part.document_part, "tcPr")
 
     @cached_property
+    def borders_info(self) -> BordersInfo:
+        """Primitive info about borders for current cell. Can be changed in future."""
+        return self.h2d.borders_info
+
+    @cached_property
     def row(self) -> Row:
+        """Current row."""
         return cast("Row", self._parent)
 
     @cached_property
     def table(self) -> Table:
+        """Current table."""
         return self.row.table
 
     @cached_property
     def width(self) -> Twips | float | None:
+        """Cell width in twips or percents, `None` if auto."""
         tcW_elm = self.h2d._prop("tcW")
         if isinstance(tcW_elm, NotFound) or tcW_elm is None:
             return None
@@ -47,6 +56,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def horz_span(self) -> int:
+        """Horizontal span of cells number like in HTML."""
         gridSpan_val = self.h2d._prop_val("gridSpan")
         if isinstance(gridSpan_val, NotFound):
             return 1
@@ -54,10 +64,12 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def idx(self) -> int:
+        """Cell index in a row (in XML)."""
         return self.row.cells.index(self)
 
     @cached_property
     def grid_x(self) -> int:
+        """Cell x-dimension (columns) index in table grid."""
         x = 0
         dflt = 1
         for i in range(self.idx):
@@ -70,16 +82,19 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def grid_y(self) -> int:
+        """Cell y-dimension (rows) index in table grid."""
         return self.row.idx
 
     @cached_property
     def vert_merged(self) -> bool:
+        """Flag if cell is vertically merged."""
         if self._vmerge in (None, SE_Merge.CONTINUE):
             return True
         return False
 
     @cached_property
     def cell_above(self) -> Cell | None:
+        """Cell is right on top of current in table grid. `None` if not."""
         above = self.table.get_cell_on_grid(self.grid_x, self.grid_y - 1)
         while above:
             # Skip vert merged cells to get origin reference
@@ -90,6 +105,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def cell_below(self) -> Cell | None:
+        """Cell is right at the bottom of current in table grid. `None` if not."""
         below = self.table.get_cell_on_grid(self.grid_x, self.grid_y + 1)
         while below:
             # Skip vert merged cells to get origin reference
@@ -166,10 +182,12 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def is_first(self) -> bool:
+        """Is first cell in current row grid."""
         return self.cell_prev is None
 
     @cached_property
     def is_last(self) -> bool:
+        """Is last cell in current row grid."""
         return self.cell_next is None
 
     @cached_property
