@@ -160,23 +160,21 @@ class ListItem:
         if restart_lvl == 0:
             # Never restarts (restart level is 0)
             return self.ilvl_ord + self.start - 1
-        else:
-            restarting = False
-            same_level_count = 1
-            prev_li = self.prev_li
-            while prev_li:
-                if prev_li.ilvl == self.ilvl:
-                    same_level_count += 1
-                if prev_li.ilvl <= upper_lvl:
-                    restarting = True
-                    break
-                prev_li = prev_li.prev_li
-            if restarting:
-                # Restart with count of the same level found before
-                return same_level_count + self.start - 1
-            else:
-                # Not restarts (not found higher level)
-                return self.ilvl_ord + self.start - 1
+        restarting = False
+        same_level_count = 1
+        prev_li = self.prev_li
+        while prev_li:
+            if prev_li.ilvl == self.ilvl:
+                same_level_count += 1
+            if prev_li.ilvl <= upper_lvl:
+                restarting = True
+                break
+            prev_li = prev_li.prev_li
+        if restarting:
+            # Restart with count of the same level found before
+            return same_level_count + self.start - 1
+        # Not restarts (not found higher level)
+        return self.ilvl_ord + self.start - 1
 
     @cached_property
     def next_li(self) -> ListItem | None:

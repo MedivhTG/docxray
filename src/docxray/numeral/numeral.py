@@ -483,6 +483,7 @@ class Numeral:
             raise ValueError(f"Wrong locale `{locale}`")
 
     @classmethod
+    @lru_cache
     def _in_private_use_char(cls, char_or_code: int | str) -> bool:
         if isinstance(char_or_code, str):
             code = ord(char_or_code)
