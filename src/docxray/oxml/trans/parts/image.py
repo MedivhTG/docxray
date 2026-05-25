@@ -1,15 +1,13 @@
-"""The proxy class for an image part, and related objects."""
-
 from __future__ import annotations
+
+from functools import cached_property
 
 # docxray stuff
 from docxray.opc.part import Part
+from docxray.oxml.trans.image.image import Image
 
 
 class ImagePart(Part):
-    """An image part.
-
-    Corresponds to the target part of a relationship with type RELATIONSHIP_TYPE.IMAGE.
-    """
-
-    pass
+    @cached_property
+    def image(self) -> Image:
+        return Image(self.blob)

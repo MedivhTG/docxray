@@ -32,7 +32,7 @@ class Break(ElementProxy[CT_Br]):
         return self.element.type
 
     @cached_property
-    def where_wrap(self) -> SE_BR_CLEAR:
+    def how_wrap(self) -> SE_BR_CLEAR:
         if self.which_break != SE_BR_TYPE.TEXT_WRAPPING:
             return SE_BR_CLEAR.NONE
         if self.element.clear_attr is None:
