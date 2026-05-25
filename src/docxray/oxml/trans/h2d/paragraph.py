@@ -33,6 +33,7 @@ from docxray.oxml.trans.st.enums import (
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
+    SE_TEXT_DIRECTION,
     SE_StyleType,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
@@ -41,14 +42,14 @@ from docxray.shared import os_locale
 from .how2display import How2Display
 from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
 
-type Direction = Literal["rtl", "ltr"]
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
 _ILVL_ALLOWED = set(DECIMAL[1:])
 
 
-# TODO: need to think about numbering refac
+# TODO: Global problem [GP_1]: need text processor
+# to know char positions dynmically (for tabs for example) and count pages
 class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def cell(self) -> Cell | None:
@@ -88,48 +89,63 @@ class ParagraphH2D(How2Display[Paragraph]):
     # --- Page properties (end)
 
     # --- Indentation/interval properties
-    # TODO: if no need -> use only in indentation property and delete it
+    # TODO: Mechanism of page counter need
     @cached_property
     def mirror_indents(self) -> bool:
+        """Based on the clarity of pages, determines which ind side should be reversed.
+
+        Page number is calculated dynamically (mechanism too complex), so let’s leave it for the future,
+        now consumer should determine page number.
+
+        Returns:
+            bool: _description_
+        """
         return on_off(self._display_val("mirrorIndents"))
 
     @cached_property
     def context_spacing(self) -> bool:
         return on_off(self._display_val("contextualSpacing"))
 
-    # TODO: look for textDirection too
     @cached_property
-    def direction(self) -> Direction:
-        val = on_off(self._display_val("bidi"))
-        return "rtl" if val is True else "ltr"
+    def right_to_left(self) -> bool:
+        return on_off(self._display_val("bidi"))
 
-    # TODO: add fallback on `start` and `startChars` properties
+    @cached_property
+    def text_flow(self) -> SE_TEXT_DIRECTION | None:
+        val = self._display_val("textDirection")
+        if isinstance(val, NotFound):
+            return None
+        return val
+
     @cached_property
     def margin_line_start(self) -> Length | int | None:
-        margin_inline_start = None
         left_chars: int | NotFound = self._display_ind_prop("leftChars")
-        if not isinstance(left_chars, NotFound):
-            margin_inline_start = left_chars
-        else:
-            left: int | str | NotFound = self._display_ind_prop("left", False)
+        if isinstance(left_chars, NotFound):
+            left_chars = self._display_ind_prop("startChars")
+        if isinstance(left_chars, NotFound):
+            left: int | str | NotFound = self._display_ind_prop("left")
+            if isinstance(left, NotFound):
+                left = self._display_ind_prop("start")
             if not isinstance(left, NotFound):
-                margin_inline_start = signed_twips_measure(left)
-        return margin_inline_start
+                return signed_twips_measure(left)
+        else:
+            return left_chars
+        return None
 
-    # TODO: add fallback on `end` and `endChars` properties
     @cached_property
     def margin_line_end(self) -> Length | int | None:
-        margin_inline_end = None
         right_chars: int | NotFound = self._display_ind_prop("rightChars")
-        if not isinstance(right_chars, NotFound):
-            margin_inline_end = right_chars
-        else:
-            right: int | str | NotFound = self._display_ind_prop(
-                "right", False
-            )
+        if isinstance(right_chars, NotFound):
+            right_chars = self._display_ind_prop("endChars")
+        if isinstance(right_chars, NotFound):
+            right: int | str | NotFound = self._display_ind_prop("right")
+            if isinstance(right, NotFound):
+                right = self._display_ind_prop("end")
             if not isinstance(right, NotFound):
-                margin_inline_end = signed_twips_measure(right)
-        return margin_inline_end
+                return signed_twips_measure(right)
+        else:
+            return right_chars
+        return None
 
     @cached_property
     def text_indent(self) -> Length | int | None:
@@ -140,9 +156,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 hanging_chars if hanging_chars < 0 else -hanging_chars
             )
         else:
-            hanging: int | str | NotFound = self._display_ind_prop(
-                "hanging", False
-            )
+            hanging: int | str | NotFound = self._display_ind_prop("hanging")
             if not isinstance(hanging, NotFound):
                 twips = twips_measure(hanging)
                 text_indent = twips if twips < 0 else -twips
@@ -155,7 +169,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 text_indent = first_line_chars
             else:
                 first_line: int | str | NotFound = self._display_ind_prop(
-                    "firstLine", False
+                    "firstLine"
                 )
                 if not isinstance(first_line, NotFound):
                     text_indent = twips_measure(first_line)
@@ -168,21 +182,21 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def header_level(self) -> WD_HEADER_LEVEL:
-        outlineLevel_val: int = self._display_val("outlineLvl", False)
+        outlineLevel_val: int = self._display_val("outlineLvl")
         if isinstance(outlineLevel_val, NotFound):
             return WD_HEADER_LEVEL.TEXT
         return WD_HEADER_LEVEL(outlineLevel_val)
 
     @cached_property
     def alignment(self) -> SE_JC:
-        jc = self._display_val("jc", False)
+        jc = self._display_val("jc")
         if isinstance(jc, NotFound):
             return SE_JC.LEFT
         return jc
 
     @cached_property
     def vert_alignment(self) -> SE_TEXT_ALIGNMENT:
-        v_align = self._display_val("textAlignment", False)
+        v_align = self._display_val("textAlignment")
         if isinstance(v_align, NotFound):
             return SE_TEXT_ALIGNMENT.BASELINE
         return v_align
@@ -448,8 +462,6 @@ class ParagraphH2D(How2Display[Paragraph]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
 
-    # TODO: implement (for _level_char too):
-    # 1) Realize numerals
     @cached_property
     def _level_text(self) -> str | None:
         num_id_ilvl = self._num_id_ilvl
@@ -472,7 +484,7 @@ class ParagraphH2D(How2Display[Paragraph]):
             return None
         text = self._parse_num_pattern(pattern, ilvl)
         if lvl.separator == SE_LEVEL_SUFFIX.TAB:
-            # TODO: it's not a tab as in WORD, but reproducing tab width.. is challenge
+            # TODO: look GP_1
             text += "\t"
         elif lvl.separator == SE_LEVEL_SUFFIX.SPACE:
             text += " "
@@ -491,8 +503,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 return locale
         return os_locale()
 
-    # TODO: here can be an Image instance along with common chars -
-    # implement after
+    # TODO: here can be an Image instance along with common chars
     @cached_property
     def _level_char(self) -> str | None:
         # Simple check for None values
@@ -628,7 +639,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         return self._display_val(para_path, optional)
 
     def _display_val(
-        self, name_or_path: str | PropertyPath, optional: bool = True
+        self, name_or_path: str | PropertyPath, optional: bool = False
     ) -> Any:
         if self._is_list_item:
             return self._prop_val(name_or_path, optional, "both")

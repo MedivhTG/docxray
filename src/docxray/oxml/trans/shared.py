@@ -5,6 +5,7 @@ from functools import cached_property
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
     SE_JC,
+    SE_TEXT_DIRECTION,
     SE_Border,
     SE_OnOff1,
     SE_TblWidth,
@@ -23,6 +24,7 @@ from docxray.oxml.trans.st.wml import (
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
     ST_TblWidth,
+    ST_TextDirection,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
@@ -165,7 +167,9 @@ class CT_FramePr(OxmlElement):
 
 
 class CT_TextDirection(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_TEXT_DIRECTION:
+        return self.attr_required(W.VAL, ST_TextDirection)
 
 
 class CT_SectPr(OxmlElement):

@@ -367,3 +367,17 @@ class SE_LEVEL_SUFFIX(StrEnum):
     TAB = "tab"
     SPACE = "space"
     NOTHING = "nothing"
+
+
+class SE_TEXT_DIRECTION(StrEnum):
+    TOP_TO_BOTTOM = "tb"
+    RIGHT_TO_LEFT = "rl"
+    LEFT_TO_RIGHT = "lr"
+    TOP_TO_BOTTOM_VERTICAL = "tbV"
+    RIGHT_TO_LEFT_VERTICAL = "rlV"
+    LEFT_TO_RIGHT_VERTICAL = "lrV"
+    BOTTOM_TO_TOP_LEFT_TO_RIGHT = "btLr"
+    LEFT_TO_RIGHT_TOP_TO_BOTTOM = "lrTb"
+    LEFT_TO_RIGHT_TOP_TO_BOTTOM_VERTICAL = "lrTbV"
+    TOP_TO_BOTTOM_RIGHT_TO_LEFT = "tbRl"
+    TOP_TO_BOTTOM_RIGHT_TO_LEFT_VERTICAL = "tbRlV"

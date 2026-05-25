@@ -21,6 +21,7 @@ from .enums import (
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
+    SE_TEXT_DIRECTION,
     SE_Border,
     SE_HexColorAuto,
     SE_Merge,
@@ -133,3 +134,8 @@ class ST_NumberFormat(XsdSimpleType):
 class ST_LevelSuffix(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_LEVEL_SUFFIX)}
+
+
+class ST_TextDirection(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_DIRECTION)}
