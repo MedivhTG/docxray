@@ -5,7 +5,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.oxml.trans.h2d.paragraph import ListItem
 from docxray.oxml.trans.proxy.shared import StoryChild
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.run import Run
@@ -16,6 +15,7 @@ from docxray.oxml.trans.text.run import CT_R
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.paragraph import (
+        ListItem,
         ParagraphH2D,
     )
     from docxray.oxml.trans.proxy.document import Body

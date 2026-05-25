@@ -72,6 +72,7 @@ class TestDocument:
                 lvl = p_fmt.header_level
                 para_Style_num = p_fmt._para_style_numbering
                 li = p_or_t.list_item
+                f = li.level_text if li is not None else None
                 pPr = p_or_t.element.pPr
                 if pPr is not None:
                     w = 1

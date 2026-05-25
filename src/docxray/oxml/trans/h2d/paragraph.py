@@ -97,26 +97,32 @@ class ListItem:
 
     @cached_property
     def level(self) -> Level:
+        """Associated level with properties for list."""
         return self._level
 
     @cached_property
     def num_id(self) -> int:
+        """Reference to numbering properties."""
         return self._num_id
 
     @cached_property
     def ilvl(self) -> int:
+        """Hierarchy level of list item."""
         return cast("int", self._ilvl)
 
     @cached_property
     def num_key(self) -> tuple[int, int]:
+        """Tuple of `num_id` and `ilvl`"""
         return self.num_id, self.ilvl
 
     @cached_property
     def start(self) -> int:
+        """Which number of ordinal (or 0) must be the start of list for `char_ord`."""
         return cast("int", self._start)
 
     @cached_property
     def ord(self) -> int:
+        """Ordinal number of list item at all."""
         prev_li = self.prev_li
         count = 1
         while prev_li:
@@ -126,6 +132,7 @@ class ListItem:
 
     @cached_property
     def ilvl_ord(self) -> int:
+        """Ordinal number of list item with the same hierarchy level (`ilvl`)."""
         prev_li = self.prev_li_ilvl
         count = 1
         while prev_li:
@@ -135,6 +142,7 @@ class ListItem:
 
     @cached_property
     def char_ord(self) -> int:
+        """Ordinal number of character in associated charset from `Numeral` module."""
         if self.ilvl == 0:
             # Never restarts (highest level)
             return self.ilvl_ord + self.start - 1
@@ -168,6 +176,7 @@ class ListItem:
 
     @cached_property
     def next_li(self) -> ListItem | None:
+        """Next list item in all list. `None` if no list item ahead."""
         next_para: Paragraph | None = self._paragraph.next_sibling
         while next_para:
             if next_para.list_item is not None:
@@ -181,6 +190,7 @@ class ListItem:
 
     @cached_property
     def prev_li(self) -> ListItem | None:
+        """Previous list item in all list. `None` if no list item behind."""
         prev_para: Paragraph | None = self._paragraph.prev_sibling
         while prev_para:
             if prev_para.list_item is not None:
@@ -194,6 +204,7 @@ class ListItem:
 
     @cached_property
     def next_li_ilvl(self) -> ListItem | None:
+        """Next list item in with same `ilvl`. `None` if no list item ahead."""
         next_para: Paragraph | None = self._paragraph.next_sibling
         while next_para:
             if next_para.list_item is not None:
@@ -205,6 +216,7 @@ class ListItem:
 
     @cached_property
     def prev_li_ilvl(self) -> ListItem | None:
+        """Previous list item in with same `ilvl`. `None` if no list item behind."""
         prev_para: Paragraph | None = self._paragraph.prev_sibling
         while prev_para:
             if prev_para.list_item is not None:
@@ -216,6 +228,10 @@ class ListItem:
 
     @cached_property
     def locale(self) -> str:
+        """Locale set for `Numeral` module.
+
+        Can determine which alphabet/spellout letters/numbering will be used in `level_text`.
+        """
         if self.level.locale is not None:
             return self.level.locale
         if self._h2d._styles.document_defaults is not None:
@@ -226,6 +242,15 @@ class ListItem:
 
     @cached_property
     def level_text(self) -> str:
+        """Get rendered level text as in WORD.
+
+        `NOTE`:
+        1) If suffix (separator-character) is TAB, then
+        we must return Tab instance, but for some reasons we can't do it
+        (Word renderer too complex) for now and returned symbol is backslashed tab.
+        2) For future level text can return `Image` instance (str | Image) if numbering
+        format has picture reference (bullet format usually).
+        """
         level = self.level
         num_format = level.numbering_format
         if num_format in NUMERAL_SPECIFIC:
@@ -255,8 +280,8 @@ class ListItem:
             return Numeral.decimal(self.char_ord)
         if format in NUMERAL_WITH_LOCALE:
             locale = self.locale or "en-US"
-            return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
-        return NUMERAL_RULES[format](ord)  # type: ignore[operator]
+            return NUMERAL_RULES[format](self.char_ord, locale)  # type: ignore[operator]
+        return NUMERAL_RULES[format](self.char_ord)  # type: ignore[operator]
 
     def _parse_pattern(self) -> str:
         text = ""
@@ -338,7 +363,7 @@ class ParagraphH2D(How2Display[Paragraph]):
     # --- Page properties (end)
 
     # --- Indentation/interval properties
-    # TODO: Mechanism of page counter need
+    # TODO: look GP_1
     @cached_property
     def mirror_indents(self) -> bool:
         """Based on the clarity of pages, determines which ind side should be reversed.
