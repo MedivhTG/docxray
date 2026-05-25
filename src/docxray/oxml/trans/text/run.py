@@ -4,7 +4,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.drawing import CT_Drawing
-from docxray.oxml.trans.ns import W
+from docxray.oxml.trans.ns import XML, W
 from docxray.oxml.trans.shared import CT_Empty
 from docxray.oxml.trans.st.enums import SE_BR_CLEAR, SE_BR_TYPE
 from docxray.oxml.trans.st.shared_common import ST_String
@@ -41,10 +41,14 @@ class CT_CustomXmlRun(OxmlElement):
     pass
 
 
-class CT_T(OxmlElement):
+class CT_Text(OxmlElement):
     @cached_property
     def txt(self) -> str:
         return self.text or ""
+
+    @cached_property
+    def space(self) -> str | None:
+        return self.attr_optional(XML.SPACE, ST_String)
 
 
 class CT_Br(OxmlElement):
@@ -71,13 +75,13 @@ class CT_PTab(OxmlElement):
     pass
 
 
-type RunInnerContent = list[CT_Br | CT_T | CT_Empty | CT_Drawing | CT_PTab]
+type RunInnerContent = list[CT_Br | CT_Text | CT_Empty | CT_Drawing | CT_PTab]
 
 
 class CT_R(OxmlElement):
     @cached_property
-    def t(self) -> CT_T | None:
-        return self.child_zero_or_one(W.T, CT_T)
+    def t(self) -> CT_Text | None:
+        return self.child_zero_or_one(W.T, CT_Text)
 
     @cached_property
     def rPr(self) -> CT_RPr | None:

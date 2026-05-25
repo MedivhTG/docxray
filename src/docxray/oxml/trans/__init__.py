@@ -97,7 +97,7 @@ from .text.hyperlink import CT_Hyperlink
 
 register_element_cls("w:hyperlink", CT_Hyperlink)
 
-from .text.run import CT_R, CT_T, CT_Br, CT_PTab, CT_Sym
+from .text.run import CT_R, CT_Br, CT_PTab, CT_Sym, CT_Text
 
 register_element_cls("w:r", CT_R)
 register_element_cls("w:br", CT_Br)
@@ -107,7 +107,7 @@ register_element_cls("w:sym", CT_Sym)
 register_element_cls("w:cr", CT_Empty)
 register_element_cls("w:tab", CT_Empty)
 register_element_cls("w:ptab", CT_PTab)
-register_element_cls("w:t", CT_T)
+register_element_cls("w:t", CT_Text)
 
 from .text.run_props import (
     CT_RPr,

@@ -34,6 +34,10 @@ def qn(tag: str) -> str:
     return "{%s}%s" % (uri, tagroot)
 
 
+class XML:
+    SPACE = qn("xml:space")
+
+
 class W:
     BACKGROUND = qn("w:background")
 
