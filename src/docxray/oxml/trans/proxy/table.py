@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
-from docxray.oxml.trans.h2d.cell import BordersInfo
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
@@ -15,9 +14,10 @@ from .compute import width
 from .shared import ElementProxy, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
-    from ..h2d.cell import CellH2D
-    from ..h2d.row import RowH2D
-    from ..h2d.table import TableH2D
+    # docxray stuff
+    from docxray.oxml.trans.h2d.cell import BordersInfo, CellH2D
+    from docxray.oxml.trans.h2d.row import RowH2D
+    from docxray.oxml.trans.h2d.table import TableH2D
 
 
 class TblPosError(Exception):
@@ -27,7 +27,8 @@ class TblPosError(Exception):
 class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def h2d(self) -> CellH2D:
-        from ..h2d.cell import CellH2D
+        # docxray stuff
+        from docxray.oxml.trans.h2d.cell import CellH2D
 
         return CellH2D(self, self.part.document_part, "tcPr")
 

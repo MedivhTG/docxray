@@ -53,7 +53,7 @@ class TestDocument:
                                     r_fmt = r_or_h.h2d
                                     italic = r_fmt.italic
                                     bold = r_fmt.bold
-                                    caps = r_fmt.all_uppercase
+                                    caps = r_fmt._all_uppercase
                                     u = r_fmt.underline
                                     v_algn = r_fmt.vertical_alignment
                                     wait = 1

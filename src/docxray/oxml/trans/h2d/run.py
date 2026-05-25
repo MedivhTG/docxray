@@ -1,7 +1,8 @@
 from functools import cached_property
-from typing import Any, cast
+from typing import Any, Literal
 
 # docxray stuff
+from docxray.oxml.trans.h2d.exceptions import DisplayError
 from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
@@ -9,7 +10,6 @@ from docxray.oxml.trans.proxy.styles.style import (
     CharacterStyle,
 )
 from docxray.oxml.trans.proxy.table import Cell
-from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import (
     SE_OnOff1,
@@ -21,6 +21,7 @@ from docxray.oxml.trans.st.enums import (
 from .how2display import How2Display
 
 type _OnOff = NotFound | bool | SE_OnOff1 | None
+type CharsCase = Literal["up", "down", "default"]
 
 
 class RunH2D(How2Display[Run]):
@@ -33,13 +34,18 @@ class RunH2D(How2Display[Run]):
         return self._display_val_toggled("b")
 
     @cached_property
-    def all_uppercase(self) -> bool:
-        return self._display_val_toggled("caps")
+    def chars_case(self) -> CharsCase:
+        if self._all_uppercase and self._all_downcase:
+            raise DisplayError(
+                "Mentiond 2 cases (up, down) when they are mutually exclusive"
+            )
+        if self._all_uppercase:
+            return "up"
+        if self._all_downcase:
+            return "down"
+        return "default"
 
-    @cached_property
-    def all_downcase(self) -> bool:
-        return self._display_val_toggled("smallCaps")
-
+    # TODO: double strike needed
     @cached_property
     def single_strike_through(self) -> bool:
         return self._display_val_toggled("strike")
@@ -65,12 +71,16 @@ class RunH2D(How2Display[Run]):
         return align
 
     @cached_property
-    def paragraph(self) -> Paragraph:
-        return cast("Paragraph", self._proxy._parent)
+    def cell(self) -> Cell | None:
+        return self._proxy.paragraph.h2d.cell
 
     @cached_property
-    def cell(self) -> Cell | None:
-        return self.paragraph.h2d.cell
+    def _all_uppercase(self) -> bool:
+        return self._display_val_toggled("caps")
+
+    @cached_property
+    def _all_downcase(self) -> bool:
+        return self._display_val_toggled("smallCaps")
 
     @cached_property
     def _char_style(self) -> CharacterStyle | None:
@@ -87,7 +97,7 @@ class RunH2D(How2Display[Run]):
         char_val = self._prop_val(name, optional, "both")
         if not isinstance(char_val, NotFound):
             return char_val
-        para_val = self.paragraph.h2d._prop_val_run(name, optional)
+        para_val = self._proxy.paragraph.h2d._prop_val_run(name, optional)
         if not isinstance(para_val, NotFound):
             return para_val
         char_path = self._prop_path("val", f"{self._path_base}.{name}")
@@ -107,7 +117,7 @@ class RunH2D(How2Display[Run]):
         if not isinstance(char_direct_val, NotFound):
             return on_off(char_direct_val)
         char_val = self._prop_val(name, True, "style")
-        para_val = self.paragraph.h2d._prop_val_run(name)
+        para_val = self._proxy.paragraph.h2d._prop_val_run(name)
         char_path = self._prop_path("val", f"{self._path_base}.{name}")
         tbl_val = NotFound(self, char_path)
         cell = self.cell
