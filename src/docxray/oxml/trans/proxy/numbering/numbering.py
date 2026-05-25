@@ -12,6 +12,7 @@ from docxray.oxml.trans.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
+from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import (
     ElementProxy,
     NotFound,
@@ -24,7 +25,12 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.styles.styles import Styles
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
-from docxray.oxml.trans.st.enums import SE_JC, SE_LEVEL_SUFFIX, SE_StyleType
+from docxray.oxml.trans.st.enums import (
+    SE_JC,
+    SE_LEVEL_SUFFIX,
+    SE_NUMBER_FORMAT,
+    SE_StyleType,
+)
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -84,6 +90,47 @@ class Level(ElementProxy[CT_Lvl]):
             return SE_LEVEL_SUFFIX.TAB
         return self._element.suff.val
 
+    @cached_property
+    def start_from(self) -> int:
+        if self.element.start is None:
+            return 0
+        return self.element.start.val
+
+    @cached_property
+    def numbering_format(self) -> SE_NUMBER_FORMAT:
+        if self.element.numFmt is None:
+            return SE_NUMBER_FORMAT.DECIMAL
+        return self.element.numFmt.val
+
+    @cached_property
+    def numbering_custom_pattern(self) -> str:
+        if self.element.numFmt is None:
+            return ""
+        return self.element.numFmt.format or ""
+
+    @cached_property
+    def pattern(self) -> str:
+        if self.element.lvlText is None:
+            return ""
+        pattern = self.element.lvlText.val
+        if pattern is None:
+            if on_off(self.element.lvlText.null):
+                return "\0"
+            return ""
+        return pattern
+
+    @cached_property
+    def restart_from(self) -> int | None:
+        if self.element.lvlRestart is None:
+            return None
+        return self.element.lvlRestart.val
+
+    @cached_property
+    def all_decimal(self) -> bool:
+        return (
+            False if self.element.isLgl is None else on_off(self.element.isLgl)
+        )
+
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
     @cached_property
@@ -95,7 +142,7 @@ class LevelOverride(ElementProxy[CT_NumLvl]):
         return self.num.numbering
 
     @cached_property
-    def restart_from(self) -> int | None:
+    def start_from(self) -> int | None:
         startOverride_elm = self.element.startOverride
         if startOverride_elm is None:
             return None

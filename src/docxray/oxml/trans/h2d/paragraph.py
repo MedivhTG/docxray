@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
@@ -15,6 +17,7 @@ from docxray.oxml.trans.proxy.numbering.numbering import (
     Level,
     LevelOverride,
     Num,
+    Numbering,
 )
 from docxray.oxml.trans.proxy.shared import (
     Length,
@@ -48,6 +51,237 @@ type _DirectCase = Literal[
 _ILVL_ALLOWED = set(DECIMAL[1:])
 
 
+class ListItemError(Exception):
+    pass
+
+
+class ListItem:
+    """Represents `Paragraph` instance as list item in numbering."""
+
+    def __init__(
+        self,
+        numbering: Numbering,
+        paragraph: Paragraph,
+        numPr_elm: CT_NumPr,
+        level: Level | LevelOverride,
+    ) -> None:
+        self._numbering = numbering
+        self._paragraph = paragraph
+        self._h2d = paragraph.h2d
+        if numPr_elm.numId is None:
+            raise ListItemError(
+                "Cannot instantiate list item with `None` numId"
+            )
+        self._num_id = numPr_elm.numId.val
+        self._ilvl = numPr_elm.ilvl.val if numPr_elm.ilvl is not None else None
+        self._start = None
+        if isinstance(level, LevelOverride):
+            if level.lvl is None:
+                if self._ilvl is None:
+                    raise ListItemError(
+                        "Cannot instantiate list item wit `None` ilvl for LevelOverride"
+                    )
+                self._level = self._numbering.associated_lvl(
+                    self._num_id, self._ilvl
+                )
+            else:
+                self._level = level.lvl
+            self._start = level.start_from
+        else:
+            self._level = level
+            self._start = level.start_from
+        if self._ilvl is None:
+            self._ilvl = self._level.ilvl
+        if self._start is None:
+            self._start = 0
+
+    @cached_property
+    def level(self) -> Level:
+        return self._level
+
+    @cached_property
+    def num_id(self) -> int:
+        return self._num_id
+
+    @cached_property
+    def ilvl(self) -> int:
+        return cast("int", self._ilvl)
+
+    @cached_property
+    def num_key(self) -> tuple[int, int]:
+        return self.num_id, self.ilvl
+
+    @cached_property
+    def start(self) -> int:
+        return cast("int", self._start)
+
+    @cached_property
+    def ord(self) -> int:
+        prev_li = self.prev_li
+        count = 1
+        while prev_li:
+            count += 1
+            prev_li = prev_li.prev_li
+        return count
+
+    @cached_property
+    def ilvl_ord(self) -> int:
+        prev_li = self.prev_li_ilvl
+        count = 1
+        while prev_li:
+            count += 1
+            prev_li = prev_li.prev_li_ilvl
+        return count
+
+    @cached_property
+    def char_ord(self) -> int:
+        if self.ilvl == 0:
+            # Never restarts (highest level)
+            return self.ilvl_ord + self.start - 1
+        if self.level.restart_from is None:
+            restart_lvl = None
+            upper_lvl = self.ilvl - 1
+        else:
+            restart_lvl = self.level.restart_from
+            upper_lvl = self.ilvl - restart_lvl
+
+        if restart_lvl == 0:
+            # Never restarts (restart level is 0)
+            return self.ilvl_ord + self.start - 1
+        else:
+            restarting = False
+            same_level_count = 1
+            prev_li = self.prev_li
+            while prev_li:
+                if prev_li.ilvl == self.ilvl:
+                    same_level_count += 1
+                if prev_li.ilvl <= upper_lvl:
+                    restarting = True
+                    break
+                prev_li = prev_li.prev_li
+            if restarting:
+                # Restart with count of the same level found before
+                return same_level_count + self.start - 1
+            else:
+                # Not restarts (not found higher level)
+                return self.ilvl_ord + self.start - 1
+
+    @cached_property
+    def next_li(self) -> ListItem | None:
+        next_para: Paragraph | None = self._paragraph.next_sibling
+        while next_para:
+            if next_para.list_item is not None:
+                next_li = next_para.list_item
+                if self.num_key == next_li.num_key:
+                    return next_li
+                if self.num_id == next_li.num_id:
+                    return next_li
+            next_para = next_para.next_sibling
+        return None
+
+    @cached_property
+    def prev_li(self) -> ListItem | None:
+        prev_para: Paragraph | None = self._paragraph.prev_sibling
+        while prev_para:
+            if prev_para.list_item is not None:
+                prev_li = prev_para.list_item
+                if self.num_key == prev_li.num_key:
+                    return prev_li
+                if self.num_id == prev_li.num_id:
+                    return prev_li
+            prev_para = prev_para.prev_sibling
+        return None
+
+    @cached_property
+    def next_li_ilvl(self) -> ListItem | None:
+        next_para: Paragraph | None = self._paragraph.next_sibling
+        while next_para:
+            if next_para.list_item is not None:
+                next_li = next_para.list_item
+                if self.num_key == next_li.num_key:
+                    return next_li
+            next_para = next_para.next_sibling
+        return None
+
+    @cached_property
+    def prev_li_ilvl(self) -> ListItem | None:
+        prev_para: Paragraph | None = self._paragraph.prev_sibling
+        while prev_para:
+            if prev_para.list_item is not None:
+                prev_li = prev_para.list_item
+                if self.num_key == prev_li.num_key:
+                    return prev_li
+            prev_para = prev_para.prev_sibling
+        return None
+
+    @cached_property
+    def locale(self) -> str:
+        if self.level.locale is not None:
+            return self.level.locale
+        if self._h2d._styles.document_defaults is not None:
+            locale = self._h2d._styles.document_defaults.locale
+            if locale is not None:
+                return locale
+        return os_locale()
+
+    @cached_property
+    def level_text(self) -> str:
+        level = self.level
+        num_format = level.numbering_format
+        if num_format in NUMERAL_SPECIFIC:
+            return self._level_char
+        text = self._parse_pattern()
+        if level.separator == SE_LEVEL_SUFFIX.TAB:
+            # TODO: look GP_1
+            text += "\t"
+        elif level.separator == SE_LEVEL_SUFFIX.SPACE:
+            text += " "
+        return text
+
+    # TODO: here can be an Image instance along with common chars
+    @cached_property
+    def _level_char(self) -> str:
+        format = self.level.numbering_format
+        if format == SE_NUMBER_FORMAT.NONE:
+            return ""
+        if format == SE_NUMBER_FORMAT.BULLET:
+            # TODO: plug for a while (or not)
+            return Numeral.bullet(self.ilvl)
+        if format == SE_NUMBER_FORMAT.CUSTOM:
+            return Numeral.custom(
+                self.char_ord, self.level.numbering_custom_pattern
+            )
+        if self.level.all_decimal:
+            return Numeral.decimal(self.char_ord)
+        if format in NUMERAL_WITH_LOCALE:
+            locale = self.locale or "en-US"
+            return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
+        return NUMERAL_RULES[format](ord)  # type: ignore[operator]
+
+    def _parse_pattern(self) -> str:
+        text = ""
+        percentage_followed = False
+        for ch in self.level.pattern:
+            if ch == "%":
+                percentage_followed = True
+                continue
+            if not (percentage_followed and ch in _ILVL_ALLOWED):
+                text += ch
+                continue
+            ilvl_found = int(ch) - 1
+            if ilvl_found == self.ilvl:
+                text += self._level_char
+            elif ilvl_found < self.ilvl:
+                prev_li = self.prev_li
+                while prev_li:
+                    if prev_li.ilvl == ilvl_found:
+                        text += prev_li._level_char
+                        break
+                    prev_li = prev_li.prev_li
+            percentage_followed = False
+        return text
+
+
 # TODO: Global problem [GP_1]: need text processor
 # to know char positions dynmically (for tabs for example) and count pages
 class ParagraphH2D(How2Display[Paragraph]):
@@ -57,6 +291,21 @@ class ParagraphH2D(How2Display[Paragraph]):
         if isinstance(container, Cell):
             return container
         return None
+
+    @cached_property
+    def list_item(self) -> ListItem | None:
+        if self._numbering is None:
+            return None
+        if self._associated_numPr is None:
+            return None
+        if self._associated_level is None:
+            return None
+        return ListItem(
+            self._numbering,
+            self._proxy,
+            self._associated_numPr,
+            self._associated_level,
+        )
 
     # --- Page properties
     @cached_property
@@ -244,131 +493,6 @@ class ParagraphH2D(How2Display[Paragraph]):
     # --- General/specific properties (end)
 
     @cached_property
-    def _num_ord(self) -> int | None:
-        if not self._is_list_item:
-            return None
-        prev_num_para = self._prev_num_para_full_search
-        count = 1
-        while prev_num_para:
-            count += 1
-            prev_num_para = prev_num_para.h2d._prev_num_para_full_search
-        return count
-
-    @cached_property
-    def _next_num_para_full_search(self) -> Paragraph | None:
-        if self._num_id_ilvl is None:
-            return None
-        next_para: Paragraph | None = self._proxy.next_sibling
-        num_id, _ = self._num_id_ilvl
-        while next_para:
-            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
-                return next_para
-            next_num_id_ilvl = next_para.h2d._num_id_ilvl
-            if next_num_id_ilvl is None:
-                next_para = next_para.next_sibling
-                continue
-            num_id_next, _ = next_num_id_ilvl
-            if num_id == num_id_next:
-                return next_para
-            next_para = next_para.next_sibling
-        return None
-
-    @cached_property
-    def _prev_num_para_full_search(self) -> Paragraph | None:
-        if self._num_id_ilvl is None:
-            return None
-        next_para: Paragraph | None = self._proxy.prev_sibling
-        num_id, _ = self._num_id_ilvl
-        while next_para:
-            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
-                return next_para
-            next_num_id_ilvl = next_para.h2d._num_id_ilvl
-            if next_num_id_ilvl is None:
-                next_para = next_para.prev_sibling
-                continue
-            num_id_next, _ = next_num_id_ilvl
-            if num_id == num_id_next:
-                return next_para
-            next_para = next_para.prev_sibling
-        return None
-
-    @cached_property
-    def _num_ilvl_ord(self) -> int | None:
-        if not self._is_list_item:
-            return None
-        prev_num_para = self._prev_num_para
-        count = 1
-        while prev_num_para:
-            count += 1
-            prev_num_para = prev_num_para.h2d._prev_num_para
-        return count
-
-    @cached_property
-    def _next_num_para(self) -> Paragraph | None:
-        if self._num_id_ilvl is None:
-            return None
-        next_para: Paragraph | None = self._proxy.next_sibling
-        while next_para:
-            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
-                return next_para
-            next_para = next_para.next_sibling
-        return None
-
-    @cached_property
-    def _prev_num_para(self) -> Paragraph | None:
-        if self._num_id_ilvl is None:
-            return None
-        next_para: Paragraph | None = self._proxy.prev_sibling
-        while next_para:
-            if self._num_id_ilvl == next_para.h2d._num_id_ilvl:
-                return next_para
-            next_para = next_para.prev_sibling
-        return None
-
-    @cached_property
-    def _num_id_ilvl(self) -> tuple[int, int] | None:
-        err = InvalidXmlError("Cannot determine associated numbering")
-        numPr_elm = self._associated_numPr
-        if numPr_elm is None:
-            return None
-        if numPr_elm.numId is None:
-            raise err
-        num_id = numPr_elm.numId.val
-        if numPr_elm.ilvl is not None:
-            ilvl = numPr_elm.ilvl.val
-        else:
-            level = self._associated_level
-            if level is None:
-                raise err
-            if isinstance(level, LevelOverride):
-                if level.lvl is None:
-                    raise err
-                ilvl = level.lvl.ilvl
-            else:
-                ilvl = level.ilvl
-        return num_id, ilvl
-
-    @cached_property
-    def _is_list_item(self) -> bool:
-        return self._associated_level is not None
-
-    @cached_property
-    def _associated_level_definition(self) -> Level | None:
-        if self._associated_level is None:
-            return None
-        if self._num_id_ilvl is None:
-            return None
-        level = self._associated_level
-        num_id, ilvl = self._num_id_ilvl
-        if isinstance(level, LevelOverride):
-            if level.lvl is None:
-                if self._numbering is None:
-                    return None
-                return self._numbering.associated_lvl(num_id, ilvl)
-            return level.lvl
-        return level
-
-    @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:
         numPr_elm_direct = self._numPr_para_direct
 
@@ -462,178 +586,6 @@ class ParagraphH2D(How2Display[Paragraph]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
 
-    @cached_property
-    def _level_text(self) -> str | None:
-        num_id_ilvl = self._num_id_ilvl
-        if num_id_ilvl is None:
-            return None
-        _, ilvl = num_id_ilvl
-        lvl = self._associated_level_definition
-        if lvl is None:
-            return None
-        numFmt_elm = lvl.element.numFmt
-        if numFmt_elm is None:
-            return None
-        if numFmt_elm.val in NUMERAL_SPECIFIC:
-            return self._level_char
-        lvlText_elm = lvl.element.lvlText
-        if lvlText_elm is None:
-            return None
-        pattern = lvlText_elm.val
-        if pattern is None:
-            return None
-        text = self._parse_num_pattern(pattern, ilvl)
-        if lvl.separator == SE_LEVEL_SUFFIX.TAB:
-            # TODO: look GP_1
-            text += "\t"
-        elif lvl.separator == SE_LEVEL_SUFFIX.SPACE:
-            text += " "
-        return text
-
-    @cached_property
-    def _num_locale(self) -> str | None:
-        lvl = self._associated_level_definition
-        if lvl is None:
-            return None
-        if lvl.locale is not None:
-            return lvl.locale
-        if self._styles.document_defaults is not None:
-            locale = self._styles.document_defaults.locale
-            if locale is not None:
-                return locale
-        return os_locale()
-
-    # TODO: here can be an Image instance along with common chars
-    @cached_property
-    def _level_char(self) -> str | None:
-        # Simple check for None values
-        if self._num_id_ilvl is None:
-            return None
-        num_id, ilvl = self._num_id_ilvl
-        if self._num_ilvl_ord is None:
-            return None
-        if self._associated_level is None:
-            return None
-
-        # Get start and level
-        level = self._associated_level
-        start = 0
-        if isinstance(level, LevelOverride):
-            if level.lvl is None:
-                if self._numbering is None:
-                    return None
-                lvl = self._numbering.associated_lvl(num_id, ilvl)
-            else:
-                lvl = level.lvl
-            startOverride = level.element.startOverride
-            if startOverride is not None:
-                start = startOverride.val
-            elif lvl.element.start is not None:
-                start = lvl.element.start.val
-        else:
-            lvl = level
-            if lvl.element.start is not None:
-                start = lvl.element.start.val
-
-        # Numbering format
-        numFmt_elm = lvl.element.numFmt
-        if numFmt_elm is None:
-            return None
-        if numFmt_elm.val == SE_NUMBER_FORMAT.NONE:
-            return None
-
-        # Get right ord
-        if ilvl == 0:
-            # Never restarts (highest level)
-            ord = self._num_ilvl_ord + start - 1
-        else:
-            if lvl.element.lvlRestart is None:
-                restart_lvl = None
-                upper_lvl = ilvl - 1
-            else:
-                restart_lvl = lvl.element.lvlRestart.val
-                upper_lvl = ilvl - restart_lvl
-
-            if restart_lvl == 0:
-                # Never restarts (restart level is 0)
-                ord = self._num_ilvl_ord + start - 1
-            else:
-                restart = False
-                same_level_count = 1
-                prev_para = self._prev_num_para_full_search
-                while prev_para:
-                    prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
-                    if prev_num_id_ilvl is None:
-                        prev_para = prev_para.h2d._prev_num_para_full_search
-                        continue
-                    _, prev_ilvl = prev_num_id_ilvl
-                    if prev_ilvl == ilvl:
-                        same_level_count += 1
-                    if prev_ilvl <= upper_lvl:
-                        restart = True
-                        break
-                    prev_para = prev_para.h2d._prev_num_para_full_search
-                if restart:
-                    # Restart with count of the same level found before
-                    ord = same_level_count + start - 1
-                else:
-                    # Not restarts (not found higher level)
-                    ord = self._num_ilvl_ord + start - 1
-
-        if numFmt_elm.val == SE_NUMBER_FORMAT.BULLET:
-            # TODO: plug for a while (or not)
-            return Numeral.bullet(ilvl)
-        if numFmt_elm.val == SE_NUMBER_FORMAT.CUSTOM:
-            if numFmt_elm.format is None:
-                return None
-            return Numeral.custom(ord, numFmt_elm.format)
-        to_decimal = (
-            on_off(lvl.element.isLgl)
-            if lvl.element.isLgl is not None
-            else False
-        )
-        if to_decimal:
-            return Numeral.decimal(ord)
-        if numFmt_elm.val in NUMERAL_WITH_LOCALE:
-            locale = self._num_locale or "en-US"
-            return NUMERAL_RULES[numFmt_elm.val](ord, locale)  # type: ignore[operator]
-        return NUMERAL_RULES[numFmt_elm.val](ord)  # type: ignore[operator]
-
-    def _parse_num_pattern(self, pattern: str, ilvl: int) -> str:
-        text = ""
-        percentage_followed = False
-        for ch in pattern:
-            if ch == "%":
-                percentage_followed = True
-                continue
-            if percentage_followed and ch in _ILVL_ALLOWED:
-                ilvl_found = int(ch) - 1
-                if ilvl_found == ilvl:
-                    if self._level_char is not None:
-                        text += self._level_char
-                if ilvl_found < ilvl:
-                    prev_para = self._prev_num_para_full_search
-                    while prev_para:
-                        prev_num_id_ilvl = prev_para.h2d._num_id_ilvl
-                        if prev_num_id_ilvl is None:
-                            prev_para = (
-                                prev_para.h2d._prev_num_para_full_search
-                            )
-                            # Never
-                            break
-                        _, prev_ilvl = prev_num_id_ilvl
-                        if prev_ilvl == ilvl_found:
-                            found_lvl_ch = prev_para.h2d._level_char
-                            if found_lvl_ch is not None:
-                                text += found_lvl_ch
-                                break
-                        prev_para = prev_para.h2d._prev_num_para_full_search
-                # If more than current -> ignore
-            else:
-                text += ch
-            percentage_followed = False
-        return text
-
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
         para_path = self._prop_path(name, f"{self._path_base}.ind")
         return self._display_val(para_path, optional)
@@ -641,7 +593,7 @@ class ParagraphH2D(How2Display[Paragraph]):
     def _display_val(
         self, name_or_path: str | PropertyPath, optional: bool = False
     ) -> Any:
-        if self._is_list_item:
+        if self.list_item:
             return self._prop_val(name_or_path, optional, "both")
         para_val = self._prop_val(name_or_path, optional, "both")
         if not isinstance(para_val, NotFound):
