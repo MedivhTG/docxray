@@ -289,6 +289,7 @@ class WP:
 
 class A:
     GRAPHIC = qn("a:graphic")
+    GRAPHIC_DATA = qn("a:graphicData")
 
 
 class NoNS:
@@ -299,3 +300,5 @@ class NoNS:
     DIST_B = "distB"
     DIST_L = "distL"
     DIST_R = "distR"
+
+    URI = "uri"

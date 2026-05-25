@@ -8,11 +8,11 @@ from docxray.enum.lxml import POS
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.trans.ns import nsmap
-from docxray.xsd.xsd import XsdSimpleType
+from docxray.xsd.xsd import XsdPrimitive, XsdSimpleType
 
 from .types import ELM_T
 
-ST_T = TypeVar("ST_T", bound=XsdSimpleType)
+ST_T = TypeVar("ST_T", bound=XsdSimpleType | XsdPrimitive)
 T = TypeVar("T")
 
 nsmap_reversed = {v: k for k, v in nsmap.items()}
@@ -55,20 +55,26 @@ class OxmlElement(BaseOxmlElement):
         return POS.ONE_ITEM
 
     def attr_optional(
-        self, elm_qn: str, simple_type: type[ST_T]
+        self, elm_qn: str, simple_type: type[ST_T], **facets: dict[str, Any]
     ) -> Any | None:
         attr = self.get(elm_qn)
         if attr is None:
             return None
+        if issubclass(simple_type, XsdPrimitive):
+            return simple_type.validate(attr, **facets)
         return simple_type(attr).validate()
 
-    def attr_required(self, elm_qn: str, simple_type: type[ST_T]) -> Any:
+    def attr_required(
+        self, elm_qn: str, simple_type: type[ST_T], **facets: dict[str, Any]
+    ) -> Any:
         attr = self.get(elm_qn)
         if attr is None:
             msg = (
                 f"Attribute {elm_qn} was None when one was required for {self}"
             )
             raise InvalidXmlError(msg)
+        if issubclass(simple_type, XsdPrimitive):
+            return simple_type.validate(attr, **facets)
         return simple_type(attr).validate()
 
     def child_exactly_one(self, elm_qn: str, elm_hint: type[ELM_T]) -> ELM_T:

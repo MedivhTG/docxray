@@ -174,3 +174,10 @@ class XsdLong(XsdPrimitive):
             cls.xsd_err(
                 xml_obj, f"internal error while converting str to int [{e}]"
             )
+
+
+# TODO: realize
+class XsdToken(XsdPrimitive):
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Any) -> str:
+        return xml_obj

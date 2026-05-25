@@ -5,6 +5,7 @@ from docxray.oxml.trans.ns import WP, A, NoNS
 from docxray.oxml.trans.st.dml_main import ST_PositiveCoordinate
 from docxray.oxml.trans.st.dml_wordprocessing_drawing import ST_WrapDistance
 from docxray.oxml.trans.xmlchemy import OxmlElement
+from docxray.xsd.primitives import XsdToken
 
 
 class CT_PositiveSize2D(OxmlElement):
@@ -29,8 +30,18 @@ class CT_EffectExtent(OxmlElement):
     pass
 
 
-class CT_GraphicalObject(OxmlElement):
+class CT_GraphicalObjectData(OxmlElement):
     pass
+
+
+class CT_GraphicalObject(OxmlElement):
+    @cached_property
+    def uri(self) -> str:
+        return self.attr_required(NoNS.URI, XsdToken)
+
+    @cached_property
+    def graphicData(self) -> CT_GraphicalObjectData:
+        return self.child_exactly_one(A.GRAPHIC_DATA, CT_GraphicalObjectData)
 
 
 class CT_Anchor(OxmlElement):

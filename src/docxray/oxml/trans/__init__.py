@@ -215,6 +215,7 @@ from .drawing import (
     CT_Anchor,
     CT_Drawing,
     CT_GraphicalObject,
+    CT_GraphicalObjectData,
     CT_Inline,
     CT_NonVisualDrawingProps,
     CT_NonVisualGraphicFrameProperties,
@@ -230,6 +231,7 @@ register_element_cls(
     "wp:cNvGraphicFramePr", CT_NonVisualGraphicFrameProperties
 )
 register_element_cls("a:graphic", CT_GraphicalObject)
+register_element_cls("a:graphicData", CT_GraphicalObjectData)
 
 from .styles import (
     CT_DocDefaults,
