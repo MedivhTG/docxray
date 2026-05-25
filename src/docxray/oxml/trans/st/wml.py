@@ -17,6 +17,8 @@ from docxray.xsd.xsd import (
 )
 
 from .enums import (
+    SE_BR_CLEAR,
+    SE_BR_TYPE,
     SE_HINT,
     SE_JC,
     SE_LEVEL_SUFFIX,
@@ -151,3 +153,13 @@ class ST_Hint(XsdSimpleType):
 class ST_Theme(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_THEME)}
+
+
+class ST_BrType(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_BR_TYPE)}
+
+
+class ST_BrClear(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_BR_CLEAR)}

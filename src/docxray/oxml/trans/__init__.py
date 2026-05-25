@@ -11,6 +11,7 @@ from .shared import (
     CT_DecimalNumber,
     CT_EastAsianLayout,
     CT_Em,
+    CT_Empty,
     CT_FitText,
     CT_Fonts,
     CT_FramePr,
@@ -96,9 +97,16 @@ from .text.hyperlink import CT_Hyperlink
 
 register_element_cls("w:hyperlink", CT_Hyperlink)
 
-from .text.run import CT_R, CT_T
+from .text.run import CT_R, CT_T, CT_Br, CT_PTab, CT_Sym
 
 register_element_cls("w:r", CT_R)
+register_element_cls("w:br", CT_Br)
+register_element_cls("w:noBreakHyphen", CT_Empty)
+register_element_cls("w:softHyphen", CT_Empty)
+register_element_cls("w:sym", CT_Sym)
+register_element_cls("w:cr", CT_Empty)
+register_element_cls("w:tab", CT_Empty)
+register_element_cls("w:ptab", CT_PTab)
 register_element_cls("w:t", CT_T)
 
 from .text.run_props import (
@@ -201,6 +209,11 @@ register_element_cls("w:tcMar", CT_TcMar)
 register_element_cls("w:tcFitText", CT_OnOff)
 register_element_cls("w:vAlign", CT_VerticalJc)
 register_element_cls("w:hideMark", CT_OnOff)
+
+
+from .drawing import CT_Drawing
+
+register_element_cls("w:drawing", CT_Drawing)
 
 from .styles import (
     CT_DocDefaults,

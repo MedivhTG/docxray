@@ -38,6 +38,7 @@ class Paragraph(StoryChild[CT_P]):
     def list_item(self) -> ListItem | None:
         return self.h2d.list_item
 
+    # TODO: not all but enough
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
         """Generate the runs and hyperlinks in this paragraph, in the order they appear.
 

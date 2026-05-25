@@ -246,3 +246,7 @@ class CT_TrackChange(CT_Markup):
     @cached_property
     def date(self) -> datetime | None:
         return self.attr_optional(W.DATE, ST_DateTime)
+
+
+class CT_Empty(OxmlElement):
+    pass

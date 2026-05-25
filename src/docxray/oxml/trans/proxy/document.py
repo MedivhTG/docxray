@@ -34,6 +34,7 @@ class Document(ElementProxy[CT_Document]):
     def body(self) -> Body:
         return Body(self.element.body, self)
 
+    # TODO: not all but enough
     def iter_inner_content(self) -> Iterator[Paragraph | Table]:
         """Generate each `Paragraph` or `Table` in this document in document order."""
         return self.body.iter_inner_content()

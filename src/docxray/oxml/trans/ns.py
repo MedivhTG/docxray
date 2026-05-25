@@ -264,6 +264,9 @@ class W:
     EAST_ASIA = qn("w:eastAsia")
 
     TYPE = qn("w:type")
+    CLEAR = qn("w:clear")
+    FONT = qn("w:font")
+    CHAR = qn("w:char")
     VAL = qn("w:val")
     NULL = qn("w:null")
     ID = qn("w:id")

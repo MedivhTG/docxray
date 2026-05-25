@@ -397,3 +397,16 @@ class SE_THEME(StrEnum):
     MINOR_BIDI = "minorBidi"
     MINOR_ASCII = "minorAscii"
     MINOR_H_ANSI = "minorHAnsi"
+
+
+class SE_BR_TYPE(StrEnum):
+    PAGE = "page"
+    COLUMN = "column"
+    TEXT_WRAPPING = "textWrapping"
+
+
+class SE_BR_CLEAR(StrEnum):
+    NONE = "none"
+    LEFT = "left"
+    RIGHT = "right"
+    ALL = "all"
