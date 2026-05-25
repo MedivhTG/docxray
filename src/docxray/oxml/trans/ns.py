@@ -275,3 +275,27 @@ class W:
     NULL = qn("w:null")
     ID = qn("w:id")
     ORIGINAL = qn("w:original")
+
+
+class WP:
+    ANCHOR = qn("wp:anchor")
+    INLINE = qn("wp:inline")
+
+    EXTENT = qn("wp:extent")
+    EFFECT_EXTENT = qn("wp:effectExtent")
+    DOC_PR = qn("wp:docPr")
+    C_NV_GRAPHIC_FRAM_PR = qn("wp:cNvGraphicFramePr")
+
+
+class A:
+    GRAPHIC = qn("a:graphic")
+
+
+class NoNS:
+    CX = "cx"
+    CY = "cy"
+
+    DIST_T = "distT"
+    DIST_B = "distB"
+    DIST_L = "distL"
+    DIST_R = "distR"

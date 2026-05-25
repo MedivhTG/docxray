@@ -211,9 +211,25 @@ register_element_cls("w:vAlign", CT_VerticalJc)
 register_element_cls("w:hideMark", CT_OnOff)
 
 
-from .drawing import CT_Drawing
+from .drawing import (
+    CT_Anchor,
+    CT_Drawing,
+    CT_GraphicalObject,
+    CT_Inline,
+    CT_NonVisualDrawingProps,
+    CT_NonVisualGraphicFrameProperties,
+    CT_PositiveSize2D,
+)
 
 register_element_cls("w:drawing", CT_Drawing)
+register_element_cls("wp:anchor", CT_Anchor)
+register_element_cls("wp:inline", CT_Inline)
+register_element_cls("wp:extent", CT_PositiveSize2D)
+register_element_cls("wp:docPr", CT_NonVisualDrawingProps)
+register_element_cls(
+    "wp:cNvGraphicFramePr", CT_NonVisualGraphicFrameProperties
+)
+register_element_cls("a:graphic", CT_GraphicalObject)
 
 from .styles import (
     CT_DocDefaults,

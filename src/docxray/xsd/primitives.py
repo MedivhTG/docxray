@@ -10,6 +10,8 @@ from dateutil import parser
 from .facets import (
     EnumerationFacet,
     LengthFacet,
+    MaxInclusiveFacet,
+    MinInclusiveFacet,
     PatternFacet,
 )
 from .xsd import XsdPrimitive
@@ -102,6 +104,26 @@ class XsdBoolean(XsdPrimitive):
         )
 
 
+class XsdUnsignedInt(XsdPrimitive):
+    MIN_UINT32 = 0
+    MAX_UINT32 = 4294967295
+
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Any) -> int:
+        try:
+            num = int(xml_obj)
+            if cls.MIN_UINT32 > num > cls.MAX_UINT32:
+                cls.xsd_err(
+                    num,
+                    f"Number must be between {cls.MIN_UINT32} and {cls.MAX_UINT32}",
+                )
+            return num
+        except ValueError as e:
+            cls.xsd_err(
+                xml_obj, f"internal error while converting str to int [{e}]"
+            )
+
+
 class XsdUnsignedLong(XsdPrimitive):
     MIN_UINT64 = 0
     MAX_UINT64 = 18446744073709551615
@@ -115,6 +137,38 @@ class XsdUnsignedLong(XsdPrimitive):
                     num,
                     f"Number must be between {cls.MIN_UINT64} and {cls.MAX_UINT64}",
                 )
+            return num
+        except ValueError as e:
+            cls.xsd_err(
+                xml_obj, f"internal error while converting str to int [{e}]"
+            )
+
+
+class LongFacets(TypedDict, total=False):
+    min_inclusive: MinInclusiveFacet
+    max_inclusive: MaxInclusiveFacet
+
+
+class XsdLong(XsdPrimitive):
+    MIN_INT64 = -9223372036854775808
+    MAX_INT64 = 9223372036854775807
+
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Unpack[LongFacets]) -> int:
+        min = cls.MIN_INT64
+        max = cls.MAX_INT64
+
+        min_facet = facets.pop("min_inclusive", MinInclusiveFacet())
+        if min_facet.value is not None:
+            min = min_facet.value
+        max_facet = facets.pop("max_inclusive", MaxInclusiveFacet())
+        if max_facet.value is not None:
+            max = max_facet.value
+
+        try:
+            num = int(xml_obj)
+            if min > num > max:
+                cls.xsd_err(num, f"Number must be between {min} and {max}")
             return num
         except ValueError as e:
             cls.xsd_err(

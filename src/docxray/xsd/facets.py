@@ -43,3 +43,16 @@ class EnumerationFacet(XsdFacet):
         if self.enum_cls is None:
             return None
         return self.enum_cls.__members__.values()
+
+
+class MinInclusiveFacet(XsdFacet):
+    def __init__(self, value: int | None = None) -> None:
+        self._value = value
+
+    @property
+    def value(self) -> int | None:
+        return self._value
+
+
+class MaxInclusiveFacet(MinInclusiveFacet):
+    pass
