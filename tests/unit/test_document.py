@@ -59,6 +59,8 @@ class TestDocument:
                                     v_algn = r_fmt.vertical_alignment
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
+                p_html = p_or_t.transform()
+
                 lvl_text = p_or_t.element.is_first
                 part = p_or_t.part
                 p_fmt = p_or_t.h2d

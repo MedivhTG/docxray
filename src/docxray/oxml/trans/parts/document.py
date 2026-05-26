@@ -15,6 +15,7 @@ from docxray.oxml.trans.proxy.document import Document
 from docxray.oxml.trans.proxy.numbering.numbering import Numbering
 from docxray.oxml.trans.proxy.settings import Settings
 from docxray.oxml.trans.proxy.styles.styles import Styles
+from docxray.transform.ruleset import RuleSet
 
 
 class DocumentPart(StoryPart[CT_Document]):
@@ -66,3 +67,7 @@ class DocumentPart(StoryPart[CT_Document]):
     @cached_property
     def settings(self) -> Settings:
         return self.settings_part.settings
+
+    @cached_property
+    def _default_html_ruleset(self) -> RuleSet:
+        return RuleSet.html_default()

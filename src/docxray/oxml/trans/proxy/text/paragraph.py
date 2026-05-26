@@ -5,12 +5,16 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import StoryChild
+from docxray.oxml.trans.enums import WD_HEADER_LEVEL
+from docxray.oxml.trans.proxy.shared import Length, StoryChild
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.run import Run
+from docxray.oxml.trans.st.enums import SE_JC
 from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
+from docxray.transform.paragraph import ParagraphT
+from docxray.transform.ruleset import RuleSet
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -37,6 +41,39 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def list_item(self) -> ListItem | None:
         return self.h2d.list_item
+
+    @cached_property
+    def right_to_left(self) -> bool:
+        return self.h2d.right_to_left
+
+    @cached_property
+    def text_indent(self) -> Length | int | None:
+        return self.h2d.text_indent
+
+    @cached_property
+    def header_level(self) -> WD_HEADER_LEVEL:
+        return self.h2d.header_level
+
+    @cached_property
+    def alignment(self) -> SE_JC:
+        return self.h2d.alignment
+
+    @cached_property
+    def word_wrap(self) -> bool:
+        return self.h2d.word_wrap
+
+    @cached_property
+    def justify_inter_character(self) -> bool:
+        return self.h2d.justify_inter_character
+
+    def transform(self, ruleset: RuleSet | None = None) -> str:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return ParagraphT.transform(self, ruleset)
 
     # TODO: not all but enough
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
