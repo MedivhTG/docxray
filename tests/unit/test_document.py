@@ -88,4 +88,12 @@ class TestDocument:
                     for r_item in r_or_h.iter_inner_content():
                         if isinstance(r_item, Drawing):
                             pic = r_item.picture
+                            if pic is not None:
+                                pic_resized = pic.resized(
+                                    (r_item.width.px(), r_item.height.px())
+                                )
+                                # pic_resized._Picture__img_interface.save(
+                                #     filename="f.png"
+                                # )
+                                w = 1
                             w = 1

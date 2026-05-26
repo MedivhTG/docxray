@@ -94,7 +94,43 @@ class CT_GraphicalObject(OxmlElement):
 
 
 class CT_Anchor(OxmlElement):
-    pass
+    @cached_property
+    def distT(self) -> int | None:
+        return self.attr_optional(NoNS.DIST_T, ST_WrapDistance)
+
+    @cached_property
+    def distB(self) -> int | None:
+        return self.attr_optional(NoNS.DIST_T, ST_WrapDistance)
+
+    @cached_property
+    def distL(self) -> int | None:
+        return self.attr_optional(NoNS.DIST_T, ST_WrapDistance)
+
+    @cached_property
+    def distR(self) -> int | None:
+        return self.attr_optional(NoNS.DIST_T, ST_WrapDistance)
+
+    @cached_property
+    def extent(self) -> CT_PositiveSize2D:
+        return self.child_exactly_one(WP.EXTENT, CT_PositiveSize2D)
+
+    @cached_property
+    def effectExtent(self) -> CT_EffectExtent | None:
+        return self.child_zero_or_one(WP.EFFECT_EXTENT, CT_EffectExtent)
+
+    @cached_property
+    def docPr(self) -> CT_NonVisualDrawingProps:
+        return self.child_exactly_one(WP.DOC_PR, CT_NonVisualDrawingProps)
+
+    @cached_property
+    def cNvGraphicFramePr(self) -> CT_NonVisualGraphicFrameProperties | None:
+        return self.child_zero_or_one(
+            WP.C_NV_GRAPHIC_FRAM_PR, CT_NonVisualGraphicFrameProperties
+        )
+
+    @cached_property
+    def graphic(self) -> CT_GraphicalObject:
+        return self.child_exactly_one(A.GRAPHIC, CT_GraphicalObject)
 
 
 class CT_Inline(OxmlElement):
