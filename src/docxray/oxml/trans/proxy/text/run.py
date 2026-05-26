@@ -71,7 +71,7 @@ class Run(StoryChild[CT_R]):
         return self.h2d.bold
 
     @cached_property
-    def chars_case(self) -> CharsCase:
+    def chars_case(self) -> CharsCase | None:
         return self.h2d.chars_case
 
     @cached_property

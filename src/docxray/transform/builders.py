@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from lxml.html import Element, HtmlElement
 
@@ -11,7 +11,7 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import SE_JC
 
-from .utils.char_graph import RunChainsMap
+from .utils.char_graph import RunChain, RunChainsMap
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -24,6 +24,17 @@ class HtmlBuilder(Generic[T]):
     @classmethod
     @abstractmethod
     def element(cls, proxy: T) -> HtmlElement: ...
+
+
+def toggled_casual_elm(name: str, value: bool):
+    if value is False:
+        raise ValueError("Value was False when True need")
+    if name == "italic":
+        return Element("i")
+    if name == "bold":
+        return Element("b")
+    if name == "strike":
+        return Element("strike")
 
 
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
@@ -63,6 +74,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "strike",
         "underline",
         "vertical_alignment",
+    }
+    ATTR_TO_ELM = {
+        "italic": toggled_casual_elm,
+        "bold": toggled_casual_elm,
+        "strike": toggled_casual_elm,
     }
 
     @classmethod
@@ -124,3 +140,19 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return f"{ind.px()}px"
         elif isinstance(ind, int):
             return f"{ind}ch"
+
+
+class _RunsBuilder:
+    def __init__(
+        self, paragraph_elm: HtmlElement, attr_to_elm_maker: Any
+    ) -> None:
+        self._p_elm = paragraph_elm
+
+    def build(self, chain_map: RunChainsMap):
+        for chain in chain_map.chains_ordered():
+            pass
+
+    def _chained(self, main: RunChain):
+        # In most cases it's enough, but in future do we need eq comparator?
+        if not main.comparable:
+            return

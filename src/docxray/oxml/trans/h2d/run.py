@@ -21,7 +21,7 @@ from docxray.oxml.trans.st.enums import (
 from .how2display import How2Display
 
 type _OnOff = NotFound | bool | SE_OnOff1 | None
-type CharsCase = Literal["up", "down", "default"]
+type CharsCase = Literal["up", "down"]
 
 
 class RunH2D(How2Display[Run]):
@@ -34,7 +34,7 @@ class RunH2D(How2Display[Run]):
         return self._display_val_toggled("b")
 
     @cached_property
-    def chars_case(self) -> CharsCase:
+    def chars_case(self) -> CharsCase | None:
         if self._all_uppercase and self._all_downcase:
             raise DisplayError(
                 "Mentiond 2 cases (up, down) when they are mutually exclusive"
@@ -43,7 +43,7 @@ class RunH2D(How2Display[Run]):
             return "up"
         if self._all_downcase:
             return "down"
-        return "default"
+        return None
 
     # TODO: double strike needed
     @cached_property

@@ -186,6 +186,10 @@ class RunChain:
         """Run wrappers linked in current chain."""
         return list(self._links.values())
 
+    @property
+    def comparable(self) -> Any:
+        return self._comparable
+
     def add_intersection(self, chain: RunChain) -> None:
         """Add new intersection."""
         self.__intersections.add(chain)
