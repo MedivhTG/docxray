@@ -47,6 +47,14 @@ class Paragraph(StoryChild[CT_P]):
         return self.h2d.right_to_left
 
     @cached_property
+    def margin_line_start(self) -> Length | int | None:
+        return self.h2d.margin_line_start
+
+    @cached_property
+    def margin_line_end(self) -> Length | int | None:
+        return self.h2d.margin_line_end
+
+    @cached_property
     def text_indent(self) -> Length | int | None:
         return self.h2d.text_indent
 

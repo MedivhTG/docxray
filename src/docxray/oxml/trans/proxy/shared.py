@@ -139,6 +139,10 @@ class Length(int):
     def __new__(cls, emu: int) -> Self:
         return int.__new__(cls, emu)
 
+    def __neg__(self) -> Length:
+        """Return negative length."""
+        return Length(-int(self))
+
     @property
     def cm(self) -> float:
         """The equivalent length expressed in centimeters (float)."""
