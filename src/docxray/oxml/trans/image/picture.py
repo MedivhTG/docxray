@@ -30,11 +30,11 @@ except ImportError:
     IMG_LIB_VERSION = __version__
 
 
-class UnrecognizedImageError(Exception):
+class UnrecognizedPictureError(Exception):
     pass
 
 
-class Image:
+class Picture:
     def __init__(self, blob: bytes) -> None:
         self.__img_lib: ImgLib = IMG_LIB
         self.__img_lib_version = IMG_LIB_VERSION
@@ -53,7 +53,7 @@ class Image:
         else:
             if wmf_t:
                 msg = f"Type `{wmf_t}` cannot be parsed by {self.__img_lib}.{self.__img_lib_version}"
-                raise UnrecognizedImageError(msg)
+                raise UnrecognizedPictureError(msg)
             return PillowImage.open(blob)
 
     def __wmf_to_png(self, wmf_blob: bytes) -> bytes:
@@ -64,6 +64,6 @@ class Image:
             with WandImage(blob=wmf_blob) as img:
                 png_blob = img.make_blob(format="png")
                 if png_blob is None:
-                    raise UnrecognizedImageError(msg)
+                    raise UnrecognizedPictureError(msg)
                 return cast("bytes", png_blob)
-        raise UnrecognizedImageError(msg)
+        raise UnrecognizedPictureError(msg)

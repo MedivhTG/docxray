@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from docxray import Document
+from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
@@ -84,3 +85,7 @@ class TestDocument:
                     italic = r_fmt.italic
                     bold = r_fmt.bold
                     wait = 1
+                    for r_item in r_or_h.iter_inner_content():
+                        if isinstance(r_item, Drawing):
+                            pic = r_item.picture
+                            w = 1
