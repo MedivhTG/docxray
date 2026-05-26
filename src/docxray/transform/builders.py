@@ -8,7 +8,10 @@ from lxml.html import Element, HtmlElement
 # docxray stuff
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.shared import Length
+from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import SE_JC
+
+from .utils.char_graph import RunChainsMap
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -53,10 +56,31 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
+    ATTR_FOR_MAP = {
+        "italic",
+        "bold",
+        "chars_case",
+        "strike",
+        "underline",
+        "vertical_alignment",
+    }
 
     @classmethod
     def element(cls, proxy: Paragraph) -> HtmlElement:
-        return Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
+        elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
+        # chain_map = cls._fill_content(proxy, elm)
+        return elm
+
+    @classmethod
+    def _fill_content(cls, proxy: Paragraph, elm: HtmlElement) -> RunChainsMap:
+        chain_map = RunChainsMap(cls.ATTR_FOR_MAP)
+        for run_or_hlink in proxy.iter_inner_content():
+            if isinstance(run_or_hlink, Run):
+                chain_map.chain(run_or_hlink)
+            else:
+                for run in run_or_hlink.iter_inner_content():
+                    chain_map.chain(run)
+        return chain_map
 
     @classmethod
     def _attrs(cls, proxy: Paragraph) -> dict[str, str]:
