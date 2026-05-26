@@ -1,7 +1,7 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.ns import WP, A, NoNS
+from docxray.oxml.trans.ns import PIC, WP, A, NoNS, R
 from docxray.oxml.trans.st.dml_main import ST_PositiveCoordinate
 from docxray.oxml.trans.st.dml_wordprocessing_drawing import ST_WrapDistance
 from docxray.oxml.trans.xmlchemy import OxmlElement
@@ -30,8 +30,57 @@ class CT_EffectExtent(OxmlElement):
     pass
 
 
-class CT_GraphicalObjectData(OxmlElement):
+class CT_NonVisualPictureProperties(OxmlElement):
     pass
+
+
+class CT_PictureNonVisual(OxmlElement):
+    @cached_property
+    def nvPicPr(self) -> CT_NonVisualDrawingProps:
+        return self.child_exactly_one(PIC.NV_PIC_PR, CT_NonVisualDrawingProps)
+
+    @cached_property
+    def cNvPicPr(self) -> CT_NonVisualPictureProperties:
+        return self.child_exactly_one(
+            PIC.C_NV_PIC_PR, CT_NonVisualPictureProperties
+        )
+
+
+class CT_Blip(OxmlElement):
+    @cached_property
+    def embed(self) -> str:
+        return self.attr_optional(R.EMBED, default="")
+
+
+class CT_BlipFillProperties(OxmlElement):
+    @cached_property
+    def blip(self) -> CT_Blip | None:
+        return self.child_zero_or_one(A.BLIP, CT_Blip)
+
+
+class CT_ShapeProperties(OxmlElement):
+    pass
+
+
+class CT_Picture(OxmlElement):
+    @cached_property
+    def nvPicPr(self) -> CT_PictureNonVisual:
+        return self.child_exactly_one(PIC.NV_PIC_PR, CT_PictureNonVisual)
+
+    @cached_property
+    def blipFill(self) -> CT_BlipFillProperties:
+        return self.child_exactly_one(PIC.BLIP_FILL, CT_BlipFillProperties)
+
+    @cached_property
+    def spPr(self) -> CT_ShapeProperties:
+        return self.child_exactly_one(PIC.SP_PR, CT_ShapeProperties)
+
+
+class CT_GraphicalObjectData(OxmlElement):
+    # In xsd schema we see `unnbounded` maxOccurs, but in reality it's not
+    @cached_property
+    def pic(self) -> CT_Picture | None:
+        return self.child_zero_or_one(PIC.PIC, CT_Picture)
 
 
 class CT_GraphicalObject(OxmlElement):

@@ -8,6 +8,7 @@ from docxray.enum.lxml import POS
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
 from docxray.oxml.trans.ns import nsmap
+from docxray.xsd.primitives import XsdString
 from docxray.xsd.xsd import XsdPrimitive, XsdSimpleType
 
 from .types import ELM_T
@@ -55,11 +56,17 @@ class OxmlElement(BaseOxmlElement):
         return POS.ONE_ITEM
 
     def attr_optional(
-        self, elm_qn: str, simple_type: type[ST_T], **facets: dict[str, Any]
-    ) -> Any | None:
+        self,
+        elm_qn: str,
+        simple_type: type[ST_T] | None = None,
+        default: Any = None,
+        **facets: Any,
+    ) -> Any:
         attr = self.get(elm_qn)
         if attr is None:
-            return None
+            return default
+        if simple_type is None:
+            return XsdString.validate(attr, **facets)
         if issubclass(simple_type, XsdPrimitive):
             return simple_type.validate(attr, **facets)
         return simple_type(attr).validate()

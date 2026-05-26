@@ -176,8 +176,11 @@ class XsdLong(XsdPrimitive):
             )
 
 
-# TODO: realize
 class XsdToken(XsdPrimitive):
+    WHITESPACE_RE = r"\s+"
+
     @classmethod
     def validate(cls, xml_obj: str, **facets: Any) -> str:
+        if xml_obj != re.sub(cls.WHITESPACE_RE, " ", xml_obj.strip()):
+            cls.xsd_err(xml_obj, "Extra spaces not allowed")
         return xml_obj

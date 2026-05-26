@@ -291,6 +291,23 @@ class A:
     GRAPHIC = qn("a:graphic")
     GRAPHIC_DATA = qn("a:graphicData")
 
+    BLIP = qn("a:blip")
+
+
+class PIC:
+    PIC = qn("pic:pic")
+
+    NV_PIC_PR = qn("pic:nvPicPr")
+    C_NV_PR = qn("pic:cNvPr")
+    C_NV_PIC_PR = qn("pic:cNvPicPr")
+
+    BLIP_FILL = qn("pic:blipFill")
+    SP_PR = qn("pic:spPr")
+
+
+class R:
+    EMBED = qn("r:embed")
+
 
 class NoNS:
     CX = "cx"
