@@ -54,3 +54,8 @@ class Drawing(ElementProxy[CT_Drawing]):
         )
         extent_elm = extent_elms[0]
         return Emu(extent_elm.cx), Emu(extent_elm.cy)
+
+    @cached_property
+    def size_px(self) -> tuple[int, int]:
+        width, height = self.size
+        return width.px(), height.px()

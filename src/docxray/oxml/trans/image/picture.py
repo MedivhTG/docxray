@@ -119,7 +119,7 @@ class Picture:
         if self.__img_lib == "wand":
             if wmf_t:
                 blob = self.__wmf_to_png(blob)
-
+                self.__blob = blob
             return WandImage(blob=blob)
         else:
             if wmf_t:

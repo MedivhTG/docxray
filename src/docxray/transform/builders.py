@@ -14,12 +14,13 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.run import Run, TxtFragment
 from docxray.oxml.trans.st.enums import SE_JC
 
-from .ruleset import RuleSet
 from .utils.char_graph import RunChain, RunChainsMap
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+
+    from .ruleset import RuleSet
 
 T = TypeVar("T")
 
@@ -165,7 +166,7 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
         pic = proxy.picture
         if pic is None:
             return {"width": f"{proxy.width}px", "height": f"{proxy.height}px"}
-        base64 = b64encode(pic.blob).decode()
+        base64 = b64encode(pic.resized(proxy.size_px).blob).decode()
         return {"src": f"data:{pic.content_type};base64,{base64}"}
 
 
