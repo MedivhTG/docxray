@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.trans.drawing import CT_Drawing
+from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import ElementProxy, StoryChild
 from docxray.oxml.trans.shared import CT_Empty
@@ -22,6 +23,10 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.run import CharsCase, RunH2D
 
     from .paragraph import Paragraph
+
+
+class Tab(ElementProxy[CT_Empty]):
+    pass
 
 
 class Break(ElementProxy[CT_Br]):
@@ -86,7 +91,9 @@ class Run(StoryChild[CT_R]):
     def vertical_alignment(self) -> SE_VerticalAlignRun | None:
         return self.h2d.vertical_alignment
 
-    def iter_inner_content(self) -> Iterator[TxtFragment | Drawing | Break]:
+    def iter_inner_content(
+        self,
+    ) -> Iterator[TxtFragment | Drawing | Break | Tab]:
         for item in self.element.inner_content_items:
             if isinstance(item, CT_Text):
                 yield TxtFragment(item, self)
@@ -99,4 +106,5 @@ class Run(StoryChild[CT_R]):
                 continue
             # TODO: extend
             elif isinstance(item, CT_Empty):
-                continue
+                if item.tag == W.TAB:
+                    yield Tab(item, self)

@@ -11,8 +11,12 @@ from lxml.html import Element, HtmlElement
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
-from docxray.oxml.trans.proxy.text.run import Run, TxtFragment
-from docxray.oxml.trans.st.enums import SE_JC
+from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
+from docxray.oxml.trans.st.enums import (
+    SE_JC,
+    SE_Underline,
+    SE_VerticalAlignRun,
+)
 
 from .utils.char_graph import RunChain, RunChainsMap
 
@@ -24,7 +28,7 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
-type ElmMaker = Callable[[str, Any], HtmlElement]
+type ElmMaker = Callable[[Any], HtmlElement]
 
 
 class HtmlBuilder(Generic[T]):
@@ -33,16 +37,51 @@ class HtmlBuilder(Generic[T]):
     def element(cls, proxy: T, ruleset: RuleSet) -> HtmlElement: ...
 
 
-def toggled_casual_elm(name: str, value: bool) -> HtmlElement:
-    if value is False:
-        raise ValueError("Value was False when True need")
-    if name == "italic":
-        return Element("i")
-    if name == "bold":
-        return Element("b")
-    if name == "strike":
-        return Element("strike")
-    raise ValueError(f"No element for such name {name}")
+def i_elm(value: bool) -> HtmlElement:
+    return Element("i")
+
+
+def b_elm(value: bool) -> HtmlElement:
+    return Element("b")
+
+
+def strike_elm(value: bool) -> HtmlElement:
+    return Element("strike")
+
+
+U_DECOR_MAP = {
+    SE_Underline.SINGLE: "underline",
+    SE_Underline.DOUBLE: "underline double",
+    SE_Underline.DOTTED: "underline dotted",
+    SE_Underline.DASH: "underline dashed",
+    SE_Underline.WAVE: "underline wavy",
+    SE_Underline.DOTTED_HEAVY: "underline dotted",
+    SE_Underline.DASHED_HEAVY: "underline dashed",
+    SE_Underline.DASH_LONG: "underline dashed",
+    SE_Underline.DASH_LONG_HEAVY: "underline dashed",
+    SE_Underline.DOT_DASH: "underline dotted",
+    SE_Underline.DASH_DOT_HEAVY: "underline dashed",
+    SE_Underline.DOT_DOT_DASH: "underline dotted",
+    SE_Underline.DASH_DOT_DOT_HEAVY: "underline dashed",
+    SE_Underline.WAVY_HEAVY: "underline wavy",
+    SE_Underline.WAVY_DOUBLE: "underline waby",
+}
+
+
+def underline_elm(value: SE_Underline) -> HtmlElement:
+    decor = U_DECOR_MAP.get(value)
+    if decor is None:
+        decor = "underline"
+    return Element("span", {"style": f"text-decoration: {decor};"})
+
+
+def vert_align_elm(value: SE_VerticalAlignRun) -> HtmlElement:
+    if value == SE_VerticalAlignRun.SUPERSCRIPT:
+        return Element("sup")
+    return Element("sub")
+
+
+TAB_MNEMONIC = "&emsp;"
 
 
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
@@ -75,22 +114,19 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
-    ATTR_FOR_MAP = {
-        "italic",
-        "bold",
-        "strike",
-        "underline",
-        "vertical_alignment",
-    }
     ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
-        "italic": toggled_casual_elm,
-        "bold": toggled_casual_elm,
-        "strike": toggled_casual_elm,
+        "italic": i_elm,
+        "bold": b_elm,
+        "strike": strike_elm,
+        "underline": underline_elm,
+        "vertical_alignment": vert_align_elm,
     }
 
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
         elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
+        if proxy.list_item:
+            elm.text = proxy.list_item.level_text.replace("\t", TAB_MNEMONIC)
         cls._fill_content(proxy, elm, ruleset)
         return elm
 
@@ -98,7 +134,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
-        chain_map = RunChainsMap(cls.ATTR_FOR_MAP)
+        chain_map = RunChainsMap(set(cls.ATTR_TO_ELMMAKER))
         for run_or_hlink in proxy.iter_inner_content():
             if isinstance(run_or_hlink, Run):
                 chain_map.chain(run_or_hlink)
@@ -183,24 +219,26 @@ class _RunsHtmlBuilder:
 
     def run(self, upper_elm: HtmlElement, run: Run) -> None:
         for item in run.iter_inner_content():
+            content: str | HtmlElement | None = None
             if isinstance(item, TxtFragment):
                 if run.chars_case is None:
-                    txt = item.raw
+                    content = item.raw
                 elif run.chars_case == "up":
-                    txt = item.raw.upper()
+                    content = item.raw.upper()
                 else:
-                    txt = item.raw.lower()
-                self._run_content(upper_elm, txt)
+                    content = item.raw.lower()
             elif isinstance(item, Drawing):
-                img_elm = self._img_elm(item)
-                self._run_content(upper_elm, img_elm)
+                content = self._img_elm(item)
+            elif isinstance(item, Tab):
+                content = TAB_MNEMONIC
             else:
                 if item.which_break == "textWrapping":
-                    br_elm = Element("br")
-                    self._run_content(upper_elm, br_elm)
+                    content = Element("br")
+            if content is not None:
+                self._run_content(upper_elm, content)
 
     def run_chain(self, main: RunChain) -> None:
-        main_tag = self._attr_elm_map[main.name](main.name, main.comparable)
+        main_tag = self._attr_elm_map[main.name](main.comparable)
         between = main.chains_between()
         skip_until: int | None = None
         for idx in range(main.start, main.end + 1):
@@ -279,10 +317,10 @@ class _RunsHtmlBuilder:
         self, indexed: list[RunChain]
     ) -> tuple[HtmlElement, HtmlElement]:
         first = indexed[0]
-        top = self._attr_elm_map[first.name](first.name, first.comparable)
+        top = self._attr_elm_map[first.name](first.comparable)
         bottom = top
         for chain in indexed[1:]:
-            elm = self._attr_elm_map[chain.name](chain.name, chain.comparable)
+            elm = self._attr_elm_map[chain.name](chain.comparable)
             bottom.append(elm)
             bottom = elm
         return top, bottom

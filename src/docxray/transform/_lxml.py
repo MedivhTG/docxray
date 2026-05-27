@@ -11,8 +11,9 @@ def to_str_html(
     encoding: type[str] | Literal["unicode"] = "unicode",
     with_tail: bool = True,
     doctype: str | None = None,
+    raw_ampersant: bool = True,
 ) -> str:
-    return tostring(
+    parsed = tostring(
         doc,
         pretty_print=pretty_print,
         include_meta_content_type=include_meta_content_type,
@@ -20,3 +21,6 @@ def to_str_html(
         with_tail=with_tail,
         doctype=doctype,
     )
+    if raw_ampersant:
+        return parsed.replace("&amp;", "&")
+    return parsed

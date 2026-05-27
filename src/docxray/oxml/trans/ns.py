@@ -267,6 +267,8 @@ class W:
     THEME_FONT_LANG = qn("w:themeFontLang")
     EAST_ASIA = qn("w:eastAsia")
 
+    TAB = qn("w:tab")
+
     TYPE = qn("w:type")
     CLEAR = qn("w:clear")
     FONT = qn("w:font")
