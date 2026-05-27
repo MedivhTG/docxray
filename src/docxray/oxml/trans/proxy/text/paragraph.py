@@ -18,13 +18,13 @@ if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.paragraph import (
         ListItem,
+        ListView,
         ParagraphH2D,
     )
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell
     from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import ParagraphT, TransformMethod
-    from docxray.oxml.trans.h2d.paragraph import ListView
+    from docxray.transform.transformers import TransformMethod
 
 
 class Paragraph(StoryChild[CT_P]):

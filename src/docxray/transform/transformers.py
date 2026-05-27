@@ -13,8 +13,9 @@ T = TypeVar("T")
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.proxy.text.paragraph import Paragraph
     from docxray.oxml.trans.h2d.paragraph import ListView
+    from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+
     from .ruleset import RuleSet
 
 

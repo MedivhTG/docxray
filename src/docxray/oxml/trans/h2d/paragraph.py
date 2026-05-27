@@ -46,8 +46,9 @@ from .how2display import How2Display
 from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
 
 if TYPE_CHECKING:
+    # docxray stuff
     from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import ListViewT, TransformMethod
+    from docxray.transform.transformers import TransformMethod
 
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
@@ -159,6 +160,7 @@ class ListView:
         stringify: bool = True,
         method: TransformMethod = "html",
     ) -> Any:
+        # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
         from docxray.transform.transformers import ListViewT
 
