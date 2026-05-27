@@ -25,6 +25,7 @@ class RunChainsMap:
     def __init__(self, attrs_for_map: set[str]) -> None:
         self._tags_for_map = attrs_for_map
         self._idx_chains: dict[int, dict[str, RunChain]] = {}
+        self._unchained: dict[int, Run] = {}
         self._last_idx = -1
 
     def __len__(self) -> int:
@@ -44,9 +45,15 @@ class RunChainsMap:
         """
         new_idx = self._last_idx + 1
         self._create_idx(new_idx)
+        # Flag for chained or unchained char format
+        is_chained = False
         # Iterate over all char format attributes
         for name in self._tags_for_map:
             attr = getattr(run, name)
+            # Boolean comparator?
+            if not attr:
+                continue
+            is_chained = True
             chain = self.get_chain(self._last_idx, name)
             if not chain:
                 # New chain
@@ -63,10 +70,13 @@ class RunChainsMap:
                     chain = RunChain(name, attr, new_idx)
                     chain.append(run)
                     self._index_chain(new_idx, chain)
-        self._add_chain_intersections(new_idx)
+        if is_chained:
+            self._add_chain_intersections(new_idx)
+        else:
+            self._index_unchained(new_idx, run)
         self._last_idx = new_idx
 
-    def chains_ordered(self) -> Iterator[RunChain]:
+    def chains_ordered(self) -> Iterator[Run | RunChain]:
         """Iterate over the longest run chains or run wrappers by index.
 
         For every index we get unchained format or main chain - chain with
@@ -75,6 +85,10 @@ class RunChainsMap:
         chains_seen: set[RunChain] = set()
 
         for i in range(len(self)):
+            unchained = self.get_unchained(i)
+            if unchained is not None:
+                yield unchained
+                continue
             for name in self._tags_for_map:
                 chain = self.get_chain(i, name)
                 if chain is None or chain in chains_seen:
@@ -96,9 +110,17 @@ class RunChainsMap:
             return None
         return idx_chains.get(name)
 
+    def get_unchained(self, idx: int) -> Run | None:
+        """Get unchained run wrapper by index."""
+        return self._unchained.get(idx)
+
     def _create_idx(self, idx: int) -> None:
         """Create space for new index in interval."""
         self._idx_chains[idx] = {}
+
+    def _index_unchained(self, idx: int, run: Run) -> None:
+        """Index unchained run wrapper in interval."""
+        self._unchained[idx] = run
 
     def _index_chain(self, idx: int, chain: RunChain) -> None:
         """Index chain in interval."""

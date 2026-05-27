@@ -32,7 +32,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
         # docxray stuff
         from docxray.oxml.trans.proxy.table import Table
 
-        content = []
+        content: list[Paragraph | Table] = []
         for element in self._element.inner_content_elements:
             if isinstance(element, CT_P):
                 content.append(Paragraph(element, self))

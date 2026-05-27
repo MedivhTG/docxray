@@ -1,10 +1,10 @@
 from functools import cached_property
 from typing import Literal, Self
 
-from .builders import HtmlBuilder, HtmlParagraph
+from .builders import HtmlBuilder, HtmlDrawing, HtmlParagraph
 
 type RuleMethod = Literal["html"]
-type RuleProxy = Literal["Paragraph"]
+type RuleProxy = Literal["Paragraph", "Drawing"]
 
 
 class Rule:
@@ -26,4 +26,6 @@ class RuleSet:
 
     @classmethod
     def html_default(cls) -> Self:
-        return cls({"Paragraph": Rule(HtmlParagraph)})
+        return cls(
+            {"Paragraph": Rule(HtmlParagraph), "Drawing": Rule(HtmlDrawing)}
+        )

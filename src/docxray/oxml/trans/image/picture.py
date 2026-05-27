@@ -38,6 +38,7 @@ class UnrecognizedPictureError(Exception):
 
 class Picture:
     def __init__(self, blob: bytes) -> None:
+        self.__blob = blob
         self.__img_lib: ImgLib = IMG_LIB
         self.__img_lib_version = IMG_LIB_VERSION
         self.__img_interface = self.__load_img_interface(blob)
@@ -70,6 +71,10 @@ class Picture:
         if isinstance(self.__img_interface, ImageFile):
             return self.__img_interface.size
         return self.__img_interface.size
+
+    @cached_property
+    def blob(self) -> bytes:
+        return self.__blob
 
     def resized(self, size: tuple[int, int]) -> Picture:
         """Get resized copy of an Picture with passed size.

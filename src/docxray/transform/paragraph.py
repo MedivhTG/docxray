@@ -22,4 +22,4 @@ class ParagraphT(Transformer):
         rule = ruleset.html_rules.get("Paragraph")
         if rule is None:
             raise ValueError("No such rule for Paragraph found in rule set")
-        return rule.builder.element(proxy)
+        return rule.builder.element(proxy, ruleset)
