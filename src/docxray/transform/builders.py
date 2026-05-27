@@ -3,12 +3,14 @@ from __future__ import annotations
 from abc import abstractmethod
 from base64 import b64encode
 from collections.abc import Callable
+from copy import copy
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
+
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
@@ -23,6 +25,8 @@ from .utils.char_graph import RunChain, RunChainsMap
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+    from docxray.oxml.trans.h2d.paragraph import ListView
+    from docxray.oxml.trans.h2d.paragraph import ListViewIlvlBlock
 
     from .ruleset import RuleSet
 
@@ -192,6 +196,14 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return f"{ind}ch"
 
 
+class HtmlParagraphInList(HtmlParagraph):
+    @classmethod
+    def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
+        elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
+        cls._fill_content(proxy, elm, ruleset)
+        return elm
+
+
 class HtmlDrawing(HtmlBuilder["Drawing"]):
     @classmethod
     def element(cls, proxy: Drawing, ruleset: RuleSet) -> HtmlElement:
@@ -204,6 +216,45 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
             return {"width": f"{proxy.width}px", "height": f"{proxy.height}px"}
         base64 = b64encode(pic.resized(proxy.size_px).blob).decode()
         return {"src": f"data:{pic.content_type};base64,{base64}"}
+
+
+class HtmlListView(HtmlBuilder["ListView"]):
+    @classmethod
+    def element(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
+        from docxray.transform.ruleset import Rule
+
+        zero_lst_elm = (
+            Element("ul") if proxy.is_bullet_format else Element("ol")
+        )
+        ruleset_for_p = copy(ruleset)
+        ruleset_for_p.set_html_rule("Paragraph", Rule(HtmlParagraphInList))
+
+        def fill_list(up_li: HtmlElement, block: ListViewIlvlBlock):
+            bullet = block.li.is_bullet_format
+            lst_elm = Element("ul") if bullet else Element("ol")
+            for block in block.inside_blocks:
+                li_elm = Element("li")
+                p_elm: HtmlElement = block.li.paragraph.transform(
+                    ruleset_for_p, stringify=False
+                )
+                li_elm.text = p_elm.text
+                lst_elm.extend(list(p_elm))
+                up_li.append(lst_elm)
+                if block.inside_blocks:
+                    fill_list(li_elm, block)
+
+        for zero_block in proxy.items_tree:
+            zero_li_elm = Element("li")
+            p_elm: HtmlElement = zero_block.li.paragraph.transform(
+                ruleset_for_p, stringify=False
+            )
+            zero_li_elm.text = p_elm.text
+            zero_li_elm.extend(list(p_elm))
+            zero_lst_elm.append(zero_li_elm)
+
+            if zero_block.inside_blocks:
+                fill_list(zero_li_elm, zero_block)
+        return zero_lst_elm
 
 
 class _RunsHtmlBuilder:

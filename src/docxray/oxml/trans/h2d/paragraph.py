@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
@@ -44,6 +44,10 @@ from docxray.shared import os_locale
 
 from .how2display import How2Display
 from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
+
+if TYPE_CHECKING:
+    from docxray.transform.ruleset import RuleSet
+    from docxray.transform.transformers import ListViewT, TransformMethod
 
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
@@ -89,6 +93,7 @@ class ListViewIlvlBlock:
 
 class ListView:
     def __init__(self, list_item: ListItem) -> None:
+        self.__li = list_item
         self.__load_items__(list_item)
 
     def __load_items__(self, list_item: ListItem) -> None:
@@ -144,6 +149,27 @@ class ListView:
             prev_ilvl = item.ilvl
         return zero_blocks
 
+    @cached_property
+    def is_bullet_format(self) -> bool:
+        return self.__li.is_bullet_format
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformers import ListViewT
+
+        ruleset = (
+            ruleset
+            or cast(
+                "DocumentPart", self.__li._paragraph.part
+            )._default_html_ruleset
+        )
+        return ListViewT.transform(self, ruleset, stringify, method)
+
 
 class ListItem:
     """Represents `Paragraph` instance as list item in numbering."""
@@ -186,8 +212,8 @@ class ListItem:
             self._start = 0
 
     @cached_property
-    def list_view(self) -> ListView:
-        return ListView(self)
+    def paragraph(self) -> Paragraph:
+        return self._paragraph
 
     @cached_property
     def level(self) -> Level:
@@ -428,6 +454,12 @@ class ParagraphH2D(How2Display[Paragraph]):
             self._associated_numPr,
             self._associated_level,
         )
+
+    @cached_property
+    def list_view(self) -> ListView | None:
+        if self.list_item is None:
+            return None
+        return ListView(self.list_item)
 
     # --- Page properties
     @cached_property

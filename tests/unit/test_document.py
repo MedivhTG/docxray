@@ -60,6 +60,9 @@ class TestDocument:
                                     wait = 1
             elif isinstance(p_or_t, Paragraph):
                 p_html = p_or_t.transform()
+                if p_or_t.list_view is not None:
+                    num_html = p_or_t.list_view.transform()
+                    w = 1
 
                 lvl_text = p_or_t.element.is_first
                 part = p_or_t.part

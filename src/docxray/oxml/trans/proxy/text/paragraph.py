@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
@@ -13,8 +13,6 @@ from docxray.oxml.trans.st.enums import SE_JC
 from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
-from docxray.transform.paragraph import ParagraphT
-from docxray.transform.ruleset import RuleSet
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -24,6 +22,9 @@ if TYPE_CHECKING:
     )
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell
+    from docxray.transform.ruleset import RuleSet
+    from docxray.transform.transformers import ParagraphT, TransformMethod
+    from docxray.oxml.trans.h2d.paragraph import ListView
 
 
 class Paragraph(StoryChild[CT_P]):
@@ -73,6 +74,10 @@ class Paragraph(StoryChild[CT_P]):
         return self.h2d.list_item
 
     @cached_property
+    def list_view(self) -> ListView | None:
+        return self.h2d.list_view
+
+    @cached_property
     def right_to_left(self) -> bool:
         return self.h2d.right_to_left
 
@@ -108,14 +113,20 @@ class Paragraph(StoryChild[CT_P]):
     def has_page_break(self) -> bool:
         return self.element.xpath('boolean(.//w:br[@w:type="page"])')
 
-    def transform(self, ruleset: RuleSet | None = None) -> str:
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformers import ParagraphT
 
         ruleset = (
             ruleset or cast("DocumentPart", self.part)._default_html_ruleset
         )
-        return ParagraphT.transform(self, ruleset)
+        return ParagraphT.transform(self, ruleset, stringify, method)
 
     # TODO: not all but enough
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
