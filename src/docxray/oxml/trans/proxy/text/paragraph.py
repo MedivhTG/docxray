@@ -104,6 +104,10 @@ class Paragraph(StoryChild[CT_P]):
     def justify_inter_character(self) -> bool:
         return self.h2d.justify_inter_character
 
+    @cached_property
+    def has_page_break(self) -> bool:
+        return self.element.xpath('boolean(.//w:br[@w:type="page"])')
+
     def transform(self, ruleset: RuleSet | None = None) -> str:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart

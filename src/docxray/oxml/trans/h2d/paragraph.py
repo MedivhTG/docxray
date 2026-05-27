@@ -59,6 +59,92 @@ class ListItemError(Exception):
 # to know char positions dynmically (for tabs for example) and count pages
 
 
+class ListViewIlvlBlock:
+    def __init__(self, li: ListItem, parent: ListViewIlvlBlock | None) -> None:
+        self._li = li
+        self._parent = parent
+        self._block: list[ListViewIlvlBlock] = []
+
+    @cached_property
+    def li(self) -> ListItem:
+        return self._li
+
+    @cached_property
+    def ilvl(self) -> int:
+        return self._li.ilvl
+
+    @cached_property
+    def parent(self) -> ListViewIlvlBlock | None:
+        return self._parent
+
+    @cached_property
+    def inside_blocks(self) -> list[ListViewIlvlBlock]:
+        return self._block
+
+    def append(self, block: ListViewIlvlBlock) -> None:
+        if block.ilvl <= self.ilvl:
+            raise ValueError("Cannot append ilvl block with higher or eq ilvl")
+        self._block.append(block)
+
+
+class ListView:
+    def __init__(self, list_item: ListItem) -> None:
+        self.__load_items__(list_item)
+
+    def __load_items__(self, list_item: ListItem) -> None:
+        first_item = list_item
+        prev_li = first_item.prev_li
+        while prev_li:
+            first_item = prev_li
+            prev_li = prev_li.prev_li
+        items = [first_item]
+        next_li = first_item.next_li
+        while next_li:
+            items.append(next_li)
+            next_li = next_li.next_li
+        self._items = items
+
+    @property
+    def items(self) -> list[ListItem]:
+        return self._items
+
+    @cached_property
+    def items_tree(self) -> list[ListViewIlvlBlock]:
+        zero_blocks = []
+        block_map: dict[int, ListViewIlvlBlock] = {}
+        prev_ilvl = None
+        for item in self.items:
+            block = ListViewIlvlBlock(item, None)
+            if prev_ilvl is not None:
+                if prev_ilvl < item.ilvl:
+                    block._parent = block_map[prev_ilvl]
+                    block_map[prev_ilvl].append(block)
+                elif prev_ilvl > item.ilvl:
+                    parent_block = block_map[item.ilvl].parent
+                    block._parent = parent_block
+                    if parent_block is not None:
+                        parent_block.append(block)
+                    on_del = set()
+                    for ilvl in block_map.keys():
+                        if ilvl >= item.ilvl:
+                            on_del.add(ilvl)
+                    for ilvl in on_del:
+                        del block_map[ilvl]
+                    block_map[item.ilvl] = block
+                else:
+                    parent_block = block_map[item.ilvl].parent
+                    block._parent = parent_block
+                    if parent_block is not None:
+                        parent_block.append(block)
+                    block_map[item.ilvl] = block
+            else:
+                block_map[item.ilvl] = block
+            if block.ilvl == 0:
+                zero_blocks.append(block)
+            prev_ilvl = item.ilvl
+        return zero_blocks
+
+
 class ListItem:
     """Represents `Paragraph` instance as list item in numbering."""
 
@@ -98,6 +184,10 @@ class ListItem:
             self._ilvl = self._level.ilvl
         if self._start is None:
             self._start = 0
+
+    @cached_property
+    def list_view(self) -> ListView:
+        return ListView(self)
 
     @cached_property
     def level(self) -> Level:
@@ -264,6 +354,10 @@ class ListItem:
         elif level.separator == SE_LEVEL_SUFFIX.SPACE:
             text += " "
         return text
+
+    @cached_property
+    def is_bullet_format(self) -> bool:
+        return self.level.numbering_format == SE_NUMBER_FORMAT.BULLET
 
     # TODO: here can be an Image instance along with common chars
     @cached_property
