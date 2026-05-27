@@ -7,6 +7,7 @@ specialized ones like structured document tags.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
@@ -26,21 +27,19 @@ BLCK_ITEM_ELM_T = TypeVar("BLCK_ITEM_ELM_T", bound=_BlockItemElement)
 
 
 class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
-    """Base class for proxy objects that can contain block items.
-
-    These containers include _Body, _Cell, header, footer, footnote, endnote, comment,
-    and text box objects. Provides the shared functionality to add a block item like a
-    paragraph or table.
-    """
-
-    def iter_inner_content(self) -> Iterator[Paragraph | Table]:
-        """Generate each `Paragraph` or `Table` in this container in document order."""
+    @cached_property
+    def inner_content(self) -> list[Paragraph | Table]:
         # docxray stuff
         from docxray.oxml.trans.proxy.table import Table
 
+        content = []
         for element in self._element.inner_content_elements:
-            yield (
-                Paragraph(element, self)
-                if isinstance(element, CT_P)
-                else Table(element, self)
-            )
+            if isinstance(element, CT_P):
+                content.append(Paragraph(element, self))
+            else:
+                content.append(Table(element, self))
+        return content
+
+    def iter_inner_content(self) -> Iterator[Paragraph | Table]:
+        for item in self.inner_content:
+            yield item

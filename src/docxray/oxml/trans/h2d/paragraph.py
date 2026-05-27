@@ -179,7 +179,7 @@ class ListItem:
     @cached_property
     def next_li(self) -> ListItem | None:
         """Next list item in all list. `None` if no list item ahead."""
-        next_para: Paragraph | None = self._paragraph.next_sibling
+        next_para: Paragraph | None = self._paragraph.next_para
         while next_para:
             if next_para.list_item is not None:
                 next_li = next_para.list_item
@@ -187,13 +187,13 @@ class ListItem:
                     return next_li
                 if self.num_id == next_li.num_id:
                     return next_li
-            next_para = next_para.next_sibling
+            next_para = next_para.next_para
         return None
 
     @cached_property
     def prev_li(self) -> ListItem | None:
         """Previous list item in all list. `None` if no list item behind."""
-        prev_para: Paragraph | None = self._paragraph.prev_sibling
+        prev_para: Paragraph | None = self._paragraph.prev_para
         while prev_para:
             if prev_para.list_item is not None:
                 prev_li = prev_para.list_item
@@ -201,31 +201,31 @@ class ListItem:
                     return prev_li
                 if self.num_id == prev_li.num_id:
                     return prev_li
-            prev_para = prev_para.prev_sibling
+            prev_para = prev_para.prev_para
         return None
 
     @cached_property
     def next_li_ilvl(self) -> ListItem | None:
         """Next list item in with same `ilvl`. `None` if no list item ahead."""
-        next_para: Paragraph | None = self._paragraph.next_sibling
+        next_para: Paragraph | None = self._paragraph.next_para
         while next_para:
             if next_para.list_item is not None:
                 next_li = next_para.list_item
                 if self.num_key == next_li.num_key:
                     return next_li
-            next_para = next_para.next_sibling
+            next_para = next_para.next_para
         return None
 
     @cached_property
     def prev_li_ilvl(self) -> ListItem | None:
         """Previous list item in with same `ilvl`. `None` if no list item behind."""
-        prev_para: Paragraph | None = self._paragraph.prev_sibling
+        prev_para: Paragraph | None = self._paragraph.prev_para
         while prev_para:
             if prev_para.list_item is not None:
                 prev_li = prev_para.list_item
                 if self.num_key == prev_li.num_key:
                     return prev_li
-            prev_para = prev_para.prev_sibling
+            prev_para = prev_para.prev_para
         return None
 
     @cached_property

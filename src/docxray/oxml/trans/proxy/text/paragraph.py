@@ -39,6 +39,36 @@ class Paragraph(StoryChild[CT_P]):
         return cast("Body | Cell", self._parent)
 
     @cached_property
+    def content_idx(self) -> int:
+        return self.container.inner_content.index(self)
+
+    @cached_property
+    def prev_para(self) -> Paragraph | None:
+        prev_idx = self.content_idx - 1
+        if prev_idx < 0:
+            return None
+        item = self.container.inner_content[prev_idx]
+        while not isinstance(item, Paragraph):
+            prev_idx = item.content_idx - 1
+            if prev_idx < 0:
+                return None
+            item = self.container.inner_content[prev_idx]
+        return item if isinstance(item, Paragraph) else None
+
+    @cached_property
+    def next_para(self) -> Paragraph | None:
+        next_idx = self.content_idx + 1
+        if next_idx + 1 > len(self.container.inner_content):
+            return None
+        item = self.container.inner_content[next_idx]
+        while not isinstance(item, Paragraph):
+            next_idx = item.content_idx + 1
+            if next_idx + 1 > len(self.container.inner_content):
+                return None
+            item = self.container.inner_content[next_idx]
+        return item if isinstance(item, Paragraph) else None
+
+    @cached_property
     def list_item(self) -> ListItem | None:
         return self.h2d.list_item
 

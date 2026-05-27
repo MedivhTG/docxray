@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.cell import BordersInfo, CellH2D
     from docxray.oxml.trans.h2d.row import RowH2D
     from docxray.oxml.trans.h2d.table import TableH2D
+    from docxray.oxml.trans.proxy.document import Body
 
 
 class TblPosError(Exception):
@@ -309,6 +310,14 @@ class Table(StoryChild[CT_Tbl]):
         from ..h2d.table import TableH2D
 
         return TableH2D(self, self.part, "tblPr")  # type: ignore[arg-type]
+
+    @cached_property
+    def container(self) -> Body | Cell:
+        return cast("Body | Cell", self._parent)
+
+    @cached_property
+    def content_idx(self) -> int:
+        return self.container.inner_content.index(self)
 
     @cached_property
     def rows(self) -> list[Row]:
