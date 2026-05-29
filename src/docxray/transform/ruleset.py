@@ -1,9 +1,15 @@
 from typing import Literal, Self
 
-from .builders import HtmlBuilder, HtmlDrawing, HtmlListView, HtmlParagraph
+from .builders import (
+    HtmlBuilder,
+    HtmlDrawing,
+    HtmlListView,
+    HtmlParagraph,
+    HtmlTable,
+)
 
 type RuleMethod = Literal["html"]
-type RuleProxy = Literal["Paragraph", "Drawing", "ListView"]
+type RuleProxy = Literal["Paragraph", "Drawing", "ListView", "Table"]
 
 
 class Rule:
@@ -36,5 +42,6 @@ class RuleSet:
                 "Paragraph": Rule(HtmlParagraph),
                 "Drawing": Rule(HtmlDrawing),
                 "ListView": Rule(HtmlListView),
+                "Table": Rule(HtmlTable),
             },
         )

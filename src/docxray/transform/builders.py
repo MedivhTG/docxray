@@ -15,6 +15,7 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_JC,
+    SE_Border,
     SE_Underline,
     SE_VerticalAlignRun,
 )
@@ -24,6 +25,7 @@ from .utils.char_graph import RunChain, RunChainsMap
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.paragraph import ListView, ListViewIlvlBlock
+    from docxray.oxml.trans.proxy.table import Cell, Row, Table
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 
     from .ruleset import RuleSet
@@ -256,6 +258,82 @@ class HtmlListView(HtmlBuilder["ListView"]):
             if zero_block.inside_blocks:
                 fill_list(zero_li_elm, zero_block)
         return zero_lst_elm
+
+
+class HtmlTable(HtmlBuilder["Table"]):
+    @classmethod
+    def element(cls, proxy: Table, ruleset: RuleSet) -> HtmlElement:
+        return cls._table(proxy)
+
+    @classmethod
+    def _table(cls, proxy: Table) -> HtmlElement:
+        table_elm = Element("table", cls._table_attrs(proxy))
+        for row in proxy.iter_rows():
+            table_elm.append(cls._row(row))
+        return table_elm
+
+    @classmethod
+    def _row(cls, proxy: Row) -> HtmlElement:
+        tr_elm = Element("tr")
+        for cell in proxy.iter_cells():
+            tr_elm.append(cls._cell(cell))
+        return tr_elm
+
+    @classmethod
+    def _cell(cls, proxy: Cell) -> HtmlElement:
+        td_elm = Element("td")
+        return td_elm
+
+    @classmethod
+    def _cell_attrs(cls, proxy: Cell) -> dict[str, str]:
+        attrs: dict[str, str] = {}
+        style = cls._cell_style(proxy)
+        if style:
+            attrs["style"] = style
+        if proxy.vert_span and proxy.vert_span > 1:
+            attrs["rowspan"] = str(proxy.vert_span)
+        if proxy.horz_span > 1:
+            attrs["colspan"] = str(proxy.horz_span)
+        return attrs
+
+    @classmethod
+    def _cell_style(cls, proxy: Cell) -> str:
+        style = ""
+        sides: set[str] = {"top", "bottom", "left", "right"}
+        for side in sides:
+            border: str = cls._cell_border(proxy.borders_info[side], side)  # type: ignore[literal-required]
+            if border:
+                style += f"{border}; "
+        return style
+
+    @classmethod
+    def _cell_border(cls, border: SE_Border | None, side: str) -> str:
+        b = ""
+        if border not in {None, SE_Border.NULL, SE_Border.NONE}:
+            b = f"border-{side}: 1px solid black"
+        return b
+
+    @classmethod
+    def _table_attrs(cls, proxy: Table) -> dict[str, str]:
+        attrs = {}
+        style = cls._table_style(proxy)
+        if style:
+            attrs["style"] = style
+        return attrs
+
+    @classmethod
+    def _table_style(cls, proxy: Table) -> str:
+        style = ""
+        if proxy.spacing_first is None:
+            style += "border-collapse: collapsed; "
+        else:
+            spacing = proxy.spacing_first
+            if isinstance(spacing, Length):
+                units = f"{spacing.px()}px"
+            else:
+                units = f"{spacing}%"
+            style += f"border-spacing: {units}; "
+        return style
 
 
 class _RunsHtmlBuilder:

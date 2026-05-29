@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
@@ -11,7 +11,7 @@ from docxray.oxml.trans.st.enums import SE_Merge
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
 from .compute import width
-from .shared import ElementProxy, NotFound, StoryChild, Twips
+from .shared import ElementProxy, Length, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.table import TableH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+    from docxray.transform.ruleset import RuleSet
+    from docxray.transform.transformers import TransformMethod
 
 
 class TblPosError(Exception):
@@ -338,6 +340,25 @@ class Table(StoryChild[CT_Tbl]):
     def rows(self) -> list[Row]:
         return [Row(tr_elm, self) for tr_elm in self.element.tr_lst]
 
+    @cached_property
+    def spacing_first(self) -> Length | float | None:
+        """Get firsct spacing value in the table inside of cells.
+
+        This property is for determining spacing between cells in the table.
+        But not use it if you want accurate reprsentation of Word cells, cause
+        each cell has own cell spacing actually.
+
+        Returns:
+            Length | float | None: If `Length` - EMU value, elif `float` - percents,
+                else no spacing.
+        """
+        for row in self.iter_rows():
+            for cell in row.iter_cells():
+                spacing = cell.borders_info["spacing"]
+                if spacing is not None:
+                    return spacing
+        return None
+
     def get_row(self, idx: int) -> Row | None:
         if idx < 0:
             return None
@@ -368,3 +389,18 @@ class Table(StoryChild[CT_Tbl]):
     def iter_rows(self) -> Iterator[Row]:
         for row in self.rows:
             yield row
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformers import TablleT
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return TablleT.transform(self, ruleset, stringify, method)
