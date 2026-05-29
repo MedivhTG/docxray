@@ -17,8 +17,11 @@ class TestDocument:
         doc = Document(test_file)
         for p_or_t in doc.iter_inner_contet_with_lists():
             if isinstance(p_or_t, Table):
+                table_html = p_or_t.transform()
                 w = 1
             elif isinstance(p_or_t, Paragraph):
+                p_html = p_or_t.transform()
                 w = 1
             else:
+                list_html = p_or_t.transform()
                 w = 1

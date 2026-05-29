@@ -88,7 +88,9 @@ class ListViewIlvlBlock:
 
     def append(self, block: ListViewIlvlBlock) -> None:
         if block.ilvl <= self.ilvl:
-            raise ValueError("Cannot append ilvl block with higher or eq ilvl")
+            raise ValueError(
+                "Cannot append block with ilvl less or equal to parent"
+            )
         self._block.append(block)
 
 
@@ -142,7 +144,7 @@ class ListView:
                     if parent_block is not None:
                         parent_block.append(block)
             block_map[item.ilvl] = block
-            if block.ilvl == 0:
+            if block.parent is None:
                 zero_blocks.append(block)
             prev_ilvl = item.ilvl
         return zero_blocks

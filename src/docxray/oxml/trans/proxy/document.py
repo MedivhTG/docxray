@@ -43,7 +43,7 @@ class Document(ElementProxy[CT_Document]):
     def iter_inner_contet_with_lists(
         self,
     ) -> Iterator[Paragraph | ListView | Table]:
-        return self.body.iter_inner_contet_with_lists()
+        return self.body.iter_inner_content_with_lists()
 
 
 class Body(BlockItemContainer[CT_Body]):

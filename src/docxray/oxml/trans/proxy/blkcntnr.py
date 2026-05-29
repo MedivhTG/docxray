@@ -45,7 +45,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
         for item in self.inner_content:
             yield item
 
-    def iter_inner_contet_with_lists(
+    def iter_inner_content_with_lists(
         self,
     ) -> Iterator[Paragraph | ListView | Table]:
         """Iterate over content in container with `ListView` additionaly.
