@@ -94,7 +94,7 @@ class ListViewIlvlBlock:
 
 class ListView:
     def __init__(self, list_item: ListItem) -> None:
-        self.__li = list_item
+        self._li = list_item
         self.__load_items__(list_item)
 
     def __load_items__(self, list_item: ListItem) -> None:
@@ -149,7 +149,7 @@ class ListView:
 
     @cached_property
     def is_bullet_format(self) -> bool:
-        return self.__li.is_bullet_format
+        return self._li.is_bullet_format
 
     def transform(
         self,
@@ -164,7 +164,7 @@ class ListView:
         ruleset = (
             ruleset
             or cast(
-                "DocumentPart", self.__li._paragraph.part
+                "DocumentPart", self._li._paragraph.part
             )._default_html_ruleset
         )
         return ListViewT.transform(self, ruleset, stringify, method)
