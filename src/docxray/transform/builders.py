@@ -12,6 +12,7 @@ from lxml.html import Element, HtmlElement
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
+from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_JC,
@@ -218,6 +219,7 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
         return {"src": f"data:{pic.content_type};base64,{base64}"}
 
 
+# TODO: add content between list items rendering
 class HtmlListView(HtmlBuilder["ListView"]):
     @classmethod
     def element(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
@@ -263,25 +265,36 @@ class HtmlListView(HtmlBuilder["ListView"]):
 class HtmlTable(HtmlBuilder["Table"]):
     @classmethod
     def element(cls, proxy: Table, ruleset: RuleSet) -> HtmlElement:
-        return cls._table(proxy)
+        return cls._table(proxy, ruleset)
 
     @classmethod
-    def _table(cls, proxy: Table) -> HtmlElement:
+    def _table(cls, proxy: Table, ruleset: RuleSet) -> HtmlElement:
         table_elm = Element("table", cls._table_attrs(proxy))
         for row in proxy.iter_rows():
-            table_elm.append(cls._row(row))
+            table_elm.append(cls._row(row, ruleset))
         return table_elm
 
     @classmethod
-    def _row(cls, proxy: Row) -> HtmlElement:
+    def _row(cls, proxy: Row, ruleset: RuleSet) -> HtmlElement:
         tr_elm = Element("tr")
         for cell in proxy.iter_cells():
-            tr_elm.append(cls._cell(cell))
+            tr_elm.append(cls._cell(cell, ruleset))
         return tr_elm
 
     @classmethod
-    def _cell(cls, proxy: Cell) -> HtmlElement:
-        td_elm = Element("td")
+    def _cell(cls, proxy: Cell, ruleset: RuleSet) -> HtmlElement:
+        td_elm = Element("td", cls._cell_attrs(proxy))
+        transform_lists = ruleset.html_rules["Table"].opts.get(
+            "transform_list_views"
+        )
+        if transform_lists:
+            for item in proxy.iter_inner_content_with_lists():
+                item_elm = item.transform(ruleset, stringify=False)
+                td_elm.append(item_elm)
+        else:
+            for item in proxy.iter_inner_content():
+                item_elm = item.transform(ruleset, stringify=False)
+                td_elm.append(item_elm)
         return td_elm
 
     @classmethod

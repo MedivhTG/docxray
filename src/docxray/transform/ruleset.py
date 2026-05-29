@@ -1,4 +1,4 @@
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from .builders import (
     HtmlBuilder,
@@ -13,12 +13,17 @@ type RuleProxy = Literal["Paragraph", "Drawing", "ListView", "Table"]
 
 
 class Rule:
-    def __init__(self, builder: type[HtmlBuilder]) -> None:
+    def __init__(self, builder: type[HtmlBuilder], **opts: Any) -> None:
         self._builder = builder
+        self._opts = opts
 
     @property
     def builder(self) -> type[HtmlBuilder]:
         return self._builder
+
+    @property
+    def opts(self) -> dict[str, Any]:
+        return self._opts
 
 
 class RuleSet:

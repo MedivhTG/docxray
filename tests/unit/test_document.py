@@ -6,6 +6,8 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.text.run import Run
+from docxray.transform.builders import HtmlTable
+from docxray.transform.ruleset import Rule, RuleSet
 
 
 class TestDocument:
@@ -17,7 +19,11 @@ class TestDocument:
         doc = Document(test_file)
         for p_or_t in doc.iter_inner_contet_with_lists():
             if isinstance(p_or_t, Table):
-                table_html = p_or_t.transform()
+                ruleset = RuleSet.html_default()
+                ruleset.set_html_rule(
+                    "Table", Rule(HtmlTable, transform_list_views=True)
+                )
+                table_html = p_or_t.transform(ruleset)
                 w = 1
             elif isinstance(p_or_t, Paragraph):
                 p_html = p_or_t.transform()
