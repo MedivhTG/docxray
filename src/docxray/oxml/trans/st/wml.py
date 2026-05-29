@@ -19,6 +19,7 @@ from docxray.xsd.xsd import (
 from .enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
+    SE_HEIGHT_RULE,
     SE_HINT,
     SE_JC,
     SE_LEVEL_SUFFIX,
@@ -163,3 +164,8 @@ class ST_BrType(XsdSimpleType):
 class ST_BrClear(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_BR_CLEAR)}
+
+
+class ST_HeightRule(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HEIGHT_RULE)}

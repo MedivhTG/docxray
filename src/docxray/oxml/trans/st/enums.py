@@ -410,3 +410,9 @@ class SE_BR_CLEAR(StrEnum):
     LEFT = "left"
     RIGHT = "right"
     ALL = "all"
+
+
+class SE_HEIGHT_RULE(StrEnum):
+    AUTO = "auto"
+    EXACT = "exact"
+    AT_LEAST = "atLeast"

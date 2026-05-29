@@ -173,9 +173,10 @@ register_element_cls("w:tblCellSpacing", CT_TblWidth)
 register_element_cls("w:tblStyleRowBandSize", CT_DecimalNumber)
 register_element_cls("w:tblStyleColBandSize", CT_DecimalNumber)
 
-from .table.row_props import CT_TblPrEx, CT_TrPr
+from .table.row_props import CT_TblPrEx, CT_TrPr, CT_Height
 
 register_element_cls("w:trPr", CT_TrPr)
+register_element_cls("w:trHeight", CT_Height)
 register_element_cls("w:tblPrEx", CT_TblPrEx)
 
 

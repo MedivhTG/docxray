@@ -7,10 +7,11 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
-from docxray.oxml.trans.st.enums import SE_Merge
+from docxray.oxml.trans.st.enums import SE_HEIGHT_RULE, SE_Merge
+from docxray.oxml.trans.table.row_props import CT_Height
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
-from .compute import width
+from .compute import twips_measure, width
 from .shared import ElementProxy, Length, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
@@ -264,6 +265,27 @@ class Row(ElementProxy[CT_Row]):
     @cached_property
     def pos(self) -> POS:
         return self.element.xml_pos
+
+    @cached_property
+    def height_rule(self) -> SE_HEIGHT_RULE:
+        trHeight_elm: CT_Height | NotFound = self.h2d._prop("trHeight")
+        if isinstance(trHeight_elm, NotFound):
+            return SE_HEIGHT_RULE.AUTO
+        rule = trHeight_elm.hRule
+        if rule is None:
+            return SE_HEIGHT_RULE.AUTO
+        return rule
+
+    @cached_property
+    def height(self) -> Length | None:
+        """Row height in twips or percents, `None` if auto."""
+        trHeight_elm: CT_Height | NotFound = self.h2d._prop("trHeight")
+        if isinstance(trHeight_elm, NotFound):
+            return None
+        val = trHeight_elm.val
+        if val is None:
+            return Twips(0)
+        return twips_measure(val)
 
     def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
         """Iterate over xml-cell proxies in a row.

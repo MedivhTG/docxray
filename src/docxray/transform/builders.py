@@ -291,6 +291,10 @@ class HtmlTable(HtmlBuilder["Table"]):
         return tr_elm
 
     @classmethod
+    def _row_attrs(cls, proxy: Row):
+        rule = proxy.height_rule
+
+    @classmethod
     def _cell(cls, proxy: Cell, ruleset: RuleSet) -> HtmlElement:
         td_elm = Element("td", cls._cell_attrs(proxy))
         transform_lists = ruleset.html_rules["Table"].opts.get(
