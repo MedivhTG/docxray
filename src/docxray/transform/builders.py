@@ -86,6 +86,15 @@ def vert_align_elm(value: SE_VerticalAlignRun) -> HtmlElement:
     return Element("sub")
 
 
+def units(length: Length | float | None) -> str:
+    if length is None:
+        return ""
+    elif isinstance(length, Length):
+        return f"{length.px()}px"
+    else:
+        return f"{length}%"
+
+
 TAB_MNEMONIC = "&emsp;"
 
 
@@ -300,13 +309,15 @@ class HtmlTable(HtmlBuilder["Table"]):
     @classmethod
     def _cell_attrs(cls, proxy: Cell) -> dict[str, str]:
         attrs: dict[str, str] = {}
-        style = cls._cell_style(proxy)
-        if style:
-            attrs["style"] = style
+        if proxy.width is not None:
+            attrs["width"] = units(proxy.width)
         if proxy.vert_span and proxy.vert_span > 1:
             attrs["rowspan"] = str(proxy.vert_span)
         if proxy.horz_span > 1:
             attrs["colspan"] = str(proxy.horz_span)
+        style = cls._cell_style(proxy)
+        if style:
+            attrs["style"] = style
         return attrs
 
     @classmethod
@@ -341,11 +352,7 @@ class HtmlTable(HtmlBuilder["Table"]):
             style += "border-collapse: collapsed; "
         else:
             spacing = proxy.spacing_first
-            if isinstance(spacing, Length):
-                units = f"{spacing.px()}px"
-            else:
-                units = f"{spacing}%"
-            style += f"border-spacing: {units}; "
+            style += f"border-spacing: {units(spacing)}; "
         return style
 
 
