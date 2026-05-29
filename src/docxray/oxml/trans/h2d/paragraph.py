@@ -136,15 +136,12 @@ class ListView:
                             on_del.add(ilvl)
                     for ilvl in on_del:
                         del block_map[ilvl]
-                    block_map[item.ilvl] = block
                 else:
                     parent_block = block_map[item.ilvl].parent
                     block._parent = parent_block
                     if parent_block is not None:
                         parent_block.append(block)
-                    block_map[item.ilvl] = block
-            else:
-                block_map[item.ilvl] = block
+            block_map[item.ilvl] = block
             if block.ilvl == 0:
                 zero_blocks.append(block)
             prev_ilvl = item.ilvl

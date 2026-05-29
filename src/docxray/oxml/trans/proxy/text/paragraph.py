@@ -22,7 +22,7 @@ if TYPE_CHECKING:
         ParagraphH2D,
     )
     from docxray.oxml.trans.proxy.document import Body
-    from docxray.oxml.trans.proxy.table import Cell
+    from docxray.oxml.trans.proxy.table import Cell, Table
     from docxray.transform.ruleset import RuleSet
     from docxray.transform.transformers import TransformMethod
 
@@ -44,30 +44,36 @@ class Paragraph(StoryChild[CT_P]):
         return self.container.inner_content.index(self)
 
     @cached_property
-    def prev_para(self) -> Paragraph | None:
+    def prev_content_item(self) -> Paragraph | Table | None:
         prev_idx = self.content_idx - 1
         if prev_idx < 0:
             return None
-        item = self.container.inner_content[prev_idx]
-        while not isinstance(item, Paragraph):
-            prev_idx = item.content_idx - 1
-            if prev_idx < 0:
-                return None
-            item = self.container.inner_content[prev_idx]
-        return item if isinstance(item, Paragraph) else None
+        return self.container.inner_content[prev_idx]
 
     @cached_property
-    def next_para(self) -> Paragraph | None:
+    def prev_para(self) -> Paragraph | None:
+        prev_item = self.prev_content_item
+        while prev_item:
+            if isinstance(prev_item, Paragraph):
+                return prev_item
+            prev_item = prev_item.prev_content_item
+        return None
+
+    @cached_property
+    def next_content_item(self) -> Paragraph | Table | None:
         next_idx = self.content_idx + 1
         if next_idx + 1 > len(self.container.inner_content):
             return None
-        item = self.container.inner_content[next_idx]
-        while not isinstance(item, Paragraph):
-            next_idx = item.content_idx + 1
-            if next_idx + 1 > len(self.container.inner_content):
-                return None
-            item = self.container.inner_content[next_idx]
-        return item if isinstance(item, Paragraph) else None
+        return self.container.inner_content[next_idx]
+
+    @cached_property
+    def next_para(self) -> Paragraph | None:
+        next_item = self.next_content_item
+        while next_item:
+            if isinstance(next_item, Paragraph):
+                return next_item
+            next_item = next_item.next_content_item
+        return None
 
     @cached_property
     def list_item(self) -> ListItem | None:

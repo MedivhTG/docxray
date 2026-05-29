@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.row import RowH2D
     from docxray.oxml.trans.h2d.table import TableH2D
     from docxray.oxml.trans.proxy.document import Body
+    from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 
 
 class TblPosError(Exception):
@@ -318,6 +319,20 @@ class Table(StoryChild[CT_Tbl]):
     @cached_property
     def content_idx(self) -> int:
         return self.container.inner_content.index(self)
+
+    @cached_property
+    def prev_content_item(self) -> Paragraph | Table | None:
+        prev_idx = self.content_idx - 1
+        if prev_idx < 0:
+            return None
+        return self.container.inner_content[prev_idx]
+
+    @cached_property
+    def next_content_item(self) -> Paragraph | Table | None:
+        next_idx = self.content_idx + 1
+        if next_idx + 1 > len(self.container.inner_content):
+            return None
+        return self.container.inner_content[next_idx]
 
     @cached_property
     def rows(self) -> list[Row]:
