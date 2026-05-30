@@ -1,11 +1,8 @@
 from pathlib import Path
 
 from docxray import Document
-from docxray.oxml.trans.proxy.drawing import Drawing
-from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.oxml.trans.proxy.text.run import Run
 from docxray.transform.builders import HtmlTable
 from docxray.transform.ruleset import Rule, RuleSet
 
@@ -29,6 +26,7 @@ class TestDocument:
                 w = 1
         w = 1
 
+        html = ""
         for p_or_t in doc.iter_inner_content_with_lists():
             if isinstance(p_or_t, Table):
                 ruleset = RuleSet.html_default()
@@ -36,10 +34,14 @@ class TestDocument:
                     "Table", Rule(HtmlTable, transform_list_views=True)
                 )
                 table_html = p_or_t.transform(ruleset)
+                html += table_html
                 w = 1
             elif isinstance(p_or_t, Paragraph):
                 p_html = p_or_t.transform()
+                html += p_html
                 w = 1
             else:
                 list_html = p_or_t.transform()
+                html += list_html
                 w = 1
+        w = 1

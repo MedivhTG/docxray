@@ -16,6 +16,7 @@ from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_JC,
+    SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_TEXT_DIRECTION,
     SE_Border,
@@ -207,16 +208,24 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         if proxy.list_item is None:
             return ""
         li = proxy.list_item
-        txt = li.level_text.replace("\t", TAB_MNEMONIC)
+        txt = li.level_text
         if li.chars_case == "up":
             txt = txt.upper()
         elif li.chars_case == "down":
             txt = txt.lower()
         tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
+        suff = li.level.separator
+        if suff == SE_LEVEL_SUFFIX.TAB:
+            sep = TAB_MNEMONIC
+        elif suff == SE_LEVEL_SUFFIX.SPACE:
+            sep = " "
+        else:
+            sep = ""
         if tree is None:
-            return txt
+            return txt + sep
         top, bottom = tree
         bottom.text = txt
+        top.tail = sep
         return top
 
     @classmethod
@@ -302,7 +311,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     @classmethod
     def _ind(cls, ind: Length | int) -> str:
         if isinstance(ind, Length):
-            return f"{ind.px()}px"
+            return f"{ind.pt}pt"
         elif isinstance(ind, int):
             return f"{ind}ch"
 

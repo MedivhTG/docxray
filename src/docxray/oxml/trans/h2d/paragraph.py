@@ -34,7 +34,6 @@ from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,
-    SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
@@ -369,23 +368,14 @@ class ListItem:
         """Get rendered level text as in WORD.
 
         `NOTE`:
-        1) If suffix (separator-character) is TAB, then
-        we must return Tab instance, but for some reasons we can't do it
-        (Word renderer too complex) for now and returned symbol is backslashed tab.
-        2) For future level text can return `Image` instance (str | Image) if numbering
+        1) For future level text can return `Image` instance (str | Image) if numbering
         format has picture reference (bullet format usually).
         """
         level = self.level
         num_format = level.numbering_format
         if num_format in NUMERAL_SPECIFIC:
             return self._level_char
-        text = self._parse_pattern()
-        if level.separator == SE_LEVEL_SUFFIX.TAB:
-            # TODO: look GP_1
-            text += "\t"
-        elif level.separator == SE_LEVEL_SUFFIX.SPACE:
-            text += " "
-        return text
+        return self._parse_pattern()
 
     @cached_property
     def is_bullet_format(self) -> bool:
@@ -421,7 +411,7 @@ class ListItem:
         return line
 
     @cached_property
-    def single_strike_through(self) -> bool:
+    def strike(self) -> bool:
         return self._display_level_text_run_val_on_off("strike")
 
     @cached_property
