@@ -23,6 +23,7 @@ from .enums import (
     SE_HINT,
     SE_JC,
     SE_LEVEL_SUFFIX,
+    SE_LINE_SPACING_RULE,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
@@ -169,3 +170,8 @@ class ST_BrClear(XsdSimpleType):
 class ST_HeightRule(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_HEIGHT_RULE)}
+
+
+class ST_LineSpacingRule(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_LINE_SPACING_RULE)}

@@ -416,3 +416,9 @@ class SE_HEIGHT_RULE(StrEnum):
     AUTO = "auto"
     EXACT = "exact"
     AT_LEAST = "atLeast"
+
+
+class SE_LINE_SPACING_RULE(StrEnum):
+    AUTO = "auto"
+    EXACT = "exact"
+    AT_LEAST = "atLeast"

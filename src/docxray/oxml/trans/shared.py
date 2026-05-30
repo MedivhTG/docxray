@@ -26,6 +26,7 @@ from docxray.oxml.trans.st.wml import (
     ST_Jc,
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
+    ST_SignedTwipsMeasure,
     ST_TblWidth,
     ST_TextDirection,
     ST_Theme,
@@ -88,7 +89,9 @@ class CT_Color(OxmlElement):
 
 
 class CT_SignedTwipsMeasure(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> int | str:
+        return self.attr_required(W.VAL, ST_SignedTwipsMeasure)
 
 
 class CT_TextScale(OxmlElement):

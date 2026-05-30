@@ -136,9 +136,9 @@ class CT_RPr(OxmlElement):
     @cached_property
     def spacing(self) -> CT_SignedTwipsMeasure | None:
         spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
-        if spacing_elm is not None:
+        if spacing_elm is None:
             return None
-        return CT_SignedTwipsMeasure(spacing_elm)
+        return spacing_elm.recreate(CT_SignedTwipsMeasure)
 
     @cached_property
     def w(self) -> CT_TextScale | None:

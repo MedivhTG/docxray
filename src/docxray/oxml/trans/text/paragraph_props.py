@@ -14,10 +14,15 @@ from docxray.oxml.trans.shared import (
     CT_TextDirection,
     CT_TrackChange,
 )
-from docxray.oxml.trans.st.enums import SE_TEXT_ALIGNMENT
-from docxray.oxml.trans.st.shared_common import ST_TwipsMeasure
+from docxray.oxml.trans.st.enums import (
+    SE_LINE_SPACING_RULE,
+    SE_TEXT_ALIGNMENT,
+    SE_OnOff1,
+)
+from docxray.oxml.trans.st.shared_common import ST_OnOff, ST_TwipsMeasure
 from docxray.oxml.trans.st.wml import (
     ST_DecimalNumber,
+    ST_LineSpacingRule,
     ST_SignedTwipsMeasure,
     ST_TextAlignment,
 )
@@ -35,7 +40,41 @@ class CT_Tabs(OxmlElement):
 
 
 class CT_Spacing(OxmlElement):
-    pass
+    @cached_property
+    def before(self) -> int | str:
+        return self.attr_optional(W.BEFORE, ST_TwipsMeasure, 0)
+
+    @cached_property
+    def beforeLines(self) -> int:
+        return self.attr_optional(W.BEFORE_LINES, ST_DecimalNumber, 0)
+
+    @cached_property
+    def beforeAutospacing(self) -> bool | SE_OnOff1:
+        return self.attr_optional(
+            W.BEFORE_AUTOSPACING, ST_OnOff, SE_OnOff1.OFF
+        )
+
+    @cached_property
+    def after(self) -> int | str:
+        return self.attr_optional(W.AFTER, ST_TwipsMeasure, default=0)
+
+    @cached_property
+    def afterLines(self) -> int:
+        return self.attr_optional(W.AFTER_LINES)
+
+    @cached_property
+    def afterAutospacing(self) -> bool | SE_OnOff1:
+        return self.attr_optional(W.AFTER_AUTOSPACING, ST_OnOff, SE_OnOff1.OFF)
+
+    @cached_property
+    def line(self) -> int | str:
+        return self.attr_optional(W.LINE, ST_SignedTwipsMeasure, 0)
+
+    @cached_property
+    def lineRule(self) -> SE_LINE_SPACING_RULE:
+        return self.attr_optional(
+            W.LINE_RULE, ST_LineSpacingRule, SE_LINE_SPACING_RULE.AUTO
+        )
 
 
 class CT_Ind(OxmlElement):
@@ -197,13 +236,9 @@ class CT_PPr(OxmlElement):
     def snapToGrid(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SNAP_TO_GRID, CT_OnOff)
 
-    # TODO: write factory method for right instantiate customized elements
-    # @cached_property
-    # def spacing(self) -> CT_Spacing | None:
-    #     spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
-    #     if spacing_elm is None:
-    #         return None
-    #     return CT_Spacing(spacing_elm)
+    @cached_property
+    def spacing(self) -> CT_Spacing | None:
+        return self.child_zero_or_one(W.SPACING, CT_Spacing)
 
     @cached_property
     def ind(self) -> CT_Ind | None:

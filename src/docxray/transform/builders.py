@@ -290,9 +290,10 @@ class HtmlTable(HtmlBuilder["Table"]):
             tr_elm.append(cls._cell(cell, ruleset))
         return tr_elm
 
-    @classmethod
-    def _row_attrs(cls, proxy: Row):
-        rule = proxy.height_rule
+    # TODO: do this
+    # @classmethod
+    # def _row_attrs(cls, proxy: Row):
+    #     rule = proxy.height_rule
 
     @classmethod
     def _cell(cls, proxy: Cell, ruleset: RuleSet) -> HtmlElement:

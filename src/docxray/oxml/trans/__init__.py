@@ -46,6 +46,7 @@ from .text.paragraph_props import (
     CT_Ind,
     CT_PBdr,
     CT_PPr,
+    CT_Spacing,
     CT_Tabs,
     CT_TextAlignment,
     CT_TextboxTightWrap,
@@ -71,6 +72,7 @@ register_element_cls("w:autoSpaceDE", CT_OnOff)
 register_element_cls("w:autoSpaceDN", CT_OnOff)
 register_element_cls("w:bidi", CT_OnOff)
 register_element_cls("w:adjustRightInd", CT_OnOff)
+register_element_cls("w:spacing", CT_Spacing)
 register_element_cls("w:snapToGrid", CT_OnOff)
 register_element_cls("w:ind", CT_Ind)
 register_element_cls("w:contextualSpacing", CT_OnOff)
@@ -173,7 +175,7 @@ register_element_cls("w:tblCellSpacing", CT_TblWidth)
 register_element_cls("w:tblStyleRowBandSize", CT_DecimalNumber)
 register_element_cls("w:tblStyleColBandSize", CT_DecimalNumber)
 
-from .table.row_props import CT_TblPrEx, CT_TrPr, CT_Height
+from .table.row_props import CT_Height, CT_TblPrEx, CT_TrPr
 
 register_element_cls("w:trPr", CT_TrPr)
 register_element_cls("w:trHeight", CT_Height)

@@ -124,7 +124,17 @@ class W:
     SNAP_TO_GRID = qn("w:snapToGrid")
     VANISH = qn("w:vanish")
     WEB_HIDDEN = qn("w:webHidden")
+
     SPACING = qn("w:spacing")
+    BEFORE = qn("w:before")
+    BEFORE_LINES = qn("w:beforeLines")
+    BEFORE_AUTOSPACING = qn("w:beforeAutospacing")
+    AFTER = qn("w:after")
+    AFTER_LINES = qn("w:afterLines")
+    AFTER_AUTOSPACING = qn("w:afterAutospacing")
+    LINE = qn("w:line")
+    LINE_RULE = qn("w:lineRule")
+
     W = qn("w:w")
     KERN = qn("w:kern")
     POSITION = qn("w:position")

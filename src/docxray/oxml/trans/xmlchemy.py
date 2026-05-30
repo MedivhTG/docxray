@@ -1,3 +1,4 @@
+from copy import deepcopy
 from functools import cached_property
 from typing import Any, TypeVar
 
@@ -177,3 +178,8 @@ class OxmlElement(BaseOxmlElement):
             f"Children {elm_qn} iteration exceeded the maximum of {max_occurs}"
         )
         raise InvalidXmlError(msg)
+
+    def recreate(self, cls: type[ELM_T]) -> ELM_T:
+        new_elm = deepcopy(self)
+        new_elm.__class__ = cls  # pyright: ignore[reportAttributeAccessIssue]
+        return new_elm  # type: ignore[return-value]
