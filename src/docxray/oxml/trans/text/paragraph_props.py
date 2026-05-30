@@ -41,34 +41,32 @@ class CT_Tabs(OxmlElement):
 
 class CT_Spacing(OxmlElement):
     @cached_property
-    def before(self) -> int | str:
-        return self.attr_optional(W.BEFORE, ST_TwipsMeasure, 0)
+    def before(self) -> int | str | None:
+        return self.attr_optional(W.BEFORE, ST_TwipsMeasure)
 
     @cached_property
-    def beforeLines(self) -> int:
-        return self.attr_optional(W.BEFORE_LINES, ST_DecimalNumber, 0)
+    def beforeLines(self) -> int | None:
+        return self.attr_optional(W.BEFORE_LINES, ST_DecimalNumber)
 
     @cached_property
-    def beforeAutospacing(self) -> bool | SE_OnOff1:
-        return self.attr_optional(
-            W.BEFORE_AUTOSPACING, ST_OnOff, SE_OnOff1.OFF
-        )
+    def beforeAutospacing(self) -> bool | SE_OnOff1 | None:
+        return self.attr_optional(W.BEFORE_AUTOSPACING, ST_OnOff)
 
     @cached_property
-    def after(self) -> int | str:
-        return self.attr_optional(W.AFTER, ST_TwipsMeasure, default=0)
+    def after(self) -> int | str | None:
+        return self.attr_optional(W.AFTER, ST_TwipsMeasure)
 
     @cached_property
-    def afterLines(self) -> int:
+    def afterLines(self) -> int | None:
         return self.attr_optional(W.AFTER_LINES)
 
     @cached_property
-    def afterAutospacing(self) -> bool | SE_OnOff1:
-        return self.attr_optional(W.AFTER_AUTOSPACING, ST_OnOff, SE_OnOff1.OFF)
+    def afterAutospacing(self) -> bool | SE_OnOff1 | None:
+        return self.attr_optional(W.AFTER_AUTOSPACING, ST_OnOff)
 
     @cached_property
-    def line(self) -> int | str:
-        return self.attr_optional(W.LINE, ST_SignedTwipsMeasure, 0)
+    def line(self) -> int | str | None:
+        return self.attr_optional(W.LINE, ST_SignedTwipsMeasure)
 
     @cached_property
     def lineRule(self) -> SE_LINE_SPACING_RULE:

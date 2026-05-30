@@ -9,7 +9,11 @@ from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.shared import Length, StoryChild
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.run import Run
-from docxray.oxml.trans.st.enums import SE_JC
+from docxray.oxml.trans.st.enums import (
+    SE_JC,
+    SE_LINE_SPACING_RULE,
+    SE_TEXT_DIRECTION,
+)
 from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
@@ -88,6 +92,10 @@ class Paragraph(StoryChild[CT_P]):
         return self.h2d.right_to_left
 
     @cached_property
+    def text_flow(self) -> SE_TEXT_DIRECTION | None:
+        return self.h2d.text_flow
+
+    @cached_property
     def margin_line_start(self) -> Length | int | None:
         return self.h2d.margin_line_start
 
@@ -114,6 +122,22 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def justify_inter_character(self) -> bool:
         return self.h2d.justify_inter_character
+
+    @cached_property
+    def margin_top(self) -> Length | int | None:
+        return self.h2d.margin_top
+
+    @cached_property
+    def margin_bottom(self) -> Length | int | None:
+        return self.h2d.margin_bottom
+
+    @cached_property
+    def line_height(self) -> Length | int | None:
+        return self.h2d.line_height
+
+    @cached_property
+    def line_rule(self) -> SE_LINE_SPACING_RULE:
+        return self.h2d.line_rule
 
     @cached_property
     def has_page_break(self) -> bool:

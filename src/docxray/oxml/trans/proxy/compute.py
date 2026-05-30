@@ -49,7 +49,10 @@ def width(
     return normalize_pct(width_float)
 
 
-def on_off(on_off: NotFound | None | bool | SE_OnOff1 | CT_OnOff) -> bool:
+def on_off(
+    on_off: NotFound | None | bool | SE_OnOff1 | CT_OnOff,
+    not_found_is_true: bool = False,
+) -> bool:
     def _val(val: None | bool | SE_OnOff1) -> bool:
         if val is None:
             return True
@@ -61,7 +64,7 @@ def on_off(on_off: NotFound | None | bool | SE_OnOff1 | CT_OnOff) -> bool:
             return False
 
     if isinstance(on_off, NotFound):
-        return False
+        return not_found_is_true
     if isinstance(on_off, CT_OnOff):
         return _val(on_off.val)
     return _val(on_off)

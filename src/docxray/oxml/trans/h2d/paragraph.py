@@ -34,9 +34,11 @@ from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,
     SE_LEVEL_SUFFIX,
+    SE_LINE_SPACING_RULE,
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
+    SE_OnOff1,
     SE_StyleType,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
@@ -480,6 +482,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def page_break_before(self) -> bool:
+        """Make page break before current paragraph."""
         return on_off(self._display_val("pageBreakBefore"))
 
     @cached_property
@@ -506,6 +509,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         """
         return on_off(self._display_val("mirrorIndents"))
 
+    # TODO: use for spacing
     @cached_property
     def context_spacing(self) -> bool:
         return on_off(self._display_val("contextualSpacing"))
@@ -514,6 +518,7 @@ class ParagraphH2D(How2Display[Paragraph]):
     def right_to_left(self) -> bool:
         return on_off(self._display_val("bidi"))
 
+    # TODO: inherit from parent Section if omitted
     @cached_property
     def text_flow(self) -> SE_TEXT_DIRECTION | None:
         val = self._display_val("textDirection")
@@ -579,6 +584,82 @@ class ParagraphH2D(How2Display[Paragraph]):
                     text_indent = twips_measure(first_line)
         return text_indent
 
+    @cached_property
+    def margin_top(self) -> Length | int | None:
+        """Return margin on top (spacing before).
+
+        Returns:
+            Length | int | None: If `Length` - measured in twips,
+                elif `int` - hundredths of a line (100 = 1 line), else auto.
+        """
+        if on_off(self._display_spacing_prop("beforeAutospacing")):
+            return None
+        before_lines: int | None = self._display_spacing_prop("beforeLines")
+        if before_lines is None:
+            before = self._display_spacing_prop("before")
+            if before is not None:
+                return twips_measure(before)
+        else:
+            return before_lines
+        return None
+
+    @cached_property
+    def margin_bottom(self) -> Length | int | None:
+        """Return margin on bottom (spacing after).
+
+        Returns:
+            Length | int | None: If `Length` - measured in twips,
+                elif `int` - hundredths of a line (100 = 1 line), else auto.
+        """
+        if on_off(self._display_spacing_prop("afterAutospacing")):
+            return None
+        after_lines: int | None = self._display_spacing_prop("afterLines")
+        if after_lines is None:
+            after = self._display_spacing_prop("after")
+            if after is not None:
+                return twips_measure(after)
+        else:
+            return after_lines
+        return None
+
+    @cached_property
+    def line_height(self) -> Length | int | None:
+        """Additional spacing of paragraph block.
+
+        For accurate interpreting this property look `line_rule` property.
+
+        Returns:
+            Length | int | None: If `Length` - measured in twips,
+                elif `int` - the number represents the line spacing
+                multiple of 240 (240 = 1 line), else no line height.
+        """
+        line: int | str | NotFound = self._display_spacing_prop("line")
+        if isinstance(line, NotFound):
+            return None
+        if self.line_rule == SE_LINE_SPACING_RULE.AUTO:
+            if isinstance(line, str):
+                return None
+            return line
+        return signed_twips_measure(line)
+
+    @cached_property
+    def line_rule(self) -> SE_LINE_SPACING_RULE:
+        """Says how to interpret `line_height` property.
+
+        If `AUTO`, then it's multiple of 240 (240 = 1 line),
+        Else measured in twips and:
+        1) When the line height is too small, the text shall be positioned at the bottom of
+        the line (i.e. clipped from the top down)
+        2) When the line height is too large, the text shall be centered in the available
+        space.
+        """
+        line_rule: SE_LINE_SPACING_RULE | NotFound = (
+            self._display_spacing_prop("lineRule")
+        )
+        if isinstance(line_rule, NotFound):
+            return SE_LINE_SPACING_RULE.AUTO
+        return line_rule
+
     # --- Indentation/interval properties (end)
 
     # TODO: some properties can be deleted and used in methods after
@@ -611,7 +692,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def justify_inter_character(self) -> bool:
-        return on_off(self._display_val("adjustRightInd"))
+        return on_off(self._display_val("adjustRightInd"), True)
 
     @cached_property
     def supress_overflow(self) -> bool:
@@ -623,11 +704,12 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def autospace_asian_latin(self) -> bool:
-        return on_off(self._display_val("autospaceDE"))
+        """Add space between latin-based and asian-based langs"""
+        return on_off(self._display_val("autospaceDE"), True)
 
     @cached_property
     def autospace_asian_numbers(self) -> bool:
-        return on_off(self._display_val("autospaceDN"))
+        return on_off(self._display_val("autospaceDN"), True)
 
     @cached_property
     def overflow_punct_asian(self) -> bool:
@@ -741,9 +823,13 @@ class ParagraphH2D(How2Display[Paragraph]):
             S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
         )
 
+    def _display_spacing_prop(self, name: str, optional: bool = False) -> Any:
+        spacing_path = self._prop_path(name, f"{self._path_base}.spacing")
+        return self._display_val(spacing_path, optional)
+
     def _display_ind_prop(self, name: str, optional: bool = False) -> Any:
-        para_path = self._prop_path(name, f"{self._path_base}.ind")
-        return self._display_val(para_path, optional)
+        ind_path = self._prop_path(name, f"{self._path_base}.ind")
+        return self._display_val(ind_path, optional)
 
     def _display_val(
         self, name_or_path: str | PropertyPath, optional: bool = False

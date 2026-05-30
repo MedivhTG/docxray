@@ -16,6 +16,8 @@ from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_JC,
+    SE_LINE_SPACING_RULE,
+    SE_TEXT_DIRECTION,
     SE_Border,
     SE_Underline,
     SE_VerticalAlignRun,
@@ -128,6 +130,19 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
+    TEXT_FLOW_TO_WRITING_MODE = {
+        SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
+        SE_TEXT_DIRECTION.RIGHT_TO_LEFT: "horizontal-tb",
+        SE_TEXT_DIRECTION.LEFT_TO_RIGHT: "horizontal-tb",
+        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
+        SE_TEXT_DIRECTION.RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
+        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_VERTICAL: "sideways-lr",
+        SE_TEXT_DIRECTION.BOTTOM_TO_TOP_LEFT_TO_RIGHT: "horizontal-bt",
+        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM: "horizontal-tb",
+        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
+        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT: "vertical-rl",
+        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
+    }
     ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
         "italic": i_elm,
         "bold": b_elm,
@@ -184,7 +199,47 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         if proxy.text_indent:
             style += f"text-indent: {cls._ind(proxy.text_indent)}; "
         style += cls._alignment(proxy)
+        if proxy.text_flow is not None:
+            style += f"writing-mode: {cls.TEXT_FLOW_TO_WRITING_MODE[proxy.text_flow]}; "
+        h2d = proxy.h2d
+        if h2d.keep_next:
+            style += f"page-break-after: avoid; "
+        if h2d.keep_lines:
+            style += f"page-break-inside: avoid; "
+        if h2d.page_break_before:
+            style += f"page-break-before: always;"
+        if h2d.no_hanging and not h2d.keep_lines:
+            style += f"page-break-inside: avoid; orphans: 2; widows: 2; "
+        else:
+            style += f"orphans: 2; widows: 2; "
+        if not h2d.word_wrap:
+            style += f"word-break: break-all; "
+        if h2d.supress_auto_hyphens:
+            style += f"hyphens: manual; "
+        spacing = cls._spacing(proxy)
+        if spacing:
+            style += spacing
         return style
+
+    @classmethod
+    def _spacing(cls, proxy: Paragraph) -> str:
+        spacing = ""
+        if proxy.margin_top is not None:
+            spacing += f"margin-top: {cls._margin(proxy.margin_top)}; "
+        if proxy.margin_bottom is not None:
+            spacing += f"margin-bottom: {cls._margin(proxy.margin_bottom)}; "
+        if proxy.line_height is not None:
+            units = ""
+            if proxy.line_rule == SE_LINE_SPACING_RULE.AUTO:
+                if not isinstance(proxy.line_height, Length):
+                    result = proxy.line_height / 240
+                    units = f"{result:.2f}"
+            else:
+                if isinstance(proxy.line_height, Length):
+                    units = f"{proxy.line_height.pt}pt"
+            if units:
+                spacing += f"line-height: {units}; "
+        return spacing
 
     @classmethod
     def _alignment(cls, proxy: Paragraph) -> str:
@@ -204,6 +259,13 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return f"{ind.px()}px"
         elif isinstance(ind, int):
             return f"{ind}ch"
+
+    @classmethod
+    def _margin(cls, margin: Length | int) -> str:
+        if isinstance(margin, Length):
+            return f"{margin.pt}pt"
+        elif isinstance(margin, int):
+            return f"{margin}em"
 
 
 class HtmlParagraphInList(HtmlParagraph):
