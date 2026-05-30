@@ -17,13 +17,17 @@ class TestDocument:
 
     def test_iter_inner_content(self, test_file: Path) -> None:
         doc = Document(test_file)
+        html = ""
         for item in doc.iter_inner_content():
             if isinstance(item, Table):
                 table_html = item.transform()
+                html += table_html
                 w = 1
             else:
                 p_html = item.transform()
+                html += p_html
                 w = 1
+        w = 1
 
         for p_or_t in doc.iter_inner_content_with_lists():
             if isinstance(p_or_t, Table):

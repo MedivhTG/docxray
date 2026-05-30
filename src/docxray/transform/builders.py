@@ -97,6 +97,28 @@ def units(length: Length | float | None) -> str:
         return f"{length}%"
 
 
+def tag_tree(
+    run_proxy: Any,
+    attr_to_elmmaker: dict[str, ElmMaker],
+) -> tuple[HtmlElement, HtmlElement] | None:
+    top = None
+    bottom = None
+    for attr, maker in attr_to_elmmaker.items():
+        val = getattr(run_proxy, attr, None)
+        if not val:
+            continue
+        elm = maker(val)
+        if top is None and bottom is None:
+            top = elm
+            bottom = elm
+        elif top is not None and bottom is not None:
+            bottom.append(elm)
+            bottom = elm
+    if top is None or bottom is None:
+        return None
+    return top, bottom
+
+
 TAB_MNEMONIC = "&emsp;"
 
 
@@ -154,8 +176,6 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
         elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
-        if proxy.list_item:
-            elm.text = proxy.list_item.level_text.replace("\t", TAB_MNEMONIC)
         cls._fill_content(proxy, elm, ruleset)
         return elm
 
@@ -163,6 +183,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
+        list_item_content = cls._list_item_content(proxy)
+        if isinstance(list_item_content, str):
+            elm.text = list_item_content
+        else:
+            elm.append(list_item_content)
         chain_map = RunChainsMap(set(cls.ATTR_TO_ELMMAKER))
         for run_or_hlink in proxy.iter_inner_content():
             if isinstance(run_or_hlink, Run):
@@ -176,6 +201,23 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
                 runs_builder.run(elm, unchained_or_chain)
             else:
                 runs_builder.run_chain(unchained_or_chain)
+
+    @classmethod
+    def _list_item_content(cls, proxy: Paragraph) -> str | HtmlElement:
+        if proxy.list_item is None:
+            return ""
+        li = proxy.list_item
+        txt = li.level_text.replace("\t", TAB_MNEMONIC)
+        if li.chars_case == "up":
+            txt = txt.upper()
+        elif li.chars_case == "down":
+            txt = txt.lower()
+        tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
+        if tree is None:
+            return txt
+        top, bottom = tree
+        bottom.text = txt
+        return top
 
     @classmethod
     def _attrs(cls, proxy: Paragraph) -> dict[str, str]:

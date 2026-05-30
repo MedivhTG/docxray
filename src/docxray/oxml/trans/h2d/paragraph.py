@@ -8,6 +8,7 @@ from docxray.exceptions import InvalidXmlError
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
+from docxray.oxml.trans.h2d.exceptions import DisplayError
 from docxray.oxml.trans.proxy.compute import (
     on_off,
     signed_twips_measure,
@@ -39,6 +40,8 @@ from docxray.oxml.trans.st.enums import (
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_StyleType,
+    SE_Underline,
+    SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
 from docxray.shared import os_locale
@@ -54,6 +57,7 @@ if TYPE_CHECKING:
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
+type CharsCase = Literal["up", "down"]
 _ILVL_ALLOWED = set(DECIMAL[1:])
 
 
@@ -387,6 +391,57 @@ class ListItem:
     def is_bullet_format(self) -> bool:
         return self.level.numbering_format == SE_NUMBER_FORMAT.BULLET
 
+    @cached_property
+    def italic(self) -> bool:
+        return self._display_level_text_run_val_on_off("i")
+
+    @cached_property
+    def bold(self) -> bool:
+        return self._display_level_text_run_val_on_off("b")
+
+    @cached_property
+    def chars_case(self) -> CharsCase | None:
+        if self._all_uppercase and self._all_downcase:
+            raise DisplayError(
+                "Mentiond 2 cases (up, down) when they are mutually exclusive"
+            )
+        if self._all_uppercase:
+            return "up"
+        if self._all_downcase:
+            return "down"
+        return None
+
+    @cached_property
+    def underline(self) -> None | SE_Underline:
+        line = self._display_level_text_run_val("u", True)
+        if isinstance(line, NotFound) or line == SE_Underline.NONE:
+            return None
+        if line is None:
+            return SE_Underline.SINGLE
+        return line
+
+    @cached_property
+    def single_strike_through(self) -> bool:
+        return self._display_level_text_run_val_on_off("strike")
+
+    @cached_property
+    def vertical_alignment(self) -> None | SE_VerticalAlignRun:
+        align = self._display_level_text_run_val("vertAlign")
+        if (
+            isinstance(align, NotFound)
+            or align == SE_VerticalAlignRun.BASELINE
+        ):
+            return None
+        return align
+
+    @cached_property
+    def _all_uppercase(self) -> bool:
+        return self._display_level_text_run_val_on_off("caps")
+
+    @cached_property
+    def _all_downcase(self) -> bool:
+        return self._display_level_text_run_val_on_off("smallCaps")
+
     # TODO: here can be an Image instance along with common chars
     @cached_property
     def _level_char(self) -> str:
@@ -409,6 +464,15 @@ class ListItem:
             locale = self.locale or "en-US"
             return NUMERAL_RULES[format](self.char_ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[format](self.char_ord)  # type: ignore[operator]
+
+    def _display_level_text_run_val(
+        self, name: str, optional: bool = False
+    ) -> Any:
+        path = PropertyPath.base("val", f"rPr.{name}")
+        return self.paragraph.h2d._prop(path, optional, "style")
+
+    def _display_level_text_run_val_on_off(self, name: str) -> bool:
+        return on_off(self._display_level_text_run_val(name, True))
 
     def _parse_pattern(self) -> str:
         text = ""
