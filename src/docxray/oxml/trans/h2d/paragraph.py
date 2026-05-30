@@ -30,7 +30,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     ParagraphStyle,
 )
-from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.table import Cell, Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,
@@ -156,6 +156,20 @@ class ListView:
     @cached_property
     def is_bullet_format(self) -> bool:
         return self._li.is_bullet_format
+
+    @cached_property
+    def keeps_lists_inside(self) -> set[int]:
+        all_lists = set()
+        for item in self.items:
+            all_lists |= item.keeps_lists_inside
+        return all_lists
+
+    @cached_property
+    def keeps_commons_inside(self) -> set[int]:
+        all_commons = set()
+        for item in self.items:
+            all_commons |= item.keeps_commons_inside
+        return all_commons
 
     def transform(
         self,
@@ -380,6 +394,49 @@ class ListItem:
     @cached_property
     def is_bullet_format(self) -> bool:
         return self.level.numbering_format == SE_NUMBER_FORMAT.BULLET
+
+    @cached_property
+    def keeps_lists_inside(self) -> set[int]:
+        def inside(
+            item: ListItem,
+        ) -> set[int]:
+            if item.next_li is None:
+                return set()
+            next_item = item.paragraph.next_content_item
+            list_ids = set()
+            while next_item:
+                if isinstance(next_item, Paragraph):
+                    if (
+                        next_item.list_view
+                        and next_item.list_view._li.num_id != item.num_id
+                    ):
+                        list_ids.add(next_item.list_view._li.num_id)
+                next_item = next_item.next_content_item
+            return list_ids
+
+        return inside(self)
+
+    @cached_property
+    def keeps_commons_inside(self) -> set[int]:
+        def inside(
+            item: ListItem,
+        ) -> set[int]:
+            if item.next_li is None:
+                return set()
+            next_item = item.paragraph.next_content_item
+            content_ids = set()
+            while next_item:
+                if isinstance(next_item, Table):
+                    content_ids.add(next_item.content_idx)
+                elif not next_item.list_view:
+                    content_ids.add(next_item.content_idx)
+                elif next_item.list_view._li.num_id == item.num_id:
+                    if next_item.list_view._li.next_li is None:
+                        break
+                next_item = next_item.next_content_item
+            return content_ids
+
+        return inside(self)
 
     @cached_property
     def italic(self) -> bool:

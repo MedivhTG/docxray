@@ -177,6 +177,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
         elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
+        list_item_content = cls._list_item_content(proxy)
+        if isinstance(list_item_content, str):
+            elm.text = list_item_content
+        else:
+            elm.append(list_item_content)
         cls._fill_content(proxy, elm, ruleset)
         return elm
 
@@ -184,11 +189,6 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
-        list_item_content = cls._list_item_content(proxy)
-        if isinstance(list_item_content, str):
-            elm.text = list_item_content
-        else:
-            elm.append(list_item_content)
         chain_map = RunChainsMap(set(cls.ATTR_TO_ELMMAKER))
         for run_or_hlink in proxy.iter_inner_content():
             if isinstance(run_or_hlink, Run):
@@ -351,12 +351,35 @@ class HtmlListView(HtmlBuilder["ListView"]):
     def element(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
         # docxray stuff
         from docxray.transform.ruleset import Rule
+        from docxray.oxml.trans.proxy.table import Table
 
         zero_lst_elm = (
             Element("ul") if proxy.is_bullet_format else Element("ol")
         )
         ruleset_for_p = copy(ruleset)
         ruleset_for_p.set_html_rule("Paragraph", Rule(HtmlParagraphInList))
+
+        def inside_content(
+            li_ilvl: ListViewIlvlBlock,
+        ) -> list[Paragraph | Table | ListView]:
+            next_item = li_ilvl.li.paragraph.next_content_item
+            items = []
+            while next_item:
+                if isinstance(next_item, Table):
+                    if li_ilvl.li.next_li is not None:
+                        items.append(next_item)
+                elif next_item.list_view:
+                    if (
+                        next_item.list_view._li.num_id != li_ilvl.li.num_id
+                        and li_ilvl.li.prev_li is None
+                    ):
+                        items.append(next_item.list_view)
+                    break
+                else:
+                    if li_ilvl.li.next_li is not None:
+                        items.append(next_item)
+                next_item = next_item.next_content_item
+            return items
 
         def fill_list(up_li: HtmlElement, block: ListViewIlvlBlock) -> None:
             bullet = block.li.is_bullet_format
@@ -368,6 +391,9 @@ class HtmlListView(HtmlBuilder["ListView"]):
                 )
                 li_elm.text = p_elm.text
                 li_elm.extend(list(p_elm))
+                items_inside = inside_content(block_in)
+                for inside in items_inside:
+                    li_elm.append(inside.transform(ruleset_for_p, False))
 
                 lst_elm.append(li_elm)
                 if block_in.inside_blocks:
@@ -377,12 +403,15 @@ class HtmlListView(HtmlBuilder["ListView"]):
         for zero_block in proxy.items_tree:
             zero_li_elm = Element("li")
             p_elm: HtmlElement = zero_block.li.paragraph.transform(
-                ruleset_for_p, stringify=False
+                ruleset_for_p, False
             )
             zero_li_elm.text = p_elm.text
             zero_li_elm.extend(list(p_elm))
-            zero_lst_elm.append(zero_li_elm)
+            items_inside = inside_content(zero_block)
+            for inside in items_inside:
+                zero_li_elm.append(inside.transform(ruleset_for_p, False))
 
+            zero_lst_elm.append(zero_li_elm)
             if zero_block.inside_blocks:
                 fill_list(zero_li_elm, zero_block)
         return zero_lst_elm

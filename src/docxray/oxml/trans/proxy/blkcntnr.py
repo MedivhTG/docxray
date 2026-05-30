@@ -58,8 +58,11 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
         # docxray stuff
         from docxray.oxml.trans.proxy.table import Table
 
-        num_id_skip = None
+        num_ids_skip = set()
+        content_ids_skip = set()
         for item in self.inner_content:
+            if item in content_ids_skip:
+                continue
             if isinstance(item, Table):
                 yield item
             else:
@@ -67,7 +70,10 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
                 if list_view is None:
                     yield item
                 else:
-                    if num_id_skip == list_view._li.num_id:
+                    if list_view._li.num_id in num_ids_skip:
                         continue
-                    num_id_skip = list_view._li.num_id
+                    num_ids_skip = {
+                        list_view._li.num_id
+                    } | list_view.keeps_lists_inside
+                    content_ids_skip = list_view.keeps_commons_inside
                     yield list_view
