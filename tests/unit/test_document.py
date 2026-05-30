@@ -17,7 +17,15 @@ class TestDocument:
 
     def test_iter_inner_content(self, test_file: Path) -> None:
         doc = Document(test_file)
-        for p_or_t in doc.iter_inner_contet_with_lists():
+        for item in doc.iter_inner_content():
+            if isinstance(item, Table):
+                table_html = item.transform()
+                w = 1
+            else:
+                p_html = item.transform()
+                w = 1
+
+        for p_or_t in doc.iter_inner_content_with_lists():
             if isinstance(p_or_t, Table):
                 ruleset = RuleSet.html_default()
                 ruleset.set_html_rule(

@@ -203,19 +203,19 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             style += f"writing-mode: {cls.TEXT_FLOW_TO_WRITING_MODE[proxy.text_flow]}; "
         h2d = proxy.h2d
         if h2d.keep_next:
-            style += f"page-break-after: avoid; "
+            style += "page-break-after: avoid; "
         if h2d.keep_lines:
-            style += f"page-break-inside: avoid; "
+            style += "page-break-inside: avoid; "
         if h2d.page_break_before:
-            style += f"page-break-before: always;"
+            style += "page-break-before: always;"
         if h2d.no_hanging and not h2d.keep_lines:
-            style += f"page-break-inside: avoid; orphans: 2; widows: 2; "
+            style += "page-break-inside: avoid; orphans: 2; widows: 2; "
         else:
-            style += f"orphans: 2; widows: 2; "
+            style += "orphans: 2; widows: 2; "
         if not h2d.word_wrap:
-            style += f"word-break: break-all; "
+            style += "word-break: break-all; "
         if h2d.supress_auto_hyphens:
-            style += f"hyphens: manual; "
+            style += "hyphens: manual; "
         spacing = cls._spacing(proxy)
         if spacing:
             style += spacing
@@ -226,8 +226,12 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         spacing = ""
         if proxy.margin_top is not None:
             spacing += f"margin-top: {cls._margin(proxy.margin_top)}; "
+        else:
+            spacing += "margin-top: 0pt; "
         if proxy.margin_bottom is not None:
             spacing += f"margin-bottom: {cls._margin(proxy.margin_bottom)}; "
+        else:
+            spacing += "margin-bottom: 0pt; "
         if proxy.line_height is not None:
             units = ""
             if proxy.line_rule == SE_LINE_SPACING_RULE.AUTO:

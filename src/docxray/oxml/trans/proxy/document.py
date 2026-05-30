@@ -40,7 +40,7 @@ class Document(ElementProxy[CT_Document]):
         """Generate each `Paragraph` or `Table` in this document in document order."""
         return self.body.iter_inner_content()
 
-    def iter_inner_contet_with_lists(
+    def iter_inner_content_with_lists(
         self,
     ) -> Iterator[Paragraph | ListView | Table]:
         return self.body.iter_inner_content_with_lists()

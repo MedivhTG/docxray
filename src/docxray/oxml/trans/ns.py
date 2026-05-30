@@ -214,6 +214,7 @@ class W:
 
     DOC_DEFAULTS = qn("w:docDefaults")
     R_PR_DEFAULT = qn("w:rPrDefault")
+    P_PR_DEFAULT = qn("w:pPrDefault")
 
     LATENT_STYLES = qn("w:latentStyles")
 

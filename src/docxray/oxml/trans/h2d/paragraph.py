@@ -38,7 +38,6 @@ from docxray.oxml.trans.st.enums import (
     SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
-    SE_OnOff1,
     SE_StyleType,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
@@ -509,11 +508,6 @@ class ParagraphH2D(How2Display[Paragraph]):
         """
         return on_off(self._display_val("mirrorIndents"))
 
-    # TODO: use for spacing
-    @cached_property
-    def context_spacing(self) -> bool:
-        return on_off(self._display_val("contextualSpacing"))
-
     @cached_property
     def right_to_left(self) -> bool:
         return on_off(self._display_val("bidi"))
@@ -592,12 +586,26 @@ class ParagraphH2D(How2Display[Paragraph]):
             Length | int | None: If `Length` - measured in twips,
                 elif `int` - hundredths of a line (100 = 1 line), else auto.
         """
+        if self._context_spacing:
+            prev_content_item = self._proxy.prev_content_item
+            if isinstance(prev_content_item, Paragraph):
+                prev_style = prev_content_item.h2d._para_style_direct
+                current_style = self._para_style_direct
+                if (
+                    prev_style is not None
+                    and current_style is not None
+                    and prev_style.name == current_style.name
+                ):
+                    return None
+
         if on_off(self._display_spacing_prop("beforeAutospacing")):
             return None
-        before_lines: int | None = self._display_spacing_prop("beforeLines")
-        if before_lines is None:
+        before_lines: int | NotFound = self._display_spacing_prop(
+            "beforeLines"
+        )
+        if isinstance(before_lines, NotFound):
             before = self._display_spacing_prop("before")
-            if before is not None:
+            if not isinstance(before, NotFound):
                 return twips_measure(before)
         else:
             return before_lines
@@ -611,12 +619,24 @@ class ParagraphH2D(How2Display[Paragraph]):
             Length | int | None: If `Length` - measured in twips,
                 elif `int` - hundredths of a line (100 = 1 line), else auto.
         """
+        if self._context_spacing:
+            next_content_item = self._proxy.next_content_item
+            if isinstance(next_content_item, Paragraph):
+                next_style = next_content_item.h2d._para_style_direct
+                current_style = self._para_style_direct
+                if (
+                    next_style is not None
+                    and current_style is not None
+                    and next_style.name == current_style.name
+                ):
+                    return None
+
         if on_off(self._display_spacing_prop("afterAutospacing")):
             return None
-        after_lines: int | None = self._display_spacing_prop("afterLines")
-        if after_lines is None:
+        after_lines: int | NotFound = self._display_spacing_prop("afterLines")
+        if isinstance(after_lines, NotFound):
             after = self._display_spacing_prop("after")
-            if after is not None:
+            if not isinstance(after, NotFound):
                 return twips_measure(after)
         else:
             return after_lines
@@ -728,6 +748,10 @@ class ParagraphH2D(How2Display[Paragraph]):
         return on_off(self._display_val("textboxTightWrap"))
 
     # --- General/specific properties (end)
+
+    @cached_property
+    def _context_spacing(self) -> bool:
+        return on_off(self._display_val("contextualSpacing", True))
 
     @cached_property
     def _associated_level(self) -> Level | LevelOverride | None:

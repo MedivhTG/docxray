@@ -258,6 +258,7 @@ register_element_cls("pic:spPr", CT_ShapeProperties)
 from .styles import (
     CT_DocDefaults,
     CT_LatentStyles,
+    CT_PPrDefault,
     CT_RPrDefault,
     CT_Style,
     CT_Styles,
@@ -266,6 +267,7 @@ from .styles import (
 
 register_element_cls("w:docDefaults", CT_DocDefaults)
 register_element_cls("w:rPrDefault", CT_RPrDefault)
+register_element_cls("w:pPrDefault", CT_PPrDefault)
 
 register_element_cls("w:styles", CT_Styles)
 

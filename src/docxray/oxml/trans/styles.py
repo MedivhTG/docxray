@@ -38,10 +38,20 @@ class CT_RPrDefault(OxmlElement):
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
 
+class CT_PPrDefault(OxmlElement):
+    @cached_property
+    def pPr(self) -> CT_PPr | None:
+        return self.child_zero_or_one(W.P_PR, CT_PPr)
+
+
 class CT_DocDefaults(OxmlElement):
     @cached_property
     def rPrDefault(self) -> CT_RPrDefault | None:
         return self.child_zero_or_one(W.R_PR_DEFAULT, CT_RPrDefault)
+
+    @cached_property
+    def pPrDefault(self) -> CT_PPrDefault | None:
+        return self.child_zero_or_one(W.P_PR_DEFAULT, CT_PPrDefault)
 
 
 class CT_LatentStyles(OxmlElement):

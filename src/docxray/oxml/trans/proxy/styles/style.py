@@ -37,6 +37,13 @@ class BaseStyle(ElementProxy[CT_Style]):
     def numbering(self) -> Numbering | None:
         return self.part.numbering
 
+    @cached_property
+    def name(self) -> str:
+        name_elm = self.element.name
+        if name_elm is None:
+            return ""
+        return name_elm.val
+
 
 class CharacterStyle(BaseStyle):
     @cached_property
