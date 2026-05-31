@@ -407,7 +407,7 @@ class HtmlTable(HtmlBuilder["Table"]):
             tr_elm.append(cls._cell(cell, ruleset))
         return tr_elm
 
-    # TODO: implement height rule
+    # TODO: use height rule
     @classmethod
     def _row_attrs(cls, proxy: Row) -> dict[str, str]:
         attrs: dict[str, str] = {}

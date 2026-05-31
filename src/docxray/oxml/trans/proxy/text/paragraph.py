@@ -158,7 +158,6 @@ class Paragraph(StoryChild[CT_P]):
         )
         return ParagraphT.transform(self, ruleset, stringify, method)
 
-    # TODO: not all but enough
     def iter_inner_content(self) -> Iterator[Run | Hyperlink]:
         """Generate the runs and hyperlinks in this paragraph, in the order they appear.
 

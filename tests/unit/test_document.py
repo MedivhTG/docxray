@@ -2,9 +2,6 @@ from pathlib import Path
 
 from docxray import Document
 from docxray.oxml.trans.proxy.table import Table
-from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-from docxray.transform.builders import HtmlTable
-from docxray.transform.ruleset import Rule, RuleSet
 
 
 class TestDocument:

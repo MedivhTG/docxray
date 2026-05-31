@@ -87,7 +87,6 @@ class CT_R(OxmlElement):
     def rPr(self) -> CT_RPr | None:
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
-    # TODO: not all but enough
     @cached_property
     def inner_content_items(self) -> RunInnerContent:
         xpath = (
