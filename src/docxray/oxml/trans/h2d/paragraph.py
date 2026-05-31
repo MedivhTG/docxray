@@ -38,7 +38,7 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
-from .list_view import ListView, ListItem, ListViewInterrupted
+from .list_view import ListItem, ListView, ListViewInterrupted
 
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"

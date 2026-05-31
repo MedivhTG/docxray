@@ -29,8 +29,8 @@ from .utils.char_graph import RunChain, RunChainsMap
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.list_view import (
-        ListViewInterrupted,
         ListViewIlvlBlock,
+        ListViewInterrupted,
     )
     from docxray.oxml.trans.proxy.table import Cell, Row, Table
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
@@ -422,9 +422,17 @@ class HtmlTable(HtmlBuilder["Table"]):
     @classmethod
     def _cell(cls, proxy: Cell, ruleset: RuleSet) -> HtmlElement:
         td_elm = Element("td", cls._cell_attrs(proxy))
-        for item in proxy.iter_inner_content():
-            item_elm = item.transform(ruleset, stringify=False)
-            td_elm.append(item_elm)
+        transform_lists = ruleset.html_rules["Table"].opts.get(
+            "transform_list_views"
+        )
+        if transform_lists:
+            for item in proxy.iter_inner_content_with_lists():
+                item_elm = item.transform(ruleset, stringify=False)
+                td_elm.append(item_elm)
+        else:
+            for item in proxy.iter_inner_content():
+                item_elm = item.transform(ruleset, stringify=False)
+                td_elm.append(item_elm)
         return td_elm
 
     @classmethod

@@ -3,6 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Literal, cast
 
+# docxray stuff
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.h2d.exceptions import DisplayError
@@ -18,7 +19,6 @@ from docxray.oxml.trans.proxy.numbering.numbering import (
     Numbering,
 )
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
-from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_NUMBER_FORMAT,
@@ -106,16 +106,18 @@ class ListView:
                     block._parent = block_map[prev_ilvl]
                     block_map[prev_ilvl].append(block)
                 elif prev_ilvl > item.ilvl:
-                    parent_block = block_map[item.ilvl].parent
-                    block._parent = parent_block
-                    if parent_block is not None:
-                        parent_block.append(block)
-                    on_del = set()
-                    for ilvl in block_map.keys():
-                        if ilvl >= item.ilvl:
-                            on_del.add(ilvl)
-                    for ilvl in on_del:
-                        del block_map[ilvl]
+                    prev_same_ilvl = block_map.get(item.ilvl)
+                    if prev_same_ilvl is not None:
+                        parent_block = prev_same_ilvl.parent
+                        block._parent = parent_block
+                        if parent_block is not None:
+                            parent_block.append(block)
+                        on_del = set()
+                        for ilvl in block_map.keys():
+                            if ilvl >= item.ilvl:
+                                on_del.add(ilvl)
+                        for ilvl in on_del:
+                            del block_map[ilvl]
                 else:
                     parent_block = block_map[item.ilvl].parent
                     block._parent = parent_block

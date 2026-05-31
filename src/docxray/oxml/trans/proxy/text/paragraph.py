@@ -20,12 +20,12 @@ from docxray.oxml.trans.text.run import CT_R
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
     from docxray.oxml.trans.h2d.list_view import (
         ListItem,
         ListView,
         ListViewInterrupted,
     )
+    from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
     from docxray.transform.ruleset import RuleSet

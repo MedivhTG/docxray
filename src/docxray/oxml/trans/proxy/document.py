@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.trans.document import CT_Body, CT_Document
+from docxray.oxml.trans.h2d.list_view import ListViewInterrupted
 
 from .blkcntnr import BlockItemContainer
 from .shared import ElementProxy
@@ -37,6 +38,11 @@ class Document(ElementProxy[CT_Document]):
     def iter_inner_content(self) -> Iterator[Paragraph | Table]:
         """Generate each `Paragraph` or `Table` in this document in document order."""
         return self.body.iter_inner_content()
+
+    def iter_inner_content_with_lists(
+        self,
+    ) -> Iterator[Paragraph | Table | ListViewInterrupted]:
+        return self.body.iter_inner_content_with_lists()
 
 
 class Body(BlockItemContainer[CT_Body]):
