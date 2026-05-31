@@ -489,7 +489,7 @@ class HtmlTable(HtmlBuilder["Table"]):
     def _table_style(cls, proxy: Table) -> str:
         style = ""
         if proxy.spacing_first is None:
-            style += "border-collapse: collapsed; "
+            style += "border-collapse: collapse; "
         else:
             spacing = proxy.spacing_first
             style += f"border-spacing: {units(spacing)}; "

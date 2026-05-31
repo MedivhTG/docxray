@@ -2,7 +2,11 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.enums import WD_CNF_TABLE_LOOK, CnfLookName
+from docxray.oxml.trans.enums import (
+    WD_CNF_FORMAT,
+    WD_CNF_TABLE_LOOK,
+    CnfLookName,
+)
 from docxray.oxml.trans.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
@@ -15,6 +19,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.table import Row, Table
 from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.row_props import CT_TblPrEx
 from docxray.oxml.trans.table.table_props import CT_TblBorders
 
@@ -72,6 +77,12 @@ class RowH2D(How2Display[Row]):
             SE_StyleType.TABLE,
             S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
         )
+
+    @cached_property
+    def _latent_tbl_style_props(self) -> list[CT_TblStylePr]:
+        if self._table_style is None:
+            return []
+        return self._table_style_props(self._table_style, WD_CNF_FORMAT(0xFFF))
 
     @cached_property
     def _cnf_look(self) -> WD_CNF_TABLE_LOOK:

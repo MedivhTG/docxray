@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict
 
 # docxray stuff
 from docxray.enum.lxml import POS
@@ -91,12 +91,14 @@ class CellH2D(How2Display[Cell]):
     def talbe(self) -> Table:
         return self.row.table
 
+    # TODO: look for resolve.. too complex and word is broken
     @cached_property
     def borders_info(self) -> BordersInfo:
-        spacing = self._spacing
-        if spacing is not None and spacing > 0:
-            return self._borders_non_zero_spacing_info
-        return self._spacing_zero(self._borders_non_zero_spacing_info)
+        return self._borders_non_zero_spacing_info
+        # spacing = self._spacing
+        # if spacing is not None and spacing > 0:
+        #     return self._borders_non_zero_spacing_info
+        # return self._spacing_zero(self._borders_non_zero_spacing_info)
 
     # TODO: inherit from parent Section if omitted
     @cached_property
@@ -301,7 +303,7 @@ class CellH2D(How2Display[Cell]):
         left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
         if left_n == "left":
             inf["left"] = self._opposing_cell_borders_conflict(
-                inf["left"], tbl_left
+                inf["left"], tbl_left, True
             )
         elif left_n == "insideV" and cell_prev_h2d is not None:
             prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
@@ -310,7 +312,7 @@ class CellH2D(How2Display[Cell]):
             )
         if right_n == "right":
             inf["right"] = self._opposing_cell_borders_conflict(
-                inf["right"], tbl_right
+                inf["right"], tbl_right, True
             )
         elif right_n == "insideV" and cell_next_h2d is not None:
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
@@ -330,7 +332,7 @@ class CellH2D(How2Display[Cell]):
         top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
         if top_n == "top":
             inf["top"] = self._opposing_cell_borders_conflict(
-                inf["top"], tbl_top
+                inf["top"], tbl_top, True
             )
         elif top_n == "insideH" and cell_above_h2d is not None:
             above_inf = cell_above_h2d._borders_non_zero_spacing_info
@@ -339,7 +341,7 @@ class CellH2D(How2Display[Cell]):
             )
         if bottom_n == "bottom":
             inf["bottom"] = self._opposing_cell_borders_conflict(
-                inf["bottom"], tbl_bottom
+                inf["bottom"], tbl_bottom, True
             )
         elif bottom_n == "insideH" and cell_below_h2d is not None:
             below_inf = cell_below_h2d._borders_non_zero_spacing_info
@@ -348,17 +350,27 @@ class CellH2D(How2Display[Cell]):
             )
 
     def _opposing_cell_borders_conflict(
-        self, main: SE_Border | None, opposing_to: SE_Border | None
+        self,
+        main: SE_Border | None,
+        opposing_to: SE_Border | None,
+        opposed_to_table: bool = False,
     ) -> SE_Border | None:
-        none_tuple = (None, SE_Border.NULL, SE_Border.NONE)
-        if main in none_tuple:
-            return opposing_to
-        if opposing_to in none_tuple:
-            return main
-        if main in none_tuple and opposing_to in none_tuple:
-            return None
-        main = cast("SE_Border", main)
-        opposing_to = cast("SE_Border", opposing_to)
+        override_none = {SE_Border.NULL, SE_Border.NONE}
+        if opposed_to_table:
+            if main is None:
+                return opposing_to
+            else:
+                return main
+        else:
+            if main is None:
+                return opposing_to
+            elif main in override_none:
+                return main
+            else:
+                if opposing_to is None:
+                    return main
+                elif opposing_to in override_none:
+                    return opposing_to
         main_weight = self._border_weight(main)
         opposing_to_weight = self._border_weight(opposing_to)
         if main_weight is None or opposing_to_weight is None:
@@ -464,13 +476,13 @@ class CellH2D(How2Display[Cell]):
         if cell.cell_next is None:
             cnf |= _CNF.LAST_COLUMN
         if self._col_band_number % 2 == 0:
-            cnf |= _CNF.ODD_VERTICAL_BAND
-        else:
             cnf |= _CNF.EVEN_VERTICAL_BAND
-        if self._row_band_number % 2 == 0:
-            cnf |= _CNF.ODD_HORIZONTAL_BAND
         else:
+            cnf |= _CNF.ODD_VERTICAL_BAND
+        if self._row_band_number % 2 == 0:
             cnf |= _CNF.EVEN_HORIZONTAL_BAND
+        else:
+            cnf |= _CNF.ODD_HORIZONTAL_BAND
         if cnf & (_CNF.FIRST_ROW | _CNF.LAST_COLUMN):
             cnf |= _CNF.FIRST_ROW_LAST_COLUMN
         if cnf & (_CNF.FIRST_ROW | _CNF.FIRST_COLUMN):
