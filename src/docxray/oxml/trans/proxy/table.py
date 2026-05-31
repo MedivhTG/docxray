@@ -9,6 +9,7 @@ from docxray.enum.lxml import POS
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.st.enums import (
     SE_HEIGHT_RULE,
+    SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
     SE_Merge,
 )
@@ -59,6 +60,10 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def vertical_alignment(self) -> SE_VERTICAL_JC:
         return self.h2d.vertical_align
+
+    @cached_property
+    def content_flow(self) -> SE_TEXT_DIRECTION | None:
+        return self.h2d.content_flow
 
     @cached_property
     def width(self) -> Twips | float | None:

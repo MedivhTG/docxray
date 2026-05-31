@@ -144,8 +144,6 @@ class ParagraphH2D(How2Display[Paragraph]):
         val = self._display_val("textDirection")
         if not isinstance(val, NotFound):
             return val
-        if self.cell and self.cell.h2d.text_flow:
-            return self.cell.h2d.text_flow
         return None
 
     @cached_property

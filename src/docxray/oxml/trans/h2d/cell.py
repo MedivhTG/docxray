@@ -100,7 +100,7 @@ class CellH2D(How2Display[Cell]):
 
     # TODO: inherit from parent Section if omitted
     @cached_property
-    def text_flow(self) -> SE_TEXT_DIRECTION | None:
+    def content_flow(self) -> SE_TEXT_DIRECTION | None:
         text_flow = self._prop_val("textDirection", algorithm="both")
         if not isinstance(text_flow, NotFound):
             return text_flow

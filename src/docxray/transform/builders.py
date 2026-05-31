@@ -15,7 +15,6 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
-    SE_HEIGHT_RULE,
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
@@ -42,6 +41,37 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 type ElmMaker = Callable[[Any], HtmlElement]
+TAB_MNEMONIC = "&emsp;"
+U_DECOR_MAP = {
+    SE_Underline.SINGLE: "underline",
+    SE_Underline.DOUBLE: "underline double",
+    SE_Underline.DOTTED: "underline dotted",
+    SE_Underline.DASH: "underline dashed",
+    SE_Underline.WAVE: "underline wavy",
+    SE_Underline.DOTTED_HEAVY: "underline dotted",
+    SE_Underline.DASHED_HEAVY: "underline dashed",
+    SE_Underline.DASH_LONG: "underline dashed",
+    SE_Underline.DASH_LONG_HEAVY: "underline dashed",
+    SE_Underline.DOT_DASH: "underline dotted",
+    SE_Underline.DASH_DOT_HEAVY: "underline dashed",
+    SE_Underline.DOT_DOT_DASH: "underline dotted",
+    SE_Underline.DASH_DOT_DOT_HEAVY: "underline dashed",
+    SE_Underline.WAVY_HEAVY: "underline wavy",
+    SE_Underline.WAVY_DOUBLE: "underline waby",
+}
+TEXT_FLOW_TO_WRITING_MODE = {
+    SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
+    SE_TEXT_DIRECTION.RIGHT_TO_LEFT: "horizontal-tb",
+    SE_TEXT_DIRECTION.LEFT_TO_RIGHT: "horizontal-tb",
+    SE_TEXT_DIRECTION.TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
+    SE_TEXT_DIRECTION.RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
+    SE_TEXT_DIRECTION.LEFT_TO_RIGHT_VERTICAL: "sideways-lr",
+    SE_TEXT_DIRECTION.BOTTOM_TO_TOP_LEFT_TO_RIGHT: "horizontal-bt",
+    SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM: "horizontal-tb",
+    SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
+    SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT: "vertical-rl",
+    SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
+}
 
 
 class HtmlBuilder(Generic[T]):
@@ -60,25 +90,6 @@ def b_elm(value: bool) -> HtmlElement:
 
 def strike_elm(value: bool) -> HtmlElement:
     return Element("strike")
-
-
-U_DECOR_MAP = {
-    SE_Underline.SINGLE: "underline",
-    SE_Underline.DOUBLE: "underline double",
-    SE_Underline.DOTTED: "underline dotted",
-    SE_Underline.DASH: "underline dashed",
-    SE_Underline.WAVE: "underline wavy",
-    SE_Underline.DOTTED_HEAVY: "underline dotted",
-    SE_Underline.DASHED_HEAVY: "underline dashed",
-    SE_Underline.DASH_LONG: "underline dashed",
-    SE_Underline.DASH_LONG_HEAVY: "underline dashed",
-    SE_Underline.DOT_DASH: "underline dotted",
-    SE_Underline.DASH_DOT_HEAVY: "underline dashed",
-    SE_Underline.DOT_DOT_DASH: "underline dotted",
-    SE_Underline.DASH_DOT_DOT_HEAVY: "underline dashed",
-    SE_Underline.WAVY_HEAVY: "underline wavy",
-    SE_Underline.WAVY_DOUBLE: "underline waby",
-}
 
 
 def underline_elm(value: SE_Underline) -> HtmlElement:
@@ -125,9 +136,6 @@ def tag_tree(
     return top, bottom
 
 
-TAB_MNEMONIC = "&emsp;"
-
-
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
     HL_TO_P_TAG = {
         WD_HEADER_LEVEL.TEXT: "p",
@@ -158,19 +166,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
-    TEXT_FLOW_TO_WRITING_MODE = {
-        SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
-        SE_TEXT_DIRECTION.RIGHT_TO_LEFT: "horizontal-tb",
-        SE_TEXT_DIRECTION.LEFT_TO_RIGHT: "horizontal-tb",
-        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
-        SE_TEXT_DIRECTION.RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
-        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_VERTICAL: "sideways-lr",
-        SE_TEXT_DIRECTION.BOTTOM_TO_TOP_LEFT_TO_RIGHT: "horizontal-bt",
-        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM: "horizontal-tb",
-        SE_TEXT_DIRECTION.LEFT_TO_RIGHT_TOP_TO_BOTTOM_VERTICAL: "sideways-lr",
-        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT: "vertical-rl",
-        SE_TEXT_DIRECTION.TOP_TO_BOTTOM_RIGHT_TO_LEFT_VERTICAL: "sideways-rl",
-    }
+
     ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
         "italic": i_elm,
         "bold": b_elm,
@@ -256,7 +252,9 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             style += f"text-indent: {cls._ind(proxy.text_indent)}; "
         style += cls._alignment(proxy)
         if proxy.text_flow is not None:
-            style += f"writing-mode: {cls.TEXT_FLOW_TO_WRITING_MODE[proxy.text_flow]}; "
+            style += (
+                f"writing-mode: {TEXT_FLOW_TO_WRITING_MODE[proxy.text_flow]}; "
+            )
         h2d = proxy.h2d
         if h2d.keep_next:
             style += "page-break-after: avoid; "
@@ -465,6 +463,8 @@ class HtmlTable(HtmlBuilder["Table"]):
             border: str = cls._cell_border(proxy.borders_info[side], side)  # type: ignore[literal-required]
             if border:
                 style += f"{border}; "
+        if proxy.content_flow is not None:
+            style += f"writing-mode: {TEXT_FLOW_TO_WRITING_MODE[proxy.content_flow]}; "
         if proxy.vertical_alignment:
             valign = cls.VALIGN_TO_HTML_VALGN[proxy.vertical_alignment]
             style += f"vertical-align: {valign}; "
