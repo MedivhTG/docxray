@@ -351,35 +351,12 @@ class HtmlListView(HtmlBuilder["ListView"]):
     def element(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
         # docxray stuff
         from docxray.transform.ruleset import Rule
-        from docxray.oxml.trans.proxy.table import Table
 
         zero_lst_elm = (
             Element("ul") if proxy.is_bullet_format else Element("ol")
         )
         ruleset_for_p = copy(ruleset)
         ruleset_for_p.set_html_rule("Paragraph", Rule(HtmlParagraphInList))
-
-        def inside_content(
-            li_ilvl: ListViewIlvlBlock,
-        ) -> list[Paragraph | Table | ListView]:
-            next_item = li_ilvl.li.paragraph.next_content_item
-            items = []
-            while next_item:
-                if isinstance(next_item, Table):
-                    if li_ilvl.li.next_li is not None:
-                        items.append(next_item)
-                elif next_item.list_view:
-                    if (
-                        next_item.list_view._li.num_id != li_ilvl.li.num_id
-                        and li_ilvl.li.prev_li is None
-                    ):
-                        items.append(next_item.list_view)
-                    break
-                else:
-                    if li_ilvl.li.next_li is not None:
-                        items.append(next_item)
-                next_item = next_item.next_content_item
-            return items
 
         def fill_list(up_li: HtmlElement, block: ListViewIlvlBlock) -> None:
             bullet = block.li.is_bullet_format
@@ -391,9 +368,6 @@ class HtmlListView(HtmlBuilder["ListView"]):
                 )
                 li_elm.text = p_elm.text
                 li_elm.extend(list(p_elm))
-                items_inside = inside_content(block_in)
-                for inside in items_inside:
-                    li_elm.append(inside.transform(ruleset_for_p, False))
 
                 lst_elm.append(li_elm)
                 if block_in.inside_blocks:
@@ -407,9 +381,6 @@ class HtmlListView(HtmlBuilder["ListView"]):
             )
             zero_li_elm.text = p_elm.text
             zero_li_elm.extend(list(p_elm))
-            items_inside = inside_content(zero_block)
-            for inside in items_inside:
-                zero_li_elm.append(inside.transform(ruleset_for_p, False))
 
             zero_lst_elm.append(zero_li_elm)
             if zero_block.inside_blocks:
@@ -431,30 +402,25 @@ class HtmlTable(HtmlBuilder["Table"]):
 
     @classmethod
     def _row(cls, proxy: Row, ruleset: RuleSet) -> HtmlElement:
-        tr_elm = Element("tr")
+        tr_elm = Element("tr", cls._row_attrs(proxy))
         for cell in proxy.iter_cells():
             tr_elm.append(cls._cell(cell, ruleset))
         return tr_elm
 
-    # TODO: do this
-    # @classmethod
-    # def _row_attrs(cls, proxy: Row):
-    #     rule = proxy.height_rule
+    # TODO: implement height rule
+    @classmethod
+    def _row_attrs(cls, proxy: Row) -> dict[str, str]:
+        attrs: dict[str, str] = {}
+        if proxy.height is not None:
+            attrs["height"] = f"{proxy.height.pt}pt"
+        return attrs
 
     @classmethod
     def _cell(cls, proxy: Cell, ruleset: RuleSet) -> HtmlElement:
         td_elm = Element("td", cls._cell_attrs(proxy))
-        transform_lists = ruleset.html_rules["Table"].opts.get(
-            "transform_list_views"
-        )
-        if transform_lists:
-            for item in proxy.iter_inner_content_with_lists():
-                item_elm = item.transform(ruleset, stringify=False)
-                td_elm.append(item_elm)
-        else:
-            for item in proxy.iter_inner_content():
-                item_elm = item.transform(ruleset, stringify=False)
-                td_elm.append(item_elm)
+        for item in proxy.iter_inner_content():
+            item_elm = item.transform(ruleset, stringify=False)
+            td_elm.append(item_elm)
         return td_elm
 
     @classmethod

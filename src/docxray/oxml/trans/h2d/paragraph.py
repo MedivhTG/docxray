@@ -411,6 +411,11 @@ class ListItem:
                         and next_item.list_view._li.num_id != item.num_id
                     ):
                         list_ids.add(next_item.list_view._li.num_id)
+                    elif (
+                        next_item.list_view
+                        and next_item.list_view._li.num_id == item.num_id
+                    ):
+                        break
                 next_item = next_item.next_content_item
             return list_ids
 
