@@ -20,10 +20,11 @@ from docxray.oxml.trans.text.run import CT_R
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.paragraph import (
+    from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
+    from docxray.oxml.trans.h2d.list_view import (
         ListItem,
         ListView,
-        ParagraphH2D,
+        ListViewInterrupted,
     )
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
@@ -86,6 +87,10 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def list_view(self) -> ListView | None:
         return self.h2d.list_view
+
+    @cached_property
+    def list_view_interrupted(self) -> ListViewInterrupted | None:
+        return self.h2d.list_view_interrupted
 
     @cached_property
     def right_to_left(self) -> bool:

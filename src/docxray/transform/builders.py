@@ -28,7 +28,10 @@ from .utils.char_graph import RunChain, RunChainsMap
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.paragraph import ListView, ListViewIlvlBlock
+    from docxray.oxml.trans.h2d.list_view import (
+        ListViewInterrupted,
+        ListViewIlvlBlock,
+    )
     from docxray.oxml.trans.proxy.table import Cell, Row, Table
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 
@@ -345,10 +348,11 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
         return {"src": f"data:{pic.content_type};base64,{base64}"}
 
 
-# TODO: add content between list items rendering
-class HtmlListView(HtmlBuilder["ListView"]):
+class HtmlListViewInterrupted(HtmlBuilder["ListViewInterrupted"]):
     @classmethod
-    def element(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
+    def element(
+        cls, proxy: ListViewInterrupted, ruleset: RuleSet
+    ) -> HtmlElement:
         # docxray stuff
         from docxray.transform.ruleset import Rule
 

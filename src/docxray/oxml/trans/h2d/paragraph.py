@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import Any, Literal
 
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
-from docxray.numeral.charset import DECIMAL
-from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
-from docxray.oxml.trans.h2d.exceptions import DisplayError
 from docxray.oxml.trans.proxy.compute import (
     on_off,
     signed_twips_measure,
@@ -18,7 +15,6 @@ from docxray.oxml.trans.proxy.numbering.numbering import (
     Level,
     LevelOverride,
     Num,
-    Numbering,
 )
 from docxray.oxml.trans.proxy.shared import (
     Length,
@@ -30,34 +26,24 @@ from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     ParagraphStyle,
 )
-from docxray.oxml.trans.proxy.table import Cell, Table
+from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,
     SE_LINE_SPACING_RULE,
-    SE_NUMBER_FORMAT,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_StyleType,
-    SE_Underline,
-    SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
-from docxray.shared import os_locale
 
 from .how2display import How2Display
-from .numeral_rules import NUMERAL_RULES, NUMERAL_SPECIFIC, NUMERAL_WITH_LOCALE
-
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import TransformMethod
+from .list_view import ListView, ListItem, ListViewInterrupted
 
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
 type CharsCase = Literal["up", "down"]
-_ILVL_ALLOWED = set(DECIMAL[1:])
 
 
 class ListItemError(Exception):
@@ -66,488 +52,6 @@ class ListItemError(Exception):
 
 # TODO: Global problem [GP_1]: need text processor
 # to know char positions dynmically (for tabs for example) and count pages
-
-
-class ListViewIlvlBlock:
-    def __init__(self, li: ListItem, parent: ListViewIlvlBlock | None) -> None:
-        self._li = li
-        self._parent = parent
-        self._block: list[ListViewIlvlBlock] = []
-
-    @cached_property
-    def li(self) -> ListItem:
-        return self._li
-
-    @cached_property
-    def ilvl(self) -> int:
-        return self._li.ilvl
-
-    @cached_property
-    def parent(self) -> ListViewIlvlBlock | None:
-        return self._parent
-
-    @cached_property
-    def inside_blocks(self) -> list[ListViewIlvlBlock]:
-        return self._block
-
-    def append(self, block: ListViewIlvlBlock) -> None:
-        if block.ilvl <= self.ilvl:
-            raise ValueError(
-                "Cannot append block with ilvl less or equal to parent"
-            )
-        self._block.append(block)
-
-
-class ListView:
-    def __init__(self, list_item: ListItem) -> None:
-        self._li = list_item
-        self.__load_items__(list_item)
-
-    def __load_items__(self, list_item: ListItem) -> None:
-        first_item = list_item
-        prev_li = first_item.prev_li
-        while prev_li:
-            first_item = prev_li
-            prev_li = prev_li.prev_li
-        items = [first_item]
-        next_li = first_item.next_li
-        while next_li:
-            items.append(next_li)
-            next_li = next_li.next_li
-        self._items = items
-
-    @property
-    def items(self) -> list[ListItem]:
-        return self._items
-
-    @cached_property
-    def items_tree(self) -> list[ListViewIlvlBlock]:
-        zero_blocks = []
-        block_map: dict[int, ListViewIlvlBlock] = {}
-        prev_ilvl = None
-        for item in self.items:
-            block = ListViewIlvlBlock(item, None)
-            if prev_ilvl is not None:
-                if prev_ilvl < item.ilvl:
-                    block._parent = block_map[prev_ilvl]
-                    block_map[prev_ilvl].append(block)
-                elif prev_ilvl > item.ilvl:
-                    parent_block = block_map[item.ilvl].parent
-                    block._parent = parent_block
-                    if parent_block is not None:
-                        parent_block.append(block)
-                    on_del = set()
-                    for ilvl in block_map.keys():
-                        if ilvl >= item.ilvl:
-                            on_del.add(ilvl)
-                    for ilvl in on_del:
-                        del block_map[ilvl]
-                else:
-                    parent_block = block_map[item.ilvl].parent
-                    block._parent = parent_block
-                    if parent_block is not None:
-                        parent_block.append(block)
-            block_map[item.ilvl] = block
-            if block.parent is None:
-                zero_blocks.append(block)
-            prev_ilvl = item.ilvl
-        return zero_blocks
-
-    @cached_property
-    def is_bullet_format(self) -> bool:
-        return self._li.is_bullet_format
-
-    @cached_property
-    def keeps_lists_inside(self) -> set[int]:
-        all_lists = set()
-        for item in self.items:
-            all_lists |= item.keeps_lists_inside
-        return all_lists
-
-    @cached_property
-    def keeps_commons_inside(self) -> set[int]:
-        all_commons = set()
-        for item in self.items:
-            all_commons |= item.keeps_commons_inside
-        return all_commons
-
-    def transform(
-        self,
-        ruleset: RuleSet | None = None,
-        stringify: bool = True,
-        method: TransformMethod = "html",
-    ) -> Any:
-        # docxray stuff
-        from docxray.oxml.trans.parts.document import DocumentPart
-        from docxray.transform.transformers import ListViewT
-
-        ruleset = (
-            ruleset
-            or cast(
-                "DocumentPart", self._li._paragraph.part
-            )._default_html_ruleset
-        )
-        return ListViewT.transform(self, ruleset, stringify, method)
-
-
-class ListItem:
-    """Represents `Paragraph` instance as list item in numbering."""
-
-    def __init__(
-        self,
-        numbering: Numbering,
-        paragraph: Paragraph,
-        numPr_elm: CT_NumPr,
-        level: Level | LevelOverride,
-    ) -> None:
-        self._numbering = numbering
-        self._paragraph = paragraph
-        self._h2d = paragraph.h2d
-        if numPr_elm.numId is None:
-            raise ListItemError(
-                "Cannot instantiate list item with `None` numId"
-            )
-        self._num_id = numPr_elm.numId.val
-        self._ilvl = numPr_elm.ilvl.val if numPr_elm.ilvl is not None else None
-        self._start = None
-        if isinstance(level, LevelOverride):
-            if level.lvl is None:
-                if self._ilvl is None:
-                    raise ListItemError(
-                        "Cannot instantiate list item wit `None` ilvl for LevelOverride"
-                    )
-                self._level = self._numbering.associated_lvl(
-                    self._num_id, self._ilvl
-                )
-            else:
-                self._level = level.lvl
-            self._start = level.start_from
-        else:
-            self._level = level
-            self._start = level.start_from
-        if self._ilvl is None:
-            self._ilvl = self._level.ilvl
-        if self._start is None:
-            self._start = 0
-
-    @cached_property
-    def paragraph(self) -> Paragraph:
-        return self._paragraph
-
-    @cached_property
-    def level(self) -> Level:
-        """Associated level with properties for list."""
-        return self._level
-
-    @cached_property
-    def num_id(self) -> int:
-        """Reference to numbering properties."""
-        return self._num_id
-
-    @cached_property
-    def ilvl(self) -> int:
-        """Hierarchy level of list item."""
-        return cast("int", self._ilvl)
-
-    @cached_property
-    def num_key(self) -> tuple[int, int]:
-        """Tuple of `num_id` and `ilvl`"""
-        return self.num_id, self.ilvl
-
-    @cached_property
-    def start(self) -> int:
-        """Which number of ordinal (or 0) must be the start of list for `char_ord`."""
-        return cast("int", self._start)
-
-    @cached_property
-    def ord(self) -> int:
-        """Ordinal number of list item at all."""
-        prev_li = self.prev_li
-        count = 1
-        while prev_li:
-            count += 1
-            prev_li = prev_li.prev_li
-        return count
-
-    @cached_property
-    def ilvl_ord(self) -> int:
-        """Ordinal number of list item with the same hierarchy level (`ilvl`)."""
-        prev_li = self.prev_li_ilvl
-        count = 1
-        while prev_li:
-            count += 1
-            prev_li = prev_li.prev_li_ilvl
-        return count
-
-    @cached_property
-    def char_ord(self) -> int:
-        """Ordinal number of character in associated charset from `Numeral` module."""
-        if self.ilvl == 0:
-            # Never restarts (highest level)
-            return self.ilvl_ord + self.start - 1
-        if self.level.restart_from is None:
-            restart_lvl = None
-            upper_lvl = self.ilvl - 1
-        else:
-            restart_lvl = self.level.restart_from
-            upper_lvl = self.ilvl - restart_lvl
-
-        if restart_lvl == 0:
-            # Never restarts (restart level is 0)
-            return self.ilvl_ord + self.start - 1
-        restarting = False
-        same_level_count = 1
-        prev_li = self.prev_li
-        while prev_li:
-            if prev_li.ilvl == self.ilvl:
-                same_level_count += 1
-            if prev_li.ilvl <= upper_lvl:
-                restarting = True
-                break
-            prev_li = prev_li.prev_li
-        if restarting:
-            # Restart with count of the same level found before
-            return same_level_count + self.start - 1
-        # Not restarts (not found higher level)
-        return self.ilvl_ord + self.start - 1
-
-    @cached_property
-    def next_li(self) -> ListItem | None:
-        """Next list item in all list. `None` if no list item ahead."""
-        next_para: Paragraph | None = self._paragraph.next_para
-        while next_para:
-            if next_para.list_item is not None:
-                next_li = next_para.list_item
-                if self.num_key == next_li.num_key:
-                    return next_li
-                if self.num_id == next_li.num_id:
-                    return next_li
-            next_para = next_para.next_para
-        return None
-
-    @cached_property
-    def prev_li(self) -> ListItem | None:
-        """Previous list item in all list. `None` if no list item behind."""
-        prev_para: Paragraph | None = self._paragraph.prev_para
-        while prev_para:
-            if prev_para.list_item is not None:
-                prev_li = prev_para.list_item
-                if self.num_key == prev_li.num_key:
-                    return prev_li
-                if self.num_id == prev_li.num_id:
-                    return prev_li
-            prev_para = prev_para.prev_para
-        return None
-
-    @cached_property
-    def next_li_ilvl(self) -> ListItem | None:
-        """Next list item in with same `ilvl`. `None` if no list item ahead."""
-        next_para: Paragraph | None = self._paragraph.next_para
-        while next_para:
-            if next_para.list_item is not None:
-                next_li = next_para.list_item
-                if self.num_key == next_li.num_key:
-                    return next_li
-            next_para = next_para.next_para
-        return None
-
-    @cached_property
-    def prev_li_ilvl(self) -> ListItem | None:
-        """Previous list item in with same `ilvl`. `None` if no list item behind."""
-        prev_para: Paragraph | None = self._paragraph.prev_para
-        while prev_para:
-            if prev_para.list_item is not None:
-                prev_li = prev_para.list_item
-                if self.num_key == prev_li.num_key:
-                    return prev_li
-            prev_para = prev_para.prev_para
-        return None
-
-    @cached_property
-    def locale(self) -> str:
-        """Locale set for `Numeral` module.
-
-        Can determine which alphabet/spellout letters/numbering will be used in `level_text`.
-        """
-        if self.level.locale is not None:
-            return self.level.locale
-        if self._h2d._styles.document_defaults is not None:
-            locale = self._h2d._styles.document_defaults.locale
-            if locale is not None:
-                return locale
-        return os_locale()
-
-    @cached_property
-    def level_text(self) -> str:
-        """Get rendered level text as in WORD.
-
-        `NOTE`:
-        1) For future level text can return `Image` instance (str | Image) if numbering
-        format has picture reference (bullet format usually).
-        """
-        level = self.level
-        num_format = level.numbering_format
-        if num_format in NUMERAL_SPECIFIC:
-            return self._level_char
-        return self._parse_pattern()
-
-    @cached_property
-    def is_bullet_format(self) -> bool:
-        return self.level.numbering_format == SE_NUMBER_FORMAT.BULLET
-
-    @cached_property
-    def keeps_lists_inside(self) -> set[int]:
-        def inside(
-            item: ListItem,
-        ) -> set[int]:
-            if item.next_li is None:
-                return set()
-            next_item = item.paragraph.next_content_item
-            list_ids = set()
-            while next_item:
-                if isinstance(next_item, Paragraph):
-                    if (
-                        next_item.list_view
-                        and next_item.list_view._li.num_id != item.num_id
-                    ):
-                        list_ids.add(next_item.list_view._li.num_id)
-                    elif (
-                        next_item.list_view
-                        and next_item.list_view._li.num_id == item.num_id
-                    ):
-                        break
-                next_item = next_item.next_content_item
-            return list_ids
-
-        return inside(self)
-
-    @cached_property
-    def keeps_commons_inside(self) -> set[int]:
-        def inside(
-            item: ListItem,
-        ) -> set[int]:
-            if item.next_li is None:
-                return set()
-            next_item = item.paragraph.next_content_item
-            content_ids = set()
-            while next_item:
-                if isinstance(next_item, Table):
-                    content_ids.add(next_item.content_idx)
-                elif not next_item.list_view:
-                    content_ids.add(next_item.content_idx)
-                elif next_item.list_view._li.num_id == item.num_id:
-                    if next_item.list_view._li.next_li is None:
-                        break
-                next_item = next_item.next_content_item
-            return content_ids
-
-        return inside(self)
-
-    @cached_property
-    def italic(self) -> bool:
-        return self._display_level_text_run_val_on_off("i")
-
-    @cached_property
-    def bold(self) -> bool:
-        return self._display_level_text_run_val_on_off("b")
-
-    @cached_property
-    def chars_case(self) -> CharsCase | None:
-        if self._all_uppercase and self._all_downcase:
-            raise DisplayError(
-                "Mentiond 2 cases (up, down) when they are mutually exclusive"
-            )
-        if self._all_uppercase:
-            return "up"
-        if self._all_downcase:
-            return "down"
-        return None
-
-    @cached_property
-    def underline(self) -> None | SE_Underline:
-        line = self._display_level_text_run_val("u", True)
-        if isinstance(line, NotFound) or line == SE_Underline.NONE:
-            return None
-        if line is None:
-            return SE_Underline.SINGLE
-        return line
-
-    @cached_property
-    def strike(self) -> bool:
-        return self._display_level_text_run_val_on_off("strike")
-
-    @cached_property
-    def vertical_alignment(self) -> None | SE_VerticalAlignRun:
-        align = self._display_level_text_run_val("vertAlign")
-        if (
-            isinstance(align, NotFound)
-            or align == SE_VerticalAlignRun.BASELINE
-        ):
-            return None
-        return align
-
-    @cached_property
-    def _all_uppercase(self) -> bool:
-        return self._display_level_text_run_val_on_off("caps")
-
-    @cached_property
-    def _all_downcase(self) -> bool:
-        return self._display_level_text_run_val_on_off("smallCaps")
-
-    # TODO: here can be an Image instance along with common chars
-    @cached_property
-    def _level_char(self) -> str:
-        format = self.level.numbering_format
-        if format == SE_NUMBER_FORMAT.NONE:
-            return ""
-        if format == SE_NUMBER_FORMAT.BULLET:
-            if self.level.font is None:
-                font = "Symbol"
-            else:
-                font = self.level.font.font_name
-            return Numeral.bullet(self.level.pattern, font)
-        if format == SE_NUMBER_FORMAT.CUSTOM:
-            return Numeral.custom(
-                self.char_ord, self.level.numbering_custom_pattern
-            )
-        if self.level.all_decimal:
-            return Numeral.decimal(self.char_ord)
-        if format in NUMERAL_WITH_LOCALE:
-            locale = self.locale or "en-US"
-            return NUMERAL_RULES[format](self.char_ord, locale)  # type: ignore[operator]
-        return NUMERAL_RULES[format](self.char_ord)  # type: ignore[operator]
-
-    def _display_level_text_run_val(
-        self, name: str, optional: bool = False
-    ) -> Any:
-        path = PropertyPath.base("val", f"rPr.{name}")
-        return self.paragraph.h2d._prop(path, optional, "style")
-
-    def _display_level_text_run_val_on_off(self, name: str) -> bool:
-        return on_off(self._display_level_text_run_val(name, True))
-
-    def _parse_pattern(self) -> str:
-        text = ""
-        percentage_followed = False
-        for ch in self.level.pattern:
-            if ch == "%":
-                percentage_followed = True
-                continue
-            if not (percentage_followed and ch in _ILVL_ALLOWED):
-                text += ch
-                continue
-            ilvl_found = int(ch) - 1
-            if ilvl_found == self.ilvl:
-                text += self._level_char
-            elif ilvl_found < self.ilvl:
-                prev_li = self.prev_li
-                while prev_li:
-                    if prev_li.ilvl == ilvl_found:
-                        text += prev_li._level_char
-                        break
-                    prev_li = prev_li.prev_li
-            percentage_followed = False
-        return text
 
 
 class ParagraphH2D(How2Display[Paragraph]):
@@ -578,6 +82,12 @@ class ParagraphH2D(How2Display[Paragraph]):
         if self.list_item is None:
             return None
         return ListView(self.list_item)
+
+    @cached_property
+    def list_view_interrupted(self) -> ListViewInterrupted | None:
+        if self.list_item is None:
+            return None
+        return ListViewInterrupted(self.list_item)
 
     # --- Page properties
     @cached_property

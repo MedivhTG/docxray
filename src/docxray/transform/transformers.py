@@ -17,7 +17,7 @@ T = TypeVar("T")
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.paragraph import ListView
+    from docxray.oxml.trans.h2d.list_view import ListViewInterrupted
     from docxray.oxml.trans.proxy.table import Table
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 
@@ -57,10 +57,12 @@ class ParagraphT(Transformer["Paragraph"]):
         return rule.builder.element(proxy, ruleset)
 
 
-class ListViewT(Transformer["ListView"]):
+class ListViewInterruptedT(Transformer["ListViewInterrupted"]):
     @classmethod
-    def transform_html(cls, proxy: ListView, ruleset: RuleSet) -> HtmlElement:
-        rule = ruleset.html_rules.get("ListView")
+    def transform_html(
+        cls, proxy: ListViewInterrupted, ruleset: RuleSet
+    ) -> HtmlElement:
+        rule = ruleset.html_rules.get("ListViewInterrupted")
         if rule is None:
             raise ValueError("No such rule for Paragraph found in rule set")
         return rule.builder.element(proxy, ruleset)

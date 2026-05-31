@@ -20,6 +20,7 @@ from docxray.oxml.trans.text.paragraph import CT_P
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.proxy.table import Table
+    from docxray.oxml.trans.h2d.list_view import ListViewInterrupted
 
 type _BlockItemElement = CT_Body | CT_Tc
 
@@ -43,3 +44,22 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
     def iter_inner_content(self) -> Iterator[Paragraph | Table]:
         for item in self.inner_content:
             yield item
+
+    def iter_inner_content_with_lists(
+        self,
+    ) -> Iterator[Paragraph | Table | ListViewInterrupted]:
+        skip_list_until = None
+        for item in self.inner_content:
+            if (
+                skip_list_until is not None
+                and item.content_idx <= skip_list_until
+            ):
+                continue
+            if isinstance(item, Table):
+                yield item
+            else:
+                if item.list_view_interrupted is not None:
+                    skip_list_until = item.list_view_interrupted.list_ends
+                    yield item.list_view_interrupted
+                else:
+                    yield item
