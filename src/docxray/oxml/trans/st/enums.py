@@ -422,3 +422,10 @@ class SE_LINE_SPACING_RULE(StrEnum):
     AUTO = "auto"
     EXACT = "exact"
     AT_LEAST = "atLeast"
+
+
+class SE_VERTICAL_JC(StrEnum):
+    TOP = "top"
+    CENTER = "center"
+    BOTH = "both"
+    BOTTOM = "bottom"

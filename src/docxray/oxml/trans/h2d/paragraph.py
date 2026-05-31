@@ -142,9 +142,11 @@ class ParagraphH2D(How2Display[Paragraph]):
     @cached_property
     def text_flow(self) -> SE_TEXT_DIRECTION | None:
         val = self._display_val("textDirection")
-        if isinstance(val, NotFound):
-            return None
-        return val
+        if not isinstance(val, NotFound):
+            return val
+        if self.cell and self.cell.h2d.text_flow:
+            return self.cell.h2d.text_flow
+        return None
 
     @cached_property
     def margin_line_start(self) -> Length | int | None:

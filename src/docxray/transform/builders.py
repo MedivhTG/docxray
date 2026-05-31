@@ -15,10 +15,12 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
+    SE_HEIGHT_RULE,
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_TEXT_DIRECTION,
+    SE_VERTICAL_JC,
     SE_Border,
     SE_Underline,
     SE_VerticalAlignRun,
@@ -393,6 +395,13 @@ class HtmlListViewInterrupted(HtmlBuilder["ListViewInterrupted"]):
 
 
 class HtmlTable(HtmlBuilder["Table"]):
+    VALIGN_TO_HTML_VALGN = {
+        SE_VERTICAL_JC.TOP: "top",
+        SE_VERTICAL_JC.CENTER: "middle",
+        SE_VERTICAL_JC.BOTTOM: "bottom",
+        SE_VERTICAL_JC.BOTH: "middle",
+    }
+
     @classmethod
     def element(cls, proxy: Table, ruleset: RuleSet) -> HtmlElement:
         return cls._table(proxy, ruleset)
@@ -411,7 +420,6 @@ class HtmlTable(HtmlBuilder["Table"]):
             tr_elm.append(cls._cell(cell, ruleset))
         return tr_elm
 
-    # TODO: use height rule
     @classmethod
     def _row_attrs(cls, proxy: Row) -> dict[str, str]:
         attrs: dict[str, str] = {}
@@ -457,6 +465,9 @@ class HtmlTable(HtmlBuilder["Table"]):
             border: str = cls._cell_border(proxy.borders_info[side], side)  # type: ignore[literal-required]
             if border:
                 style += f"{border}; "
+        if proxy.vertical_alignment:
+            valign = cls.VALIGN_TO_HTML_VALGN[proxy.vertical_alignment]
+            style += f"vertical-align: {valign}; "
         return style
 
     @classmethod

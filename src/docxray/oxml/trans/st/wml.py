@@ -28,6 +28,7 @@ from .enums import (
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_THEME,
+    SE_VERTICAL_JC,
     SE_Border,
     SE_HexColorAuto,
     SE_Merge,
@@ -175,3 +176,8 @@ class ST_HeightRule(XsdSimpleType):
 class ST_LineSpacingRule(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_LINE_SPACING_RULE)}
+
+
+class ST_VerticalJc(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_VERTICAL_JC)}

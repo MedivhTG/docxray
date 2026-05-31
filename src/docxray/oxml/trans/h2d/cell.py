@@ -21,7 +21,12 @@ from docxray.oxml.trans.proxy.shared import (
 )
 from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
-from docxray.oxml.trans.st.enums import SE_Border, SE_TblStyleOverrideType
+from docxray.oxml.trans.st.enums import (
+    SE_TEXT_DIRECTION,
+    SE_VERTICAL_JC,
+    SE_Border,
+    SE_TblStyleOverrideType,
+)
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders
 from docxray.oxml.trans.table.table_props import CT_TblBorders
@@ -92,6 +97,21 @@ class CellH2D(How2Display[Cell]):
         if spacing is not None and spacing > 0:
             return self._borders_non_zero_spacing_info
         return self._spacing_zero(self._borders_non_zero_spacing_info)
+
+    # TODO: inherit from parent Section if omitted
+    @cached_property
+    def text_flow(self) -> SE_TEXT_DIRECTION | None:
+        text_flow = self._prop_val("textDirection", algorithm="both")
+        if not isinstance(text_flow, NotFound):
+            return text_flow
+        return None
+
+    @cached_property
+    def vertical_align(self) -> SE_VERTICAL_JC:
+        align = self._prop_val("vAlign", algorithm="both")
+        if not isinstance(align, NotFound):
+            return align
+        return SE_VERTICAL_JC.TOP
 
     @cached_property
     def _table_style(self) -> TableStyle | None:

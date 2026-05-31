@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
-from docxray.oxml.trans.st.enums import SE_HEIGHT_RULE, SE_Merge
+from docxray.oxml.trans.st.enums import (
+    SE_HEIGHT_RULE,
+    SE_VERTICAL_JC,
+    SE_Merge,
+)
 from docxray.oxml.trans.table.row_props import CT_Height
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
 
@@ -51,6 +55,10 @@ class Cell(BlockItemContainer[CT_Tc]):
     def table(self) -> Table:
         """Current table."""
         return self.row.table
+
+    @cached_property
+    def vertical_alignment(self) -> SE_VERTICAL_JC:
+        return self.h2d.vertical_align
 
     @cached_property
     def width(self) -> Twips | float | None:
