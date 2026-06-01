@@ -94,11 +94,10 @@ class CellH2D(How2Display[Cell]):
     # TODO: look for resolve.. too complex and word is broken
     @cached_property
     def borders_info(self) -> BordersInfo:
-        return self._borders_non_zero_spacing_info
-        # spacing = self._spacing
-        # if spacing is not None and spacing > 0:
-        #     return self._borders_non_zero_spacing_info
-        # return self._spacing_zero(self._borders_non_zero_spacing_info)
+        spacing = self._spacing
+        if spacing is not None and spacing > 0:
+            return self._borders_non_zero_spacing_info
+        return self._spacing_zero(self._borders_non_zero_spacing_info)
 
     # TODO: inherit from parent Section if omitted
     @cached_property
@@ -355,22 +354,18 @@ class CellH2D(How2Display[Cell]):
         opposing_to: SE_Border | None,
         opposed_to_table: bool = False,
     ) -> SE_Border | None:
-        override_none = {SE_Border.NULL, SE_Border.NONE}
+        none = (None, SE_Border.NULL, SE_Border.NONE)
         if opposed_to_table:
             if main is None:
                 return opposing_to
             else:
                 return main
         else:
-            if main is None:
+            if main in none:
                 return opposing_to
-            elif main in override_none:
-                return main
             else:
-                if opposing_to is None:
+                if opposing_to in none:
                     return main
-                elif opposing_to in override_none:
-                    return opposing_to
         main_weight = self._border_weight(main)
         opposing_to_weight = self._border_weight(opposing_to)
         if main_weight is None or opposing_to_weight is None:
@@ -453,14 +448,30 @@ class CellH2D(How2Display[Cell]):
         return None
 
     @cached_property
+    def _shift_row_band(self) -> bool:
+        for prop in self.row.h2d._latent_tbl_style_props:
+            if prop.type == SE_TblStyleOverrideType.HEADER_ROW:
+                return True
+        return False
+
+    @cached_property
     def _row_band_number(self) -> int:
         cell = self._proxy
-        return self._proxy.grid_y // cell.table.h2d.row_band_size
+        shift = 1 if self._shift_row_band else 0
+        return (self._proxy.grid_y + shift) // cell.table.h2d.row_band_size
+
+    @cached_property
+    def _shift_col_band(self) -> bool:
+        for prop in self.row.h2d._latent_tbl_style_props:
+            if prop.type == SE_TblStyleOverrideType.FIRST_COLUMN:
+                return True
+        return False
 
     @cached_property
     def _col_band_number(self) -> int:
         cell = self._proxy
-        return self._proxy.grid_x // cell.table.h2d.col_band_size
+        shift = 1 if self._shift_col_band else 0
+        return (self._proxy.grid_x + shift) // cell.table.h2d.col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:
