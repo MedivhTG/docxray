@@ -597,14 +597,16 @@ class CellH2D(How2Display[Cell]):
     @cached_property
     def _row_band_number(self) -> int:
         cell = self._proxy
-        shift = 0 if self.row.h2d._shift_row_band else 1
-        return (self._proxy.grid_y + shift) // cell.table.h2d.row_band_size
+        band_shift = 1 if self.row.h2d._shift_row_band else 0
+        y_shift = cell.grid_y + band_shift
+        return y_shift // cell.table.h2d.row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
         cell = self._proxy
-        shift = 0 if self.row.h2d._shift_col_band else 1
-        return (self._proxy.grid_x + shift) // cell.table.h2d.col_band_size
+        band_shift = 1 if self.row.h2d._shift_col_band else 0
+        x_shift = cell.idx + 1 + band_shift
+        return x_shift // cell.table.h2d.col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:

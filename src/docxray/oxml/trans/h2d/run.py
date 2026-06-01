@@ -104,7 +104,7 @@ class RunH2D(How2Display[Run]):
         cell = self.cell
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell.h2d._tbl_style_props_deep, char_path, optional
+                cell.h2d._tbl_style_props_deep, char_path, optional, True
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
@@ -123,7 +123,7 @@ class RunH2D(How2Display[Run]):
         cell = self.cell
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell.h2d._tbl_style_props_deep, char_path, True
+                cell.h2d._tbl_style_props_deep, char_path, True, True
             )
         found_count = sum(
             1
