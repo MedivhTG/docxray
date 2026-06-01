@@ -407,10 +407,10 @@ class HtmlTable(HtmlBuilder["Table"]):
         SE_Border.DASHED: "2px dashed black",
         SE_Border.DOT_DASH: "2px dashed black",
         SE_Border.DOT_DOT_DASH: "2px dashed black",
-        SE_Border.TRIPLE: "2px double black; outline: 1px solid black; outline-offset: 2px",
-        SE_Border.THIN_THICK_SMALL_GAP: "2px solid black; border-top-width: 4px; border-bottom-width: 4px",
-        SE_Border.THICK_THIN_SMALL_GAP: "4px solid black; border-top-width: 2px; border-bottom-width: 2px",
-        SE_Border.THIN_THICK_THIN_SMALL_GAP: "2px solid black; box-shadow: 0 0 0 4px black",
+        SE_Border.TRIPLE: "2px double black;",
+        SE_Border.THIN_THICK_SMALL_GAP: "thick solid black",
+        SE_Border.THICK_THIN_SMALL_GAP: "thick solid black",
+        SE_Border.THIN_THICK_THIN_SMALL_GAP: "thick solid black",
         SE_Border.THIN_THICK_MEDIUM_GAP: "3px double black",
         SE_Border.THICK_THIN_MEDIUM_GAP: "3px double black",
         SE_Border.THIN_THICK_THIN_MEDIUM_GAP: "3px double black",
@@ -500,8 +500,12 @@ class HtmlTable(HtmlBuilder["Table"]):
     @classmethod
     def _cell_border(cls, border: SE_Border | None, side: str) -> str:
         b = ""
-        if border not in {None, SE_Border.NULL, SE_Border.NONE}:
-            b = f"border-{side}: 1px solid black"
+        if (
+            border not in (SE_Border.NULL, SE_Border.NONE)
+            and border is not None
+        ):
+            border_css = cls.SE_BORDER_TO_CSS.get(border) or "1px solid black"
+            b = f"border-{side}: {border_css}"
         return b
 
     @classmethod
