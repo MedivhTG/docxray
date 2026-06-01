@@ -168,11 +168,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     }
 
     ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
+        "underline": underline_elm,
+        "vertical_alignment": vert_align_elm,
         "italic": i_elm,
         "bold": b_elm,
         "strike": strike_elm,
-        "underline": underline_elm,
-        "vertical_alignment": vert_align_elm,
     }
 
     @classmethod

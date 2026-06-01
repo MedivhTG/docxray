@@ -420,9 +420,12 @@ class CellH2D(How2Display[Cell]):
             )
         elif left_n == "insideV" and cell_prev_h2d is not None:
             prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
+            right_dropped = prev_inf["_sides_dropped_to_table_borders"][
+                "right"
+            ]
             if prev_inf["right"]:
                 inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], prev_inf["right"]
+                    inf["left"], prev_inf["right"], right_dropped
                 )
             else:
                 inf["left"] = self._opposing_cell_borders_conflict(
@@ -434,9 +437,10 @@ class CellH2D(How2Display[Cell]):
             )
         elif right_n == "insideV" and cell_next_h2d is not None:
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
+            left_dropped = next_inf["_sides_dropped_to_table_borders"]["left"]
             if next_inf["right"]:
                 inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], next_inf["left"]
+                    inf["right"], next_inf["left"], left_dropped
                 )
             else:
                 inf["right"] = self._opposing_cell_borders_conflict(
@@ -460,9 +464,12 @@ class CellH2D(How2Display[Cell]):
             )
         elif top_n == "insideH" and cell_above_h2d is not None:
             above_inf = cell_above_h2d._borders_non_zero_spacing_info
+            bottom_dropped = above_inf["_sides_dropped_to_table_borders"][
+                "bottom"
+            ]
             if above_inf["bottom"]:
                 inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], above_inf["bottom"]
+                    inf["top"], above_inf["bottom"], bottom_dropped
                 )
             else:
                 inf["top"] = self._opposing_cell_borders_conflict(
@@ -474,6 +481,9 @@ class CellH2D(How2Display[Cell]):
             )
         elif bottom_n == "insideH" and cell_below_h2d is not None:
             below_inf = cell_below_h2d._borders_non_zero_spacing_info
+            bottom_dropped = below_inf["_sides_dropped_to_table_borders"][
+                "top"
+            ]
             if below_inf["top"]:
                 inf["bottom"] = self._opposing_cell_borders_conflict(
                     inf["bottom"], below_inf["top"]
@@ -585,29 +595,15 @@ class CellH2D(How2Display[Cell]):
         return None
 
     @cached_property
-    def _shift_row_band(self) -> bool:
-        for prop in self.row.h2d._latent_tbl_style_props:
-            if prop.type == SE_TblStyleOverrideType.HEADER_ROW:
-                return True
-        return False
-
-    @cached_property
     def _row_band_number(self) -> int:
         cell = self._proxy
-        shift = 1 if self._shift_row_band else 0
+        shift = 0 if self.row.h2d._shift_row_band else 1
         return (self._proxy.grid_y + shift) // cell.table.h2d.row_band_size
-
-    @cached_property
-    def _shift_col_band(self) -> bool:
-        for prop in self.row.h2d._latent_tbl_style_props:
-            if prop.type == SE_TblStyleOverrideType.FIRST_COLUMN:
-                return True
-        return False
 
     @cached_property
     def _col_band_number(self) -> int:
         cell = self._proxy
-        shift = 1 if self._shift_col_band else 0
+        shift = 0 if self.row.h2d._shift_col_band else 1
         return (self._proxy.grid_x + shift) // cell.table.h2d.col_band_size
 
     @cached_property

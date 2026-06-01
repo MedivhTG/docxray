@@ -18,7 +18,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     TableStyle,
 )
 from docxray.oxml.trans.proxy.table import Row, Table
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import SE_StyleType, SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.row_props import CT_TblPrEx
 from docxray.oxml.trans.table.table_props import CT_TblBorders
@@ -83,6 +83,20 @@ class RowH2D(How2Display[Row]):
         if self._table_style is None:
             return []
         return self._table_style_props(self._table_style, WD_CNF_FORMAT(0xFFF))
+
+    @cached_property
+    def _shift_row_band(self) -> bool:
+        for prop in self._latent_tbl_style_props:
+            if prop.type == SE_TblStyleOverrideType.HEADER_ROW:
+                return True
+        return False
+
+    @cached_property
+    def _shift_col_band(self) -> bool:
+        for prop in self._latent_tbl_style_props:
+            if prop.type == SE_TblStyleOverrideType.FIRST_COLUMN:
+                return True
+        return False
 
     @cached_property
     def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
