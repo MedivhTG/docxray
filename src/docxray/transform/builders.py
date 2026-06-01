@@ -399,6 +399,33 @@ class HtmlTable(HtmlBuilder["Table"]):
         SE_VERTICAL_JC.BOTTOM: "bottom",
         SE_VERTICAL_JC.BOTH: "middle",
     }
+    SE_BORDER_TO_CSS = {
+        SE_Border.SINGLE: "1px solid black",
+        SE_Border.THICK: "thick solid black",
+        SE_Border.DOUBLE: "3px double black",
+        SE_Border.DOTTED: "2px dotted black",
+        SE_Border.DASHED: "2px dashed black",
+        SE_Border.DOT_DASH: "2px dashed black",
+        SE_Border.DOT_DOT_DASH: "2px dashed black",
+        SE_Border.TRIPLE: "2px double black; outline: 1px solid black; outline-offset: 2px",
+        SE_Border.THIN_THICK_SMALL_GAP: "2px solid black; border-top-width: 4px; border-bottom-width: 4px",
+        SE_Border.THICK_THIN_SMALL_GAP: "4px solid black; border-top-width: 2px; border-bottom-width: 2px",
+        SE_Border.THIN_THICK_THIN_SMALL_GAP: "2px solid black; box-shadow: 0 0 0 4px black",
+        SE_Border.THIN_THICK_MEDIUM_GAP: "3px double black",
+        SE_Border.THICK_THIN_MEDIUM_GAP: "3px double black",
+        SE_Border.THIN_THICK_THIN_MEDIUM_GAP: "3px double black",
+        SE_Border.THIN_THICK_LARGE_GAP: "4px double black",
+        SE_Border.THICK_THIN_LARGE_GAP: "4px double black",
+        SE_Border.THIN_THICK_THIN_LARGE_GAP: "4px double black",
+        SE_Border.WAVE: "3px groove black",
+        SE_Border.DOUBLE_WAVE: "3px ridge black",
+        SE_Border.DASH_SMALL_GAP: "2px dashed black",
+        SE_Border.DASH_DOT_STROKED: "2px dotted black",
+        SE_Border.THREE_D_EMBOSS: "3px ridge black",
+        SE_Border.THREE_D_ENGRAVE: "3px groove black",
+        SE_Border.OUTSET: "3px outset black",
+        SE_Border.INSET: "3px inset black",
+    }
 
     @classmethod
     def element(cls, proxy: Table, ruleset: RuleSet) -> HtmlElement:
