@@ -1,3 +1,5 @@
+"""Module with exceptions used for XSD validation"""
+
 from typing import Any, Self
 
 

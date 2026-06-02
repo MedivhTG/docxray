@@ -1,3 +1,5 @@
+"""Module with standard W3C xsd primitives."""
+
 # mypy: disable-error-code="override"
 
 import re

@@ -1,3 +1,5 @@
+"""Module with standard W3C xsd facets."""
+
 from collections.abc import ValuesView
 from enum import StrEnum
 from functools import cached_property
