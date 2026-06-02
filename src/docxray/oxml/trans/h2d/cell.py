@@ -10,8 +10,6 @@ from docxray.oxml.trans.enums import (
     _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
 )
-from docxray.oxml.trans.h2d.exceptions import DisplayError
-from docxray.oxml.trans.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.compute import width
 from docxray.oxml.trans.proxy.shared import (
     Length,
@@ -30,6 +28,9 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders
 from docxray.oxml.trans.table.table_props import CT_TblBorders
+
+from .exceptions import DisplayError
+from .how2display import How2Display
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
 type _TableChild = Literal["row", "cell"]
