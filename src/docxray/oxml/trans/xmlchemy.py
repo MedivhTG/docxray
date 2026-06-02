@@ -1,3 +1,5 @@
+"""Main module for parsing/getting XML nodes from tree."""
+
 from copy import deepcopy
 from functools import cached_property
 from typing import Any, TypeVar
@@ -8,10 +10,10 @@ from lxml.etree import QName
 from docxray.enum.lxml import POS
 from docxray.exceptions import InvalidXmlError
 from docxray.lxml import BaseOxmlElement
-from docxray.oxml.trans.ns import nsmap
 from docxray.xsd.primitives import XsdString
 from docxray.xsd.xsd import XsdPrimitive, XsdSimpleType
 
+from .ns import nsmap
 from .types import ELM_T
 
 ST_T = TypeVar("ST_T", bound=XsdSimpleType | XsdPrimitive)
@@ -26,35 +28,41 @@ class OxmlElement(BaseOxmlElement):
 
     @cached_property
     def is_first(self) -> bool:
+        """XML-node has no siblings with same tage before."""
         return self.xpath(f"not(preceding-sibling::{self.xml_tag_self})")
 
     @cached_property
     def is_last(self) -> bool:
+        """XML-node has no siblings with same tage after."""
         return self.xpath(f"not(following-sibling::{self.xml_tag_self})")
 
     @cached_property
     def xml_pos(self) -> POS:
+        """XML-postion relative to it's siblings."""
         return self.xml_position(self.is_first, self.is_last)
 
     @cached_property
     def xml_tag_self(self) -> str:
+        """Self tag name with prefix"""
         return self.xml_tag(self.tag)
 
     def xml_tag(self, qn_tag: Any) -> str:
+        """Get tag name with prefix, e.g. `w:p` for `{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p` (clark-notation).
+
+        Args:
+            qn_tag (Any): Tag in clark-notation.
+
+        Raises:
+            InvalidXmlError: If cannot recognize namespace from mapping.
+
+        Returns:
+            str: Tag name string.
+        """
         qn = QName(qn_tag)
         if qn.namespace is None:
             msg = "No namespace provided for word element"
             raise InvalidXmlError(msg)
         return f"{nsmap_reversed[qn.namespace]}:{qn.localname}"
-
-    def xml_position(self, is_first: bool, is_last: bool) -> POS:
-        if not is_first and not is_last:
-            return POS.MIDDLE
-        if is_first and not is_last:
-            return POS.START
-        if not is_first and is_last:
-            return POS.END
-        return POS.ONE_ITEM
 
     def attr_optional(
         self,
@@ -63,6 +71,16 @@ class OxmlElement(BaseOxmlElement):
         default: Any = None,
         **facets: Any,
     ) -> Any:
+        """Get optional attribute from element with XSD validation.
+
+        Args:
+            elm_qn (str): Qalified name of an desired element.
+            simple_type (type[ST_T] | None, optional): Validation XSD cls type on found element. Defaults to None.
+            default (Any, optional): Default value if element not found. Defaults to None.
+
+        Returns:
+            Any: Validated and converted attribute value.
+        """
         attr = self.get(elm_qn)
         if attr is None:
             return default
@@ -75,6 +93,18 @@ class OxmlElement(BaseOxmlElement):
     def attr_required(
         self, elm_qn: str, simple_type: type[ST_T], **facets: dict[str, Any]
     ) -> Any:
+        """Get required attribute from element with XSD validation.
+
+        Args:
+            elm_qn (str): Qalified name of an desired element.
+            simple_type (type[ST_T]): Validation XSD cls type on found element.
+
+        Raises:
+            InvalidXmlError: If required lement is not found.
+
+        Returns:
+            Any: Validated and converted attribute value.
+        """
         attr = self.get(elm_qn)
         if attr is None:
             msg = (
@@ -180,6 +210,36 @@ class OxmlElement(BaseOxmlElement):
         raise InvalidXmlError(msg)
 
     def recreate(self, cls: type[ELM_T]) -> ELM_T:
+        """Get copy of current element with change cls type.
+
+        Usually needed in edge cases where ECMA schema uses same element with different XSD types,
+        e.g. `w:spacing` for `CT_Spacing` and `CT_SignedTwipsMeasure`.
+
+        Args:
+            cls (type[ELM_T]): `OxmlElement` cls for change.
+
+        Returns:
+            ELM_T: Copy of and current element.
+        """
         new_elm = deepcopy(self)
         new_elm.__class__ = cls  # pyright: ignore[reportAttributeAccessIssue]
         return new_elm  # type: ignore[return-value]
+
+    @classmethod
+    def xml_position(cls, is_first: bool, is_last: bool) -> POS:
+        """Determine XML position relative to it's siblings.
+
+        Args:
+            is_first (bool): F
+            is_last (bool): _description_
+
+        Returns:
+            POS: _description_
+        """
+        if not is_first and not is_last:
+            return POS.MIDDLE
+        if is_first and not is_last:
+            return POS.START
+        if not is_first and is_last:
+            return POS.END
+        return POS.ONE_ITEM

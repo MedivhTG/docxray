@@ -1,11 +1,12 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.ns import PIC, WP, A, NoNS, R
-from docxray.oxml.trans.st.dml_main import ST_PositiveCoordinate
-from docxray.oxml.trans.st.dml_wordprocessing_drawing import ST_WrapDistance
-from docxray.oxml.trans.xmlchemy import OxmlElement
 from docxray.xsd.primitives import XsdToken
+
+from .ns import PIC, WP, A, NoNS, R
+from .st.dml_main import ST_PositiveCoordinate
+from .st.dml_wordprocessing_drawing import ST_WrapDistance
+from .xmlchemy import OxmlElement
 
 
 class CT_PositiveSize2D(OxmlElement):

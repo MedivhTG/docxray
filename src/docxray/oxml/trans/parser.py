@@ -1,16 +1,15 @@
 # pyright: reportImportCycles=false
 
-"""XML parser for python-docx."""
-
-from __future__ import annotations
+"""XML parser for docxray"""
 
 from lxml import etree
 
 # docxray stuff
 from docxray.lxml import elm_ns_cls_lookup
-from docxray.oxml.trans.ns import nsmap
-from docxray.oxml.trans.types import ELM_T
-from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .ns import nsmap
+from .types import ELM_T
+from .xmlchemy import OxmlElement
 
 # -- configure XML parser --
 lookup = elm_ns_cls_lookup(OxmlElement)

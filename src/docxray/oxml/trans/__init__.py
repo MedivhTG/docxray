@@ -1,9 +1,9 @@
+"""Here CT_* classes mapped in memory for lxml namepsace class lookup."""
+
 # ruff: noqa: E402
 
-# docxray stuff
-from docxray.oxml.trans.parser import register_element_cls
-
 from .document import CT_Body, CT_Document
+from .parser import register_element_cls
 from .shared import (
     CT_Border,
     CT_Cnf,

@@ -16,6 +16,15 @@ class TransitionalPartFactory(PartFactory):
 
 
 def part_class_selector(content_type: str, reltype: str) -> type[Part] | None:
+    """Return part cls for given reltype or content_type.
+
+    Args:
+        content_type (str): Given content_type.
+        reltype (str): Given reltype.
+
+    Returns:
+        type[Part] | None: Part cls or `None` if there is no suitable cls.
+    """
     if reltype == RT.IMAGE:
         return ImagePart
     return None

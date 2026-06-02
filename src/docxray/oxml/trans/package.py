@@ -16,12 +16,7 @@ if TYPE_CHECKING:
 class TransitionalPackage(OpcPackage):
     @cached_property
     def main_document_part(self) -> DocumentPart:
-        """Return a reference to the main document part for this package.
-
-        Examples include a document part for a WordprocessingML package, a presentation
-        part for a PresentationML package, or a workbook part for a SpreadsheetML
-        package.
-        """
+        """Return a reference to the main document part for this package."""
         from .parts.document import DocumentPart
 
         return self.part_related_by(RT.OFFICE_DOCUMENT, DocumentPart)

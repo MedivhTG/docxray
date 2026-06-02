@@ -3,9 +3,9 @@ from __future__ import annotations
 from enum import IntEnum, IntFlag
 from typing import Literal, Self
 
-# docxray stuff
-from docxray.oxml.trans.st.enums import SE_Border
+from .st.enums import SE_Border
 
+# CNF name representation for `w:tblStylPr tag
 type CnfName = Literal[
     "firstRow",
     "lastRow",

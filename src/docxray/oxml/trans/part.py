@@ -11,6 +11,8 @@ from .xmlchemy import OxmlElement
 
 
 class TransitionalPart(XmlPart[TransitionalPackage], Generic[ELM_T]):
+    """Main part class for transitional (foollowed by ECMA-376, Part 1 and 4) parts in MS Word."""
+
     def __init__(
         self,
         partname: PackURI,
