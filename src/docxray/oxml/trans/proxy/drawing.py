@@ -5,10 +5,10 @@ from typing import cast
 
 # docxray stuff
 from docxray.oxml.trans.drawing import CT_Drawing, CT_PositiveSize2D
+from docxray.oxml.trans.parts.image import ImagePart
 
 # from docxray.oxml.trans.image.image import Image
-from docxray.oxml.trans.image.picture import Picture
-from docxray.oxml.trans.parts.image import ImagePart
+from docxray.oxml.trans.proxy.image.picture import Picture
 from docxray.oxml.trans.proxy.shared import ElementProxy, Emu, Length
 
 

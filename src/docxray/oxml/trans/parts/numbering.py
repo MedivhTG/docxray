@@ -15,6 +15,7 @@ class NumberingPart(TransitionalPart[CT_Numbering]):
 
     @cached_property
     def numbering(self) -> Numbering:
+        """`Numbering` instance with list properties."""
         return Numbering(self.element, self)
 
     @cached_property

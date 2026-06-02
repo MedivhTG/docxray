@@ -18,8 +18,6 @@ if TYPE_CHECKING:
 
 
 class CT_Tc(OxmlElement):
-    # -- Сhoice for EG_BlockLevelElts
-
     @cached_property
     def inner_content_elements(self) -> list[CT_P | CT_Tbl]:
         return self.xpath("w:p | w:tbl")
@@ -27,8 +25,6 @@ class CT_Tc(OxmlElement):
     @cached_property
     def altChunk_lst(self) -> list[CT_AltChunk]:
         return self.child_zero_or_more(W.ALT_CHUNK, CT_AltChunk)
-
-    # -- EndChoice for EG_BlockLevelElts
 
     @cached_property
     def tcPr(self) -> CT_TcPr | None:

@@ -6,8 +6,9 @@ from docxray.oxml.trans.shared import CT_Cnf, CT_String, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_HEIGHT_RULE
 from docxray.oxml.trans.st.shared_common import ST_TwipsMeasure
 from docxray.oxml.trans.st.wml import ST_HeightRule
-from docxray.oxml.trans.table.table_props import CT_TblBorders, CT_TblLook
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .table_props import CT_TblBorders, CT_TblLook
 
 
 class CT_Height(OxmlElement):

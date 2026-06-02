@@ -23,6 +23,7 @@ class StylesPart(TransitionalPart[CT_Styles]):
 
     @cached_property
     def numbering(self) -> Numbering | None:
+        """`Numbering` instance with list properties, `None` if no such part."""
         package = self.package
         assert package is not None
         return package.main_document_part.numbering

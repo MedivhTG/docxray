@@ -22,9 +22,7 @@ class StoryPart(TransitionalPart[ELM_T]):
     """Base class for story parts.
 
     A story part is one that can contain textual content, such as the document-part and
-    header or footer parts. These all share content behaviors like `.paragraphs`,
-    `.add_paragraph()`, `.add_table()` etc.
-    """
+    header or footer parts."""
 
     def get_style(
         self,

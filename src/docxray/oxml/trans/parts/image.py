@@ -4,7 +4,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.opc.part import Part
-from docxray.oxml.trans.image.picture import Picture
+from docxray.oxml.trans.proxy.image.picture import Picture
 
 
 class ImagePart(Part):

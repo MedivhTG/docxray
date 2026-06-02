@@ -19,13 +19,7 @@ from docxray.transform.ruleset import RuleSet
 
 
 class DocumentPart(StoryPart[CT_Document]):
-    """Main document part of a WordprocessingML (WML) package, aka a .docx file.
-
-    Acts as broker to other parts such as image, core properties, and style parts. It
-    also acts as a convenient delegate when a mid-document object needs a service
-    involving a remote ancestor. The `Parented.part` property inherited by many content
-    objects provides access to this part object for that purpose.
-    """
+    """Main document part of a WordprocessingML (WML) package, aka a .docx file."""
 
     @cached_property
     def document(self) -> Document:
@@ -42,32 +36,32 @@ class DocumentPart(StoryPart[CT_Document]):
 
     @cached_property
     def numbering(self) -> Numbering | None:
+        """`Numbering` instance with list properties, `None` if no such part."""
         if self.numbering_part is None:
             return None
         return self.numbering_part.numbering
 
     @cached_property
     def styles_part(self) -> StylesPart:
-        """Instance of |StylesPart| for this document.
-
-        Creates an empty styles part if one is not present.
-        """
+        """Instance of |StylesPart| for this document."""
         return self.part_related_by(RT.STYLES, StylesPart)
 
     @cached_property
     def styles(self) -> Styles:
-        """A |Styles| object providing access to the styles in the styles part of this
-        document."""
+        """A |Styles| object providing access to the styles in the styles part of this document."""
         return self.styles_part.styles
 
     @cached_property
     def settings_part(self) -> SettingsPart:
+        """Instance of |SettingsPart| for this document."""
         return self.part_related_by(RT.SETTINGS, SettingsPart)
 
     @cached_property
     def settings(self) -> Settings:
+        """A |Settings| object providing access to the settings in the settings part of this document."""
         return self.settings_part.settings
 
     @cached_property
     def _default_html_ruleset(self) -> RuleSet:
+        """Default `RuleSet` instance with transform rules."""
         return RuleSet.html_default()
