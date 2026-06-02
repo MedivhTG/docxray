@@ -316,7 +316,7 @@ class How2Display(Generic[PROXY_T]):
     ) -> Any:
         """Main method for getting property values from style hierarchy.
 
-        Common order (from ECMA-376, Part 1 spec):
+        Common order (from spec ECMA-376, Part 1, 17.7.2 Style Hierarchy):
         1) First, the document defaults are applied to all runs and paragraphs in the document.
         2) Next, the table style properties are applied to each table in the document, following the conditional
         formatting inclusions and exclusions specified per table.
