@@ -1,3 +1,5 @@
+"""Enumrations for lxml (XML)."""
+
 from enum import IntEnum
 
 

@@ -1,4 +1,9 @@
+"""Module for getting BCP47 (Best Current Practice 47, RFC5646/4676) language tag
+in format like: `Cyrl` (Cyrillic-based chars), Latn (Latin-based chars), etc for locales like `en-US`.
+"""
+
 import csv
+from functools import lru_cache
 from pathlib import Path
 
 _DIR_ = Path(__file__).parent
@@ -21,7 +26,22 @@ with open(_ICIDS_PATH_, "r", encoding="utf-8") as f:
         )
 
 
+@lru_cache
 def script(locale: str) -> str:
+    """Get language tag for `locale`.
+
+    Examples:
+        For `en-US` it will return `Latn`.
+
+    Args:
+        locale (str): Locale with dash-format `en-US` or single lang tag `ru`.
+
+    Raises:
+        ValueError: Wrong locale format OR script not found.
+
+    Returns:
+        str: Language tag like `Latn`.
+    """
     locale_split = locale.split("-")
     if len(locale_split) == 2:
         key = tuple(locale_split)

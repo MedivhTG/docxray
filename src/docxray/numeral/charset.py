@@ -1,11 +1,23 @@
+"""Module for containing charsets (Unicode list strings)
+and mappings to them.
+"""
+
 from enum import StrEnum
 
 
 def charset(start: int, end: int) -> list[str]:
+    """Get character unicode string range list.
+
+    Args:
+        start (int): Unicode ordinal start (inclusive).
+        end (int): Unicode ordinal end (inclusive).
+
+    Returns:
+        list[str]: Unicode string list.
+    """
     return [chr(code) for code in range(start, end + 1)]
 
 
-# We do not need it in Numeral class, but for compatibility
 DECIMAL = charset(0x0030, 0x0039)
 UPPER_ROMAN = [
     chr(0x0049),
@@ -25,10 +37,9 @@ LOWER_ROMAN = [
     chr(0x0064),
     chr(0x006D),
 ]
-# Only latin
+# Latin-based
 UPPER_LETTER = charset(0x0041, 0x005A)
 LOWER_LETTER = charset(0x0061, 0x007A)
-
 CHICAGO = [chr(0x002A), chr(0x2020), chr(0x2021), chr(0x00A7)]
 IDEOGRAPH_DIGITAL = [
     chr(0x3007),
@@ -112,7 +123,6 @@ JAPANESE_DIGITAL_TEN_THOUSAND = [
     chr(0x4E5D),
 ]
 DECIMAL_ENCLOSED_CIRCLE = charset(0x2460, 0x2473)
-# TODO: no spec for this..
 DECIMAL_FULL_WIDTH_2 = DECIMAL_FULL_WIDTH
 AIUEO_FULL_WIDTH = [
     chr(0x30A2),
@@ -214,7 +224,7 @@ IROHA_FULL_WIDTH = [
     chr(0x30B9),
     chr(0x30F3),
 ]
-# Think that's enough but if need - extend it
+# Extend if need
 DINGBAT_MAPPINGS = {
     "Symbol": {
         0xB7: 0x2022,  # • BULLET

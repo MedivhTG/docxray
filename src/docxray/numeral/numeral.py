@@ -1,3 +1,8 @@
+"""Module for getting character string by ordinal number for MS Word.
+
+Primary use is for lists, such as paragraphs with numbering format.
+"""
+
 import unicodedata
 from functools import lru_cache
 from typing import Literal
@@ -14,46 +19,61 @@ class Numeral:
     """Class for translating ordinal position (int) to symbol from
     chosen word chracter set.
 
-    `NOTE`:
+    **Common use:**
+    ```python
+        letter = Numeral.upper_letter(1)
+        print(letter) # will print `A`
+        ordinal = Numeral.ordinal(1, "en-US")
+        print(ordinal) # will print `1st`
+    ```
+
+    **NOTE**:
         1) Some character sets are not fully supported or implemented for a while.
-        2) Caution with bullet (it's default display)
-        3) Some methods like `ordinal` can return fallback decimals or other if not
+        2) Some methods like `ordinal` can return fallback decimals or other if not
         in site-package tables (third-party libraries).
     """
 
     @classmethod
     def decimal(cls, ord: int) -> str:
+        """Get ordinal number (1, 2, 3, ...)."""
         cls._ord_validate(ord)
         return str(ord)
 
     @classmethod
     def upper_roman(cls, ord: int) -> str:
+        """Get ordinal number in roman format in uppercase (I, V, X, ...)."""
         return cls._roman(ord, CharsetName.UPPER_ROMAN)
 
     @classmethod
     def lower_roman(cls, ord: int) -> str:
+        """Get ordinal number in roman format in lowercase (i, v, x, ...)."""
         return cls._roman(ord, CharsetName.LOWER_ROMAN)
 
     @classmethod
-    def upper_letter(cls, ord: int) -> str:
-        return cls._letter(ord, CharsetName.UPPER_LETTER)
+    def upper_letter(cls, ord: int, locale: str = "en-US") -> str:
+        """Get ordinal letter for chosen `locale` in uppercase (for `en-US`: A, B, C, ...)."""
+        return cls._letter(ord, CharsetName.UPPER_LETTER, locale)
 
     @classmethod
-    def lower_letter(cls, ord: int) -> str:
-        return cls._letter(ord, CharsetName.LOWER_LETTER)
+    def lower_letter(cls, ord: int, locale: str = "en-US") -> str:
+        """Get ordinal letter for chosen `locale` in lowercase (for `en-US`: a, b, c, ...)."""
+        return cls._letter(ord, CharsetName.LOWER_LETTER, locale)
 
+    # TODO: not all ordinals supported
     @classmethod
     def ordinal(cls, ord: int, locale: str = "en-US") -> str:
+        """Get ordinal word number for chosen `locale` (for `en-US`: 1st, 2nd, 3rd, ...)."""
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
-        # num2word do not support russian ordinal numerals
-        if code == "ru":
-            return f"{ord}-й"
+        word = Num2Word.ordinal_num(ord, code)
+        if word is not None:
+            return word
         # Stringify for safety
         return str(num2words.num2words(ord, lang=code, to="ordinal_num"))
 
     @classmethod
     def cardinal_text(cls, ord: int, locale: str = "en-US") -> str:
+        """Get ordinal word as cardinal for chosen `locale` (for `en-US`: One, Two, Three, ...)."""
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
         # Stringify for safety
@@ -61,6 +81,7 @@ class Numeral:
 
     @classmethod
     def ordinal_text(cls, ord: int, locale: str = "en-US") -> str:
+        """Get ordinal word as ordinal text for chosen `locale` (for `en-US`: first, second, third, ...)."""
         cls._ord_validate(ord)
         code, _ = cls._locale_split(locale)
         # Stringify for safety
@@ -68,15 +89,18 @@ class Numeral:
 
     @classmethod
     def hex(cls, ord: int) -> str:
+        """Get ordinal number in hexadecimal format (9, A, B, ...)."""
         cls._ord_validate(ord)
         return format(ord, "X")
 
     @classmethod
     def chicago(cls, ord: int) -> str:
+        """Get ordinal repeated character sequence (*, †, ‡, §, **, ††, ...)."""
         return cls._repeated(ord, CharsetName.CHICAGO)
 
     @classmethod
     def ideograph_digital(cls, ord: int) -> str:
+        """Get ordinal decimal number in asian languages (一, 二, 三, ..., 八, 九, 一〇)."""
         return cls._digital(ord, CharsetName.IDEOGRAPH_DIGITAL)
 
     # TODO: realize
@@ -86,18 +110,22 @@ class Numeral:
 
     @classmethod
     def aiueo(cls, ord: int) -> str:
+        """Get ordinal repeated character sequence in order hallf-width katakana (ｱ, ｲ, ｳ, ..., ｦ, ﾝ, ｱｱ, ｲｲ, ｳｳ, ...)."""
         return cls._repeated(ord, CharsetName.AIUEO)
 
     @classmethod
     def iroha(cls, ord: int) -> str:
+        """Get ordinal cyclic repeated character sequence in iroha ordered katakana (ｲ, ﾛ, ﾊ, ..., ｽ, ﾝ, ｲ, ﾛ, ﾊ, ...)."""
         return cls._cyclic(ord, CharsetName.IROHA)
 
     @classmethod
     def decimal_full_width(cls, ord: int) -> str:
+        """Get ordinal number as character sequence of full width arabic numeral (１, ２, ３, ..., ８, ９, １０, １１, １２, ...)."""
         return cls._decimal_full_width(ord, CharsetName.DECIMAL_FULL_WIDTH)
 
     @classmethod
     def decimal_half_width(cls, ord: int) -> str:
+        """Get ordinal number like `decimal` (1, 2, 3, ...)."""
         return cls.decimal(ord)
 
     # TODO: realize
@@ -107,26 +135,52 @@ class Numeral:
 
     @classmethod
     def japanese_digital_ten_thousand(cls, ord: int) -> str:
+        """Get ordinal decimal number in japanese digital ten thousand counting system (一, 二, 三, ..., 八, 九, 一〇, 一一, 一二, ...)."""
         return cls._digital(ord, CharsetName.JAPANESE_DIGITAL_TEN_THOUSAND)
 
     @classmethod
     def decimal_enclosed_circle(cls, ord: int) -> str:
+        """Get ordinal decimal number in circled character sequence with fallback to decimal characters (①, ②, ③, ..., ⑲, ⑳, 21, ...)."""
         return cls._decimal_fallback(ord, CharsetName.DECIMAL_ENCLOSED_CIRCLE)
 
     @classmethod
     def decimal_full_width_2(cls, ord: int) -> str:
+        """Get ordinal number as character sequence of full width arabic numeral (１, ２, ３, ..., ８, ９, １０, １１, １２, ...)."""
         return cls._decimal_full_width(ord, CharsetName.DECIMAL_FULL_WIDTH_2)
 
     @classmethod
     def aiueo_full_width(cls, ord: int) -> str:
+        """Get ordinal repeated character sequence in order full-width katakana (ア, イ, ウ, ..., ヲ, ン, アア, イイ, ウウ, ...)."""
         return cls._repeated(ord, CharsetName.AIUEO_FULL_WIDTH)
 
     @classmethod
     def iroha_full_width(cls, ord: int) -> str:
+        """Get ordinal cyclic repeated character sequence for full-width iroha ordered katakana (イ, ロ, ハ, ..., ス, ン, イ, ロ, ハ, ...)."""
         return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
 
     @classmethod
     def bullet(cls, char: str, font: str) -> str:
+        """Get an bullet character from dingbat mapping for chosen char (in PUA or not) and font.
+
+        **Example:**
+        ```python
+            bullet = Numeral.bullet(_here_pua_char_, "Symbol")
+            print(bullet) # will print `•`
+        ```
+
+        **NOTE**:
+        Not all characters/charsets supported.
+
+        Args:
+            char (str): Character in PUA (or not).
+            font (str): Selected font to getting alt_code if in PUA.
+
+        Raises:
+            ValueError: Provided only single character for `char`.
+
+        Returns:
+            str: Visible unicode chracter.
+        """
         if not isinstance(char, str) and len(char) != 1:
             raise ValueError("There's must be single char")
         if not cls._in_private_use_char(char):
@@ -352,7 +406,7 @@ class Numeral:
     def _letter(
         cls,
         ord: int,
-        letter_name: Literal[
+        letter_case: Literal[
             CharsetName.UPPER_LETTER, CharsetName.LOWER_LETTER
         ],
         locale: str = "en-US",
@@ -360,11 +414,11 @@ class Numeral:
         if cls._is_latin_based(locale):
             cls._ord_validate(ord)
             case = (
-                "upper" if letter_name == CharsetName.UPPER_LETTER else "lower"
+                "upper" if letter_case == CharsetName.UPPER_LETTER else "lower"
             )
             charset = cls._alphabet(locale, case)
         else:
-            charset = cls._charset(ord, letter_name)
+            charset = cls._charset(ord, letter_case)
         return cls._repeated_compute(ord, charset)
 
     @classmethod
@@ -522,3 +576,11 @@ class Numeral:
     @lru_cache
     def _is_latin_based(cls, locale: str = "en-US") -> bool:
         return script(locale) == "Latn"
+
+
+class Num2Word:
+    @classmethod
+    def ordinal_num(cls, ord: int, code: str) -> str | None:
+        if code == "ru":
+            return f"{ord}-й"
+        return None
