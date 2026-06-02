@@ -26,9 +26,10 @@ from docxray.oxml.trans.st.wml import (
     ST_SignedTwipsMeasure,
     ST_TextAlignment,
 )
-from docxray.oxml.trans.text.num_props import CT_NumPr
-from docxray.oxml.trans.text.run_props import CT_RPr
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .num_props import CT_NumPr
+from .run_props import CT_RPr
 
 
 class CT_PBdr(OxmlElement):

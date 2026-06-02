@@ -2,8 +2,9 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.ns import W
-from docxray.oxml.trans.text.run import CT_R
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .run import CT_R
 
 
 class CT_Hyperlink(OxmlElement):

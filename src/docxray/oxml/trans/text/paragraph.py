@@ -5,10 +5,11 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.wml import ST_LongHexNumber
-from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
-from docxray.oxml.trans.text.paragraph_props import CT_PPr
-from docxray.oxml.trans.text.run import CT_R
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .hyperlink import CT_Hyperlink
+from .paragraph_props import CT_PPr
+from .run import CT_R
 
 
 class CT_Rel(OxmlElement):

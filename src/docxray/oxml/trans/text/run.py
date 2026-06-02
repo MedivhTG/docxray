@@ -9,8 +9,9 @@ from docxray.oxml.trans.shared import CT_Empty
 from docxray.oxml.trans.st.enums import SE_BR_CLEAR, SE_BR_TYPE
 from docxray.oxml.trans.st.shared_common import ST_String
 from docxray.oxml.trans.st.wml import ST_BrClear, ST_BrType, ST_ShortHexNumber
-from docxray.oxml.trans.text.run_props import CT_RPr
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+from .run_props import CT_RPr
 
 
 class CT_RunTrackChange(OxmlElement):
