@@ -111,7 +111,6 @@ class How2Display(Generic[PROXY_T]):
         tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
         path: PropertyPath,
         optional: bool = False,
-        first_iteration_only: bool = False,
     ) -> tuple[Any, TableStyle | CT_TblStylePr | None]:
         style_direct_val = NotFound(self, path)
         found_in_style = None
@@ -122,12 +121,10 @@ class How2Display(Generic[PROXY_T]):
                 )
                 found_in_style = tbl_style
             tbl_val, tbl_style_prop = self._from_tbl_style_props(
-                tbl_style_props, path, optional, first_iteration_only
+                tbl_style_props, path, optional
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
-            if first_iteration_only:
-                break
         return style_direct_val, found_in_style
 
     def _from_tbl_style_props(
@@ -135,13 +132,10 @@ class How2Display(Generic[PROXY_T]):
         table_style_props: list[CT_TblStylePr],
         path: PropertyPath,
         optional: bool = False,
-        first_iteration_only: bool = False,
     ) -> tuple[Any, CT_TblStylePr | None]:
         for tbl_style_prop in table_style_props:
             table_val = safe_get_prop(tbl_style_prop, path, optional)
             if isinstance(table_val, NotFound):
-                if first_iteration_only:
-                    break
                 continue
             return table_val, tbl_style_prop
         return NotFound(table_style_props, path), None

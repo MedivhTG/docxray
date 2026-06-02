@@ -597,14 +597,14 @@ class CellH2D(How2Display[Cell]):
     @cached_property
     def _row_band_number(self) -> int:
         cell = self._proxy
-        band_shift = 1 if self.row.h2d._shift_row_band else 0
-        y_shift = cell.grid_y + band_shift
+        band_shift = 1 if cell.row.h2d._shift_horz_bands else 0
+        y_shift = cell.grid_y + 1 + band_shift
         return y_shift // cell.table.h2d.row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
         cell = self._proxy
-        band_shift = 1 if self.row.h2d._shift_col_band else 0
+        band_shift = 1 if cell.row.h2d._shift_vert_bands else 0
         x_shift = cell.idx + 1 + band_shift
         return x_shift // cell.table.h2d.col_band_size
 
@@ -612,7 +612,9 @@ class CellH2D(How2Display[Cell]):
     def _cnf_latent(self) -> WD_CNF_FORMAT:
         _CNF = WD_CNF_FORMAT
         cell = self._proxy
+        row_h2d = cell.row.h2d
         cnf = _CNF(0)
+        # Special rows/columns
         if cell.grid_y == 0:
             cnf |= _CNF.FIRST_ROW
         if cell.cell_below is None:
@@ -621,22 +623,36 @@ class CellH2D(How2Display[Cell]):
             cnf |= _CNF.FIRST_COLUMN
         if cell.cell_next is None:
             cnf |= _CNF.LAST_COLUMN
-        if self._col_band_number % 2 == 0:
-            cnf |= _CNF.EVEN_VERTICAL_BAND
-        else:
-            cnf |= _CNF.ODD_VERTICAL_BAND
-        if self._row_band_number % 2 == 0:
-            cnf |= _CNF.EVEN_HORIZONTAL_BAND
-        else:
-            cnf |= _CNF.ODD_HORIZONTAL_BAND
-        if cnf & (_CNF.FIRST_ROW | _CNF.LAST_COLUMN):
+        # Corner group
+        if cell.grid_y == 0 and cell.grid_x == 0:
             cnf |= _CNF.FIRST_ROW_LAST_COLUMN
-        if cnf & (_CNF.FIRST_ROW | _CNF.FIRST_COLUMN):
-            cnf |= _CNF.FIRST_ROW_FIRST_COLUMN
-        if cnf & (_CNF.LAST_ROW | _CNF.LAST_COLUMN):
-            cnf |= _CNF.LAST_ROW_LAST_COLUMN
-        if cnf & (_CNF.LAST_ROW | _CNF.FIRST_COLUMN):
+        if cell.grid_y == 0 and cell.cell_next is None:
+            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
+        if cell.cell_below is None and cell.grid_x == 0:
             cnf |= _CNF.LAST_ROW_FIRST_COLUMN
+        if cell.cell_below is None and cell.cell_next is None:
+            cnf |= _CNF.LAST_ROW_LAST_COLUMN
+        # Horizontal/Vertical Bands
+        has_vert_band_shift_group = (
+            _CNF.FIRST_COLUMN & cnf
+            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
+            or _CNF.LAST_ROW_FIRST_COLUMN & cnf
+        )
+        if not (row_h2d._shift_vert_bands and has_vert_band_shift_group):
+            if self._col_band_number % 2 == 0:
+                cnf |= _CNF.EVEN_VERTICAL_BAND
+            else:
+                cnf |= _CNF.ODD_VERTICAL_BAND
+        has_horz_band_shift_group = (
+            _CNF.FIRST_ROW & cnf
+            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
+            or _CNF.FIRST_ROW_LAST_COLUMN & cnf
+        )
+        if not (row_h2d._shift_vert_bands and has_horz_band_shift_group):
+            if self._row_band_number % 2 == 0:
+                cnf |= _CNF.EVEN_HORIZONTAL_BAND
+            else:
+                cnf |= _CNF.ODD_HORIZONTAL_BAND
         return cnf
 
     @cached_property

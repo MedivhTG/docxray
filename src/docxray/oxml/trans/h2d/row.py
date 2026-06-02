@@ -23,6 +23,17 @@ from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.row_props import CT_TblPrEx
 from docxray.oxml.trans.table.table_props import CT_TblBorders
 
+SHIFT_HORZ_BANDS = {
+    SE_TblStyleOverrideType.HEADER_ROW,
+    SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL,
+    SE_TblStyleOverrideType.TOP_RIGHT_CORNER_CELL,
+}
+SHIFT_VERT_BANDS = {
+    SE_TblStyleOverrideType.FIRST_COLUMN,
+    SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL,
+    SE_TblStyleOverrideType.BOTTOM_LEFT_CORNER_CELL,
+}
+
 
 class RowH2D(How2Display[Row]):
     @cached_property
@@ -85,16 +96,16 @@ class RowH2D(How2Display[Row]):
         return self._table_style_props(self._table_style, WD_CNF_FORMAT(0xFFF))
 
     @cached_property
-    def _shift_row_band(self) -> bool:
+    def _shift_horz_bands(self) -> bool:
         for prop in self._latent_tbl_style_props:
-            if prop.type == SE_TblStyleOverrideType.HEADER_ROW:
+            if prop.type in SHIFT_HORZ_BANDS:
                 return True
         return False
 
     @cached_property
-    def _shift_col_band(self) -> bool:
+    def _shift_vert_bands(self) -> bool:
         for prop in self._latent_tbl_style_props:
-            if prop.type == SE_TblStyleOverrideType.FIRST_COLUMN:
+            if prop.type in SHIFT_VERT_BANDS:
                 return True
         return False
 
