@@ -1,3 +1,5 @@
+"""Standard types provided for project"""
+
 from pathlib import Path
 from typing import BinaryIO
 

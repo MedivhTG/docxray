@@ -1,24 +1,23 @@
-"""Directly exposed API functions and classes, :func:`Document` for now.
+"""Main class for loading DOCX (Word documents)."""
 
-Provides a syntactically more convenient API for interacting with the OpcPackage graph.
-"""
-
-from __future__ import annotations
-
-# docxray stuff
-from docxray.opc.constants import CONTENT_TYPE as CT
-from docxray.oxml import TransitionalPartFactory
-from docxray.oxml.trans.package import TransitionalPackage
-from docxray.oxml.trans.proxy.document import Document as DocumentObject
-from docxray.types import PkgFile
+from .opc.constants import CONTENT_TYPE as CT
+from .oxml import TransitionalPartFactory
+from .oxml.trans.package import TransitionalPackage
+from .oxml.trans.proxy.document import Document as DocumentObject
+from .types import PkgFile
 
 
 def Document(docx: PkgFile) -> DocumentObject:
-    """Return a |Document| object loaded from `docx`, where `docx` can be either a path
-    to a ``.docx`` file (a string) or a file-like object.
+    """Load Word document of an `.docx` format (OOXML) only for reading.
 
-    If `docx` is missing or ``None``, the built-in default document "template" is
-    loaded.
+    Args:
+        docx (PkgFile): String path or `Path` instance or byte stream.
+
+    Raises:
+        ValueError: If cannot get document part or parse file.
+
+    Returns:
+        DocumentObject: `Document` instance.
     """
     document_part = TransitionalPackage.open(
         docx, TransitionalPartFactory

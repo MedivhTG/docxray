@@ -2,7 +2,6 @@ import re
 from typing import cast
 
 # docxray stuff
-from docxray.constants import PCT_TO_PERCENT_RATIO
 from docxray.oxml.trans.shared import CT_OnOff, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_OnOff1, SE_TblWidth
 from docxray.oxml.trans.st.shared_common import (
@@ -12,6 +11,8 @@ from docxray.oxml.trans.st.shared_common import (
 from docxray.xsd.facets import PatternFacet
 
 from .shared import Cm, Inches, Length, Mm, NotFound, Pica, Pt, Twips
+
+PCT_TO_PERCENT_RATIO = 50
 
 
 def normalize_pct(pct: float) -> float:

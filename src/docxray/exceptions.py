@@ -1,16 +1,8 @@
-"""Exceptions used with python-docx.
-
-The base exception class is PythonDocxError.
-"""
+"""Module with exception used in `docxray`."""
 
 
 class DocxrayError(Exception):
     """Generic error class."""
-
-
-class InvalidSpanError(DocxrayError):
-    """Raised when an invalid merge region is specified in a request to merge table
-    cells."""
 
 
 class InvalidXmlError(DocxrayError):

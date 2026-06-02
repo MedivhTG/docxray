@@ -1,3 +1,5 @@
+"""Standard functionality provided for project"""
+
 from functools import lru_cache
 from locale import LC_ALL, getlocale, setlocale
 
