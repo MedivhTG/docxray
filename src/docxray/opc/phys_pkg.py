@@ -31,31 +31,20 @@ class PhysPkgReader(ABC):
 
     @abstractmethod
     def blob_for(self, pack_uri: PackURI) -> bytes:
-        """_summary_
-
-        Args:
-            pack_uri (PackURI): _description_
-
-        Returns:
-            bytes: _description_
-        """
-        ...
+        """Get raw bytes for given URI."""
 
     @abstractmethod
     def close(self) -> None:
         """Close the package reader, releasing any resources."""
-        ...
 
     @property
     @abstractmethod
     def content_types_xml(self) -> bytes:
         """Return the `[Content_Types].xml` blob from the package."""
-        ...
 
     @abstractmethod
     def rels_xml_for(self, source_uri: PackURI) -> bytes | None:
         """Return rels item XML for source with `source_uri`, or None if no rels item."""
-        ...
 
 
 class _DirPkgReader(PhysPkgReader):

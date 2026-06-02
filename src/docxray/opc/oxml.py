@@ -1,10 +1,3 @@
-"""Temporary stand-in for main oxml module.
-
-This module came across with the PackageReader transplant. Probably much will get
-replaced with objects from the pptx.oxml.transitional.core and then this module will either get
-deleted or only hold the package related custom element classes.
-"""
-
 from __future__ import annotations
 
 from typing import TypeVar
@@ -13,9 +6,10 @@ from lxml import etree
 
 # docxray stuff
 from docxray.lxml import BaseOxmlElement, elm_ns_cls_lookup
-from docxray.opc.constants import RELATIONSHIP_TARGET_MODE as RTM
-from docxray.opc.exceptions import OpcError
-from docxray.opc.ns import CT, PR, nsmap
+
+from .constants import RELATIONSHIP_TARGET_MODE as RTM
+from .exceptions import OpcError
+from .ns import CT, PR, nsmap
 
 # configure XML parser
 lookup = etree.ElementNamespaceClassLookup()
@@ -25,6 +19,7 @@ parser.set_element_class_lookup(lookup)
 
 class OpcOxmlElement(BaseOxmlElement):
     def get_one(self, tag: str) -> str:
+        """Get attribute from self element."""
         attr = self.get(tag)
         if attr is None:
             msg = f"Cannot get '{tag}' from {self}"

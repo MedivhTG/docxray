@@ -1,11 +1,8 @@
-"""Exceptions specific to python-opc.
-
-The base exception class is OpcError.
-"""
+"""Exceptions specific for OPC module."""
 
 
 class OpcError(Exception):
-    """Base error class for python-opc."""
+    """Base error class OPC module."""
 
 
 class PackageNotFoundError(OpcError):
