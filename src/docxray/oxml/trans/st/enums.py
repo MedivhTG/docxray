@@ -457,3 +457,8 @@ class SE_JC_TABLE(StrEnum):
     LEFT = "left"
     RIGHT = "right"
     START = "start"
+
+
+class SE_TBL_LAYOUT_TYPE(StrEnum):
+    FIXED = "fixed"
+    AUTOFIT = "autofit"

@@ -9,6 +9,8 @@ from docxray.enum.lxml import POS
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.st.enums import (
     SE_HEIGHT_RULE,
+    SE_JC_TABLE,
+    SE_TBL_LAYOUT_TYPE,
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
     SE_Merge,
@@ -382,6 +384,18 @@ class Table(StoryChild[CT_Tbl]):
     @cached_property
     def left_indent(self) -> Length | float | None:
         return self.h2d.left_indent
+
+    @cached_property
+    def alignment(self) -> SE_JC_TABLE:
+        return self.h2d.alignment
+
+    @cached_property
+    def width(self) -> Length | float | None:
+        return self.h2d.width
+
+    @cached_property
+    def layout(self) -> SE_TBL_LAYOUT_TYPE:
+        return self.h2d.table_layout
 
     @cached_property
     def rows(self) -> list[Row]:

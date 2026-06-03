@@ -18,8 +18,10 @@ from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,
     SE_JC,
+    SE_JC_TABLE,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
+    SE_TBL_LAYOUT_TYPE,
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
@@ -107,10 +109,8 @@ def vert_align_elm(value: SE_VerticalAlignRun) -> HtmlElement:
     return Element("sub")
 
 
-def units(length: Length | float | None) -> str:
-    if length is None:
-        return ""
-    elif isinstance(length, Length):
+def pt(length: Length | float) -> str:
+    if isinstance(length, Length):
         return f"{length.pt}pt"
     else:
         return f"{length}%"
@@ -482,7 +482,7 @@ class HtmlTable(HtmlBuilder["Table"]):
     def _cell_attrs(cls, proxy: Cell) -> dict[str, str]:
         attrs: dict[str, str] = {}
         if proxy.width is not None:
-            attrs["width"] = units(proxy.width)
+            attrs["width"] = pt(proxy.width)
         if proxy.vert_span and proxy.vert_span > 1:
             attrs["rowspan"] = str(proxy.vert_span)
         if proxy.horz_span > 1:
@@ -535,12 +535,14 @@ class HtmlTable(HtmlBuilder["Table"]):
         for side in sides:
             padding_side = info[side]  # type: ignore[literal-required]
             if padding_side is not None:
-                padding += f"padding-{side}: {units(padding_side)}; "
+                padding += f"padding-{side}: {pt(padding_side)}; "
         return padding
 
     @classmethod
     def _table_attrs(cls, proxy: Table) -> dict[str, str]:
         attrs = {}
+        if proxy.width is not None:
+            attrs["width"] = pt(proxy.width)
         style = cls._table_style(proxy)
         if style:
             attrs["style"] = style
@@ -553,10 +555,24 @@ class HtmlTable(HtmlBuilder["Table"]):
             style += "border-collapse: collapse; "
         else:
             spacing = proxy.spacing_first
-            style += f"border-spacing: {units(spacing)}; "
+            style += f"border-spacing: {pt(spacing)}; "
         if proxy.left_indent:
-            style += f"margin-inline-start: {units(proxy.left_indent)}; "
+            style += f"margin-inline-start: {pt(proxy.left_indent)}; "
+        if proxy.layout == SE_TBL_LAYOUT_TYPE.FIXED:
+            style += "table-layout: fixed; "
+        style += cls._table_alignment(proxy)
         return style
+
+    @classmethod
+    def _table_alignment(cls, proxy: Table) -> str:
+        align = ""
+        if proxy.alignment in {SE_JC_TABLE.LEFT, SE_JC_TABLE.START}:
+            align += "margin-right: auto; "
+        elif proxy.alignment in {SE_JC_TABLE.START, SE_JC_TABLE.END}:
+            align += "margin-left: auto; "
+        else:
+            align += "margin-left: auto; margin-right: auto;"
+        return align
 
 
 class _RunsHtmlBuilder:

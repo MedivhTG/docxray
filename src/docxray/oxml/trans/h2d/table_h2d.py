@@ -12,7 +12,11 @@ from docxray.oxml.trans.proxy.styles.style import (
     TableStyle,
 )
 from docxray.oxml.trans.proxy.table import Table
-from docxray.oxml.trans.st.enums import SE_StyleType
+from docxray.oxml.trans.st.enums import (
+    SE_JC_TABLE,
+    SE_TBL_LAYOUT_TYPE,
+    SE_StyleType,
+)
 
 from .how2display import How2Display
 
@@ -20,10 +24,32 @@ from .how2display import How2Display
 class TableH2D(How2Display[Table]):
     @cached_property
     def left_indent(self) -> Length | float | None:
-        tblInd_elm = self._prop("tblInd")
+        tblInd_elm = self._prop("tblInd", algorithm="both")
         if isinstance(tblInd_elm, NotFound):
             return None
         return width(tblInd_elm)
+
+    @cached_property
+    def alignment(self) -> SE_JC_TABLE:
+        align = self._prop_val("jc", algorithm="both")
+        if isinstance(align, NotFound):
+            return SE_JC_TABLE.LEFT
+        return align
+
+    @cached_property
+    def width(self) -> Length | float | None:
+        tblW_elm = self._prop("tblW")
+        if isinstance(tblW_elm, NotFound):
+            return None
+        return width(tblW_elm)
+
+    @cached_property
+    def table_layout(self) -> SE_TBL_LAYOUT_TYPE:
+        path = self._prop_path("type", f"{self._path_base}.tblLayout")
+        layout = self._prop(path)
+        if isinstance(layout, NotFound):
+            return SE_TBL_LAYOUT_TYPE.AUTOFIT
+        return layout
 
     @cached_property
     def _table_style(self) -> TableStyle | None:

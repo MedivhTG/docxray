@@ -28,6 +28,7 @@ from .enums import (
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_NUMBER_FORMAT,
+    SE_TBL_LAYOUT_TYPE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_THEME,
@@ -220,3 +221,8 @@ class ST_HpsMeasure(XsdSimpleType):
 class ST_JcTable(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_JC_TABLE)}
+
+
+class ST_TblLayoutType(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TBL_LAYOUT_TYPE)}

@@ -10,9 +10,13 @@ from docxray.oxml.trans.shared import (
     CT_String,
     CT_TblWidth,
 )
-from docxray.oxml.trans.st.enums import SE_JC_TABLE
+from docxray.oxml.trans.st.enums import SE_JC_TABLE, SE_TBL_LAYOUT_TYPE
 from docxray.oxml.trans.st.shared_common import ST_OnOff
-from docxray.oxml.trans.st.wml import ST_JcTable, ST_ShortHexNumber
+from docxray.oxml.trans.st.wml import (
+    ST_JcTable,
+    ST_ShortHexNumber,
+    ST_TblLayoutType,
+)
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 
@@ -23,7 +27,9 @@ class CT_JcTable(OxmlElement):
 
 
 class CT_TblLayoutType(OxmlElement):
-    pass
+    @cached_property
+    def type(self) -> SE_TBL_LAYOUT_TYPE | None:
+        return self.attr_optional(W.TYPE, ST_TblLayoutType)
 
 
 class CT_TblCellMar(OxmlElement):
