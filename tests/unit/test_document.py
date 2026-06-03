@@ -26,13 +26,13 @@ class TestDocument:
                 w = 1
         w = 1
         html = ""
+        ruleset_table_lists_transform = RuleSet.html_default()
+        ruleset_table_lists_transform.set_html_rule(
+            "Table", Rule(HtmlTable, transform_list_views=True)
+        )
         for item in doc.iter_inner_content_with_lists():
             if isinstance(item, Table):
-                ruleset = RuleSet.html_default()
-                ruleset.set_html_rule(
-                    "Table", Rule(HtmlTable, transform_list_views=True)
-                )
-                table_html = item.transform()
+                table_html = item.transform(ruleset_table_lists_transform)
                 html += table_html
                 w = 1
             elif isinstance(item, Paragraph):
