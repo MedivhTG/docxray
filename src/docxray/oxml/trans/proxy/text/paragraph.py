@@ -25,7 +25,7 @@ if TYPE_CHECKING:
         ListView,
         ListViewInterrupted,
     )
-    from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
+    from docxray.oxml.trans.h2d.paragraph_h2d import ParagraphH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
     from docxray.transform.ruleset import RuleSet
@@ -36,7 +36,7 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def h2d(self) -> ParagraphH2D:
         # docxray stuff
-        from docxray.oxml.trans.h2d.paragraph import ParagraphH2D
+        from docxray.oxml.trans.h2d.paragraph_h2d import ParagraphH2D
 
         return ParagraphH2D(self, self.part.document_part, "pPr")
 

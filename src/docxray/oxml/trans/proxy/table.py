@@ -21,9 +21,13 @@ from .shared import ElementProxy, Length, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.cell import BordersInfo, CellH2D, PaddingInfo
-    from docxray.oxml.trans.h2d.row import RowH2D
-    from docxray.oxml.trans.h2d.table import TableH2D
+    from docxray.oxml.trans.h2d.cell_h2d import (
+        BordersInfo,
+        CellH2D,
+        PaddingInfo,
+    )
+    from docxray.oxml.trans.h2d.row_h2d import RowH2D
+    from docxray.oxml.trans.h2d.table_h2d import TableH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
@@ -38,7 +42,7 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def h2d(self) -> CellH2D:
         # docxray stuff
-        from docxray.oxml.trans.h2d.cell import CellH2D
+        from docxray.oxml.trans.h2d.cell_h2d import CellH2D
 
         return CellH2D(self, self.part.document_part, "tcPr")
 
@@ -251,7 +255,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 class Row(ElementProxy[CT_Row]):
     @cached_property
     def h2d(self) -> RowH2D:
-        from ..h2d.row import RowH2D
+        from ..h2d.row_h2d import RowH2D
 
         return RowH2D(self, self.part, "trPr")  # type: ignore[arg-type]
 
@@ -349,7 +353,7 @@ class Row(ElementProxy[CT_Row]):
 class Table(StoryChild[CT_Tbl]):
     @cached_property
     def h2d(self) -> TableH2D:
-        from ..h2d.table import TableH2D
+        from ..h2d.table_h2d import TableH2D
 
         return TableH2D(self, self.part, "tblPr")  # type: ignore[arg-type]
 
