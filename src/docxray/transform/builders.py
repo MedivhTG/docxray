@@ -89,7 +89,7 @@ def b_elm(value: bool) -> HtmlElement:
 
 
 def strike_elm(value: bool) -> HtmlElement:
-    return Element("strike")
+    return Element("s")
 
 
 def underline_elm(value: SE_Underline) -> HtmlElement:

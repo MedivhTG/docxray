@@ -1,5 +1,6 @@
 """Main module for parsing/getting XML nodes from tree."""
 
+import logging
 from copy import deepcopy
 from functools import cached_property
 from typing import Any, TypeVar
@@ -137,7 +138,13 @@ class OxmlElement(BaseOxmlElement):
         child_ahead = next(iterator, None)
         if child_ahead is not None:
             msg = f"Child {elm_qn} must appear only once for {self}"
-            raise InvalidXmlError(msg)
+            logging.warning(msg)
+            while child_ahead is not None:
+                child_ahead_next = next(iterator, None)
+                if child_ahead_next is None:
+                    break
+                child_ahead = child_ahead_next
+            return child_ahead
         return child
 
     def child_zero_or_one(
@@ -162,7 +169,13 @@ class OxmlElement(BaseOxmlElement):
         child_ahead = next(iterator, None)
         if child_ahead is not None:
             msg = f"Child {elm_qn} must appear 0 or 1 time for {self}"
-            raise InvalidXmlError(msg)
+            logging.warning(msg)
+            while child_ahead is not None:
+                child_ahead_next = next(iterator, None)
+                if child_ahead_next is None:
+                    break
+                child_ahead = child_ahead_next
+            return child_ahead
         return child
 
     def child_zero_or_more(
@@ -204,10 +217,12 @@ class OxmlElement(BaseOxmlElement):
                 return children
             count += 1
             children.append(child)
+
         msg = (
             f"Children {elm_qn} iteration exceeded the maximum of {max_occurs}"
         )
-        raise InvalidXmlError(msg)
+        logging.warning(msg)
+        return children
 
     def recreate(self, cls: type[ELM_T]) -> ELM_T:
         """Get copy of current element with change cls type.
