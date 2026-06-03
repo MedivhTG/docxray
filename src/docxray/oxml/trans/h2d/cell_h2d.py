@@ -583,7 +583,7 @@ class CellH2D(How2Display[Cell]):
         self, borders_elm: CT_TcBorders | CT_TblBorders | None, border: _Border
     ) -> Border | None:
         path = self._prop_path(border)
-        prop = safe_get_prop(borders_elm, path)
+        prop = safe_get_prop(borders_elm, path, False)
         if isinstance(prop, NotFound):
             return None
         return Border(prop, self._proxy)
@@ -686,7 +686,7 @@ class CellH2D(How2Display[Cell]):
     ) -> Border | None:
         none = (None, SE_BORDER.NULL, SE_BORDER.NONE)
         if opposed_to_table:
-            if main is None or main.border_type is None:
+            if main is None:
                 return opposing_to
             else:
                 return main
@@ -731,9 +731,9 @@ class CellH2D(How2Display[Cell]):
     def _prop_with_ctx(
         self, name: str
     ) -> tuple[Any | None, TableStyle | CT_TblStylePr | None]:
-        tcBorders_elm = self._prop(name)
-        if not isinstance(tcBorders_elm, NotFound):
-            return tcBorders_elm, None
+        elm = self._prop(name)
+        if not isinstance(elm, NotFound):
+            return elm, None
         path = self._prop_path(name, self._path_base)
         tc_ctx = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path

@@ -23,6 +23,7 @@ from .enums import (
     SE_HEX_COLOR_AUTO,
     SE_HINT,
     SE_JC,
+    SE_JC_TABLE,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_NUMBER_FORMAT,
@@ -214,3 +215,8 @@ class ST_PointMeasure(XsdSimpleType):
 
 class ST_HpsMeasure(XsdSimpleType):
     SCHEMA = XsdUnion(ST_UnsignedDecimalNumber, ST_PositiveUniversalMeasure)
+
+
+class ST_JcTable(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_JC_TABLE)}

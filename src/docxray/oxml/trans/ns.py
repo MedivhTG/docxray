@@ -168,6 +168,13 @@ class W:
     TBL_CELL_SPACING = qn("w:tblCellSpacing")
     TBL_IND = qn("w:tblInd")
     TBL_CELL_MAR = qn("w:tblCellMar")
+    TBL_W = qn("w:tblW")
+    TBL_LAYOUT = qn("w:tblLayout")
+    TBLP_PR = qn("w:tblpPr")
+    TBL_OVERLAP = qn("w:tblOverlap")
+    BIDI_VISUAL = qn("w:bidiVisual")
+    TBL_CAPTION = qn("w:tblCaption")
+    TBL_DESCRIPTION = qn("w:tblDescription")
 
     TR_PR = qn("w:trPr")
     TR_HEIGHT = qn("w:trHeight")

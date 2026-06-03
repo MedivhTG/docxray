@@ -449,3 +449,11 @@ class SE_THEME_COLOR(StrEnum):
     TEXT1 = "text1"
     BACKGROUND2 = "background2"
     TEXT2 = "text2"
+
+
+class SE_JC_TABLE(StrEnum):
+    CENTER = "center"
+    END = "end"
+    LEFT = "left"
+    RIGHT = "right"
+    START = "start"

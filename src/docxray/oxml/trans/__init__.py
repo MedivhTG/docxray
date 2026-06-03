@@ -168,19 +168,29 @@ register_element_cls("w:tc", CT_Tc)
 from .table.table_props import (
     CT_TblBorders,
     CT_TblCellMar,
+    CT_TblLayoutType,
     CT_TblLook,
+    CT_TblOverlap,
+    CT_TblPPr,
     CT_TblPr,
 )
 
 register_element_cls("w:tblPr", CT_TblPr)
-register_element_cls("w:tblLook", CT_TblLook)
 register_element_cls("w:tblStyle", CT_String)
-register_element_cls("w:tblBorders", CT_TblBorders)
-register_element_cls("w:tblCellSpacing", CT_TblWidth)
+register_element_cls("w:tblpPr", CT_TblPPr)
+register_element_cls("w:tblOverlap", CT_TblOverlap)
+register_element_cls("w:bidiVisual", CT_OnOff)
 register_element_cls("w:tblStyleRowBandSize", CT_DecimalNumber)
 register_element_cls("w:tblStyleColBandSize", CT_DecimalNumber)
+register_element_cls("w:tblW", CT_TblWidth)
+register_element_cls("w:tblCellSpacing", CT_TblWidth)
 register_element_cls("w:tblInd", CT_TblWidth)
+register_element_cls("w:tblBorders", CT_TblBorders)
+register_element_cls("w:tblLayout", CT_TblLayoutType)
 register_element_cls("w:tblCellMar", CT_TblCellMar)
+register_element_cls("w:tblLook", CT_TblLook)
+register_element_cls("w:tblCaption", CT_String)
+register_element_cls("w:tblDescription", CT_String)
 
 from .table.row_props import CT_Height, CT_TblPrEx, CT_TrPr
 

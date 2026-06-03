@@ -5,12 +5,25 @@ from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.shared import (
     CT_Border,
     CT_DecimalNumber,
+    CT_OnOff,
+    CT_Shd,
     CT_String,
     CT_TblWidth,
 )
+from docxray.oxml.trans.st.enums import SE_JC_TABLE
 from docxray.oxml.trans.st.shared_common import ST_OnOff
-from docxray.oxml.trans.st.wml import ST_ShortHexNumber
+from docxray.oxml.trans.st.wml import ST_JcTable, ST_ShortHexNumber
 from docxray.oxml.trans.xmlchemy import OxmlElement
+
+
+class CT_JcTable(OxmlElement):
+    @cached_property
+    def val(self) -> SE_JC_TABLE:
+        return self.attr_required(W.VAL, ST_JcTable)
+
+
+class CT_TblLayoutType(OxmlElement):
+    pass
 
 
 class CT_TblCellMar(OxmlElement):
@@ -121,10 +134,30 @@ class CT_TblBorders(OxmlElement):
         return self.child_zero_or_one(W.TR_2_BL, CT_Border)
 
 
+class CT_TblPPr(OxmlElement):
+    pass
+
+
+class CT_TblOverlap(OxmlElement):
+    pass
+
+
 class CT_TblPr(OxmlElement):
     @cached_property
     def tblStyle(self) -> CT_String | None:
         return self.child_zero_or_one(W.TBL_STYLE, CT_String)
+
+    @cached_property
+    def tblpPr(self) -> CT_TblPPr | None:
+        return self.child_zero_or_one(W.TBLP_PR, CT_TblPPr)
+
+    @cached_property
+    def tblOverlap(self) -> CT_TblOverlap | None:
+        return self.child_zero_or_one(W.TBL_OVERLAP, CT_TblOverlap)
+
+    @cached_property
+    def bidiVisual(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(W.BIDI_VISUAL, CT_OnOff)
 
     @cached_property
     def tblStyleRowBandSize(self) -> CT_DecimalNumber | None:
@@ -139,21 +172,48 @@ class CT_TblPr(OxmlElement):
         )
 
     @cached_property
+    def tblW(self) -> CT_TblWidth | None:
+        return self.child_zero_or_one(W.TBL_W, CT_TblWidth)
+
+    @cached_property
+    def jc(self) -> CT_JcTable | None:
+        jc_elm = self.child_zero_or_one(W.JC, CT_JcTable)
+        if jc_elm is None:
+            return None
+        return jc_elm.recreate(CT_JcTable)
+
+    @cached_property
     def tblCellSpacing(self) -> CT_TblWidth | None:
         return self.child_zero_or_one(W.TBL_CELL_SPACING, CT_TblWidth)
-
-    @cached_property
-    def tblBorders(self) -> CT_TblBorders | None:
-        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
-
-    @cached_property
-    def tblLook(self) -> CT_TblLook | None:
-        return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)
 
     @cached_property
     def tblInd(self) -> CT_TblWidth | None:
         return self.child_zero_or_one(W.TBL_IND, CT_TblWidth)
 
     @cached_property
+    def tblBorders(self) -> CT_TblBorders | None:
+        return self.child_zero_or_one(W.TBL_BORDERS, CT_TblBorders)
+
+    @cached_property
+    def shd(self) -> CT_Shd | None:
+        return self.child_zero_or_one(W.SHD, CT_Shd)
+
+    @cached_property
+    def tblLayout(self) -> CT_TblLayoutType | None:
+        return self.child_zero_or_one(W.TBL_LAYOUT, CT_TblLayoutType)
+
+    @cached_property
     def tblCellMar(self) -> CT_TblCellMar | None:
         return self.child_zero_or_one(W.TBL_CELL_MAR, CT_TblCellMar)
+
+    @cached_property
+    def tblLook(self) -> CT_TblLook | None:
+        return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)
+
+    @cached_property
+    def tblCaption(self) -> CT_String | None:
+        return self.child_zero_or_one(W.TBL_CAPTION, CT_String)
+
+    @cached_property
+    def tblDescription(self) -> CT_String | None:
+        return self.child_zero_or_one(W.TBL_DESCRIPTION, CT_String)

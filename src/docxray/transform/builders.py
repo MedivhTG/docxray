@@ -410,31 +410,31 @@ class HtmlTable(HtmlBuilder["Table"]):
         SE_VERTICAL_JC.BOTH: "middle",
     }
     SE_BORDER_TO_CSS = {
-        SE_BORDER.SINGLE: "1px solid black",
-        SE_BORDER.THICK: "thick solid black",
-        SE_BORDER.DOUBLE: "3px double black",
-        SE_BORDER.DOTTED: "2px dotted black",
-        SE_BORDER.DASHED: "2px dashed black",
-        SE_BORDER.DOT_DASH: "2px dashed black",
-        SE_BORDER.DOT_DOT_DASH: "2px dashed black",
-        SE_BORDER.TRIPLE: "2px double black;",
-        SE_BORDER.THIN_THICK_SMALL_GAP: "thick solid black",
-        SE_BORDER.THICK_THIN_SMALL_GAP: "thick solid black",
-        SE_BORDER.THIN_THICK_THIN_SMALL_GAP: "thick solid black",
-        SE_BORDER.THIN_THICK_MEDIUM_GAP: "3px double black",
-        SE_BORDER.THICK_THIN_MEDIUM_GAP: "3px double black",
-        SE_BORDER.THIN_THICK_THIN_MEDIUM_GAP: "3px double black",
-        SE_BORDER.THIN_THICK_LARGE_GAP: "4px double black",
-        SE_BORDER.THICK_THIN_LARGE_GAP: "4px double black",
-        SE_BORDER.THIN_THICK_THIN_LARGE_GAP: "4px double black",
-        SE_BORDER.WAVE: "3px groove black",
-        SE_BORDER.DOUBLE_WAVE: "3px ridge black",
-        SE_BORDER.DASH_SMALL_GAP: "2px dashed black",
-        SE_BORDER.DASH_DOT_STROKED: "2px dotted black",
-        SE_BORDER.THREE_D_EMBOSS: "3px ridge black",
-        SE_BORDER.THREE_D_ENGRAVE: "3px groove black",
-        SE_BORDER.OUTSET: "3px outset black",
-        SE_BORDER.INSET: "3px inset black",
+        SE_BORDER.SINGLE: (1, "solid"),
+        SE_BORDER.THICK: (5, "solid"),
+        SE_BORDER.DOUBLE: (3, "double"),
+        SE_BORDER.DOTTED: (2, "dotted"),
+        SE_BORDER.DASHED: (2, "dashed"),
+        SE_BORDER.DOT_DASH: (2, "dashed"),
+        SE_BORDER.DOT_DOT_DASH: (2, "dashed"),
+        SE_BORDER.TRIPLE: (2, "double"),
+        SE_BORDER.THIN_THICK_SMALL_GAP: (5, "solid"),
+        SE_BORDER.THICK_THIN_SMALL_GAP: (5, "solid"),
+        SE_BORDER.THIN_THICK_THIN_SMALL_GAP: (5, "solid"),
+        SE_BORDER.THIN_THICK_MEDIUM_GAP: (3, "double"),
+        SE_BORDER.THICK_THIN_MEDIUM_GAP: (3, "double"),
+        SE_BORDER.THIN_THICK_THIN_MEDIUM_GAP: (3, "double"),
+        SE_BORDER.THIN_THICK_LARGE_GAP: (4, "double"),
+        SE_BORDER.THICK_THIN_LARGE_GAP: (4, "double"),
+        SE_BORDER.THIN_THICK_THIN_LARGE_GAP: (4, "double"),
+        SE_BORDER.WAVE: (3, "groove"),
+        SE_BORDER.DOUBLE_WAVE: (3, "ridge"),
+        SE_BORDER.DASH_SMALL_GAP: (2, "dashed"),
+        SE_BORDER.DASH_DOT_STROKED: (2, "dotted"),
+        SE_BORDER.THREE_D_EMBOSS: (3, "ridge"),
+        SE_BORDER.THREE_D_ENGRAVE: (3, "groove"),
+        SE_BORDER.OUTSET: (3, "outset"),
+        SE_BORDER.INSET: (3, "inset"),
     }
 
     @classmethod
@@ -499,7 +499,7 @@ class HtmlTable(HtmlBuilder["Table"]):
         for side in sides:
             border: str = cls._cell_border(proxy.borders_info[side], side)  # type: ignore[literal-required]
             if border:
-                style += f"{border}; "
+                style += border
         if proxy.content_flow is not None:
             style += f"writing-mode: {TEXT_FLOW_TO_WRITING_MODE[proxy.content_flow]}; "
         if proxy.vertical_alignment:
@@ -512,17 +512,20 @@ class HtmlTable(HtmlBuilder["Table"]):
 
     @classmethod
     def _cell_border(cls, border: Border | None, side: str) -> str:
-        b = ""
-        if (
-            border not in (SE_BORDER.NULL, SE_BORDER.NONE)
-            and border is not None
+        border_side = ""
+
+        if border is not None and border.border_type not in (
+            SE_BORDER.NULL,
+            SE_BORDER.NONE,
         ):
-            border_css = (
-                cls.SE_BORDER_TO_CSS.get(border.border_type)
-                or "1px solid black"
+            dflt_size, line_type = cls.SE_BORDER_TO_CSS.get(
+                border.border_type, (1, "solid")
             )
-            b = f"border-{side}: {border_css}"
-        return b
+            given_size = -1 if border.size is None else border.size.px()
+            size = f"{dflt_size if given_size < dflt_size else given_size}px"
+            color = border.final_color or "black"
+            border_side = f"border-{side}: {size} {line_type} {color}; "
+        return border_side
 
     @classmethod
     def _cell_padding(cls, proxy: Cell) -> str:

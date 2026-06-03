@@ -35,7 +35,7 @@ class Border(ElementProxy[CT_Border]):
         return Pt(sz / 8)
 
     @cached_property
-    def color(self) -> str | None:
+    def final_color(self) -> str | None:
         color = self.element.color
         if isinstance(color, SE_HEX_COLOR_AUTO):
             return None
