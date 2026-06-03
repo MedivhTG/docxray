@@ -17,6 +17,7 @@ from docxray.xsd.xsd import (
 )
 
 from .enums import (
+    SE_BORDER,
     SE_BR_CLEAR,
     SE_BR_TYPE,
     SE_HEIGHT_RULE,
@@ -33,7 +34,6 @@ from .enums import (
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
-    SE_BORDER,
     SE_Merge,
     SE_MultilevelType,
     SE_StyleType,

@@ -16,13 +16,13 @@ from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
+    SE_BORDER,
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
-    SE_BORDER,
     SE_VerticalAlignRun,
 )
 

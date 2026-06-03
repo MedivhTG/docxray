@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict
 
 # docxray stuff
 from docxray.enum.lxml import POS
@@ -21,18 +21,18 @@ from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
 from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import (
+    SE_BORDER,
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
-    SE_BORDER,
     SE_TblStyleOverrideType,
 )
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders, CT_TcMar
 from docxray.oxml.trans.table.table_props import CT_TblBorders
 
+from .border import Border
 from .exceptions import DisplayError
 from .how2display import How2Display
-from .border import Border
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
 type _TableChild = Literal["row", "cell"]
@@ -140,7 +140,7 @@ class CellH2D(How2Display[Cell]):
             "right": None,
         }
         cell_mar = self._cell_mar_ctx[0]
-        tbl_cell_mar = self.talbe.h2d._tblCellMar
+        tbl_cell_mar = self.row.h2d._tblCellMar
         if cell_mar is None and tbl_cell_mar is None:
             pass
         elif cell_mar is None and tbl_cell_mar is not None:
@@ -212,15 +212,9 @@ class CellH2D(How2Display[Cell]):
         spacing_elm = row_h2d._prop(name)
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
-        # Row-level exception
-        tblPrEx_elm = row_h2d._tblPrEx
-        if tblPrEx_elm is not None:
-            spacing_elm = tblPrEx_elm.tblCellSpacing
-            if spacing_elm is not None:
-                return width(spacing_elm, True)
-        # Table-level
-        spacing_elm = tbl_h2d._prop(name)
-        if not isinstance(spacing_elm, NotFound):
+        # Row-level exception or Table-level direct
+        spacing_elm = row_h2d._tblCellSpacing
+        if spacing_elm is not None:
             return width(spacing_elm, True)
 
         # From table style (defined common or exception)
@@ -699,8 +693,6 @@ class CellH2D(How2Display[Cell]):
                 return main
             elif opposing_to.border_type in none:
                 return main
-        main = cast("Border", main)
-        opposing_to = cast("Border", opposing_to)
         main_weight = self._border_weight(main.border_type)
         opposing_to_weight = self._border_weight(opposing_to.border_type)
         if main_weight is None or opposing_to_weight is None:

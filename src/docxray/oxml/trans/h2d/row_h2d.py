@@ -13,15 +13,11 @@ from docxray.oxml.trans.proxy.shared import (
     PropertyPath,
     safe_get_prop,
 )
-from docxray.oxml.trans.proxy.styles.style import (
-    S_TYPE_TO_STYLE_CLS,
-    TableStyle,
-)
+from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.proxy.table import Row, Table
 from docxray.oxml.trans.shared import CT_Shd, CT_TblWidth
-from docxray.oxml.trans.st.enums import SE_StyleType, SE_TblStyleOverrideType
+from docxray.oxml.trans.st.enums import SE_TblStyleOverrideType
 from docxray.oxml.trans.styles import CT_TblStylePr
-from docxray.oxml.trans.table.row_props import CT_TblPrEx
 from docxray.oxml.trans.table.table_props import (
     CT_JcTable,
     CT_TblBorders,

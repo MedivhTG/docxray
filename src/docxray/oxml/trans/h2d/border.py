@@ -5,8 +5,8 @@ from docxray.oxml.trans.enums import _SE_BORDER_TO_ECMA_NUMBER
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import (
-    SE_HEX_COLOR_AUTO,
     SE_BORDER,
+    SE_HEX_COLOR_AUTO,
 )
 
 from .colorize import Colorize
@@ -44,16 +44,16 @@ class Border(ElementProxy[CT_Border]):
             base_color = Colorize.theme_color(theme_color)
             if self.element.themeTint:
                 return Colorize.apply_tint(
-                    base_color, str(self.element.themeTint)
+                    base_color, self.element.themeTint.hex()
                 )
             elif self.element.themeShade:
                 return Colorize.apply_shade(
-                    base_color, str(self.element.themeShade)
+                    base_color, self.element.themeShade.hex()
                 )
             else:
                 return base_color
         else:
-            return str(color).upper()
+            return f"#{color.hex()}"
 
     @cached_property
     def shadow(self) -> bool:

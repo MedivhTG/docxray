@@ -4,13 +4,13 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
+    SE_BORDER,
     SE_HEX_COLOR_AUTO,
     SE_HINT,
     SE_JC,
     SE_TEXT_DIRECTION,
     SE_THEME,
     SE_THEME_COLOR,
-    SE_BORDER,
     SE_OnOff1,
     SE_TblWidth,
 )

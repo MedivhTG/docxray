@@ -2,7 +2,7 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.trans.ns import W
-from docxray.oxml.trans.shared import CT_Cnf, CT_Shd, CT_String, CT_TblWidth
+from docxray.oxml.trans.shared import CT_Cnf, CT_Shd, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_HEIGHT_RULE
 from docxray.oxml.trans.st.shared_common import ST_TwipsMeasure
 from docxray.oxml.trans.st.wml import ST_HeightRule
