@@ -166,6 +166,8 @@ class W:
     NO_H_BAND = qn("w:noHBand")
     NO_V_BAND = qn("w:noVBande")
     TBL_CELL_SPACING = qn("w:tblCellSpacing")
+    TBL_IND = qn("w:tblInd")
+    TBL_CELL_MAR = qn("w:tblCellMar")
 
     TR_PR = qn("w:trPr")
     TR_HEIGHT = qn("w:trHeight")

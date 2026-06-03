@@ -400,7 +400,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def _associated_numPr(self) -> CT_NumPr | None:
-        if self._numPr_para_direct:
+        if self._numPr_para_direct is not None:
             return self._numPr_para_direct
         style = self._para_style_num_ref
         if style is not None:
@@ -412,11 +412,20 @@ class ParagraphH2D(How2Display[Paragraph]):
 
     @cached_property
     def _direct_case(self) -> _DirectCase:
-        if self._numPr_para_direct and self._para_style_direct:
+        if (
+            self._numPr_para_direct is not None
+            and self._para_style_direct is not None
+        ):
             return "numbering_first"
-        if self._numPr_para_direct and not self._para_style_direct:
+        if (
+            self._numPr_para_direct is not None
+            and self._para_style_direct is None
+        ):
             return "numbering_first"
-        if not self._numPr_para_direct and self._para_style_direct:
+        if (
+            self._numPr_para_direct is None
+            and self._para_style_direct is not None
+        ):
             return "paragraph_first"
         return "up_to_hierarchy"
 

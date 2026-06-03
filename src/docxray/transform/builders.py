@@ -109,7 +109,7 @@ def units(length: Length | float | None) -> str:
     if length is None:
         return ""
     elif isinstance(length, Length):
-        return f"{length.px()}px"
+        return f"{length.pt}pt"
     else:
         return f"{length}%"
 
@@ -500,6 +500,9 @@ class HtmlTable(HtmlBuilder["Table"]):
         if proxy.vertical_alignment:
             valign = cls.VALIGN_TO_HTML_VALGN[proxy.vertical_alignment]
             style += f"vertical-align: {valign}; "
+        padding = cls._cell_padding(proxy)
+        if padding:
+            style += padding
         return style
 
     @classmethod
@@ -512,6 +515,17 @@ class HtmlTable(HtmlBuilder["Table"]):
             border_css = cls.SE_BORDER_TO_CSS.get(border) or "1px solid black"
             b = f"border-{side}: {border_css}"
         return b
+
+    @classmethod
+    def _cell_padding(cls, proxy: Cell) -> str:
+        info = proxy.padding_info
+        padding = ""
+        sides = {"top", "bottom", "left", "right"}
+        for side in sides:
+            padding_side = info[side]  # type: ignore[literal-required]
+            if padding_side is not None:
+                padding += f"padding-{side}: {units(padding_side)}; "
+        return padding
 
     @classmethod
     def _table_attrs(cls, proxy: Table) -> dict[str, str]:
@@ -529,6 +543,8 @@ class HtmlTable(HtmlBuilder["Table"]):
         else:
             spacing = proxy.spacing_first
             style += f"border-spacing: {units(spacing)}; "
+        if proxy.left_indent:
+            style += f"margin-inline-start: {units(proxy.left_indent)}; "
         return style
 
 

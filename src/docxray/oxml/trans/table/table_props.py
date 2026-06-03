@@ -13,6 +13,50 @@ from docxray.oxml.trans.st.wml import ST_ShortHexNumber
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 
+class CT_TblCellMar(OxmlElement):
+    @cached_property
+    def top(self) -> CT_TblWidth | None:
+        top_elm = self.child_zero_or_one(W.TOP, CT_TblWidth)
+        if top_elm is None:
+            return None
+        return top_elm.recreate(CT_TblWidth)
+
+    @cached_property
+    def start(self) -> CT_TblWidth | None:
+        start_elm = self.child_zero_or_one(W.START, CT_TblWidth)
+        if start_elm is None:
+            return None
+        return start_elm.recreate(CT_TblWidth)
+
+    @cached_property
+    def left(self) -> CT_TblWidth | None:
+        left_elm = self.child_zero_or_one(W.LEFT, CT_TblWidth)
+        if left_elm is None:
+            return None
+        return left_elm.recreate(CT_TblWidth)
+
+    @cached_property
+    def bottom(self) -> CT_TblWidth | None:
+        bottom_elm = self.child_zero_or_one(W.BOTTOM, CT_TblWidth)
+        if bottom_elm is None:
+            return None
+        return bottom_elm.recreate(CT_TblWidth)
+
+    @cached_property
+    def end(self) -> CT_TblWidth | None:
+        end_elm = self.child_zero_or_one(W.END, CT_TblWidth)
+        if end_elm is None:
+            return None
+        return end_elm.recreate(CT_TblWidth)
+
+    @cached_property
+    def right(self) -> CT_TblWidth | None:
+        right_elm = self.child_zero_or_one(W.RIGHT, CT_TblWidth)
+        if right_elm is None:
+            return None
+        return right_elm.recreate(CT_TblWidth)
+
+
 class CT_TblLook(OxmlElement):
     @cached_property
     def val(self) -> bytes | None:
@@ -105,3 +149,11 @@ class CT_TblPr(OxmlElement):
     @cached_property
     def tblLook(self) -> CT_TblLook | None:
         return self.child_zero_or_one(W.TBL_LOOK, CT_TblLook)
+
+    @cached_property
+    def tblInd(self) -> CT_TblWidth | None:
+        return self.child_zero_or_one(W.TBL_IND, CT_TblWidth)
+
+    @cached_property
+    def tblCellMar(self) -> CT_TblCellMar | None:
+        return self.child_zero_or_one(W.TBL_CELL_MAR, CT_TblCellMar)

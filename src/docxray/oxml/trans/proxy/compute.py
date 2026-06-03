@@ -24,7 +24,7 @@ def width(
 ) -> Length | float | None:
     """Compute width of anything that has width measure.
 
-    If return `Length` instance, then it's numbered width,
+    If return `Length` instance, then it's twips width,
     else if it's float, then it's percents, else auto.
 
     Args:

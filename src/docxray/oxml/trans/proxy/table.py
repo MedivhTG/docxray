@@ -21,7 +21,7 @@ from .shared import ElementProxy, Length, NotFound, StoryChild, Twips
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.cell import BordersInfo, CellH2D
+    from docxray.oxml.trans.h2d.cell import BordersInfo, CellH2D, PaddingInfo
     from docxray.oxml.trans.h2d.row import RowH2D
     from docxray.oxml.trans.h2d.table import TableH2D
     from docxray.oxml.trans.proxy.document import Body
@@ -46,6 +46,10 @@ class Cell(BlockItemContainer[CT_Tc]):
     def borders_info(self) -> BordersInfo:
         """Primitive info about borders for current cell. Can be changed in future."""
         return self.h2d.borders_info
+
+    @cached_property
+    def padding_info(self) -> PaddingInfo:
+        return self.h2d.padding_info
 
     @cached_property
     def row(self) -> Row:
@@ -370,6 +374,10 @@ class Table(StoryChild[CT_Tbl]):
         if next_idx + 1 > len(self.container.inner_content):
             return None
         return self.container.inner_content[next_idx]
+
+    @cached_property
+    def left_indent(self) -> Length | float | None:
+        return self.h2d.left_indent
 
     @cached_property
     def rows(self) -> list[Row]:

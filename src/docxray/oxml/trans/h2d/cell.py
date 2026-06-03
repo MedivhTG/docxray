@@ -19,6 +19,7 @@ from docxray.oxml.trans.proxy.shared import (
 )
 from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
+from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
@@ -26,7 +27,7 @@ from docxray.oxml.trans.st.enums import (
     SE_TblStyleOverrideType,
 )
 from docxray.oxml.trans.styles import CT_TblStylePr
-from docxray.oxml.trans.table.cell_props import CT_TcBorders
+from docxray.oxml.trans.table.cell_props import CT_TcBorders, CT_TcMar
 from docxray.oxml.trans.table.table_props import CT_TblBorders
 
 from .exceptions import DisplayError
@@ -90,6 +91,13 @@ class BordersInfo(TypedDict):
     _sides_dropped_to_table_borders: BordersDropped
 
 
+class PaddingInfo(TypedDict):
+    top: Length | float | None
+    bottom: Length | float | None
+    left: Length | float | None
+    right: Length | float | None
+
+
 # TODO: borders info refac needed after
 class CellH2D(How2Display[Cell]):
     @cached_property
@@ -100,13 +108,62 @@ class CellH2D(How2Display[Cell]):
     def talbe(self) -> Table:
         return self.row.table
 
-    # TODO: look for resolve.. too complex and word is broken
     @cached_property
     def borders_info(self) -> BordersInfo:
         spacing = self._spacing
         if spacing is not None and spacing > 0:
             return self._borders_non_zero_spacing_info
         return self._spacing_zero(self._borders_non_zero_spacing_info)
+
+    @cached_property
+    def padding_info(self) -> PaddingInfo:
+        def _mar(
+            mar_width: CT_TblWidth | None,
+            fallbacks_width: list[CT_TblWidth | None] | None = None,
+        ) -> Length | float | None:
+            if mar_width is None:
+                if fallbacks_width is None:
+                    return None
+                for fallback in fallbacks_width:
+                    if fallback is not None:
+                        mar_width = fallback
+                        break
+            if mar_width is None:
+                return None
+            return width(mar_width)
+
+        padding: PaddingInfo = {
+            "top": None,
+            "bottom": None,
+            "left": None,
+            "right": None,
+        }
+        cell_mar = self._cell_mar_ctx[0]
+        tbl_cell_mar = self.talbe.h2d._tblCellMar
+        if cell_mar is None and tbl_cell_mar is None:
+            pass
+        elif cell_mar is None and tbl_cell_mar is not None:
+            padding["top"] = _mar(tbl_cell_mar.top)
+            padding["bottom"] = _mar(tbl_cell_mar.bottom)
+            padding["left"] = _mar(tbl_cell_mar.left, [tbl_cell_mar.start])
+            padding["right"] = _mar(tbl_cell_mar.right, [tbl_cell_mar.end])
+        elif cell_mar is not None and tbl_cell_mar is None:
+            padding["top"] = _mar(cell_mar.top)
+            padding["bottom"] = _mar(cell_mar.bottom)
+            padding["left"] = _mar(cell_mar.left, [cell_mar.start])
+            padding["right"] = _mar(cell_mar.right, [cell_mar.end])
+        elif cell_mar is not None and tbl_cell_mar is not None:
+            padding["top"] = _mar(cell_mar.top, [tbl_cell_mar.top])
+            padding["bottom"] = _mar(cell_mar.bottom, [tbl_cell_mar.bottom])
+            padding["left"] = _mar(
+                cell_mar.left,
+                [cell_mar.start, tbl_cell_mar.left, tbl_cell_mar.start],
+            )
+            padding["right"] = _mar(
+                cell_mar.right,
+                [cell_mar.right, tbl_cell_mar.right, tbl_cell_mar.end],
+            )
+        return padding
 
     # TODO: inherit from parent Section if omitted
     @cached_property
@@ -122,6 +179,12 @@ class CellH2D(How2Display[Cell]):
         if not isinstance(align, NotFound):
             return align
         return SE_VERTICAL_JC.TOP
+
+    @cached_property
+    def _cell_mar_ctx(
+        self,
+    ) -> tuple[CT_TcMar | None, TableStyle | CT_TblStylePr | None]:
+        return self._prop_with_ctx("tcMar")
 
     @cached_property
     def _table_style(self) -> TableStyle | None:
@@ -539,17 +602,12 @@ class CellH2D(How2Display[Cell]):
             return None
         return lines_count * border_number
 
-    @cached_property
-    def _cell_borders_ctx(
-        self,
-    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
-        name = "tcBorders"
-        # Direct
+    def _prop_with_ctx(
+        self, name: str
+    ) -> tuple[Any | None, TableStyle | CT_TblStylePr | None]:
         tcBorders_elm = self._prop(name)
         if not isinstance(tcBorders_elm, NotFound):
             return tcBorders_elm, None
-        # From table style (defined common or exception)
-        # whenever in grid group or directly
         path = self._prop_path(name, self._path_base)
         tc_ctx = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
@@ -557,6 +615,12 @@ class CellH2D(How2Display[Cell]):
         if not isinstance(tc_ctx[0], NotFound):
             return tc_ctx
         return None, None
+
+    @cached_property
+    def _cell_borders_ctx(
+        self,
+    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
+        return self._prop_with_ctx("tcBorders")
 
     @cached_property
     def _spacing(self) -> Length | float | None:
@@ -600,14 +664,14 @@ class CellH2D(How2Display[Cell]):
         cell = self._proxy
         band_shift = 1 if cell.row.h2d._shift_horz_bands else 0
         y_shift = cell.grid_y + 1 + band_shift
-        return y_shift // cell.table.h2d.row_band_size
+        return y_shift // cell.table.h2d._row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
         cell = self._proxy
         band_shift = 1 if cell.row.h2d._shift_vert_bands else 0
         x_shift = cell.idx + 1 + band_shift
-        return x_shift // cell.table.h2d.col_band_size
+        return x_shift // cell.table.h2d._col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:

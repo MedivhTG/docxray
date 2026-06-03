@@ -5,28 +5,36 @@ from typing import Any
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_TABLE_LOOK
-from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
+from docxray.oxml.trans.proxy.compute import width
+from docxray.oxml.trans.proxy.shared import Length, NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     TableStyle,
 )
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.st.enums import SE_StyleType
-from docxray.oxml.trans.table.table_props import CT_TblBorders
+from docxray.oxml.trans.table.table_props import CT_TblBorders, CT_TblCellMar
 
 from .how2display import How2Display
 
 
 class TableH2D(How2Display[Table]):
     @cached_property
-    def row_band_size(self) -> int:
+    def left_indent(self) -> Length | float | None:
+        tblInd_elm = self._prop("tblInd")
+        if isinstance(tblInd_elm, NotFound):
+            return None
+        return width(tblInd_elm)
+
+    @cached_property
+    def _row_band_size(self) -> int:
         size = self._prop_val("tblStyleRowBandSize", algorithm="style")
         if isinstance(size, NotFound):
             return 1
         return size
 
     @cached_property
-    def col_band_size(self) -> int:
+    def _col_band_size(self) -> int:
         size = self._prop_val("tblStyleColBandSize", algorithm="style")
         if isinstance(size, NotFound):
             return 1
@@ -45,6 +53,13 @@ class TableH2D(How2Display[Table]):
         if isinstance(tblBorders_elm, NotFound):
             return None
         return tblBorders_elm
+
+    @cached_property
+    def _tblCellMar(self) -> CT_TblCellMar | None:
+        tblCellMar = self._prop("tblCellMar", algorithm="both")
+        if isinstance(tblCellMar, NotFound):
+            return None
+        return tblCellMar
 
     @cached_property
     def _table_style(self) -> TableStyle | None:

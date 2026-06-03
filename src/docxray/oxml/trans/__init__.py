@@ -165,7 +165,12 @@ register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
 
-from .table.table_props import CT_TblBorders, CT_TblLook, CT_TblPr
+from .table.table_props import (
+    CT_TblBorders,
+    CT_TblCellMar,
+    CT_TblLook,
+    CT_TblPr,
+)
 
 register_element_cls("w:tblPr", CT_TblPr)
 register_element_cls("w:tblLook", CT_TblLook)
@@ -174,6 +179,8 @@ register_element_cls("w:tblBorders", CT_TblBorders)
 register_element_cls("w:tblCellSpacing", CT_TblWidth)
 register_element_cls("w:tblStyleRowBandSize", CT_DecimalNumber)
 register_element_cls("w:tblStyleColBandSize", CT_DecimalNumber)
+register_element_cls("w:tblInd", CT_TblWidth)
+register_element_cls("w:tblCellMar", CT_TblCellMar)
 
 from .table.row_props import CT_Height, CT_TblPrEx, CT_TrPr
 
@@ -196,6 +203,7 @@ register_element_cls("w:tcW", CT_TblWidth)
 register_element_cls("w:gridSpan", CT_DecimalNumber)
 register_element_cls("w:hMerge", CT_HMerge)
 register_element_cls("w:vMerge", CT_VMerge)
+register_element_cls("w:tcMar", CT_TcMar)
 
 register_element_cls("w:tcBorders", CT_TcBorders)
 register_element_cls("w:top", CT_Border)
