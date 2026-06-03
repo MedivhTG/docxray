@@ -1,0 +1,730 @@
+"""Module for containing charsets (Unicode list strings)
+and mappings to them.
+"""
+
+from enum import StrEnum
+
+
+def charset(start: int, end: int) -> list[str]:
+    """Get character unicode string range list.
+
+    Args:
+        start (int): Unicode ordinal start (inclusive).
+        end (int): Unicode ordinal end (inclusive).
+
+    Returns:
+        list[str]: Unicode string list.
+    """
+    return [chr(code) for code in range(start, end + 1)]
+
+
+DECIMAL = charset(0x0030, 0x0039)
+UPPER_ROMAN = [
+    chr(0x0049),
+    chr(0x0056),
+    chr(0x0058),
+    chr(0x004C),
+    chr(0x0043),
+    chr(0x0044),
+    chr(0x004D),
+]
+LOWER_ROMAN = [
+    chr(0x0069),
+    chr(0x0076),
+    chr(0x0078),
+    chr(0x006C),
+    chr(0x0063),
+    chr(0x0064),
+    chr(0x006D),
+]
+# Latin-based
+UPPER_LETTER = charset(0x0041, 0x005A)
+LOWER_LETTER = charset(0x0061, 0x007A)
+CHICAGO = [chr(0x002A), chr(0x2020), chr(0x2021), chr(0x00A7)]
+IDEOGRAPH_DIGITAL = [
+    chr(0x3007),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+AIUEO = [
+    *charset(0xFF71, 0xFF9D),
+    chr(0xFF9D),
+    chr(0xFF9D),
+]
+IROHA = [
+    chr(0xFF72),
+    chr(0xFF9B),
+    chr(0xFF8A),
+    chr(0xFF86),
+    chr(0xFF8E),
+    chr(0xFF8D),
+    chr(0xFF84),
+    chr(0xFF81),
+    chr(0xFF98),
+    chr(0xFF87),
+    chr(0xFF99),
+    chr(0xFF66),
+    chr(0xFF9C),
+    chr(0xFF76),
+    chr(0xFF96),
+    chr(0xFF80),
+    chr(0xFF9A),
+    chr(0xFF7F),
+    chr(0xFF82),
+    chr(0xFF88),
+    chr(0xFF85),
+    chr(0xFF97),
+    chr(0xFF91),
+    chr(0xFF73),
+    chr(0x30F0),
+    chr(0xFF89),
+    chr(0xFF75),
+    chr(0xFF78),
+    chr(0xFF94),
+    chr(0xFF8F),
+    chr(0xFF79),
+    chr(0xFF8C),
+    chr(0xFF7A),
+    chr(0xFF74),
+    chr(0xFF83),
+    chr(0xFF71),
+    chr(0xFF7B),
+    chr(0xFF77),
+    chr(0xFF95),
+    chr(0xFF92),
+    chr(0xFF90),
+    chr(0xFF7C),
+    chr(0x30F1),
+    chr(0xFF8B),
+    chr(0xFF93),
+    chr(0xFF7E),
+    chr(0xFF7D),
+    chr(0xFF9D),
+]
+DECIMAL_FULL_WIDTH = charset(0xFF10, 0xFF19)
+DECIMAL_HALF_WIDTH = DECIMAL
+JAPANESE_DIGITAL_TEN_THOUSAND = [
+    chr(0x3007),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+DECIMAL_ENCLOSED_CIRCLE = charset(0x2460, 0x2473)
+DECIMAL_FULL_WIDTH_2 = DECIMAL_FULL_WIDTH
+AIUEO_FULL_WIDTH = [
+    chr(0x30A2),
+    chr(0x30A4),
+    chr(0x30A6),
+    chr(0x30A8),
+    chr(0x30AA),
+    chr(0x30AB),
+    chr(0x30AD),
+    chr(0x30AF),
+    chr(0x30B1),
+    chr(0x30B3),
+    chr(0x30B5),
+    chr(0x30B7),
+    chr(0x30B9),
+    chr(0x30BB),
+    chr(0x30BD),
+    chr(0x30BF),
+    chr(0x30C1),
+    chr(0x30C4),
+    chr(0x30C6),
+    chr(0x30C8),
+    chr(0x30CA),
+    chr(0x30CB),
+    chr(0x30CC),
+    chr(0x30CD),
+    chr(0x30CE),
+    chr(0x30CF),
+    chr(0x30D2),
+    chr(0x30D5),
+    chr(0x30D8),
+    chr(0x30DB),
+    chr(0x30DE),
+    chr(0x30DF),
+    chr(0x30E0),
+    chr(0x30E1),
+    chr(0x30E2),
+    chr(0x30E4),
+    chr(0x30E6),
+    chr(0x30E8),
+    chr(0x30E9),
+    chr(0x30EA),
+    chr(0x30EB),
+    chr(0x30EC),
+    chr(0x30ED),
+    chr(0x30EF),
+    chr(0x30F0),
+    chr(0x30F1),
+    chr(0x30F2),
+    chr(0x30F3),
+]
+IROHA_FULL_WIDTH = [
+    chr(0x30A4),
+    chr(0x30ED),
+    chr(0x30CF),
+    chr(0x30CB),
+    chr(0x30DB),
+    chr(0x30D8),
+    chr(0x30C8),
+    chr(0x30C1),
+    chr(0x30EA),
+    chr(0x30CC),
+    chr(0x30EB),
+    chr(0x30F2),
+    chr(0x30EF),
+    chr(0x30AB),
+    chr(0x30E8),
+    chr(0x30BF),
+    chr(0x30EC),
+    chr(0x30BD),
+    chr(0x30C4),
+    chr(0x30CD),
+    chr(0x30CA),
+    chr(0x30E9),
+    chr(0x30E0),
+    chr(0x30A6),
+    chr(0x30F0),
+    chr(0x30CE),
+    chr(0x30AA),
+    chr(0x30AF),
+    chr(0x30E4),
+    chr(0x30DE),
+    chr(0x30B1),
+    chr(0x30D5),
+    chr(0x30B3),
+    chr(0x30A8),
+    chr(0x30C6),
+    chr(0x30A2),
+    chr(0x30B5),
+    chr(0x30AD),
+    chr(0x30E6),
+    chr(0x30E1),
+    chr(0x30DF),
+    chr(0x30B7),
+    chr(0x30F1),
+    chr(0x30D2),
+    chr(0x30E2),
+    chr(0x30BB),
+    chr(0x30B9),
+    chr(0x30F3),
+]
+# Extend if need
+DINGBAT_MAPPINGS = {
+    "Symbol": {
+        0xB7: 0x2022,  # • BULLET
+        0xA7: 0x25AA,  # ▪ SQUARE
+        0xD8: 0x2192,  # → RIGHTWARDS ARROW
+        0xD7: 0x2190,  # ← LEFTWARDS ARROW
+        0xD9: 0x2193,  # ↓ DOWNWARDS ARROW
+        0xDA: 0x2191,  # ↑ UPWARDS ARROW
+        0xB4: 0x25CB,  # ○ CIRCLE
+        0xB0: 0x2713,  # ✓ CHECK MARK
+        0xA8: 0x2666,  # ♦ DIAMOND
+        0xAA: 0x2022,  # • BULLET (альтернативный)
+        0xBA: 0x25C6,  # ◆ BLACK DIAMOND
+        0xAC: 0x221A,  # √ SQUARE ROOT
+        0xB1: 0x221E,  # ∞ INFINITY
+    },
+    "Wingdings": {
+        # Стрелки
+        0xD8: 0x2192,  # → RIGHTWARDS ARROW
+        0xD7: 0x2190,  # ← LEFTWARDS ARROW
+        0xD9: 0x2193,  # ↓ DOWNWARDS ARROW
+        0xDA: 0x2191,  # ↑ UPWARDS ARROW
+        0xD6: 0x2194,  # ↔ LEFT RIGHT ARROW
+        # Маркеры
+        0xFC: 0x2713,  # ✓ CHECK MARK
+        0xFB: 0x2717,  # ✗ CROSS MARK
+        0xA8: 0x2666,  # ♦ DIAMOND
+        0xA7: 0x25AA,  # ▪ SQUARE
+        0xB7: 0x2022,  # • BULLET
+        0xB4: 0x25CB,  # ○ CIRCLE
+        0xAC: 0x25A0,  # ■ BLACK SQUARE
+        # Звёзды и прочее
+        0xAA: 0x272A,  # ✪ CIRCLE STAR
+        0xAF: 0x270E,  # ✎ PEN
+        0xE1: 0x2706,  # ✆ TELEPHONE
+        0xE2: 0x2709,  # ✉ ENVELOPE
+        0xE3: 0x270F,  # ✏ PENCIL
+        # Смайлики
+        0xC0: 0x263A,  # ☺ WHITE SMILING FACE
+        0xC1: 0x263B,  # ☻ BLACK SMILING FACE
+        0xC2: 0x2639,  # ☹ WHITE FROWNING FACE
+    },
+    "Wingdings 2": {
+        0x41: 0x2708,  # ✈ AIRPLANE
+        0x42: 0x270C,  # ✌ VICTORY HAND
+        0x43: 0x270D,  # ✍ WRITING HAND
+        0x44: 0x2701,  # ✁ UPPER BLADE SCISSORS
+    },
+    "Wingdings 3": {
+        0x4C: 0x271D,  # ✝ LATIN CROSS
+        0x4F: 0x2720,  # ✠ MALTESE CROSS
+    },
+    "Webdings": {
+        0x4E: 0x2708,  # ✈ AIRPLANE
+        0x50: 0x260E,  # ☎ TELEPHONE
+        0x56: 0x2709,  # ✉ ENVELOPE
+        0x57: 0x2706,  # ✆ TELEPHONE
+    },
+}
+GANADA = [
+    chr(0xAC00),
+    chr(0xB098),
+    chr(0xB2E4),
+    chr(0xB77C),
+    chr(0xB9C8),
+    chr(0xBC14),
+    chr(0xC0AC),
+    chr(0xC544),
+    chr(0xC790),
+    chr(0xCC28),
+    chr(0xCE74),
+    chr(0xD0C0),
+    chr(0xD30C),
+    chr(0xD558),
+]
+CHOSUNG = [
+    chr(0x3131),
+    chr(0x3134),
+    chr(0x3137),
+    chr(0x3139),
+    chr(0x3141),
+    chr(0x3142),
+    chr(0x3145),
+    chr(0x3147),
+    chr(0x3148),
+    chr(0x314A),
+    chr(0x314B),
+    chr(0x314C),
+    chr(0x314D),
+    chr(0x314E),
+]
+DECIMAL_ENCLOSED_FULLSTOP = charset(0x2488, 0x249B)
+DECIMAL_ENCLOSED_PAREN = charset(0x2474, 0x2487)
+DECIMAL_ENCLOSED_CIRCLE_CHINESE = DECIMAL_ENCLOSED_CIRCLE
+IDEOGRAPH_ENCLOSED_CIRCLE = charset(0x2474, 0x2487)
+IDEOGRAPH_TRADITIONAL = [
+    chr(0x7532),
+    chr(0x4E59),
+    chr(0x4E19),
+    chr(0x4E01),
+    chr(0x620A),
+    chr(0x5DF1),
+    chr(0x5E9A),
+    chr(0x8F9B),
+    chr(0x58EC),
+    chr(0x7678),
+]
+IDEOGRAPH_ZODIAC = [
+    chr(0x5B50),
+    chr(0x4E11),
+    chr(0x5BC5),
+    chr(0x536F),
+    chr(0x8FB0),
+    chr(0x5DF3),
+    chr(0x5348),
+    chr(0x672A),
+    chr(0x7533),
+    chr(0x9149),
+    chr(0x620C),
+    chr(0x4EA5),
+]
+IDEOGRAPH_ZODIAC_TRADITIONAL = [
+    chr(0x7532),
+    chr(0x5B50),
+    chr(0x4E59),
+    chr(0x4E11),
+    chr(0x4E19),
+    chr(0x5BC5),
+    chr(0x4E01),
+    chr(0x536F),
+    chr(0x620A),
+    chr(0x8FB0),
+    chr(0x5DF1),
+    chr(0x5DF3),
+    chr(0x5E9A),
+    chr(0x5348),
+    chr(0x8F9B),
+    chr(0x672A),
+    chr(0x58EC),
+    chr(0x7533),
+    chr(0x7678),
+    chr(0x9149),
+    chr(0x7532),
+    chr(0x620D),
+    chr(0x4E59),
+    chr(0x4EA5),
+    chr(0x4E19),
+    chr(0x5B50),
+    chr(0x4E01),
+    chr(0x4E11),
+    chr(0x620A),
+    chr(0x5BC5),
+    chr(0x5DF1),
+    chr(0x536F),
+    chr(0x5E9A),
+    chr(0x8FB0),
+    chr(0x8F9B),
+    chr(0x5DF3),
+    chr(0x58EC),
+    chr(0x5348),
+    chr(0x7678),
+    chr(0x672A),
+    chr(0x7532),
+    chr(0x7533),
+    chr(0x4E59),
+    chr(0x9149),
+    chr(0x4E19),
+    chr(0x620D),
+    chr(0x4E01),
+    chr(0x4EA5),
+    chr(0x620A),
+    chr(0x5B50),
+    chr(0x5DF1),
+    chr(0x4E11),
+    chr(0x5E9A),
+    chr(0x5BC5),
+    chr(0x8F9B),
+    chr(0x536F),
+    chr(0x58EC),
+    chr(0x8FB0),
+    chr(0x7678),
+    chr(0x5DF3),
+    chr(0x7532),
+    chr(0x5348),
+    chr(0x4E59),
+    chr(0x672A),
+    chr(0x4E19),
+    chr(0x7533),
+    chr(0x4E01),
+    chr(0x9149),
+    chr(0x620A),
+    chr(0x620D),
+    chr(0x5DF1),
+    chr(0x4EA5),
+    chr(0x5E9A),
+    chr(0x5B50),
+    chr(0x8F9B),
+    chr(0x4E11),
+    chr(0x58EC),
+    chr(0x5BC5),
+    chr(0x7678),
+    chr(0x536F),
+    chr(0x7532),
+    chr(0x8FB0),
+    chr(0x4E59),
+    chr(0x5DF3),
+    chr(0x4E19),
+    chr(0x5348),
+    chr(0x4E01),
+    chr(0x672A),
+    chr(0x620A),
+    chr(0x7533),
+    chr(0x5DF1),
+    chr(0x9149),
+    chr(0x5E9A),
+    chr(0x620D),
+    chr(0x8F9B),
+    chr(0x4EA5),
+    chr(0x58EC),
+    chr(0x5B50),
+    chr(0x7678),
+    chr(0x4E11),
+    chr(0x7532),
+    chr(0x5BC5),
+    chr(0x4E59),
+    chr(0x536F),
+    chr(0x4E19),
+    chr(0x8FB0),
+    chr(0x4E01),
+    chr(0x5DF3),
+    chr(0x620A),
+    chr(0x5348),
+    chr(0x5DF1),
+    chr(0x672A),
+    chr(0x5E9A),
+    chr(0x7533),
+    chr(0x8F9B),
+    chr(0x9149),
+    chr(0x58EC),
+    chr(0x620D),
+    chr(0x7678),
+    chr(0x4EA5),
+]
+TAIWANESE_DIGITAL = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+CHINESE_COUNTING = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+    chr(0x5341),
+]
+KOREAN_DIGITAL = [
+    chr(0xC601),
+    chr(0xC77C),
+    chr(0xC774),
+    chr(0xC0BC),
+    chr(0xC0AC),
+    chr(0xC624),
+    chr(0xC721),
+    chr(0xCE60),
+    chr(0xD314),
+    chr(0xAD6C),
+]
+KOREAN_DIGITAL_2 = [
+    chr(0x96F6),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+]
+RUSSIAN_LOWER = [
+    *charset(0x0430, 0x0438),
+    *charset(0x043A, 0x043F),
+    *charset(0x0440, 0x0449),
+    chr(0x044B),
+    chr(0x044D),
+    chr(0x044E),
+    chr(0x044F),
+]
+RUSSIAN_UPPER = [
+    *charset(0x0410, 0x0418),
+    *charset(0x041A, 0x041F),
+    *charset(0x0420, 0x0429),
+    chr(0x042B),
+    chr(0x042D),
+    chr(0x042E),
+    chr(0x042F),
+]
+HEBREW_2 = [
+    *charset(0x05D0, 0x05D9),
+    chr(0x05DB),
+    chr(0x05DC),
+    chr(0x05DE),
+    *charset(0x05E0, 0x05E2),
+    chr(0x05E4),
+    *charset(0x05E6, 0x05EA),
+]
+ARABIC_ALPHA = [
+    chr(0x0623),
+    chr(0x0628),
+    chr(0x062A),
+    chr(0x062B),
+    chr(0x062C),
+    chr(0x062D),
+    chr(0x062E),
+    chr(0x062F),
+    chr(0x0630),
+    chr(0x0631),
+    chr(0x0632),
+    chr(0x0633),
+    chr(0x0634),
+    chr(0x0635),
+    chr(0x0636),
+    chr(0x0637),
+    chr(0x0638),
+    chr(0x0639),
+    chr(0x063A),
+    chr(0x0641),
+    chr(0x0642),
+    chr(0x0643),
+    chr(0x0644),
+    chr(0x0645),
+    chr(0x0646),
+    chr(0x0647),
+    chr(0x0648),
+    chr(0x064A),
+]
+ARABIC_ABJAD = [
+    chr(0x0623),
+    chr(0x0628),
+    chr(0x062C),
+    chr(0x062F),
+    chr(0x0647),
+    chr(0x0648),
+    chr(0x0632),
+    chr(0x062D),
+    chr(0x0637),
+    chr(0x064A),
+    chr(0x0643),
+    chr(0x0644),
+    chr(0x0645),
+    chr(0x0646),
+    chr(0x0633),
+    chr(0x0639),
+    chr(0x0641),
+    chr(0x0635),
+    chr(0x0642),
+    chr(0x0631),
+    chr(0x0634),
+    chr(0x062A),
+    chr(0x062B),
+    chr(0x062E),
+    chr(0x0630),
+    chr(0x0636),
+    chr(0x063A),
+    chr(0x0638),
+]
+HINDI_VOWELS = charset(0x0915, 0x0939)
+HINDI_CONSONANTS = [
+    *charset(0x0905, 0x0914),
+    chr(0x0905) + chr(0x0902),
+    chr(0x0905) + chr(0x0903),
+]
+HINDI_NUMBERS = [
+    chr(0x0966),
+    chr(0x0967),
+    chr(0x0968),
+    chr(0x0969),
+    chr(0x096A),
+    chr(0x096B),
+    chr(0x096C),
+    chr(0x096D),
+    chr(0x096E),
+    chr(0x096F),
+]
+THAI_LETTERS = [
+    chr(0x0E01),
+    chr(0x0E02),
+    chr(0x0E04),
+    *charset(0x0E07, 0x0E23),
+    chr(0x0E23),
+    chr(0x0E25),
+    *charset(0x0E27, 0x0E2E),
+]
+THAI_NUMBERS = [
+    chr(0x0E50),
+    chr(0x0E51),
+    chr(0x0E52),
+    chr(0x0E53),
+    chr(0x0E54),
+    chr(0x0E55),
+    chr(0x0E56),
+    chr(0x0E57),
+    chr(0x0E58),
+    chr(0x0E59),
+]
+
+
+class CharsetName(StrEnum):
+    DECIMAL = "decimal"
+    UPPER_ROMAN = "upperRoman"
+    LOWER_ROMAN = "lowerRoman"
+    UPPER_LETTER = "upperLetter"
+    LOWER_LETTER = "lowerLetter"
+    CHICAGO = "chicago"
+    IDEOGRAPH_DIGITAL = "ideographDigital"
+    AIUEO = "aiueo"
+    IROHA = "iroha"
+    DECIMAL_FULL_WIDTH = "decimalFullWidth"
+    DECIMAL_HALF_WIDTH = "decimalHalfWidth"
+    JAPANESE_DIGITAL_TEN_THOUSAND = "japaneseDigitalTenThousand"
+    DECIMAL_ENCLOSED_CIRCLE = "decimalEnclosedCircle"
+    DECIMAL_FULL_WIDTH_2 = "decimalFullWidth2"
+    AIUEO_FULL_WIDTH = "aiueoFullWidth"
+    IROHA_FULL_WIDTH = "irohaFullWidth"
+    GANADA = "ganada"
+    CHOSUNG = "chosung"
+    DECIMAL_ENCLOSED_FULLSTOP = "decimalEnclosedFullstop"
+    DECIMAL_ENCLOSED_PAREN = "decimalEnclosedParen"
+    DECIMAL_ENCLOSED_CIRCLE_CHINESE = "decimalEnclosedCircleChinese"
+    IDEOGRAPH_ENCLOSED_CIRCLE = "ideographEnclosedCircle"
+    IDEOGRAPH_TRADITIONAL = "ideographTraditional"
+    IDEOGRAPH_ZODIAC = "ideographZodiac"
+    IDEOGRAPH_ZODIAC_TRADITIONAL = "ideographZodiacTraditional"
+    TAIWANESE_DIGITAL = "taiwaneseDigital"
+    CHINESE_COUNTING = "chineseCounting"
+    KOREAN_DIGITAL = "koreanDigital"
+    KOREAN_DIGITAL_2 = "koreanDigital2"
+    RUSSIAN_LOWER = "russianLower"
+    RUSSIAN_UPPER = "russianUpper"
+    HEBREW_2 = "hebrew2"
+    ARABIC_ALPHA = "arabicAlpha"
+    ARABIC_ABJAD = "arabicAbjad"
+    HINDI_VOWELS = "hindiVowels"
+    HINDI_CONSONANTS = "hindiConsonants"
+    HINDI_NUMBERS = "hindiNumbers"
+    THAI_LETTERS = "thaiLetters"
+    THAI_NUMBERS = "thaiNumbers"
+
+
+NAME_TO_CHARSET = {
+    CharsetName.AIUEO: AIUEO,
+    CharsetName.DECIMAL: DECIMAL,
+    CharsetName.UPPER_ROMAN: UPPER_ROMAN,
+    CharsetName.LOWER_ROMAN: LOWER_ROMAN,
+    CharsetName.UPPER_LETTER: UPPER_LETTER,
+    CharsetName.LOWER_LETTER: LOWER_LETTER,
+    CharsetName.CHICAGO: CHICAGO,
+    CharsetName.IDEOGRAPH_DIGITAL: IDEOGRAPH_DIGITAL,
+    CharsetName.IROHA: IROHA,
+    CharsetName.DECIMAL_FULL_WIDTH: DECIMAL_FULL_WIDTH,
+    CharsetName.DECIMAL_HALF_WIDTH: DECIMAL_HALF_WIDTH,
+    CharsetName.JAPANESE_DIGITAL_TEN_THOUSAND: JAPANESE_DIGITAL_TEN_THOUSAND,
+    CharsetName.DECIMAL_ENCLOSED_CIRCLE: DECIMAL_ENCLOSED_CIRCLE,
+    CharsetName.DECIMAL_FULL_WIDTH_2: DECIMAL_FULL_WIDTH_2,
+    CharsetName.AIUEO_FULL_WIDTH: AIUEO_FULL_WIDTH,
+    CharsetName.IROHA_FULL_WIDTH: IROHA_FULL_WIDTH,
+    CharsetName.GANADA: GANADA,
+    CharsetName.CHOSUNG: CHOSUNG,
+    CharsetName.DECIMAL_ENCLOSED_FULLSTOP: DECIMAL_ENCLOSED_FULLSTOP,
+    CharsetName.DECIMAL_ENCLOSED_PAREN: DECIMAL_ENCLOSED_PAREN,
+    CharsetName.DECIMAL_ENCLOSED_CIRCLE_CHINESE: DECIMAL_ENCLOSED_CIRCLE_CHINESE,
+    CharsetName.IDEOGRAPH_ENCLOSED_CIRCLE: IDEOGRAPH_ENCLOSED_CIRCLE,
+    CharsetName.IDEOGRAPH_TRADITIONAL: IDEOGRAPH_TRADITIONAL,
+    CharsetName.IDEOGRAPH_ZODIAC: IDEOGRAPH_ZODIAC,
+    CharsetName.IDEOGRAPH_ZODIAC_TRADITIONAL: IDEOGRAPH_ZODIAC_TRADITIONAL,
+    CharsetName.TAIWANESE_DIGITAL: TAIWANESE_DIGITAL,
+    CharsetName.CHINESE_COUNTING: CHINESE_COUNTING,
+    CharsetName.KOREAN_DIGITAL: KOREAN_DIGITAL,
+    CharsetName.KOREAN_DIGITAL_2: KOREAN_DIGITAL_2,
+    CharsetName.RUSSIAN_LOWER: RUSSIAN_LOWER,
+    CharsetName.RUSSIAN_UPPER: RUSSIAN_UPPER,
+    CharsetName.HEBREW_2: HEBREW_2,
+    CharsetName.ARABIC_ALPHA: ARABIC_ALPHA,
+    CharsetName.ARABIC_ABJAD: ARABIC_ABJAD,
+    CharsetName.HINDI_VOWELS: HINDI_VOWELS,
+    CharsetName.HINDI_CONSONANTS: HINDI_CONSONANTS,
+    CharsetName.HINDI_NUMBERS: HINDI_NUMBERS,
+    CharsetName.THAI_LETTERS: THAI_LETTERS,
+    CharsetName.THAI_NUMBERS: THAI_NUMBERS,
+}

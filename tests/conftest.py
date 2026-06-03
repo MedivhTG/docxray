@@ -1,21 +1,12 @@
-"""pytest fixtures that are shared across test modules."""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+import os
+from pathlib import Path
 
 import pytest
 
-if TYPE_CHECKING:
-    from docx import types as t
-    from docx.parts.story import StoryPart
+EXAMPLES_DIR = Path(__file__).parent / "examples"
 
 
 @pytest.fixture
-def fake_parent() -> t.ProvidesStoryPart:
-    class ProvidesStoryPart:
-        @property
-        def part(self) -> StoryPart:
-            raise NotImplementedError
-
-    return ProvidesStoryPart()
+def test_file() -> Path:
+    file_name = os.getenv("TEST_FILE", "abc.docx")
+    return EXAMPLES_DIR / file_name
