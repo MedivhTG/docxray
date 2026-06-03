@@ -5,7 +5,7 @@
 from lxml import etree
 
 # docxray stuff
-from docxray.lxml import elm_ns_cls_lookup
+from docxray.xml import elm_ns_cls_lookup
 
 from .ns import nsmap
 from .types import ELM_T

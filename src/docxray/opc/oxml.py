@@ -5,7 +5,7 @@ from typing import TypeVar
 from lxml import etree
 
 # docxray stuff
-from docxray.lxml import BaseOxmlElement, elm_ns_cls_lookup
+from docxray.xml import BaseOxmlElement, elm_ns_cls_lookup
 
 from .constants import RELATIONSHIP_TARGET_MODE as RTM
 from .exceptions import OpcError
@@ -108,7 +108,7 @@ class CT_Relationships(OpcOxmlElement):
     @property
     def Relationship_lst(self) -> list[CT_Relationship]:
         """Return a list containing all the ``<Relationship>`` child elements."""
-        return self.findall(PR.RELATIONSHIP, CT_Relationship)
+        return self.find_all(PR.RELATIONSHIP, CT_Relationship)
 
 
 class CT_Types(OpcOxmlElement):
@@ -117,11 +117,11 @@ class CT_Types(OpcOxmlElement):
 
     @property
     def defaults(self) -> list[CT_Default]:
-        return self.findall(CT.DEFAULT, CT_Default)
+        return self.find_all(CT.DEFAULT, CT_Default)
 
     @property
     def overrides(self) -> list[CT_Override]:
-        return self.findall(CT.OVERRIDE, CT_Override)
+        return self.find_all(CT.OVERRIDE, CT_Override)
 
 
 ct_namespace = lookup.get_namespace(nsmap["ct"])

@@ -175,7 +175,7 @@ class CT_Style(OxmlElement):
     def tblStylePr_for(
         self, type: SE_TblStyleOverrideType
     ) -> CT_TblStylePr | None:
-        tblStylPr_elm = self.find(
+        tblStylPr_elm = self.find_first(
             f"./{W.TBL_STYLE_PR}[@{W.TYPE}='{type}']", CT_TblStylePr
         )
         if tblStylPr_elm is None:
@@ -197,4 +197,6 @@ class CT_Styles(OxmlElement):
         return self.child_zero_or_more(W.STYLE, CT_Style)
 
     def get_by_id(self, styleId: str) -> CT_Style | None:
-        return self.find(f"{W.STYLE}[@{W.STYLE_ID}='{styleId}']", CT_Style)
+        return self.find_first(
+            f"{W.STYLE}[@{W.STYLE_ID}='{styleId}']", CT_Style
+        )

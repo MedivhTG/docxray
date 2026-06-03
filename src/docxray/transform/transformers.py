@@ -9,7 +9,7 @@ from lxml.html import HtmlElement
 from docxray.oxml.trans.proxy.table import Table
 from docxray.transform.ruleset import RuleSet
 
-from ._lxml import to_str_html
+from .xml import to_str_html
 
 type TransformMethod = Literal["html"]
 

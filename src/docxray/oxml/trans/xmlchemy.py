@@ -9,7 +9,7 @@ from lxml.etree import QName
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.exceptions import InvalidXmlError
-from docxray.lxml import BaseOxmlElement
+from docxray.xml import BaseOxmlElement
 from docxray.xsd.primitives import XsdString
 from docxray.xsd.xsd import XsdPrimitive, XsdSimpleType
 
@@ -129,7 +129,7 @@ class OxmlElement(BaseOxmlElement):
         Returns:
             ELM_T: OxmlElement found.
         """
-        iterator = self.iterfind(elm_qn, elm_hint)
+        iterator = self.iter_children(elm_qn, elm_hint)
         child = next(iterator, None)
         if child is None:
             msg = f"Child {elm_qn} was None when one was required for {self}"
@@ -155,7 +155,7 @@ class OxmlElement(BaseOxmlElement):
         Returns:
             ELM_T | None: OxmlElement found or not.
         """
-        iterator = self.iterfind(elm_qn, elm_hint)
+        iterator = self.iter_children(elm_qn, elm_hint)
         child = next(iterator, None)
         if child is None:
             return None
@@ -177,7 +177,7 @@ class OxmlElement(BaseOxmlElement):
         Returns:
             list[ELM_T]: List of Oxmlelement's found.
         """
-        return self.findall(elm_qn, elm_hint)
+        return list(self.iter_children(elm_qn, elm_hint))
 
     def child_zero_or_n(
         self, elm_qn: str, elm_hint: type[ELM_T], max_occurs: int
@@ -197,7 +197,7 @@ class OxmlElement(BaseOxmlElement):
         """
         count = 0
         children: list[ELM_T] = []
-        iterator = self.iterfind(elm_qn, elm_hint)
+        iterator = self.iter_children(elm_qn, elm_hint)
         while count <= max_occurs:
             child = next(iterator, None)
             if child is None:

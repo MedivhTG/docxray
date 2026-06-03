@@ -58,7 +58,7 @@ class CharacterStyle(BaseStyle):
         basedOn = self.based_on
         if basedOn is None:
             return None
-        styles_elm = self.element.getparent(CT_Styles)
+        styles_elm = self.element.get_parent(CT_Styles)
         if styles_elm is None:
             return None
         style_elm = styles_elm.get_by_id(basedOn)
@@ -158,7 +158,7 @@ class NumberingStyle(BaseStyle):
         basedOn = self.based_on
         if basedOn is None:
             return None
-        styles_elm = self.element.getparent(CT_Styles)
+        styles_elm = self.element.get_parent(CT_Styles)
         if styles_elm is None:
             return None
         style_elm = styles_elm.get_by_id(basedOn)

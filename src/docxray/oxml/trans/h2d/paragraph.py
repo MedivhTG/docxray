@@ -588,6 +588,15 @@ class ParagraphH2D(How2Display[Paragraph]):
                     return style_val
             return not_found
 
+        def _from_table_style() -> Any | NotFound:
+            if self.cell:
+                tbl_val, _ = self._from_tbl_style_hierarchy(
+                    self.cell.h2d._tbl_style_props_deep, path, optional
+                )
+                if not isinstance(tbl_val, NotFound):
+                    return tbl_val
+            return not_found
+
         def _from_doc_defaults() -> Any | NotFound:
             if not for_run:
                 doc_val = self._from_doc_dflts(
@@ -602,6 +611,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 _from_level,
                 _from_para_style_direct,
                 _from_para_style_numbering,
+                _from_table_style,
                 _from_doc_defaults,
             ]
         # Even if it's list item, we must follow the logic of Word renderer that
@@ -612,6 +622,7 @@ class ParagraphH2D(How2Display[Paragraph]):
                 _from_para_style_direct,
                 _from_level,
                 _from_para_style_numbering,
+                _from_table_style,
                 _from_doc_defaults,
             ]
         else:
