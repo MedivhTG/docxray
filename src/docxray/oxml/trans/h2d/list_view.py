@@ -22,7 +22,7 @@ from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_NUMBER_FORMAT,
-    SE_Underline,
+    SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
@@ -401,12 +401,12 @@ class ListItem:
         return None
 
     @cached_property
-    def underline(self) -> None | SE_Underline:
+    def underline(self) -> None | SE_UNDERLINE:
         line = self._display_level_text_run_val("u", True)
-        if isinstance(line, NotFound) or line == SE_Underline.NONE:
+        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
             return None
         if line is None:
-            return SE_Underline.SINGLE
+            return SE_UNDERLINE.SINGLE
         return line
 
     @cached_property

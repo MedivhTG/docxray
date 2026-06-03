@@ -40,7 +40,7 @@ class SE_VerticalAlignRun(StrEnum):
     SUBSCRIPT = "subscript"
 
 
-class SE_Underline(StrEnum):
+class SE_UNDERLINE(StrEnum):
     SINGLE = "single"
     WORDS = "words"
     DOUBLE = "double"
@@ -270,7 +270,7 @@ class SE_Border(StrEnum):
     CUSTOM = "custom"
 
 
-class SE_HexColorAuto(StrEnum):
+class SE_HEX_COLOR_AUTO(StrEnum):
     AUTO = "auto"
 
 
@@ -429,3 +429,23 @@ class SE_VERTICAL_JC(StrEnum):
     CENTER = "center"
     BOTH = "both"
     BOTTOM = "bottom"
+
+
+class SE_THEME_COLOR(StrEnum):
+    DARK1 = "dark1"
+    LIGHT1 = "light1"
+    DARK2 = "dark2"
+    LIGHT2 = "light2"
+    ACCENT1 = "accent1"
+    ACCENT2 = "accent2"
+    ACCENT3 = "accent3"
+    ACCENT4 = "accent4"
+    ACCENT5 = "accent5"
+    ACCENT6 = "accent6"
+    HYPERLINK = "hyperlink"
+    FOLLOWED_HYPERLINK = "followedHyperlink"
+    NONE = "none"
+    BACKGROUND1 = "background1"
+    TEXT1 = "text1"
+    BACKGROUND2 = "background2"
+    TEXT2 = "text2"

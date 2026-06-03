@@ -4,10 +4,12 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.st.enums import (
+    SE_HEX_COLOR_AUTO,
     SE_HINT,
     SE_JC,
     SE_TEXT_DIRECTION,
     SE_THEME,
+    SE_THEME_COLOR,
     SE_Border,
     SE_OnOff1,
     SE_TblWidth,
@@ -22,14 +24,20 @@ from docxray.oxml.trans.st.wml import (
     ST_Cnf,
     ST_DateTime,
     ST_DecimalNumber,
+    ST_EighthPointMeasure,
+    ST_HexColor,
     ST_Hint,
+    ST_HpsMeasure,
     ST_Jc,
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
+    ST_PointMeasure,
     ST_SignedTwipsMeasure,
     ST_TblWidth,
     ST_TextDirection,
     ST_Theme,
+    ST_ThemeColor,
+    ST_UcharHexNumber,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
@@ -85,7 +93,21 @@ class CT_Fonts(OxmlElement):
 
 
 class CT_Color(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_HEX_COLOR_AUTO | bytes:
+        return self.attr_optional(W.COLOR, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
+
+    @cached_property
+    def themeColor(self) -> SE_THEME_COLOR | None:
+        return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
+
+    @cached_property
+    def themeTint(self) -> bytes | None:
+        return self.attr_optional(W.THEME_TINT, ST_UcharHexNumber)
+
+    @cached_property
+    def themeShade(self) -> bytes | None:
+        return self.attr_optional(W.THEME_SHADE, ST_UcharHexNumber)
 
 
 class CT_SignedTwipsMeasure(OxmlElement):
@@ -99,7 +121,9 @@ class CT_TextScale(OxmlElement):
 
 
 class CT_HpsMeasure(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> int | str:
+        return self.attr_required(W.VAL, ST_HpsMeasure)
 
 
 class CT_SignedHpsMeasure(OxmlElement):
@@ -119,30 +143,29 @@ class CT_Border(OxmlElement):
     def val(self) -> SE_Border:
         return self.attr_required(W.VAL, ST_Border)
 
-    # TODO: uncomment and do work
-    # @cached_property
-    # def color(self) -> Literal["auto"] | str | None:
-    #     return self.attr_optional(W.COLOR, ST_HexColor)
+    @cached_property
+    def color(self) -> SE_HEX_COLOR_AUTO | bytes:
+        return self.attr_optional(W.COLOR, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
 
-    # @cached_property
-    # def themeColor(self):
-    #     return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
+    @cached_property
+    def themeColor(self) -> SE_THEME_COLOR | None:
+        return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
 
-    # @cached_property
-    # def themeTint(self):
-    #     return self.attr_optional(W.THEME_TINT, ST_UcharHexNumber)
+    @cached_property
+    def themeTint(self) -> bytes | None:
+        return self.attr_optional(W.THEME_TINT, ST_UcharHexNumber)
 
-    # @cached_property
-    # def themeShade(self):
-    #     return self.attr_optional(W.THEME_SHADE, ST_UcharHexNumber)
+    @cached_property
+    def themeShade(self) -> bytes | None:
+        return self.attr_optional(W.THEME_SHADE, ST_UcharHexNumber)
 
-    # @cached_property
-    # def sz(self):
-    #     return self.attr_optional(W.SZ, ST_EighthPointMeasure)
+    @cached_property
+    def sz(self) -> int | None:
+        return self.attr_optional(W.SZ, ST_EighthPointMeasure)
 
-    # @cached_property
-    # def space(self):
-    #     return self.attr_optional(W.SPACE, ST_PointMeasure)
+    @cached_property
+    def space(self) -> int:
+        return self.attr_optional(W.SPACE, ST_PointMeasure, 0)
 
     @cached_property
     def shadow(self) -> bool | None:

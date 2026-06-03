@@ -19,9 +19,9 @@ from docxray.oxml.trans.st.enums import (
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
     SE_TEXT_DIRECTION,
+    SE_UNDERLINE,
     SE_VERTICAL_JC,
     SE_Border,
-    SE_Underline,
     SE_VerticalAlignRun,
 )
 
@@ -44,21 +44,21 @@ type ElmMaker = Callable[[Any], HtmlElement]
 TAB_MNEMONIC = "&emsp;"
 SPACEBREAK_MNEMONIC = "&nbsp;"
 U_DECOR_MAP = {
-    SE_Underline.SINGLE: "underline",
-    SE_Underline.DOUBLE: "underline double",
-    SE_Underline.DOTTED: "underline dotted",
-    SE_Underline.DASH: "underline dashed",
-    SE_Underline.WAVE: "underline wavy",
-    SE_Underline.DOTTED_HEAVY: "underline dotted",
-    SE_Underline.DASHED_HEAVY: "underline dashed",
-    SE_Underline.DASH_LONG: "underline dashed",
-    SE_Underline.DASH_LONG_HEAVY: "underline dashed",
-    SE_Underline.DOT_DASH: "underline dotted",
-    SE_Underline.DASH_DOT_HEAVY: "underline dashed",
-    SE_Underline.DOT_DOT_DASH: "underline dotted",
-    SE_Underline.DASH_DOT_DOT_HEAVY: "underline dashed",
-    SE_Underline.WAVY_HEAVY: "underline wavy",
-    SE_Underline.WAVY_DOUBLE: "underline waby",
+    SE_UNDERLINE.SINGLE: "underline",
+    SE_UNDERLINE.DOUBLE: "underline double",
+    SE_UNDERLINE.DOTTED: "underline dotted",
+    SE_UNDERLINE.DASH: "underline dashed",
+    SE_UNDERLINE.WAVE: "underline wavy",
+    SE_UNDERLINE.DOTTED_HEAVY: "underline dotted",
+    SE_UNDERLINE.DASHED_HEAVY: "underline dashed",
+    SE_UNDERLINE.DASH_LONG: "underline dashed",
+    SE_UNDERLINE.DASH_LONG_HEAVY: "underline dashed",
+    SE_UNDERLINE.DOT_DASH: "underline dotted",
+    SE_UNDERLINE.DASH_DOT_HEAVY: "underline dashed",
+    SE_UNDERLINE.DOT_DOT_DASH: "underline dotted",
+    SE_UNDERLINE.DASH_DOT_DOT_HEAVY: "underline dashed",
+    SE_UNDERLINE.WAVY_HEAVY: "underline wavy",
+    SE_UNDERLINE.WAVY_DOUBLE: "underline waby",
 }
 TEXT_FLOW_TO_WRITING_MODE = {
     SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
@@ -93,7 +93,7 @@ def strike_elm(value: bool) -> HtmlElement:
     return Element("s")
 
 
-def underline_elm(value: SE_Underline) -> HtmlElement:
+def underline_elm(value: SE_UNDERLINE) -> HtmlElement:
     decor = U_DECOR_MAP.get(value)
     if decor is None:
         decor = "underline"

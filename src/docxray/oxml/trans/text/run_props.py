@@ -24,13 +24,20 @@ from docxray.oxml.trans.shared import (
     CT_TrackChange,
 )
 from docxray.oxml.trans.st.enums import (
-    SE_Underline,
+    SE_HEX_COLOR_AUTO,
+    SE_THEME_COLOR,
+    SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.st.shared_common import (
     ST_VerticalAlignRun,
 )
-from docxray.oxml.trans.st.wml import ST_Underline
+from docxray.oxml.trans.st.wml import (
+    ST_HexColor,
+    ST_ThemeColor,
+    ST_UcharHexNumber,
+    ST_Underline,
+)
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 
@@ -42,8 +49,24 @@ class CT_VerticalAlignRun(OxmlElement):
 
 class CT_Underline(OxmlElement):
     @cached_property
-    def val(self) -> SE_Underline | None:
+    def val(self) -> SE_UNDERLINE | None:
         return self.attr_optional(W.VAL, ST_Underline)
+
+    @cached_property
+    def color(self) -> SE_HEX_COLOR_AUTO | bytes:
+        return self.attr_optional(W.COLOR, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
+
+    @cached_property
+    def themeColor(self) -> SE_THEME_COLOR | None:
+        return self.attr_optional(W.THEME_COLOR, ST_ThemeColor)
+
+    @cached_property
+    def themeTint(self) -> bytes | None:
+        return self.attr_optional(W.THEME_TINT, ST_UcharHexNumber)
+
+    @cached_property
+    def themeShade(self) -> bytes | None:
+        return self.attr_optional(W.THEME_SHADE, ST_UcharHexNumber)
 
 
 class CT_RPrOriginal(OxmlElement):

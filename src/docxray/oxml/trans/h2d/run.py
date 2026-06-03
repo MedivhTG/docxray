@@ -12,9 +12,9 @@ from docxray.oxml.trans.proxy.styles.style import (
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import (
+    SE_UNDERLINE,
     SE_OnOff1,
     SE_StyleType,
-    SE_Underline,
     SE_VerticalAlignRun,
 )
 
@@ -52,12 +52,12 @@ class RunH2D(How2Display[Run]):
 
     # TODO: change after if needed
     @cached_property
-    def underline(self) -> None | SE_Underline:
+    def underline(self) -> None | SE_UNDERLINE:
         line = self._display_val("u")
-        if isinstance(line, NotFound) or line == SE_Underline.NONE:
+        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
             return None
         if line is None:
-            return SE_Underline.SINGLE
+            return SE_UNDERLINE.SINGLE
         return line
 
     @cached_property

@@ -1,7 +1,8 @@
 # docxray stuff
-from docxray.xsd.facets import EnumerationFacet, PatternFacet
+from docxray.xsd.facets import EnumerationFacet, LengthFacet, PatternFacet
 from docxray.xsd.primitives import (
     XsdBoolean,
+    XsdHexBinary,
     XsdString,
     XsdUnsignedLong,
 )
@@ -59,3 +60,8 @@ class ST_TwipsMeasure(XsdSimpleType):
 
 class ST_Lang(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
+
+
+class ST_HexColorRGB(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdHexBinary)
+    FACETS = {"length": LengthFacet(3, True)}

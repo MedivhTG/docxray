@@ -13,7 +13,7 @@ from docxray.oxml.trans.shared import CT_Empty
 from docxray.oxml.trans.st.enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
-    SE_Underline,
+    SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.text.run import CT_R, CT_Br, CT_PTab, CT_Text
@@ -91,7 +91,7 @@ class Run(StoryChild[CT_R]):
         return self.h2d.single_strike_through
 
     @cached_property
-    def underline(self) -> SE_Underline | None:
+    def underline(self) -> SE_UNDERLINE | None:
         return self.h2d.underline
 
     @cached_property

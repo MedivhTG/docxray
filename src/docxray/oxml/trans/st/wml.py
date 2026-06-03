@@ -20,6 +20,7 @@ from .enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
     SE_HEIGHT_RULE,
+    SE_HEX_COLOR_AUTO,
     SE_HINT,
     SE_JC,
     SE_LEVEL_SUFFIX,
@@ -28,17 +29,23 @@ from .enums import (
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_THEME,
+    SE_THEME_COLOR,
+    SE_UNDERLINE,
     SE_VERTICAL_JC,
     SE_Border,
-    SE_HexColorAuto,
     SE_Merge,
     SE_MultilevelType,
     SE_StyleType,
     SE_TblStyleOverrideType,
     SE_TblWidth,
-    SE_Underline,
 )
-from .shared_common import ST_Percentage, ST_UniversalMeasure
+from .shared_common import (
+    ST_HexColorRGB,
+    ST_Percentage,
+    ST_PositiveUniversalMeasure,
+    ST_UniversalMeasure,
+    ST_UnsignedDecimalNumber,
+)
 
 
 class ST_DateTime(XsdSimpleType):
@@ -79,7 +86,7 @@ class ST_Merge(XsdSimpleType):
 
 class ST_Underline(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_Underline)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_UNDERLINE)}
 
 
 class ST_MultiLevelType(XsdSimpleType):
@@ -99,7 +106,7 @@ class ST_Border(XsdSimpleType):
 
 class ST_HexColorAuto(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HexColorAuto)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HEX_COLOR_AUTO)}
 
 
 class ST_UnqualifiedPercentage(XsdSimpleType):
@@ -181,3 +188,29 @@ class ST_LineSpacingRule(XsdSimpleType):
 class ST_VerticalJc(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_VERTICAL_JC)}
+
+
+class ST_HexColor(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_HexColorAuto, ST_HexColorRGB)
+
+
+class ST_ThemeColor(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_THEME_COLOR)}
+
+
+class ST_UcharHexNumber(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdHexBinary)
+    FACETS = {"length": LengthFacet(1)}
+
+
+class ST_EighthPointMeasure(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_UnsignedDecimalNumber)
+
+
+class ST_PointMeasure(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_UnsignedDecimalNumber)
+
+
+class ST_HpsMeasure(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_UnsignedDecimalNumber, ST_PositiveUniversalMeasure)
