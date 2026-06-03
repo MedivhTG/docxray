@@ -21,7 +21,7 @@ from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
-    SE_Border,
+    SE_BORDER,
     SE_VerticalAlignRun,
 )
 
@@ -409,31 +409,31 @@ class HtmlTable(HtmlBuilder["Table"]):
         SE_VERTICAL_JC.BOTH: "middle",
     }
     SE_BORDER_TO_CSS = {
-        SE_Border.SINGLE: "1px solid black",
-        SE_Border.THICK: "thick solid black",
-        SE_Border.DOUBLE: "3px double black",
-        SE_Border.DOTTED: "2px dotted black",
-        SE_Border.DASHED: "2px dashed black",
-        SE_Border.DOT_DASH: "2px dashed black",
-        SE_Border.DOT_DOT_DASH: "2px dashed black",
-        SE_Border.TRIPLE: "2px double black;",
-        SE_Border.THIN_THICK_SMALL_GAP: "thick solid black",
-        SE_Border.THICK_THIN_SMALL_GAP: "thick solid black",
-        SE_Border.THIN_THICK_THIN_SMALL_GAP: "thick solid black",
-        SE_Border.THIN_THICK_MEDIUM_GAP: "3px double black",
-        SE_Border.THICK_THIN_MEDIUM_GAP: "3px double black",
-        SE_Border.THIN_THICK_THIN_MEDIUM_GAP: "3px double black",
-        SE_Border.THIN_THICK_LARGE_GAP: "4px double black",
-        SE_Border.THICK_THIN_LARGE_GAP: "4px double black",
-        SE_Border.THIN_THICK_THIN_LARGE_GAP: "4px double black",
-        SE_Border.WAVE: "3px groove black",
-        SE_Border.DOUBLE_WAVE: "3px ridge black",
-        SE_Border.DASH_SMALL_GAP: "2px dashed black",
-        SE_Border.DASH_DOT_STROKED: "2px dotted black",
-        SE_Border.THREE_D_EMBOSS: "3px ridge black",
-        SE_Border.THREE_D_ENGRAVE: "3px groove black",
-        SE_Border.OUTSET: "3px outset black",
-        SE_Border.INSET: "3px inset black",
+        SE_BORDER.SINGLE: "1px solid black",
+        SE_BORDER.THICK: "thick solid black",
+        SE_BORDER.DOUBLE: "3px double black",
+        SE_BORDER.DOTTED: "2px dotted black",
+        SE_BORDER.DASHED: "2px dashed black",
+        SE_BORDER.DOT_DASH: "2px dashed black",
+        SE_BORDER.DOT_DOT_DASH: "2px dashed black",
+        SE_BORDER.TRIPLE: "2px double black;",
+        SE_BORDER.THIN_THICK_SMALL_GAP: "thick solid black",
+        SE_BORDER.THICK_THIN_SMALL_GAP: "thick solid black",
+        SE_BORDER.THIN_THICK_THIN_SMALL_GAP: "thick solid black",
+        SE_BORDER.THIN_THICK_MEDIUM_GAP: "3px double black",
+        SE_BORDER.THICK_THIN_MEDIUM_GAP: "3px double black",
+        SE_BORDER.THIN_THICK_THIN_MEDIUM_GAP: "3px double black",
+        SE_BORDER.THIN_THICK_LARGE_GAP: "4px double black",
+        SE_BORDER.THICK_THIN_LARGE_GAP: "4px double black",
+        SE_BORDER.THIN_THICK_THIN_LARGE_GAP: "4px double black",
+        SE_BORDER.WAVE: "3px groove black",
+        SE_BORDER.DOUBLE_WAVE: "3px ridge black",
+        SE_BORDER.DASH_SMALL_GAP: "2px dashed black",
+        SE_BORDER.DASH_DOT_STROKED: "2px dotted black",
+        SE_BORDER.THREE_D_EMBOSS: "3px ridge black",
+        SE_BORDER.THREE_D_ENGRAVE: "3px groove black",
+        SE_BORDER.OUTSET: "3px outset black",
+        SE_BORDER.INSET: "3px inset black",
     }
 
     @classmethod
@@ -510,10 +510,10 @@ class HtmlTable(HtmlBuilder["Table"]):
         return style
 
     @classmethod
-    def _cell_border(cls, border: SE_Border | None, side: str) -> str:
+    def _cell_border(cls, border: SE_BORDER | None, side: str) -> str:
         b = ""
         if (
-            border not in (SE_Border.NULL, SE_Border.NONE)
+            border not in (SE_BORDER.NULL, SE_BORDER.NONE)
             and border is not None
         ):
             border_css = cls.SE_BORDER_TO_CSS.get(border) or "1px solid black"

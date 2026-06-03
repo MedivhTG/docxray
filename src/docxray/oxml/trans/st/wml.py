@@ -32,7 +32,7 @@ from .enums import (
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
-    SE_Border,
+    SE_BORDER,
     SE_Merge,
     SE_MultilevelType,
     SE_StyleType,
@@ -101,7 +101,7 @@ class ST_TblWidth(XsdSimpleType):
 
 class ST_Border(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_Border)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_BORDER)}
 
 
 class ST_HexColorAuto(XsdSimpleType):

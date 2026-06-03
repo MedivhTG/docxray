@@ -6,7 +6,7 @@ from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import (
     SE_HEX_COLOR_AUTO,
-    SE_Border,
+    SE_BORDER,
 )
 
 from .colorize import Colorize
@@ -14,7 +14,7 @@ from .colorize import Colorize
 
 class Border(ElementProxy[CT_Border]):
     @cached_property
-    def border_type(self) -> SE_Border:
+    def border_type(self) -> SE_BORDER:
         return self.element.val
 
     @cached_property

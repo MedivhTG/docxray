@@ -74,7 +74,7 @@ class SE_TblWidth(StrEnum):
     AUTO = "auto"
 
 
-class SE_Border(StrEnum):
+class SE_BORDER(StrEnum):
     NULL = "nil"
     NONE = "none"
     SINGLE = "single"

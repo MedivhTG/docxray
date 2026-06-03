@@ -10,7 +10,7 @@ from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_THEME,
     SE_THEME_COLOR,
-    SE_Border,
+    SE_BORDER,
     SE_OnOff1,
     SE_TblWidth,
 )
@@ -140,7 +140,7 @@ class CT_TextEffect(OxmlElement):
 
 class CT_Border(OxmlElement):
     @cached_property
-    def val(self) -> SE_Border:
+    def val(self) -> SE_BORDER:
         return self.attr_required(W.VAL, ST_Border)
 
     @cached_property
