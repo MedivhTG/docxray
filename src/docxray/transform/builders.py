@@ -42,6 +42,7 @@ T = TypeVar("T")
 
 type ElmMaker = Callable[[Any], HtmlElement]
 TAB_MNEMONIC = "&emsp;"
+SPACEBREAK_MNEMONIC = "&nbsp;"
 U_DECOR_MAP = {
     SE_Underline.SINGLE: "underline",
     SE_Underline.DOUBLE: "underline double",
@@ -190,6 +191,9 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
+        if not proxy.has_text and not proxy.has_picture:
+            elm.text = SPACEBREAK_MNEMONIC
+            return
         chain_map = RunChainsMap(set(cls.ATTR_TO_ELMMAKER))
         for run_or_hlink in proxy.iter_inner_content():
             if isinstance(run_or_hlink, Run):

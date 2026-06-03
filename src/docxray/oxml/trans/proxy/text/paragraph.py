@@ -148,6 +148,16 @@ class Paragraph(StoryChild[CT_P]):
     def has_page_break(self) -> bool:
         return self.element.xpath('boolean(.//w:br[@w:type="page"])')
 
+    @cached_property
+    def has_text(self) -> bool:
+        return self.element.xpath("boolean(.//w:t)")
+
+    @cached_property
+    def has_picture(self) -> bool:
+        return self.element.xpath(
+            "boolean(.//pic:pic/pic:blipFill/a:blip/@r:embed)"
+        )
+
     def transform(
         self,
         ruleset: RuleSet | None = None,

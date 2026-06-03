@@ -196,6 +196,126 @@ class CellH2D(How2Display[Cell]):
         inf["spacing"] = self._spacing
         return inf
 
+    @cached_property
+    def _cell_borders_ctx(
+        self,
+    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
+        return self._prop_with_ctx("tcBorders")
+
+    @cached_property
+    def _spacing(self) -> Length | float | None:
+        name = "tblCellSpacing"
+        row_h2d = self.row.h2d
+        tbl_h2d = row_h2d.table.h2d
+        # Row-level direct
+        spacing_elm = row_h2d._prop(name)
+        if not isinstance(spacing_elm, NotFound):
+            return width(spacing_elm, True)
+        # Row-level exception
+        tblPrEx_elm = row_h2d._tblPrEx
+        if tblPrEx_elm is not None:
+            spacing_elm = tblPrEx_elm.tblCellSpacing
+            if spacing_elm is not None:
+                return width(spacing_elm, True)
+        # Table-level
+        spacing_elm = tbl_h2d._prop(name)
+        if not isinstance(spacing_elm, NotFound):
+            return width(spacing_elm, True)
+
+        # From table style (defined common or exception)
+        path = row_h2d._prop_path(name, row_h2d._path_base)
+        # Table style Row-level (in grid group or direct) firstly
+        spacing_elm, _ = self._from_tbl_style_hierarchy(
+            self._tbl_style_props_deep, path
+        )
+        if not isinstance(spacing_elm, NotFound):
+            return width(spacing_elm, True)
+        # Table style Table-level (in grid group or direct) lastly
+        path = tbl_h2d._prop_path(name, tbl_h2d._path_base)
+        spacing_elm, _ = self._from_tbl_style_hierarchy(
+            self._tbl_style_props_deep, path
+        )
+        if not isinstance(spacing_elm, NotFound):
+            return width(spacing_elm, True)
+        return None
+
+    @cached_property
+    def _row_band_number(self) -> int:
+        cell = self._proxy
+        band_shift = 1 if cell.row.h2d._shift_horz_bands else 0
+        y_shift = cell.grid_y + 1 + band_shift
+        return y_shift // cell.table.h2d._row_band_size
+
+    @cached_property
+    def _col_band_number(self) -> int:
+        cell = self._proxy
+        band_shift = 1 if cell.row.h2d._shift_vert_bands else 0
+        x_shift = cell.idx + 1 + band_shift
+        return x_shift // cell.table.h2d._col_band_size
+
+    @cached_property
+    def _cnf_latent(self) -> WD_CNF_FORMAT:
+        _CNF = WD_CNF_FORMAT
+        cell = self._proxy
+        row_h2d = cell.row.h2d
+        cnf = _CNF(0)
+        # Special rows/columns
+        if cell.grid_y == 0:
+            cnf |= _CNF.FIRST_ROW
+        if cell.cell_below is None:
+            cnf |= _CNF.LAST_ROW
+        if cell.grid_x == 0:
+            cnf |= _CNF.FIRST_COLUMN
+        if cell.cell_next is None:
+            cnf |= _CNF.LAST_COLUMN
+        # Corner group
+        if cell.grid_y == 0 and cell.grid_x == 0:
+            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
+        if cell.grid_y == 0 and cell.cell_next is None:
+            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
+        if cell.cell_below is None and cell.grid_x == 0:
+            cnf |= _CNF.LAST_ROW_FIRST_COLUMN
+        if cell.cell_below is None and cell.cell_next is None:
+            cnf |= _CNF.LAST_ROW_LAST_COLUMN
+        # Horizontal/Vertical Bands
+        has_vert_band_shift_group = (
+            _CNF.FIRST_COLUMN & cnf
+            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
+            or _CNF.LAST_ROW_FIRST_COLUMN & cnf
+        )
+        if not (row_h2d._shift_vert_bands and has_vert_band_shift_group):
+            if self._col_band_number % 2 == 0:
+                cnf |= _CNF.EVEN_VERTICAL_BAND
+            else:
+                cnf |= _CNF.ODD_VERTICAL_BAND
+        has_horz_band_shift_group = (
+            _CNF.FIRST_ROW & cnf
+            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
+            or _CNF.FIRST_ROW_LAST_COLUMN & cnf
+        )
+        if not (row_h2d._shift_vert_bands and has_horz_band_shift_group):
+            if self._row_band_number % 2 == 0:
+                cnf |= _CNF.EVEN_HORIZONTAL_BAND
+            else:
+                cnf |= _CNF.ODD_HORIZONTAL_BAND
+        return cnf
+
+    @cached_property
+    def _tbl_style_props_deep(
+        self,
+    ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
+        tbl_style = self._table_style
+        props_leveled = []
+        cnf = self._cnf_latent
+        while isinstance(tbl_style, TableStyle):
+            if cnf is not None:
+                tbl_style_props = self._table_style_props(tbl_style, cnf)
+            else:
+                tbl_style_props = []
+            props_leveled.append((tbl_style, tbl_style_props))
+            tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
+        return props_leveled
+
     def _spacing_non_zero(self) -> BordersInfo:
         inf: BordersInfo = {
             "top": None,
@@ -615,126 +735,6 @@ class CellH2D(How2Display[Cell]):
         if not isinstance(tc_ctx[0], NotFound):
             return tc_ctx
         return None, None
-
-    @cached_property
-    def _cell_borders_ctx(
-        self,
-    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
-        return self._prop_with_ctx("tcBorders")
-
-    @cached_property
-    def _spacing(self) -> Length | float | None:
-        name = "tblCellSpacing"
-        row_h2d = self.row.h2d
-        tbl_h2d = row_h2d.table.h2d
-        # Row-level direct
-        spacing_elm = row_h2d._prop(name)
-        if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm, True)
-        # Row-level exception
-        tblPrEx_elm = row_h2d._tblPrEx
-        if tblPrEx_elm is not None:
-            spacing_elm = tblPrEx_elm.tblCellSpacing
-            if spacing_elm is not None:
-                return width(spacing_elm, True)
-        # Table-level
-        spacing_elm = tbl_h2d._prop(name)
-        if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm, True)
-
-        # From table style (defined common or exception)
-        path = row_h2d._prop_path(name, row_h2d._path_base)
-        # Table style Row-level (in grid group or direct) firstly
-        spacing_elm, _ = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
-        if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm, True)
-        # Table style Table-level (in grid group or direct) lastly
-        path = tbl_h2d._prop_path(name, tbl_h2d._path_base)
-        spacing_elm, _ = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
-        if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm, True)
-        return None
-
-    @cached_property
-    def _row_band_number(self) -> int:
-        cell = self._proxy
-        band_shift = 1 if cell.row.h2d._shift_horz_bands else 0
-        y_shift = cell.grid_y + 1 + band_shift
-        return y_shift // cell.table.h2d._row_band_size
-
-    @cached_property
-    def _col_band_number(self) -> int:
-        cell = self._proxy
-        band_shift = 1 if cell.row.h2d._shift_vert_bands else 0
-        x_shift = cell.idx + 1 + band_shift
-        return x_shift // cell.table.h2d._col_band_size
-
-    @cached_property
-    def _cnf_latent(self) -> WD_CNF_FORMAT:
-        _CNF = WD_CNF_FORMAT
-        cell = self._proxy
-        row_h2d = cell.row.h2d
-        cnf = _CNF(0)
-        # Special rows/columns
-        if cell.grid_y == 0:
-            cnf |= _CNF.FIRST_ROW
-        if cell.cell_below is None:
-            cnf |= _CNF.LAST_ROW
-        if cell.grid_x == 0:
-            cnf |= _CNF.FIRST_COLUMN
-        if cell.cell_next is None:
-            cnf |= _CNF.LAST_COLUMN
-        # Corner group
-        if cell.grid_y == 0 and cell.grid_x == 0:
-            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
-        if cell.grid_y == 0 and cell.cell_next is None:
-            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
-        if cell.cell_below is None and cell.grid_x == 0:
-            cnf |= _CNF.LAST_ROW_FIRST_COLUMN
-        if cell.cell_below is None and cell.cell_next is None:
-            cnf |= _CNF.LAST_ROW_LAST_COLUMN
-        # Horizontal/Vertical Bands
-        has_vert_band_shift_group = (
-            _CNF.FIRST_COLUMN & cnf
-            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
-            or _CNF.LAST_ROW_FIRST_COLUMN & cnf
-        )
-        if not (row_h2d._shift_vert_bands and has_vert_band_shift_group):
-            if self._col_band_number % 2 == 0:
-                cnf |= _CNF.EVEN_VERTICAL_BAND
-            else:
-                cnf |= _CNF.ODD_VERTICAL_BAND
-        has_horz_band_shift_group = (
-            _CNF.FIRST_ROW & cnf
-            or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
-            or _CNF.FIRST_ROW_LAST_COLUMN & cnf
-        )
-        if not (row_h2d._shift_vert_bands and has_horz_band_shift_group):
-            if self._row_band_number % 2 == 0:
-                cnf |= _CNF.EVEN_HORIZONTAL_BAND
-            else:
-                cnf |= _CNF.ODD_HORIZONTAL_BAND
-        return cnf
-
-    @cached_property
-    def _tbl_style_props_deep(
-        self,
-    ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
-        tbl_style = self._table_style
-        props_leveled = []
-        cnf = self._cnf_latent
-        while isinstance(tbl_style, TableStyle):
-            if cnf is not None:
-                tbl_style_props = self._table_style_props(tbl_style, cnf)
-            else:
-                tbl_style_props = []
-            props_leveled.append((tbl_style, tbl_style_props))
-            tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
-        return props_leveled
 
     def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
         row_h2d = self.row.h2d
