@@ -132,11 +132,11 @@ class ParagraphH2D(How2Display[Paragraph]):
         Returns:
             bool: _description_
         """
-        return on_off(self._display_val("mirrorIndents"))
+        return on_off(self._display_val("mirrorIndents", True))
 
     @cached_property
     def right_to_left(self) -> bool:
-        return on_off(self._display_val("bidi"))
+        return on_off(self._display_val("bidi", True))
 
     # TODO: inherit from parent Section if omitted
     @cached_property
@@ -559,45 +559,65 @@ class ParagraphH2D(How2Display[Paragraph]):
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
     ) -> Any:
         for_run: bool | None = kwargs.pop("for_run", None)
-        if self._direct_case == "numbering_first":
+        not_found = NotFound(self, path)
+
+        def _from_level() -> Any | NotFound:
             if self._associated_level is not None and not for_run:
                 numbering_val = safe_get_prop(
                     self._associated_level.element, path, optional
                 )
                 if not isinstance(numbering_val, NotFound):
                     return numbering_val
+            return not_found
+
+        def _from_para_style_direct() -> Any | NotFound:
             if self._para_style_direct:
                 style_val = self._from_style_inheritance(
                     self._para_style_direct, path, optional
                 )
                 if not isinstance(style_val, NotFound):
                     return style_val
+            return not_found
+
+        def _from_para_style_numbering() -> Any | NotFound:
             if self._para_style_numbering and not for_run:
                 style_val = self._from_style_inheritance(
                     self._para_style_numbering, path, optional
                 )
                 if not isinstance(style_val, NotFound):
                     return style_val
+            return not_found
+
+        def _from_doc_defaults() -> Any | NotFound:
+            if not for_run:
+                doc_val = self._from_doc_dflts(
+                    path.join_left("pPrDefault"), optional
+                )
+                if not isinstance(doc_val, NotFound):
+                    return doc_val
+            return not_found
+
+        if self._direct_case == "numbering_first":
+            search_list = [
+                _from_level,
+                _from_para_style_direct,
+                _from_para_style_numbering,
+                _from_doc_defaults,
+            ]
         # Even if it's list item, we must follow the logic of Word renderer that
         # getting firstly property from paragraph styles in styles.xml then
         # we go to numbering
         elif self._direct_case == "paragraph_first":
-            if self._para_style_direct:
-                style_val = self._from_style_inheritance(
-                    self._para_style_direct, path, optional
-                )
-                if not isinstance(style_val, NotFound):
-                    return style_val
-            if self._associated_level is not None and not for_run:
-                numbering_val = safe_get_prop(
-                    self._associated_level.element, path, optional
-                )
-                if not isinstance(numbering_val, NotFound):
-                    return numbering_val
-            if self._para_style_numbering and not for_run:
-                style_val = self._from_style_inheritance(
-                    self._para_style_numbering, path, optional
-                )
-                if not isinstance(style_val, NotFound):
-                    return style_val
-        return NotFound(self, path)
+            search_list = [
+                _from_para_style_direct,
+                _from_level,
+                _from_para_style_numbering,
+                _from_doc_defaults,
+            ]
+        else:
+            search_list = []
+        for search_method in search_list:
+            val = search_method()
+            if not isinstance(val, NotFound):
+                return val
+        return not_found

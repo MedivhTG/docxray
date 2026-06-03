@@ -304,7 +304,12 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         alignment = proxy.alignment
         algn = ""
         if alignment in cls.ALGN_TO_ALGN:
-            algn += f"text-align: {cls.ALGN_TO_ALGN[alignment]}; "
+            if proxy.right_to_left and alignment in (SE_JC.START, SE_JC.LEFT):
+                algn += f"text-align: {cls.ALGN_TO_ALGN[SE_JC.RIGHT]}; "
+            elif proxy.right_to_left and alignment in (SE_JC.END, SE_JC.RIGHT):
+                algn += f"text-align: {cls.ALGN_TO_ALGN[SE_JC.LEFT]}; "
+            else:
+                algn += f"text-align: {cls.ALGN_TO_ALGN[alignment]}; "
         elif alignment in cls.ALGN_TO_JSTFY:
             if alignment in cls.ALGN_JSTFIED:
                 algn += "text-align: justify;"
