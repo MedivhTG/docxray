@@ -32,6 +32,7 @@ from docxray.oxml.trans.table.table_props import CT_TblBorders
 
 from .exceptions import DisplayError
 from .how2display import How2Display
+from .border import Border
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
 type _TableChild = Literal["row", "cell"]
@@ -83,10 +84,10 @@ class BordersDropped(TypedDict):
 
 
 class BordersInfo(TypedDict):
-    top: SE_BORDER | None
-    bottom: SE_BORDER | None
-    left: SE_BORDER | None
-    right: SE_BORDER | None
+    top: Border | None
+    bottom: Border | None
+    left: Border | None
+    right: Border | None
     spacing: Length | float | None
     _sides_dropped_to_table_borders: BordersDropped
 
@@ -406,8 +407,8 @@ class CellH2D(How2Display[Cell]):
     def _case_1_tc_borders_ommited(
         self,
         inf: BordersInfo,
-        tbl_horz: SE_BORDER | None,
-        tbl_vert: SE_BORDER | None,
+        tbl_horz: Border | None,
+        tbl_vert: Border | None,
     ) -> None:
         inf["top"] = tbl_horz
         inf["bottom"] = tbl_horz
@@ -418,8 +419,8 @@ class CellH2D(How2Display[Cell]):
         self,
         inf: BordersInfo,
         tcBorders_elm: CT_TcBorders,
-        tbl_horz: SE_BORDER | None,
-        tbl_vert: SE_BORDER | None,
+        tbl_horz: Border | None,
+        tbl_vert: Border | None,
     ) -> None:
         top = self._border(tcBorders_elm, "top")
         if top:
@@ -450,8 +451,8 @@ class CellH2D(How2Display[Cell]):
         self,
         inf: BordersInfo,
         tcBorders_elm: CT_TcBorders,
-        tbl_horz: SE_BORDER | None,
-        tbl_vert: SE_BORDER | None,
+        tbl_horz: Border | None,
+        tbl_vert: Border | None,
     ) -> None:
         self._case_2_tc_borders_direct(inf, tcBorders_elm, tbl_horz, tbl_vert)
 
@@ -459,8 +460,8 @@ class CellH2D(How2Display[Cell]):
         self,
         inf: BordersInfo,
         tcBorders_elm: CT_TcBorders,
-        tbl_horz: SE_BORDER | None,
-        tbl_vert: SE_BORDER | None,
+        tbl_horz: Border | None,
+        tbl_vert: Border | None,
         grid_group: SE_TblStyleOverrideType,
     ) -> None:
         cell = self._proxy
@@ -531,8 +532,8 @@ class CellH2D(How2Display[Cell]):
         dropped: BordersDropped,
         row_pos: POS,
         tcBorders_elm: CT_TcBorders,
-        tbl_horz: SE_BORDER | None,
-    ) -> tuple[SE_BORDER | None, SE_BORDER | None]:
+        tbl_horz: Border | None,
+    ) -> tuple[Border | None, Border | None]:
         top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
         top = self._border(tcBorders_elm, top_n)
         if top_n == "insideH" and top is None:
@@ -557,8 +558,8 @@ class CellH2D(How2Display[Cell]):
         dropped: BordersDropped,
         cell_pos: POS,
         tcBorders_elm: CT_TcBorders,
-        tbl_vert: SE_BORDER | None,
-    ) -> tuple[SE_BORDER | None, SE_BORDER | None]:
+        tbl_vert: Border | None,
+    ) -> tuple[Border | None, Border | None]:
         left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
         left = self._border(tcBorders_elm, left_n)
         if left_n == "insideV" and left is None:
@@ -580,12 +581,12 @@ class CellH2D(How2Display[Cell]):
 
     def _border(
         self, borders_elm: CT_TcBorders | CT_TblBorders | None, border: _Border
-    ) -> SE_BORDER | None:
-        path = self._prop_path("val", border)
+    ) -> Border | None:
+        path = self._prop_path(border)
         prop = safe_get_prop(borders_elm, path)
         if isinstance(prop, NotFound):
             return None
-        return prop
+        return Border(prop, self._proxy)
 
     def _vert_borders_conflict(
         self,
@@ -593,9 +594,9 @@ class CellH2D(How2Display[Cell]):
         cell_pos: POS,
         cell_prev_h2d: CellH2D | None,
         cell_next_h2d: CellH2D | None,
-        tbl_left: SE_BORDER | None,
-        tbl_right: SE_BORDER | None,
-        tbl_vert: SE_BORDER | None,
+        tbl_left: Border | None,
+        tbl_right: Border | None,
+        tbl_vert: Border | None,
     ) -> None:
         left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
         if left_n == "left":
@@ -637,9 +638,9 @@ class CellH2D(How2Display[Cell]):
         row_pos: POS,
         cell_above_h2d: CellH2D | None,
         cell_below_h2d: CellH2D | None,
-        tbl_top: SE_BORDER | None,
-        tbl_bottom: SE_BORDER | None,
-        tbl_horz: SE_BORDER | None,
+        tbl_top: Border | None,
+        tbl_bottom: Border | None,
+        tbl_horz: Border | None,
     ) -> None:
         top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
         if top_n == "top":
@@ -679,26 +680,29 @@ class CellH2D(How2Display[Cell]):
 
     def _opposing_cell_borders_conflict(
         self,
-        main: SE_BORDER | None,
-        opposing_to: SE_BORDER | None,
+        main: Border | None,
+        opposing_to: Border | None,
         opposed_to_table: bool = False,
-    ) -> SE_BORDER | None:
+    ) -> Border | None:
         none = (None, SE_BORDER.NULL, SE_BORDER.NONE)
         if opposed_to_table:
-            if main is None:
+            if main is None or main.border_type is None:
                 return opposing_to
             else:
                 return main
         else:
-            if main in none:
+            if main is None:
                 return opposing_to
-            else:
-                if opposing_to in none:
-                    return main
-        main = cast("SE_BORDER", main)
-        opposing_to = cast("SE_BORDER", opposing_to)
-        main_weight = self._border_weight(main)
-        opposing_to_weight = self._border_weight(opposing_to)
+            elif main.border_type in none:
+                return opposing_to
+            elif opposing_to is None:
+                return main
+            elif opposing_to.border_type in none:
+                return main
+        main = cast("Border", main)
+        opposing_to = cast("Border", opposing_to)
+        main_weight = self._border_weight(main.border_type)
+        opposing_to_weight = self._border_weight(opposing_to.border_type)
         if main_weight is None or opposing_to_weight is None:
             msg = "Art borders detected in table of story part"
             raise DisplayError(msg)
@@ -707,8 +711,10 @@ class CellH2D(How2Display[Cell]):
         elif main_weight < opposing_to_weight:
             return opposing_to
         elif main_weight == opposing_to_weight:
-            main_number = _SE_BORDER_TO_ECMA_NUMBER[main]
-            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[opposing_to]
+            main_number = _SE_BORDER_TO_ECMA_NUMBER[main.border_type]
+            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[
+                opposing_to.border_type
+            ]
             if main_number <= opposing_to_number:
                 return main
             return opposing_to

@@ -10,6 +10,7 @@ from lxml.html import Element, HtmlElement
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
+from docxray.oxml.trans.h2d.border import Border
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Cell
@@ -510,13 +511,16 @@ class HtmlTable(HtmlBuilder["Table"]):
         return style
 
     @classmethod
-    def _cell_border(cls, border: SE_BORDER | None, side: str) -> str:
+    def _cell_border(cls, border: Border | None, side: str) -> str:
         b = ""
         if (
             border not in (SE_BORDER.NULL, SE_BORDER.NONE)
             and border is not None
         ):
-            border_css = cls.SE_BORDER_TO_CSS.get(border) or "1px solid black"
+            border_css = (
+                cls.SE_BORDER_TO_CSS.get(border.border_type)
+                or "1px solid black"
+            )
             b = f"border-{side}: {border_css}"
         return b
 
