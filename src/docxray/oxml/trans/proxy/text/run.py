@@ -65,7 +65,14 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def paragraph(self) -> Paragraph:
-        return cast("Paragraph", self._parent)
+        from .hyperlink import Hyperlink
+        from .paragraph import Paragraph
+
+        if isinstance(self._parent, Paragraph):
+            return self._parent
+        elif isinstance(self._parent, Hyperlink):
+            return self._parent.paragraph
+        return cast(Paragraph, self._parent)
 
     @cached_property
     def italic(self) -> bool:

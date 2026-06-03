@@ -258,7 +258,7 @@ class Numbering(ElementProxy[CT_Numbering]):
             return num
         num_elm = self.element.num_by_id(num_id)
         if num_elm is None:
-            msg = "Referenced num not found"
+            msg = f"Referenced num with `{num_id}` not found"
             raise InvalidXmlError(msg)
         num = Num(num_elm, self)
         self._cached_nums[num_id] = num
