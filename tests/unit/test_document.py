@@ -22,6 +22,7 @@ class TestDocument:
                 w = 1
             else:
                 p_html = item.transform()
+                txt = item.raw_text
                 html += p_html
                 w = 1
         w = 1
