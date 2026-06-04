@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.shared import Length, StoryChild
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
-from docxray.oxml.trans.proxy.text.run import Run
+from docxray.oxml.trans.proxy.text.run import Run, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_JC,
     SE_LINE_SPACING_RULE,
@@ -157,6 +157,21 @@ class Paragraph(StoryChild[CT_P]):
         return self.element.xpath(
             "boolean(.//pic:pic/pic:blipFill/a:blip/@r:embed)"
         )
+
+    @cached_property
+    def raw_text(self) -> str:
+        txt = ""
+        for item in self.iter_inner_content():
+            if isinstance(item, Hyperlink):
+                for run in item.iter_inner_content():
+                    for run_item in run.iter_inner_content():
+                        if isinstance(run_item, TxtFragment):
+                            txt += run_item.raw
+            else:
+                for run_item in item.iter_inner_content():
+                    if isinstance(run_item, TxtFragment):
+                        txt += run_item.raw
+        return txt
 
     def transform(
         self,
