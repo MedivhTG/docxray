@@ -247,14 +247,13 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     @classmethod
     def _style(cls, proxy: Paragraph) -> str:
         style = ""
+        in_table = isinstance(proxy.container, Cell)
         if proxy.margin_line_start:
-            style += (
-                f"margin-inline-start: {cls._ind(proxy.margin_line_start)}; "
-            )
+            style += f"margin-inline-start: {cls._ind(proxy.margin_line_start, in_table)}; "
         if proxy.margin_line_end:
-            style += f"margin-inline-end: {cls._ind(proxy.margin_line_end)}; "
+            style += f"margin-inline-end: {cls._ind(proxy.margin_line_end, in_table)}; "
         if proxy.text_indent:
-            style += f"text-indent: {cls._ind(proxy.text_indent)}; "
+            style += f"text-indent: {cls._ind(proxy.text_indent, in_table)}; "
         style += cls._alignment(proxy)
         if proxy.text_flow is not None:
             style += (
@@ -322,9 +321,12 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         return algn
 
     @classmethod
-    def _ind(cls, ind: Length | int) -> str:
+    def _ind(cls, ind: Length | int, in_table: bool) -> str:
         if isinstance(ind, Length):
-            return f"{ind.pt}pt"
+            if in_table:
+                return "0pt"
+            else:
+                return f"{ind.pt}pt"
         elif isinstance(ind, int):
             return f"{ind}ch"
 
