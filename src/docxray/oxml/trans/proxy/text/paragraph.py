@@ -145,6 +145,10 @@ class Paragraph(StoryChild[CT_P]):
         return self.h2d.line_rule
 
     @cached_property
+    def has_last_rendered_page_break(self) -> bool:
+        return self.element.xpath("boolean(.//w:lastRenderedPageBreak)")
+
+    @cached_property
     def has_page_break(self) -> bool:
         return self.element.xpath('boolean(.//w:br[@w:type="page"])')
 
