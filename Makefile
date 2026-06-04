@@ -1,6 +1,3 @@
-export
--include .env
-
 SHELL = /bin/bash
 
 test:
