@@ -27,11 +27,11 @@ type CharsCase = Literal["up", "down"]
 class RunH2D(How2Display[Run]):
     @cached_property
     def italic(self) -> bool:
-        return self._display_val_toggled("i")
+        return self._display_val_toggled("i", "iCs")
 
     @cached_property
     def bold(self) -> bool:
-        return self._display_val_toggled("b")
+        return self._display_val_toggled("b", "bCs")
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
@@ -112,19 +112,35 @@ class RunH2D(How2Display[Run]):
             char_path.join_left("rPrDefault"), optional
         )
 
-    def _display_val_toggled(self, name: str) -> bool:
+    def _display_val_toggled(self, name: str, cs: str | None = None) -> bool:
         char_direct_val = self._prop_val(name, True)
         if not isinstance(char_direct_val, NotFound):
             return on_off(char_direct_val)
+        if cs:
+            char_direct_val_cs = self._prop_val(cs)
+            if not isinstance(char_direct_val, NotFound):
+                return on_off(char_direct_val_cs)
         char_val = self._prop_val(name, True, "style")
+        if cs and isinstance(char_val, NotFound):
+            char_val = self._prop_val(cs, True, "style")
         para_val = self._proxy.paragraph.h2d._prop_val_run(name)
+        if cs and isinstance(para_val, NotFound):
+            para_val = self._proxy.paragraph.h2d._prop_val_run(cs)
         char_path = self._prop_path("val", f"{self._path_base}.{name}")
         tbl_val = NotFound(self, char_path)
         cell = self.cell
+        char_path_cs = None
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
                 cell.h2d._tbl_style_props_deep, char_path, True
             )
+            if cs and isinstance(tbl_val, NotFound):
+                char_path_cs = self._prop_path(
+                    "val", f"{self._path_base}.{cs}"
+                )
+                tbl_val, _ = self._from_tbl_style_hierarchy(
+                    cell.h2d._tbl_style_props_deep, char_path_cs, True
+                )
         found_count = sum(
             1
             for i in [char_val, para_val, tbl_val]
@@ -132,7 +148,7 @@ class RunH2D(How2Display[Run]):
         )
         if found_count > 1:
             return self._effective_toggled(
-                char_path, char_val, para_val, tbl_val
+                char_path, char_val, para_val, tbl_val, char_path_cs
             )
         if not isinstance(char_val, NotFound):
             return on_off(char_val)
@@ -148,12 +164,21 @@ class RunH2D(How2Display[Run]):
         char_val: _OnOff,
         para_val: _OnOff,
         tbl_val: _OnOff,
+        char_path_cs: PropertyPath | None = None,
     ) -> bool:
         doc_val = on_off(
             self._from_doc_dflts(char_path.join_left("rPrDefault"), True)
         )
         if doc_val is True:
             return doc_val
+        elif char_path_cs:
+            doc_val = on_off(
+                self._from_doc_dflts(
+                    char_path_cs.join_left("rPrDefault"), True
+                )
+            )
+            if doc_val is True:
+                return doc_val
         return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)
 
     def _from_styles_hierarchy(
