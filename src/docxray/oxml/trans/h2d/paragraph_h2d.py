@@ -598,7 +598,7 @@ class ParagraphH2D(How2Display[Paragraph]):
             return not_found
 
         def _from_table_style() -> Any | NotFound:
-            if self.cell:
+            if not for_run and self.cell:
                 tbl_val, _ = self._from_tbl_style_hierarchy(
                     self.cell.h2d._tbl_style_props_deep, path, optional
                 )
