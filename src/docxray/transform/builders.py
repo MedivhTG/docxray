@@ -270,7 +270,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             style += "page-break-inside: avoid; orphans: 2; widows: 2; "
         else:
             style += "orphans: 2; widows: 2; "
-        if not h2d.word_wrap:
+        if h2d.word_wrap:
             style += "word-break: break-all; "
         if h2d.supress_auto_hyphens:
             style += "hyphens: manual; "
