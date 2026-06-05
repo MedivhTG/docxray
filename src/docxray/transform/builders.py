@@ -533,7 +533,7 @@ class HtmlTable(HtmlBuilder["Table"]):
     def _cell_padding(cls, proxy: Cell) -> str:
         info = proxy.padding_info
         padding = ""
-        sides = {"top", "bottom", "left", "right"}
+        sides = ["top", "bottom", "left", "right"]
         for side in sides:
             padding_side = info[side]  # type: ignore[literal-required]
             if padding_side is not None:
