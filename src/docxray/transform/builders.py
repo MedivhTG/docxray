@@ -195,7 +195,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         if not proxy.has_text and not proxy.has_picture:
             elm.text = SPACEBREAK_MNEMONIC
             return
-        chain_map = RunChainsMap(set(cls.ATTR_TO_ELMMAKER))
+        chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
         for run_or_hlink in proxy.iter_inner_content():
             if isinstance(run_or_hlink, Run):
                 chain_map.chain(run_or_hlink)
@@ -497,7 +497,7 @@ class HtmlTable(HtmlBuilder["Table"]):
     @classmethod
     def _cell_style(cls, proxy: Cell) -> str:
         style = ""
-        sides: set[str] = {"top", "bottom", "left", "right"}
+        sides: list[str] = ["top", "bottom", "left", "right"]
         for side in sides:
             border: str = cls._cell_border(proxy.borders_info[side], side)  # type: ignore[literal-required]
             if border:
@@ -621,7 +621,8 @@ class _RunsHtmlBuilder:
             idxed = self._same_idx_intersects(between, idx)
             if idxed:
                 top, bottom = self._chained_tag_tree(idxed)
-                exclude = set(idxed) | {main}
+                exclude = {chain.key: chain for chain in idxed}
+                exclude[main.key] = main
                 skip_until = self._chained_recursive(
                     bottom, idxed[-1], exclude
                 )
@@ -697,11 +698,11 @@ class _RunsHtmlBuilder:
         return top, bottom
 
     def _same_idx_intersects(
-        self, between: set[RunChain], idx: int
+        self, between: dict[tuple[str, Any], RunChain], idx: int
     ) -> list[RunChain]:
         """Filter by index and topological sorting by length of run chain."""
         return sorted(
-            [chain for chain in between if chain.start == idx],
+            [chain for chain in between.values() if chain.start == idx],
             key=lambda c: len(c),
         )
 
@@ -709,7 +710,7 @@ class _RunsHtmlBuilder:
         self,
         bottom: HtmlElement,
         bottom_chain: RunChain,
-        exclude: set[RunChain] | None = None,
+        exclude: dict[tuple[str, Any], RunChain] | None = None,
         skip_until: int = -1,
     ) -> int:
         """Recursively traverses run chains and build up format tag trees.
@@ -717,7 +718,7 @@ class _RunsHtmlBuilder:
         Args:
             bottom (_Element): Current bottom element of an format tag tree.
             bottom_chain (RunChain): Current bottom chain.
-            exclude (set[RunChain] | None, optional): Exclude processed
+            exclude (dict[tuple[str, Any], RunChain] | None, optional): Exclude processed
                 run chains to avoid infinite calls. Defaults to None.
             skip_until (int, optional): Rightmost end index of processed
                 run chains. Defaults to -1.
@@ -727,7 +728,12 @@ class _RunsHtmlBuilder:
         """
         between = bottom_chain.chains_between()
         if exclude:
-            between = between - exclude
+            exclude_set = set(exclude)
+            between = {
+                key: chain
+                for key, chain in between.items()
+                if key not in exclude_set
+            }
         for idx in range(bottom_chain.start, bottom_chain.end + 1):
             bottom_link = bottom_chain.link(idx)
             if bottom_link is None:
@@ -735,7 +741,8 @@ class _RunsHtmlBuilder:
             idxed = self._same_idx_intersects(between, idx)
             if idxed:
                 t, b = self._chained_tag_tree(idxed)
-                exclude = set(idxed) | {bottom_chain}
+                exclude = {chain.key: chain for chain in idxed}
+                exclude[bottom_chain.key] = bottom_chain
                 skip_until = self._chained_recursive(b, idxed[-1], exclude)
                 bottom.append(t)
             else:

@@ -22,7 +22,7 @@ class RunChainsMap:
     Unchained runs are runs without formating (common text).
     """
 
-    def __init__(self, attrs_for_map: set[str]) -> None:
+    def __init__(self, attrs_for_map: list[str]) -> None:
         self._tags_for_map = attrs_for_map
         self._idx_chains: dict[int, dict[str, RunChain]] = {}
         self._unchained: dict[int, Run] = {}
@@ -82,7 +82,7 @@ class RunChainsMap:
         For every index we get unchained format or main chain - chain with
         the smallest start index and longest length.
         """
-        chains_seen: set[RunChain] = set()
+        chains_seen: dict[tuple[str, Any], RunChain] = {}
 
         for i in range(len(self)):
             unchained = self.get_unchained(i)
@@ -91,16 +91,19 @@ class RunChainsMap:
                 continue
             for name in self._tags_for_map:
                 chain = self.get_chain(i, name)
-                if chain is None or chain in chains_seen:
+                if chain is None or chain.key in chains_seen:
                     continue
-                all = {chain}
+                all = {chain.key: chain}
                 all.update(chain.intersections)
-                all_remained = all - chains_seen
+                del_seen_set = set(chains_seen)
+                all_remained = {
+                    k: v for k, v in all.items() if k not in del_seen_set
+                }
                 # Topological sorting by start index
                 all_sorted = sorted(
-                    all_remained, key=lambda c: (c.start, len(c))
+                    all_remained.values(), key=lambda c: (c.start, len(c))
                 )
-                chains_seen.update(all_sorted)
+                chains_seen.update({item.key: item for item in all_sorted})
                 yield all_sorted[0]
 
     def get_chain(self, idx: int, name: str) -> RunChain | None:
@@ -159,16 +162,17 @@ class RunChainsMap:
         for name in self._tags_for_map:
             chain = self.get_chain(idx, name)
             if chain is None:
-                attrs_remained.discard(name)
+                attrs_remained.remove(name)
                 continue
-            attrs_to_check = attrs_remained - {name}
+            attrs_to_check = attrs_remained.copy()
+            attrs_to_check.remove(name)
             for subname in attrs_to_check:
                 subchain = self.get_chain(idx, subname)
                 if subchain is None:
                     continue
                 chain.add_intersection(subchain)
                 subchain.add_intersection(chain)
-            attrs_remained.discard(name)
+            attrs_remained.remove(name)
 
 
 class RunChain:
@@ -177,7 +181,7 @@ class RunChain:
         self._comparable = attr
         self._links: dict[int, Run] = {}
         self._start = start
-        self.__intersections: set[RunChain] = set()
+        self.__intersections: dict[tuple[str, Any], RunChain] = {}
 
     def __len__(self) -> int:
         """Length of chain in single run chain."""
@@ -199,7 +203,7 @@ class RunChain:
         return self._start + self.__len__() - 1
 
     @property
-    def intersections(self) -> set[RunChain]:
+    def intersections(self) -> dict[tuple[str, Any], RunChain]:
         """Run chain references inetersected."""
         return self.__intersections
 
@@ -210,25 +214,31 @@ class RunChain:
 
     @property
     def comparable(self) -> Any:
+        """Main value for chain that applied for runs."""
         return self._comparable
+
+    @property
+    def key(self) -> tuple[str, Any]:
+        """Determines this RunChain as unique instance in RunChainsMap."""
+        return self._name, self._comparable
 
     def add_intersection(self, chain: RunChain) -> None:
         """Add new intersection."""
-        self.__intersections.add(chain)
+        self.__intersections[chain.key] = chain
 
     def in_range_of(self, upper: RunChain) -> bool:
         """If current chain between indexes of upper chain."""
         return self.start >= upper.start and self.end <= upper.end
 
-    def chains_between(self) -> set[RunChain]:
+    def chains_between(self) -> dict[tuple[str, Any], RunChain]:
         """All chains that between current from intersections.
 
         It is determined using the start and end indexes.
         """
-        chains_inside = set()
-        for intersection in self.intersections:
+        chains_inside = {}
+        for key, intersection in self.intersections.items():
             if intersection.in_range_of(self):
-                chains_inside.add(intersection)
+                chains_inside[key] = intersection
         return chains_inside
 
     def link(self, idx: int) -> Run | None:
