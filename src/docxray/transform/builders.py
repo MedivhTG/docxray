@@ -365,14 +365,13 @@ class HtmlListViewInterrupted(HtmlBuilder["ListViewInterrupted"]):
     def element(
         cls, proxy: ListViewInterrupted, ruleset: RuleSet
     ) -> HtmlElement:
-        # docxray stuff
-        from docxray.transform.ruleset import Rule
-
         zero_lst_elm = (
             Element("ul") if proxy.is_bullet_format else Element("ol")
         )
         ruleset_for_p = copy(ruleset)
-        ruleset_for_p.set_html_rule("Paragraph", Rule(HtmlParagraphInList))
+        ruleset_for_p.set_html_rule(
+            "Paragraph", ruleset.html_rules["ParagraphInList"]
+        )
 
         def fill_list(up_li: HtmlElement, block: ListViewIlvlBlock) -> None:
             bullet = block.li.is_bullet_format

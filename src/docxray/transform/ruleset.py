@@ -5,12 +5,13 @@ from .builders import (
     HtmlDrawing,
     HtmlListViewInterrupted,
     HtmlParagraph,
+    HtmlParagraphInList,
     HtmlTable,
 )
 
 type RuleMethod = Literal["html"]
 type RuleProxy = Literal[
-    "Paragraph", "Drawing", "ListViewInterrupted", "Table"
+    "Paragraph", "ParagraphInList", "Drawing", "ListViewInterrupted", "Table"
 ]
 
 
@@ -47,6 +48,7 @@ class RuleSet:
         return cls(
             {
                 "Paragraph": Rule(HtmlParagraph),
+                "ParagraphInList": Rule(HtmlParagraphInList),
                 "Drawing": Rule(HtmlDrawing),
                 "ListViewInterrupted": Rule(HtmlListViewInterrupted),
                 "Table": Rule(HtmlTable),
