@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from copy import copy
 from functools import cached_property
 from typing import Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.oxml.trans.enums import (
-    _SE_BORDER_TO_ECMA_NUMBER,
-    _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
 )
 from docxray.oxml.trans.proxy.compute import width
@@ -28,11 +25,9 @@ from docxray.oxml.trans.st.enums import (
     SE_TblStyleOverrideType,
 )
 from docxray.oxml.trans.styles import CT_TblStylePr
-from docxray.oxml.trans.table.cell_props import CT_TcBorders, CT_TcMar
-from docxray.oxml.trans.table.table_props import CT_TblBorders
+from docxray.oxml.trans.table.cell_props import CT_TcMar
 
 from .border import Border
-from .exceptions import DisplayError
 from .how2display import How2Display
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
@@ -438,33 +433,21 @@ class CellH2D(How2Display[Cell]):
         cell_next_h2d = cell_next.h2d if cell_next is not None else None
         left_n, right_n = TBL_POSITIONING[cell.pos]["cell"]
         if left_n == "left":
-            inf["left"] = self._opposing_cell_borders_conflict(
-                inf["left"], tbl_left, True
-            )
+            inf["left"] = Border.oppose(inf["left"], tbl_left)
         elif left_n == "insideV" and cell_prev_h2d is not None:
             prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
             if prev_inf["right"]:
-                inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], prev_inf["right"]
-                )
+                inf["left"] = Border.oppose(inf["left"], prev_inf["right"])
             else:
-                inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], tbl_vert, True
-                )
+                inf["left"] = Border.oppose(inf["left"], tbl_vert)
         if right_n == "right":
-            inf["right"] = self._opposing_cell_borders_conflict(
-                inf["right"], tbl_right, True
-            )
+            inf["right"] = Border.oppose(inf["right"], tbl_right)
         elif right_n == "insideV" and cell_next_h2d is not None:
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
             if next_inf["right"]:
-                inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], next_inf["left"]
-                )
+                inf["right"] = Border.oppose(inf["right"], next_inf["left"])
             else:
-                inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], tbl_vert, True
-                )
+                inf["right"] = Border.oppose(inf["right"], tbl_vert)
 
     def _horz_borders_conflict(self, inf: BordersInfo) -> None:
         cell = self._proxy
@@ -479,86 +462,21 @@ class CellH2D(How2Display[Cell]):
         top_n, bottom_n = TBL_POSITIONING[self.row.pos]["row"]
 
         if top_n == "top":
-            inf["top"] = self._opposing_cell_borders_conflict(
-                inf["top"], tbl_top, True
-            )
+            inf["top"] = Border.oppose(inf["top"], tbl_top)
         elif top_n == "insideH" and cell_above_h2d is not None:
             above_inf = cell_above_h2d._borders_non_zero_spacing_info
             if above_inf["bottom"]:
-                inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], above_inf["bottom"]
-                )
-                # inf["top"] = self._opposing_cell_borders_conflict(
-                #     inf["top"], above_inf["bottom"], bottom_dropped
-                # )
+                inf["top"] = Border.oppose(inf["top"], above_inf["bottom"])
             else:
-                inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], tbl_horz, True
-                )
+                inf["top"] = Border.oppose(inf["top"], tbl_horz)
         if bottom_n == "bottom":
-            inf["bottom"] = self._opposing_cell_borders_conflict(
-                inf["bottom"], tbl_bottom, True
-            )
+            inf["bottom"] = Border.oppose(inf["bottom"], tbl_bottom)
         elif bottom_n == "insideH" and cell_below_h2d is not None:
             below_inf = cell_below_h2d._borders_non_zero_spacing_info
             if below_inf["top"]:
-                inf["bottom"] = self._opposing_cell_borders_conflict(
-                    inf["bottom"], below_inf["top"]
-                )
+                inf["bottom"] = Border.oppose(inf["bottom"], below_inf["top"])
             else:
-                inf["bottom"] = self._opposing_cell_borders_conflict(
-                    inf["bottom"], tbl_horz, True
-                )
-
-    def _opposing_cell_borders_conflict(
-        self,
-        side_1: Border | None,
-        side_2: Border | None,
-        # opposed_to_table: bool = False,
-    ) -> Border | None:
-        none = (SE_BORDER.NULL, SE_BORDER.NONE)
-        #
-        if side_1 is None:
-            return side_2
-        if side_2 is None:
-            return side_1
-        # Switch opposing sides
-        if side_1.which_border == "table" and side_2.which_border == "cell":
-            side_1, side_2 = side_2, side_1
-        # Cell always wins
-        if side_2.which_border == "table":
-            return side_1
-        # If our border in none tuple -> opposed side wins;
-        # else ours if opposed in none tuple
-        if side_1.border_type in none:
-            return side_2
-        elif side_2.border_type in none:
-            return side_1
-        # If both not in none tuple -> compare weights
-        side_1_w = self._border_weight(side_1.border_type)
-        side_2_w = self._border_weight(side_2.border_type)
-        if side_1_w is None or side_2_w is None:
-            msg = "Art borders detected in table of story part"
-            raise DisplayError(msg)
-        if side_1_w > side_2_w:
-            return side_1
-        elif side_1_w < side_2_w:
-            return side_2
-        elif side_1_w == side_2_w:
-            main_number = _SE_BORDER_TO_ECMA_NUMBER[side_1.border_type]
-            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[side_2.border_type]
-            if main_number <= opposing_to_number:
-                return side_1
-            return side_2
-        return None
-
-    def _border_weight(self, border_type: SE_BORDER) -> int | None:
-        lines_count = _SE_BORDER_TO_LINES_COUNT.get(border_type)
-        border_number = _SE_BORDER_TO_ECMA_NUMBER.get(border_type)
-        if lines_count is None or border_number is None:
-            # It's an art border
-            return None
-        return lines_count * border_number
+                inf["bottom"] = Border.oppose(inf["bottom"], tbl_horz)
 
     def _prop_with_ctx(
         self, name: str

@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 from functools import cached_property
 from typing import Literal
 
 # docxray stuff
-from docxray.oxml.trans.enums import _SE_BORDER_TO_ECMA_NUMBER
+from docxray.oxml.trans.enums import (
+    _SE_BORDER_TO_ECMA_NUMBER,
+    _SE_BORDER_TO_LINES_COUNT,
+)
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
@@ -18,11 +23,50 @@ type _WhichBorder = Literal["cell", "table"]
 
 
 class Border(ElementProxy[CT_Border]):
+    @classmethod
+    def oppose(cls, side_1: Border | None, side_2: Border | None):
+        none = (SE_BORDER.NULL, SE_BORDER.NONE)
+        # Our border ommitted - return opposed, same for opposed
+        if side_1 is None:
+            return side_2
+        if side_2 is None:
+            return side_1
+        # Cell always wins
+        if side_2.which_border == "table":
+            return side_1
+        if side_1.border_type in none:
+            return side_1
+        elif side_2.border_type in none:
+            return side_2
+        return cls.which_heavier(side_1, side_2)
+
+    @classmethod
+    def which_heavier(cls, side_1: Border, side_2: Border) -> Border | None:
+        if side_1.weight is None or side_2.weight is None:
+            return None
+        if side_1.weight > side_2.weight:
+            return side_1
+        elif side_1.weight < side_2.weight:
+            return side_2
+        self_n = _SE_BORDER_TO_ECMA_NUMBER[side_1.border_type]
+        comparable_n = _SE_BORDER_TO_ECMA_NUMBER[side_2.border_type]
+        if self_n <= comparable_n:
+            return side_1
+        return side_2
+
     @cached_property
     def which_border(self) -> _WhichBorder:
         if isinstance(self._parent, Cell):
             return "cell"
         return "table"
+
+    @cached_property
+    def weight(self) -> int | None:
+        lines_count = _SE_BORDER_TO_LINES_COUNT.get(self.border_type)
+        border_number = _SE_BORDER_TO_ECMA_NUMBER.get(self.border_type)
+        if lines_count is None or border_number is None:
+            return None
+        return lines_count * border_number
 
     @cached_property
     def border_type(self) -> SE_BORDER:
