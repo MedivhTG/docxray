@@ -351,46 +351,64 @@ class CellH2D(How2Display[Cell]):
 
     def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
         row_h2d = self.row.h2d
-        # TODO: fix insides (no meaning for positioning)
         if side_n in ("top", "bottom"):
             cell_inside_ctx = self._self_insideH
             table_inside = row_h2d._table_insideH
-            child_name = "row"
+            inside_n = "insideH"
+            tbl_child = "row"
             one_item_group = HORZ_GROUP | CORNER_GROUP
         else:
             cell_inside_ctx = self._self_insideV
             table_inside = row_h2d._table_insideV
-            child_name = "cell"
+            inside_n = "insideV"
+            tbl_child = "cell"
             one_item_group = VERT_GROUP | CORNER_GROUP
         if side_n in ("top", "left"):
             take_first = True
         else:
             take_first = False
-        side = None
-        pos = self.row.pos if child_name == "row" else self._proxy.pos
-        side_ctx: _BorderCtx = getattr(self, f"_self_{side_n}")
-        # If no side context - look for inside border
-        if side_ctx is None:
-            if cell_inside_ctx is not None:
-                side, _ = cell_inside_ctx
-        # Else resolve between sides
-        else:
-            side_got, ctx = side_ctx
+        init_pos = self.row.pos if tbl_child == "row" else self._proxy.pos
+
+        def _side_on_ctx(
+            border_ctx: _BorderCtx, desired_n: str
+        ) -> Border | None:
+            nonlocal init_pos, take_first, tbl_child
+
+            if border_ctx is None:
+                return None
+            side_got, ctx = border_ctx
+            # No meaning in ctx for insides
             if (
                 not (ctx is None or isinstance(ctx, TableStyle))
                 and ctx.type in one_item_group
             ):
-                pos = POS.ONE_ITEM
-            first_n, second_n = TBL_POSITIONING[pos][child_name]
-            preffered_n = first_n if take_first else second_n
-            if preffered_n == side_n:
-                side = side_got
-            elif cell_inside_ctx is not None:
-                side, _ = cell_inside_ctx
+                init_pos = POS.ONE_ITEM
+            first_n, second_n = TBL_POSITIONING[init_pos][
+                cast("_TableChild", tbl_child)
+            ]
+            # Top or bottom, left or right
+            preferred_n = first_n if take_first else second_n
+            if preferred_n == desired_n:
+                return side_got
+            return None
+
+        side = None
+        side_ctx: _BorderCtx = getattr(self, f"_self_{side_n}")
+        # If no side context - look for inside border
+        if side_ctx is None:
+            side = _side_on_ctx(cell_inside_ctx, inside_n)
+        # Else resolve between sides
+        else:
+            side = _side_on_ctx(side_ctx, side_n)
+            if side is None:
+                side = _side_on_ctx(cell_inside_ctx, inside_n)
+        # If None we got even now - go for table side
         if side is None:
             if table_inside is not None:
-                side = table_inside
-                inf["_sides_dropped_to_table_borders"][side_n] = True
+                side = _side_on_ctx((table_inside, None), inside_n)
+                inf["_sides_dropped_to_table_borders"][side_n] = (
+                    side is not None
+                )
         inf[side_n] = side
 
     def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
