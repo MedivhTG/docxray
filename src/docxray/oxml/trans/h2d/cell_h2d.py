@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from functools import cached_property
 from typing import Any, Literal, TypedDict, cast
 
@@ -91,7 +92,6 @@ class BordersInfo(TypedDict):
     left: Border | None
     right: Border | None
     spacing: Length | float | None
-    _sides_dropped_to_table_borders: BordersDropped
 
 
 class PaddingInfo(TypedDict):
@@ -337,12 +337,6 @@ class CellH2D(How2Display[Cell]):
             "left": None,
             "right": None,
             "spacing": None,
-            "_sides_dropped_to_table_borders": {
-                "top": False,
-                "bottom": False,
-                "left": False,
-                "right": False,
-            },
         }
         sides = ["top", "bottom", "left", "right"]
         for side_n in sides:
@@ -374,6 +368,7 @@ class CellH2D(How2Display[Cell]):
         ) -> Border | None:
             nonlocal init_pos, take_first, tbl_child
 
+            pos = init_pos
             if border_ctx is None:
                 return None
             side_got, ctx = border_ctx
@@ -382,8 +377,8 @@ class CellH2D(How2Display[Cell]):
                 not (ctx is None or isinstance(ctx, TableStyle))
                 and ctx.type in one_item_group
             ):
-                init_pos = POS.ONE_ITEM
-            first_n, second_n = TBL_POSITIONING[init_pos][
+                pos = POS.ONE_ITEM
+            first_n, second_n = TBL_POSITIONING[pos][
                 cast("_TableChild", tbl_child)
             ]
             # Top or bottom, left or right
@@ -406,41 +401,29 @@ class CellH2D(How2Display[Cell]):
         if side is None:
             if table_inside is not None:
                 side = _side_on_ctx((table_inside, None), inside_n)
-                inf["_sides_dropped_to_table_borders"][side_n] = (
-                    side is not None
-                )
         inf[side_n] = side
 
     def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
         # Drop and compute again
-        dropped = inf["_sides_dropped_to_table_borders"]
-        if dropped["top"]:
-            inf["top"] = None
-        if dropped["bottom"]:
-            inf["bottom"] = None
-        if dropped["left"]:
-            inf["left"] = None
-        if dropped["right"]:
-            inf["right"] = None
         self._vert_borders_conflict(inf)
         self._horz_borders_conflict(inf)
         return inf
 
-    def _self_border(self, side: _Border) -> _BorderCtx:
-        path = PropertyPath.base(side, "tcPr.tcBorders")
-        side_elm = self._prop(path)
-        if not isinstance(side_elm, NotFound):
-            return Border(side_elm, self._proxy), None
+    def _self_border(self, border: _Border) -> _BorderCtx:
+        path = PropertyPath.base(border, "tcPr.tcBorders")
+        border_elm = self._prop(path)
+        if not isinstance(border_elm, NotFound):
+            return Border(border_elm, self._proxy), None
         for tbl_style, tbl_style_props in self._tbl_style_props_deep:
             if not tbl_style_props:
-                side_elm = safe_get_prop(tbl_style.element, path, False)
-                if not isinstance(side_elm, NotFound):
-                    return Border(side_elm, self._proxy), tbl_style
+                border_elm = safe_get_prop(tbl_style.element, path, False)
+                if not isinstance(border_elm, NotFound):
+                    return Border(border_elm, self._proxy), tbl_style
             else:
                 for prop in tbl_style_props:
-                    side_elm = safe_get_prop(prop, path, False)
-                    if not isinstance(side_elm, NotFound):
-                        return Border(side_elm, self._proxy), prop
+                    border_elm = safe_get_prop(prop, path, False)
+                    if not isinstance(border_elm, NotFound):
+                        return Border(border_elm, self._proxy), prop
         return None
 
     def _vert_borders_conflict(self, inf: BordersInfo) -> None:
@@ -460,12 +443,9 @@ class CellH2D(How2Display[Cell]):
             )
         elif left_n == "insideV" and cell_prev_h2d is not None:
             prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
-            right_dropped = prev_inf["_sides_dropped_to_table_borders"][
-                "right"
-            ]
             if prev_inf["right"]:
                 inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], prev_inf["right"], right_dropped
+                    inf["left"], prev_inf["right"]
                 )
             else:
                 inf["left"] = self._opposing_cell_borders_conflict(
@@ -477,10 +457,9 @@ class CellH2D(How2Display[Cell]):
             )
         elif right_n == "insideV" and cell_next_h2d is not None:
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
-            left_dropped = next_inf["_sides_dropped_to_table_borders"]["left"]
             if next_inf["right"]:
                 inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], next_inf["left"], left_dropped
+                    inf["right"], next_inf["left"]
                 )
             else:
                 inf["right"] = self._opposing_cell_borders_conflict(
@@ -498,19 +477,20 @@ class CellH2D(How2Display[Cell]):
         cell_below = cell.cell_below
         cell_below_h2d = cell_below.h2d if cell_below is not None else None
         top_n, bottom_n = TBL_POSITIONING[self.row.pos]["row"]
+
         if top_n == "top":
             inf["top"] = self._opposing_cell_borders_conflict(
                 inf["top"], tbl_top, True
             )
         elif top_n == "insideH" and cell_above_h2d is not None:
             above_inf = cell_above_h2d._borders_non_zero_spacing_info
-            bottom_dropped = above_inf["_sides_dropped_to_table_borders"][
-                "bottom"
-            ]
             if above_inf["bottom"]:
                 inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], above_inf["bottom"], bottom_dropped
+                    inf["top"], above_inf["bottom"]
                 )
+                # inf["top"] = self._opposing_cell_borders_conflict(
+                #     inf["top"], above_inf["bottom"], bottom_dropped
+                # )
             else:
                 inf["top"] = self._opposing_cell_borders_conflict(
                     inf["top"], tbl_horz, True
@@ -521,9 +501,6 @@ class CellH2D(How2Display[Cell]):
             )
         elif bottom_n == "insideH" and cell_below_h2d is not None:
             below_inf = cell_below_h2d._borders_non_zero_spacing_info
-            bottom_dropped = below_inf["_sides_dropped_to_table_borders"][
-                "top"
-            ]
             if below_inf["top"]:
                 inf["bottom"] = self._opposing_cell_borders_conflict(
                     inf["bottom"], below_inf["top"]
@@ -535,42 +512,44 @@ class CellH2D(How2Display[Cell]):
 
     def _opposing_cell_borders_conflict(
         self,
-        main: Border | None,
-        opposing_to: Border | None,
-        opposed_to_table: bool = False,
+        side_1: Border | None,
+        side_2: Border | None,
+        # opposed_to_table: bool = False,
     ) -> Border | None:
-        none = (None, SE_BORDER.NULL, SE_BORDER.NONE)
-        if opposed_to_table:
-            if main is None:
-                return opposing_to
-            else:
-                return main
-        else:
-            if main is None:
-                return opposing_to
-            elif main.border_type in none:
-                return opposing_to
-            elif opposing_to is None:
-                return main
-            elif opposing_to.border_type in none:
-                return main
-        main_weight = self._border_weight(main.border_type)
-        opposing_to_weight = self._border_weight(opposing_to.border_type)
-        if main_weight is None or opposing_to_weight is None:
+        none = (SE_BORDER.NULL, SE_BORDER.NONE)
+        #
+        if side_1 is None:
+            return side_2
+        if side_2 is None:
+            return side_1
+        # Switch opposing sides
+        if side_1.which_border == "table" and side_2.which_border == "cell":
+            side_1, side_2 = side_2, side_1
+        # Cell always wins
+        if side_2.which_border == "table":
+            return side_1
+        # If our border in none tuple -> opposed side wins;
+        # else ours if opposed in none tuple
+        if side_1.border_type in none:
+            return side_2
+        elif side_2.border_type in none:
+            return side_1
+        # If both not in none tuple -> compare weights
+        side_1_w = self._border_weight(side_1.border_type)
+        side_2_w = self._border_weight(side_2.border_type)
+        if side_1_w is None or side_2_w is None:
             msg = "Art borders detected in table of story part"
             raise DisplayError(msg)
-        if main_weight > opposing_to_weight:
-            return main
-        elif main_weight < opposing_to_weight:
-            return opposing_to
-        elif main_weight == opposing_to_weight:
-            main_number = _SE_BORDER_TO_ECMA_NUMBER[main.border_type]
-            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[
-                opposing_to.border_type
-            ]
+        if side_1_w > side_2_w:
+            return side_1
+        elif side_1_w < side_2_w:
+            return side_2
+        elif side_1_w == side_2_w:
+            main_number = _SE_BORDER_TO_ECMA_NUMBER[side_1.border_type]
+            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[side_2.border_type]
             if main_number <= opposing_to_number:
-                return main
-            return opposing_to
+                return side_1
+            return side_2
         return None
 
     def _border_weight(self, border_type: SE_BORDER) -> int | None:

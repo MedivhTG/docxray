@@ -173,7 +173,7 @@ class RowH2D(How2Display[Row]):
         side_elm = safe_get_prop(
             self._tblBorders, PropertyPath.base(side), False
         )
-        if not isinstance(side, NotFound):
+        if not isinstance(side_elm, NotFound):
             return Border(side_elm, self._proxy)
         return None
 

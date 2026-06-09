@@ -1,8 +1,11 @@
 from functools import cached_property
+from typing import Literal
 
 # docxray stuff
 from docxray.oxml.trans.enums import _SE_BORDER_TO_ECMA_NUMBER
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
+from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,
@@ -11,8 +14,16 @@ from docxray.oxml.trans.st.enums import (
 
 from .colorize import Colorize
 
+type _WhichBorder = Literal["cell", "table"]
+
 
 class Border(ElementProxy[CT_Border]):
+    @cached_property
+    def which_border(self) -> _WhichBorder:
+        if isinstance(self._parent, Cell):
+            return "cell"
+        return "table"
+
     @cached_property
     def border_type(self) -> SE_BORDER:
         return self.element.val
