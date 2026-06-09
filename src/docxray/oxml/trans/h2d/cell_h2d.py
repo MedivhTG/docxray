@@ -286,6 +286,34 @@ class CellH2D(How2Display[Cell]):
         return cnf
 
     @cached_property
+    def _cnf_looked(self) -> WD_CNF_FORMAT:
+        row_h2d = self.row.h2d
+        cnf = self._cnf_latent
+        if not row_h2d.first_row_show:
+            cnf &= ~WD_CNF_FORMAT.FIRST_ROW
+            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
+        if not row_h2d.last_row_show:
+            cnf &= ~WD_CNF_FORMAT.LAST_ROW
+            cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
+        if not row_h2d.first_col_show:
+            cnf &= ~WD_CNF_FORMAT.FIRST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
+        if not row_h2d.last_col_show:
+            cnf &= ~WD_CNF_FORMAT.LAST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
+            cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
+        if row_h2d.no_horizontal_lines:
+            cnf &= ~WD_CNF_FORMAT.ODD_HORIZONTAL_BAND
+            cnf &= ~WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND
+        if row_h2d.no_vertical_lines:
+            cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
+            cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
+        return cnf
+
+    @cached_property
     def _self_top(self) -> _BorderCtx:
         return self._self_border("top")
 
@@ -315,7 +343,7 @@ class CellH2D(How2Display[Cell]):
     ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
         tbl_style = self._table_style
         props_leveled = []
-        cnf = self._cnf_latent
+        cnf = self._cnf_looked
         while isinstance(tbl_style, TableStyle):
             if cnf is not None:
                 tbl_style_props = self._table_style_props(tbl_style, cnf)
@@ -338,6 +366,14 @@ class CellH2D(How2Display[Cell]):
             self._choose_side(inf, cast("_Side", side_n))
         return inf
 
+    # TODO: here can be bugs with grid groups
+    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
+        # Drop and compute again
+        self._vert_borders_conflict(inf)
+        self._horz_borders_conflict(inf)
+        return inf
+
+    # TODO: known bug - horizontals bands in WORD overriden idk why (or other grid groups)
     def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
         row_h2d = self.row.h2d
         if side_n in ("top", "bottom"):
@@ -367,11 +403,11 @@ class CellH2D(How2Display[Cell]):
             if border_ctx is None:
                 return None
             side_got, ctx = border_ctx
+            # Always get self-cell borders
+            if ctx is None or isinstance(ctx, TableStyle):
+                pos = POS.ONE_ITEM
             # No meaning in ctx for insides
-            if (
-                not (ctx is None or isinstance(ctx, TableStyle))
-                and ctx.type in one_item_group
-            ):
+            elif isinstance(ctx, CT_TblStylePr) and ctx.type in one_item_group:
                 pos = POS.ONE_ITEM
             first_n, second_n = TBL_POSITIONING[pos][
                 cast("_TableChild", tbl_child)
@@ -393,16 +429,10 @@ class CellH2D(How2Display[Cell]):
             if side is None:
                 side = _side_on_ctx(cell_inside_ctx, inside_n)
         # If None we got even now - go for table side
-        if side is None:
-            if table_inside is not None:
-                side = _side_on_ctx((table_inside, None), inside_n)
+        # TODO: for safety.. but render bugs
+        if side is None and table_inside is not None:
+            side = table_inside
         inf[side_n] = side
-
-    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
-        # Drop and compute again
-        self._vert_borders_conflict(inf)
-        self._horz_borders_conflict(inf)
-        return inf
 
     def _self_border(self, border: _Border) -> _BorderCtx:
         path = PropertyPath.base(border, "tcPr.tcBorders")
@@ -436,18 +466,16 @@ class CellH2D(How2Display[Cell]):
             inf["left"] = Border.oppose(inf["left"], tbl_left)
         elif left_n == "insideV" and cell_prev_h2d is not None:
             prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
-            if prev_inf["right"]:
-                inf["left"] = Border.oppose(inf["left"], prev_inf["right"])
-            else:
-                inf["left"] = Border.oppose(inf["left"], tbl_vert)
+            inf["left"] = Border.oppose(
+                inf["left"], prev_inf["right"] or tbl_vert
+            )
         if right_n == "right":
             inf["right"] = Border.oppose(inf["right"], tbl_right)
         elif right_n == "insideV" and cell_next_h2d is not None:
             next_inf = cell_next_h2d._borders_non_zero_spacing_info
-            if next_inf["right"]:
-                inf["right"] = Border.oppose(inf["right"], next_inf["left"])
-            else:
-                inf["right"] = Border.oppose(inf["right"], tbl_vert)
+            inf["right"] = Border.oppose(
+                inf["right"], next_inf["left"] or tbl_vert
+            )
 
     def _horz_borders_conflict(self, inf: BordersInfo) -> None:
         cell = self._proxy
@@ -465,18 +493,16 @@ class CellH2D(How2Display[Cell]):
             inf["top"] = Border.oppose(inf["top"], tbl_top)
         elif top_n == "insideH" and cell_above_h2d is not None:
             above_inf = cell_above_h2d._borders_non_zero_spacing_info
-            if above_inf["bottom"]:
-                inf["top"] = Border.oppose(inf["top"], above_inf["bottom"])
-            else:
-                inf["top"] = Border.oppose(inf["top"], tbl_horz)
+            inf["top"] = Border.oppose(
+                inf["top"], above_inf["bottom"] or tbl_horz
+            )
         if bottom_n == "bottom":
             inf["bottom"] = Border.oppose(inf["bottom"], tbl_bottom)
         elif bottom_n == "insideH" and cell_below_h2d is not None:
             below_inf = cell_below_h2d._borders_non_zero_spacing_info
-            if below_inf["top"]:
-                inf["bottom"] = Border.oppose(inf["bottom"], below_inf["top"])
-            else:
-                inf["bottom"] = Border.oppose(inf["bottom"], tbl_horz)
+            inf["bottom"] = Border.oppose(
+                inf["bottom"], below_inf["top"] or tbl_horz
+            )
 
     def _prop_with_ctx(
         self, name: str
@@ -491,32 +517,6 @@ class CellH2D(How2Display[Cell]):
         if not isinstance(tc_ctx[0], NotFound):
             return tc_ctx
         return None, None
-
-    def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
-        row_h2d = self.row.h2d
-        if not row_h2d.first_row_show:
-            cnf &= ~WD_CNF_FORMAT.FIRST_ROW
-            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
-        if not row_h2d.last_row_show:
-            cnf &= ~WD_CNF_FORMAT.LAST_ROW
-            cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if not row_h2d.first_col_show:
-            cnf &= ~WD_CNF_FORMAT.FIRST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
-        if not row_h2d.last_col_show:
-            cnf &= ~WD_CNF_FORMAT.LAST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
-            cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if row_h2d.no_horizontal_lines:
-            cnf &= ~WD_CNF_FORMAT.ODD_HORIZONTAL_BAND
-            cnf &= ~WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND
-        if row_h2d.no_vertical_lines:
-            cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
-            cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
-        return cnf
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any

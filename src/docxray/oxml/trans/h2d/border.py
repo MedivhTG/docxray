@@ -19,7 +19,7 @@ from docxray.oxml.trans.st.enums import (
 
 from .colorize import Colorize
 
-type _WhichBorder = Literal["cell", "table"]
+type _WhichParent = Literal["cell", "table"]
 
 
 class Border(ElementProxy[CT_Border]):
@@ -32,12 +32,14 @@ class Border(ElementProxy[CT_Border]):
         if side_2 is None:
             return side_1
         # Cell always wins
-        if side_2.which_border == "table":
+        if side_2.which_parent == "table":
             return side_1
-        if side_1.border_type in none:
-            return side_1
-        elif side_2.border_type in none:
+        if side_1.which_parent == "table":
             return side_2
+        if side_1.border_type in none:
+            return side_2
+        elif side_2.border_type in none:
+            return side_1
         return cls.which_heavier(side_1, side_2)
 
     @classmethod
@@ -55,7 +57,7 @@ class Border(ElementProxy[CT_Border]):
         return side_2
 
     @cached_property
-    def which_border(self) -> _WhichBorder:
+    def which_parent(self) -> _WhichParent:
         if isinstance(self._parent, Cell):
             return "cell"
         return "table"
