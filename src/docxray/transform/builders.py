@@ -526,6 +526,13 @@ class HtmlTable(HtmlBuilder["Table"]):
             size = f"{dflt_size if given_size < dflt_size else given_size}px"
             color = border.final_color or "black"
             border_side = f"border-{side}: {size} {line_type} {color}; "
+        # elif border is not None and border.border_type in (
+        #     SE_BORDER.NULL,
+        #     SE_BORDER.NONE,
+        # ):
+        #     border_side = f"border-{side}: 1px solid blue; "
+        # elif border is None:
+        #     border_side = f"border-{side}: 1px solid yellow; "
         return border_side
 
     @classmethod

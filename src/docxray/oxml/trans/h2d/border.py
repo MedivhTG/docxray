@@ -32,10 +32,10 @@ class Border(ElementProxy[CT_Border]):
         if side_2 is None:
             return side_1
         # Cell always wins
-        if side_2.which_parent == "table":
-            return side_1
         if side_1.which_parent == "table":
             return side_2
+        if side_2.which_parent == "table":
+            return side_1
         if side_1.border_type in none:
             return side_2
         elif side_2.border_type in none:
@@ -56,7 +56,7 @@ class Border(ElementProxy[CT_Border]):
             return side_1
         return side_2
 
-    @cached_property
+    @property
     def which_parent(self) -> _WhichParent:
         if isinstance(self._parent, Cell):
             return "cell"

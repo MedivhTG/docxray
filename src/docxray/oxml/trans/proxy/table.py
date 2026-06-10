@@ -346,10 +346,7 @@ class Row(ElementProxy[CT_Row]):
         Returns:
             Cell | None: Cell on table grid or None if not found.
         """
-        try:
-            return self.cells_grid_x[grid_x]
-        except KeyError:
-            return None
+        return self.cells_grid_x.get(grid_x)
 
 
 class Table(StoryChild[CT_Tbl]):
