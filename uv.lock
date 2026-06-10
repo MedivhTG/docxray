@@ -188,7 +188,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf57
 
 [[package]]
 name = "docxray"
-version = "0.0.0a9"
+version = "0.0.0a10"
 source = { virtual = "." }
 dependencies = [
     { name = "homoglyphs" },
