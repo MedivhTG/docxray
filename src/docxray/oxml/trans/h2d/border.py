@@ -10,7 +10,6 @@ from docxray.oxml.trans.enums import (
 )
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.proxy.table import Cell
-from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,
@@ -24,7 +23,9 @@ type _WhichParent = Literal["cell", "table"]
 
 class Border(ElementProxy[CT_Border]):
     @classmethod
-    def oppose(cls, side_1: Border | None, side_2: Border | None):
+    def oppose(
+        cls, side_1: Border | None, side_2: Border | None
+    ) -> Border | None:
         none = (SE_BORDER.NULL, SE_BORDER.NONE)
         # Our border ommitted - return opposed, same for opposed
         if side_1 is None:

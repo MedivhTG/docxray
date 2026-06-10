@@ -130,6 +130,15 @@ class CellOnBorderGrid:
                 top = Border(top_elm, self._cell)
         else:
             top = self._self_insideH
+            # Fallback
+            if (
+                top is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                top_elm = getattr(self._tcBorders_elm, "top", None)
+                if top_elm is not None:
+                    top = Border(top_elm, self._cell)
+
         # Bottom
         if bottom_n == "bottom":
             bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
@@ -137,6 +146,14 @@ class CellOnBorderGrid:
                 bottom = Border(bottom_elm, self._cell)
         else:
             bottom = self._self_insideH
+            # Fallback
+            if (
+                bottom is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
+                if bottom_elm is not None:
+                    bottom = Border(bottom_elm, self._cell)
         # Left, Right
         left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
         left = None
@@ -148,6 +165,14 @@ class CellOnBorderGrid:
                 left = Border(left_elm, self._cell)
         else:
             left = self._self_insideV
+            # Fallback
+            if (
+                left is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                left_elm = getattr(self._tcBorders_elm, "left", None)
+                if left_elm is not None:
+                    left = Border(left_elm, self._cell)
         # Right
         if right_n == "right":
             right_elm = getattr(self._tcBorders_elm, "right", None)
@@ -155,6 +180,14 @@ class CellOnBorderGrid:
                 right = Border(right_elm, self._cell)
         else:
             right = self._self_insideV
+            # Fallback
+            if (
+                right is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                right_elm = getattr(self._tcBorders_elm, "right", None)
+                if right_elm is not None:
+                    right = Border(right_elm, self._cell)
         return top, bottom, left, right
 
     @cached_property
@@ -174,7 +207,7 @@ class CellOnBorderGrid:
         return self.sides[3]
 
     @cached_property
-    def _self_insideH(self):
+    def _self_insideH(self) -> Border | None:
         if self._group in HORZ_GROUP | CORNER_GROUP:
             return None
         insideH_elm = getattr(self._tcBorders_elm, "insideH", None)
@@ -183,7 +216,7 @@ class CellOnBorderGrid:
         return Border(insideH_elm, self._cell)
 
     @cached_property
-    def _self_insideV(self):
+    def _self_insideV(self) -> Border | None:
         if self._group in VERT_GROUP | CORNER_GROUP:
             return None
         insideV_elm = getattr(self._tcBorders_elm, "insideV", None)
@@ -480,8 +513,6 @@ class CellH2D(How2Display[Cell]):
 
     def _self_border(self, border: _Border) -> Border | None:
         border_proxy = None
-        if self.border_grid_cells:
-            border_proxy = getattr(self.border_grid_cells[0], border, None)
         for cell_grid in self.border_grid_cells:
             if border_proxy is None:
                 border_proxy = getattr(cell_grid, border, None)
@@ -489,7 +520,7 @@ class CellH2D(How2Display[Cell]):
 
     @cached_property
     def border_grid_cells(self) -> list[CellOnBorderGrid]:
-        cell_on_grids = []
+        cell_on_grids: list[CellOnBorderGrid] = []
         borders_ctx = self._tcBordersCtx
         if borders_ctx is None:
             return cell_on_grids
@@ -511,7 +542,9 @@ class CellH2D(How2Display[Cell]):
         tcBorders_elm = self._prop(path)
         if not isinstance(tcBorders_elm, NotFound):
             return [(tcBorders_elm, None)]
-        ctx_list = []
+        ctx_list: list[
+            tuple[CT_TcBorders, None | TableStyle | CT_TblStylePr]
+        ] = []
         override_type_seen = set()
         for tbl_style, tbl_style_props in self._tbl_style_props_deep:
             if not tbl_style_props:
