@@ -463,6 +463,8 @@ class ListItem:
     def _display_level_text_run_val_on_off(self, name: str) -> bool:
         return on_off(self._display_level_text_run_val(name, True))
 
+    # FIXME: when try to get level char from upper level that restarted before -
+    # we get same char, but not restarted
     def _parse_pattern(self) -> str:
         text = ""
         percentage_followed = False
