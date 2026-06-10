@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
 from docxray.oxml.trans.enums import (
-    _SE_BORDER_TO_ECMA_NUMBER,
-    _SE_BORDER_TO_LINES_COUNT,
     WD_CNF_FORMAT,
 )
 from docxray.oxml.trans.proxy.compute import width
@@ -21,21 +19,20 @@ from docxray.oxml.trans.proxy.styles.style import TableStyle
 from docxray.oxml.trans.proxy.table import Cell, Row, Table
 from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import (
-    SE_BORDER,
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
     SE_TblStyleOverrideType,
 )
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders, CT_TcMar
-from docxray.oxml.trans.table.table_props import CT_TblBorders
 
 from .border import Border
-from .exceptions import DisplayError
 from .how2display import How2Display
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]
+type _Side = Literal["top", "bottom", "left", "right"]
 type _TableChild = Literal["row", "cell"]
+type _BorderCtx = tuple[Border, None | TableStyle | CT_TblStylePr] | None
 
 TBL_POSITIONING: dict[POS, dict[_TableChild, tuple[_Border, _Border]]] = {
     POS.ONE_ITEM: {
@@ -89,7 +86,6 @@ class BordersInfo(TypedDict):
     left: Border | None
     right: Border | None
     spacing: Length | float | None
-    _sides_dropped_to_table_borders: BordersDropped
 
 
 class PaddingInfo(TypedDict):
@@ -99,14 +95,143 @@ class PaddingInfo(TypedDict):
     right: Length | float | None
 
 
-# TODO: borders info refac needed after
+class CellOnBorderGrid:
+    def __init__(
+        self,
+        cell: Cell,
+        tcBorders_elm: CT_TcBorders,
+        grid_group: SE_TblStyleOverrideType,
+    ) -> None:
+        self._cell = cell
+        self._tcBorders_elm = tcBorders_elm
+        self._group = grid_group
+
+    @cached_property
+    def sides(
+        self,
+    ) -> tuple[Border | None, Border | None, Border | None, Border | None]:
+        row_pos = self._cell.row.pos
+        cell_pos = self._cell.pos
+        if self._group in HORZ_GROUP:
+            row_pos = POS.ONE_ITEM
+        elif self._group in VERT_GROUP:
+            cell_pos = POS.ONE_ITEM
+        elif self._group in CORNER_GROUP:
+            row_pos = POS.ONE_ITEM
+            cell_pos = POS.ONE_ITEM
+        # Top, Bottom
+        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
+        top = None
+        bottom = None
+        # Top
+        if top_n == "top":
+            top_elm = getattr(self._tcBorders_elm, "top", None)
+            if top_elm is not None:
+                top = Border(top_elm, self._cell)
+        else:
+            top = self._self_insideH
+            # Fallback
+            if (
+                top is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                top_elm = getattr(self._tcBorders_elm, "top", None)
+                if top_elm is not None:
+                    top = Border(top_elm, self._cell)
+
+        # Bottom
+        if bottom_n == "bottom":
+            bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
+            if bottom_elm is not None:
+                bottom = Border(bottom_elm, self._cell)
+        else:
+            bottom = self._self_insideH
+            # Fallback
+            if (
+                bottom is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
+                if bottom_elm is not None:
+                    bottom = Border(bottom_elm, self._cell)
+        # Left, Right
+        left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
+        left = None
+        right = None
+        # Left
+        if left_n == "left":
+            left_elm = getattr(self._tcBorders_elm, "left", None)
+            if left_elm is not None:
+                left = Border(left_elm, self._cell)
+        else:
+            left = self._self_insideV
+            # Fallback
+            if (
+                left is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                left_elm = getattr(self._tcBorders_elm, "left", None)
+                if left_elm is not None:
+                    left = Border(left_elm, self._cell)
+        # Right
+        if right_n == "right":
+            right_elm = getattr(self._tcBorders_elm, "right", None)
+            if right_elm is not None:
+                right = Border(right_elm, self._cell)
+        else:
+            right = self._self_insideV
+            # Fallback
+            if (
+                right is None
+                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+            ):
+                right_elm = getattr(self._tcBorders_elm, "right", None)
+                if right_elm is not None:
+                    right = Border(right_elm, self._cell)
+        return top, bottom, left, right
+
+    @cached_property
+    def top(self) -> Border | None:
+        return self.sides[0]
+
+    @cached_property
+    def bottom(self) -> Border | None:
+        return self.sides[1]
+
+    @cached_property
+    def left(self) -> Border | None:
+        return self.sides[2]
+
+    @cached_property
+    def right(self) -> Border | None:
+        return self.sides[3]
+
+    @cached_property
+    def _self_insideH(self) -> Border | None:
+        if self._group in HORZ_GROUP | CORNER_GROUP:
+            return None
+        insideH_elm = getattr(self._tcBorders_elm, "insideH", None)
+        if insideH_elm is None:
+            return None
+        return Border(insideH_elm, self._cell)
+
+    @cached_property
+    def _self_insideV(self) -> Border | None:
+        if self._group in VERT_GROUP | CORNER_GROUP:
+            return None
+        insideV_elm = getattr(self._tcBorders_elm, "insideV", None)
+        if insideV_elm is None:
+            return None
+        return Border(insideV_elm, self._cell)
+
+
 class CellH2D(How2Display[Cell]):
     @cached_property
     def row(self) -> Row:
         return self._proxy.row
 
     @cached_property
-    def talbe(self) -> Table:
+    def table(self) -> Table:
         return self.row.table
 
     @cached_property
@@ -198,12 +323,6 @@ class CellH2D(How2Display[Cell]):
         return inf
 
     @cached_property
-    def _cell_borders_ctx(
-        self,
-    ) -> tuple[CT_TcBorders | None, TableStyle | CT_TblStylePr | None]:
-        return self._prop_with_ctx("tcBorders")
-
-    @cached_property
     def _spacing(self) -> Length | float | None:
         name = "tblCellSpacing"
         row_h2d = self.row.h2d
@@ -265,7 +384,7 @@ class CellH2D(How2Display[Cell]):
             cnf |= _CNF.LAST_COLUMN
         # Corner group
         if cell.grid_y == 0 and cell.grid_x == 0:
-            cnf |= _CNF.FIRST_ROW_LAST_COLUMN
+            cnf |= _CNF.FIRST_ROW_FIRST_COLUMN
         if cell.grid_y == 0 and cell.cell_next is None:
             cnf |= _CNF.FIRST_ROW_LAST_COLUMN
         if cell.cell_below is None and cell.grid_x == 0:
@@ -277,6 +396,9 @@ class CellH2D(How2Display[Cell]):
             _CNF.FIRST_COLUMN & cnf
             or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
             or _CNF.LAST_ROW_FIRST_COLUMN & cnf
+            or _CNF.LAST_COLUMN & cnf
+            or _CNF.FIRST_ROW_LAST_COLUMN & cnf
+            or _CNF.LAST_ROW_LAST_COLUMN & cnf
         )
         if not (row_h2d._shift_vert_bands and has_vert_band_shift_group):
             if self._col_band_number % 2 == 0:
@@ -287,6 +409,9 @@ class CellH2D(How2Display[Cell]):
             _CNF.FIRST_ROW & cnf
             or _CNF.FIRST_ROW_FIRST_COLUMN & cnf
             or _CNF.FIRST_ROW_LAST_COLUMN & cnf
+            or _CNF.LAST_ROW & cnf
+            or _CNF.LAST_ROW_FIRST_COLUMN & cnf
+            or _CNF.LAST_ROW_LAST_COLUMN & cnf
         )
         if not (row_h2d._shift_vert_bands and has_horz_band_shift_group):
             if self._row_band_number % 2 == 0:
@@ -296,446 +421,9 @@ class CellH2D(How2Display[Cell]):
         return cnf
 
     @cached_property
-    def _tbl_style_props_deep(
-        self,
-    ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
-        tbl_style = self._table_style
-        props_leveled = []
-        cnf = self._cnf_latent
-        while isinstance(tbl_style, TableStyle):
-            if cnf is not None:
-                tbl_style_props = self._table_style_props(tbl_style, cnf)
-            else:
-                tbl_style_props = []
-            props_leveled.append((tbl_style, tbl_style_props))
-            tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
-        return props_leveled
-
-    def _spacing_non_zero(self) -> BordersInfo:
-        inf: BordersInfo = {
-            "top": None,
-            "bottom": None,
-            "left": None,
-            "right": None,
-            "spacing": None,
-            "_sides_dropped_to_table_borders": {
-                "top": False,
-                "bottom": False,
-                "left": False,
-                "right": False,
-            },
-        }
-        tcBorders_elm, cell_ctx = self._cell_borders_ctx
-        tblBorders_elm = self.row.h2d._tblBorders
-        tbl_horz = self._border(tblBorders_elm, "insideH")
-        tbl_vert = self._border(tblBorders_elm, "insideV")
-        if tcBorders_elm is None and cell_ctx is None:
-            self._case_1_tc_borders_ommited(inf, tbl_horz, tbl_vert)
-        if tcBorders_elm is not None and cell_ctx is None:
-            self._case_2_tc_borders_direct(
-                inf, tcBorders_elm, tbl_horz, tbl_vert
-            )
-        if tcBorders_elm is not None and isinstance(cell_ctx, TableStyle):
-            self._case_3_tc_borders_style_direct(
-                inf, tcBorders_elm, tbl_horz, tbl_vert
-            )
-        if tcBorders_elm is not None and isinstance(cell_ctx, CT_TblStylePr):
-            self._case_4_tc_borders_grid_group(
-                inf, tcBorders_elm, tbl_horz, tbl_vert, cell_ctx.type
-            )
-        return inf
-
-    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
-        # Drop and compute again
-        dropped = inf["_sides_dropped_to_table_borders"]
-        if dropped["top"]:
-            inf["top"] = None
-        if dropped["bottom"]:
-            inf["bottom"] = None
-        if dropped["left"]:
-            inf["left"] = None
-        if dropped["right"]:
-            inf["right"] = None
-
-        cell = self._proxy
-        row = cell.row
-        tblBorders_elm = self.row.h2d._tblBorders
-
-        cell_above = cell.cell_above
-        cell_above_h2d = cell_above.h2d if cell_above is not None else None
-        cell_below = cell.cell_below
-        cell_below_h2d = cell_below.h2d if cell_below is not None else None
-        cell_prev = cell.cell_prev
-        cell_prev_h2d = cell_prev.h2d if cell_prev is not None else None
-        cell_next = cell.cell_next
-        cell_next_h2d = cell_next.h2d if cell_next is not None else None
-
-        tbl_top = self._border(tblBorders_elm, "top")
-        tbl_bottom = self._border(tblBorders_elm, "bottom")
-        tbl_left = self._border(tblBorders_elm, "left")
-        tbl_right = self._border(tblBorders_elm, "right")
-        tbl_horz = self._border(tblBorders_elm, "insideH")
-        tbl_vert = self._border(tblBorders_elm, "insideV")
-
-        self._vert_borders_conflict(
-            inf,
-            cell.pos,
-            cell_prev_h2d,
-            cell_next_h2d,
-            tbl_left,
-            tbl_right,
-            tbl_vert,
-        )
-        self._horz_borders_conflict(
-            inf,
-            row.pos,
-            cell_above_h2d,
-            cell_below_h2d,
-            tbl_top,
-            tbl_bottom,
-            tbl_horz,
-        )
-
-        return inf
-
-    def _case_1_tc_borders_ommited(
-        self,
-        inf: BordersInfo,
-        tbl_horz: Border | None,
-        tbl_vert: Border | None,
-    ) -> None:
-        inf["top"] = tbl_horz
-        inf["bottom"] = tbl_horz
-        inf["left"] = tbl_vert
-        inf["right"] = tbl_vert
-
-    def _case_2_tc_borders_direct(
-        self,
-        inf: BordersInfo,
-        tcBorders_elm: CT_TcBorders,
-        tbl_horz: Border | None,
-        tbl_vert: Border | None,
-    ) -> None:
-        top = self._border(tcBorders_elm, "top")
-        if top:
-            inf["top"] = top
-        else:
-            inf["_sides_dropped_to_table_borders"]["top"] = True
-            inf["top"] = tbl_horz
-        bottom = self._border(tcBorders_elm, "bottom")
-        if bottom:
-            inf["bottom"] = bottom
-        else:
-            inf["_sides_dropped_to_table_borders"]["bottom"] = True
-            inf["bottom"] = tbl_horz
-        left = self._border(tcBorders_elm, "left")
-        if left:
-            inf["left"] = left
-        else:
-            inf["_sides_dropped_to_table_borders"]["left"] = True
-            inf["left"] = tbl_vert
-        right = self._border(tcBorders_elm, "right")
-        if right:
-            inf["right"] = right
-        else:
-            inf["_sides_dropped_to_table_borders"]["right"] = True
-            inf["right"] = tbl_vert
-
-    def _case_3_tc_borders_style_direct(
-        self,
-        inf: BordersInfo,
-        tcBorders_elm: CT_TcBorders,
-        tbl_horz: Border | None,
-        tbl_vert: Border | None,
-    ) -> None:
-        self._case_2_tc_borders_direct(inf, tcBorders_elm, tbl_horz, tbl_vert)
-
-    def _case_4_tc_borders_grid_group(
-        self,
-        inf: BordersInfo,
-        tcBorders_elm: CT_TcBorders,
-        tbl_horz: Border | None,
-        tbl_vert: Border | None,
-        grid_group: SE_TblStyleOverrideType,
-    ) -> None:
-        cell = self._proxy
-        row = cell.row
-        top = None
-        bottom = None
-        left = None
-        right = None
-        if grid_group == SE_TblStyleOverrideType.ENTIRE_TABLE:
-            top, bottom = self._choose_horz(
-                inf["_sides_dropped_to_table_borders"],
-                row.pos,
-                tcBorders_elm,
-                tbl_horz,
-            )
-            left, right = self._choose_vert(
-                inf["_sides_dropped_to_table_borders"],
-                cell.pos,
-                tcBorders_elm,
-                tbl_vert,
-            )
-        elif grid_group in HORZ_GROUP:
-            top, bottom = self._choose_horz(
-                inf["_sides_dropped_to_table_borders"],
-                POS.ONE_ITEM,
-                tcBorders_elm,
-                tbl_horz,
-            )
-            left, right = self._choose_vert(
-                inf["_sides_dropped_to_table_borders"],
-                cell.pos,
-                tcBorders_elm,
-                tbl_vert,
-            )
-        elif grid_group in VERT_GROUP:
-            top, bottom = self._choose_horz(
-                inf["_sides_dropped_to_table_borders"],
-                row.pos,
-                tcBorders_elm,
-                tbl_horz,
-            )
-            left, right = self._choose_vert(
-                inf["_sides_dropped_to_table_borders"],
-                POS.ONE_ITEM,
-                tcBorders_elm,
-                tbl_vert,
-            )
-        elif grid_group in CORNER_GROUP:
-            top, bottom = self._choose_horz(
-                inf["_sides_dropped_to_table_borders"],
-                POS.ONE_ITEM,
-                tcBorders_elm,
-                tbl_horz,
-            )
-            left, right = self._choose_vert(
-                inf["_sides_dropped_to_table_borders"],
-                POS.ONE_ITEM,
-                tcBorders_elm,
-                tbl_vert,
-            )
-        inf["top"] = top
-        inf["bottom"] = bottom
-        inf["left"] = left
-        inf["right"] = right
-
-    def _choose_horz(
-        self,
-        dropped: BordersDropped,
-        row_pos: POS,
-        tcBorders_elm: CT_TcBorders,
-        tbl_horz: Border | None,
-    ) -> tuple[Border | None, Border | None]:
-        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
-        top = self._border(tcBorders_elm, top_n)
-        if top_n == "insideH" and top is None:
-            top_got = self._border(tcBorders_elm, "top")
-            if top_got:
-                top = top_got
-            else:
-                dropped["top"] = True
-                top = tbl_horz
-        bottom = self._border(tcBorders_elm, bottom_n)
-        if bottom_n == "insideH" and bottom is None:
-            bottom_got = self._border(tcBorders_elm, "bottom")
-            if bottom_got:
-                bottom = bottom_got
-            else:
-                dropped["bottom"] = True
-                bottom = tbl_horz
-        return top, bottom
-
-    def _choose_vert(
-        self,
-        dropped: BordersDropped,
-        cell_pos: POS,
-        tcBorders_elm: CT_TcBorders,
-        tbl_vert: Border | None,
-    ) -> tuple[Border | None, Border | None]:
-        left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
-        left = self._border(tcBorders_elm, left_n)
-        if left_n == "insideV" and left is None:
-            left_got = self._border(tcBorders_elm, "left")
-            if left_got:
-                left = left_got
-            else:
-                dropped["left"] = True
-                left = tbl_vert
-        right = self._border(tcBorders_elm, right_n)
-        if right_n == "insideV" and right is None:
-            right_got = self._border(tcBorders_elm, "right")
-            if right_got:
-                right = right_got
-            else:
-                dropped["right"] = True
-                right = tbl_vert
-        return left, right
-
-    def _border(
-        self, borders_elm: CT_TcBorders | CT_TblBorders | None, border: _Border
-    ) -> Border | None:
-        path = self._prop_path(border)
-        prop = safe_get_prop(borders_elm, path, False)
-        if isinstance(prop, NotFound):
-            return None
-        return Border(prop, self._proxy)
-
-    def _vert_borders_conflict(
-        self,
-        inf: BordersInfo,
-        cell_pos: POS,
-        cell_prev_h2d: CellH2D | None,
-        cell_next_h2d: CellH2D | None,
-        tbl_left: Border | None,
-        tbl_right: Border | None,
-        tbl_vert: Border | None,
-    ) -> None:
-        left_n, right_n = TBL_POSITIONING[cell_pos]["cell"]
-        if left_n == "left":
-            inf["left"] = self._opposing_cell_borders_conflict(
-                inf["left"], tbl_left, True
-            )
-        elif left_n == "insideV" and cell_prev_h2d is not None:
-            prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
-            right_dropped = prev_inf["_sides_dropped_to_table_borders"][
-                "right"
-            ]
-            if prev_inf["right"]:
-                inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], prev_inf["right"], right_dropped
-                )
-            else:
-                inf["left"] = self._opposing_cell_borders_conflict(
-                    inf["left"], tbl_vert, True
-                )
-        if right_n == "right":
-            inf["right"] = self._opposing_cell_borders_conflict(
-                inf["right"], tbl_right, True
-            )
-        elif right_n == "insideV" and cell_next_h2d is not None:
-            next_inf = cell_next_h2d._borders_non_zero_spacing_info
-            left_dropped = next_inf["_sides_dropped_to_table_borders"]["left"]
-            if next_inf["right"]:
-                inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], next_inf["left"], left_dropped
-                )
-            else:
-                inf["right"] = self._opposing_cell_borders_conflict(
-                    inf["right"], tbl_vert, True
-                )
-
-    def _horz_borders_conflict(
-        self,
-        inf: BordersInfo,
-        row_pos: POS,
-        cell_above_h2d: CellH2D | None,
-        cell_below_h2d: CellH2D | None,
-        tbl_top: Border | None,
-        tbl_bottom: Border | None,
-        tbl_horz: Border | None,
-    ) -> None:
-        top_n, bottom_n = TBL_POSITIONING[row_pos]["row"]
-        if top_n == "top":
-            inf["top"] = self._opposing_cell_borders_conflict(
-                inf["top"], tbl_top, True
-            )
-        elif top_n == "insideH" and cell_above_h2d is not None:
-            above_inf = cell_above_h2d._borders_non_zero_spacing_info
-            bottom_dropped = above_inf["_sides_dropped_to_table_borders"][
-                "bottom"
-            ]
-            if above_inf["bottom"]:
-                inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], above_inf["bottom"], bottom_dropped
-                )
-            else:
-                inf["top"] = self._opposing_cell_borders_conflict(
-                    inf["top"], tbl_horz, True
-                )
-        if bottom_n == "bottom":
-            inf["bottom"] = self._opposing_cell_borders_conflict(
-                inf["bottom"], tbl_bottom, True
-            )
-        elif bottom_n == "insideH" and cell_below_h2d is not None:
-            below_inf = cell_below_h2d._borders_non_zero_spacing_info
-            bottom_dropped = below_inf["_sides_dropped_to_table_borders"][
-                "top"
-            ]
-            if below_inf["top"]:
-                inf["bottom"] = self._opposing_cell_borders_conflict(
-                    inf["bottom"], below_inf["top"]
-                )
-            else:
-                inf["bottom"] = self._opposing_cell_borders_conflict(
-                    inf["bottom"], tbl_horz, True
-                )
-
-    def _opposing_cell_borders_conflict(
-        self,
-        main: Border | None,
-        opposing_to: Border | None,
-        opposed_to_table: bool = False,
-    ) -> Border | None:
-        none = (None, SE_BORDER.NULL, SE_BORDER.NONE)
-        if opposed_to_table:
-            if main is None:
-                return opposing_to
-            else:
-                return main
-        else:
-            if main is None:
-                return opposing_to
-            elif main.border_type in none:
-                return opposing_to
-            elif opposing_to is None:
-                return main
-            elif opposing_to.border_type in none:
-                return main
-        main_weight = self._border_weight(main.border_type)
-        opposing_to_weight = self._border_weight(opposing_to.border_type)
-        if main_weight is None or opposing_to_weight is None:
-            msg = "Art borders detected in table of story part"
-            raise DisplayError(msg)
-        if main_weight > opposing_to_weight:
-            return main
-        elif main_weight < opposing_to_weight:
-            return opposing_to
-        elif main_weight == opposing_to_weight:
-            main_number = _SE_BORDER_TO_ECMA_NUMBER[main.border_type]
-            opposing_to_number = _SE_BORDER_TO_ECMA_NUMBER[
-                opposing_to.border_type
-            ]
-            if main_number <= opposing_to_number:
-                return main
-            return opposing_to
-        return None
-
-    def _border_weight(self, border_type: SE_BORDER) -> int | None:
-        lines_count = _SE_BORDER_TO_LINES_COUNT.get(border_type)
-        border_number = _SE_BORDER_TO_ECMA_NUMBER.get(border_type)
-        if lines_count is None or border_number is None:
-            # It's an art border
-            return None
-        return lines_count * border_number
-
-    def _prop_with_ctx(
-        self, name: str
-    ) -> tuple[Any | None, TableStyle | CT_TblStylePr | None]:
-        elm = self._prop(name)
-        if not isinstance(elm, NotFound):
-            return elm, None
-        path = self._prop_path(name, self._path_base)
-        tc_ctx = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
-        if not isinstance(tc_ctx[0], NotFound):
-            return tc_ctx
-        return None, None
-
-    def _cnf_looked(self, cnf: WD_CNF_FORMAT) -> WD_CNF_FORMAT:
+    def _cnf_looked(self) -> WD_CNF_FORMAT:
         row_h2d = self.row.h2d
+        cnf = self._cnf_latent
         if not row_h2d.first_row_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
@@ -759,6 +447,188 @@ class CellH2D(How2Display[Cell]):
             cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
         return cnf
+
+    @cached_property
+    def _self_top(self) -> Border | None:
+        return self._self_border("top")
+
+    @cached_property
+    def _self_bottom(self) -> Border | None:
+        return self._self_border("bottom")
+
+    @cached_property
+    def _self_left(self) -> Border | None:
+        return self._self_border("left")
+
+    @cached_property
+    def _self_right(self) -> Border | None:
+        return self._self_border("right")
+
+    @cached_property
+    def _tbl_style_props_deep(
+        self,
+    ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
+        tbl_style = self._table_style
+        props_leveled = []
+        cnf = self._cnf_looked
+        while isinstance(tbl_style, TableStyle):
+            if cnf is not None:
+                tbl_style_props = self._table_style_props(tbl_style, cnf)
+            else:
+                tbl_style_props = []
+            props_leveled.append((tbl_style, tbl_style_props))
+            tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
+        return props_leveled
+
+    @cached_property
+    def border_grid_cells(self) -> list[CellOnBorderGrid]:
+        cell_on_grids: list[CellOnBorderGrid] = []
+        borders_ctx = self._tcBordersCtx
+        if borders_ctx is None:
+            return cell_on_grids
+        for tcBorders_elm, ctx in borders_ctx:
+            if ctx is None or isinstance(ctx, TableStyle):
+                grid_group = SE_TblStyleOverrideType.ENTIRE_TABLE
+            else:
+                grid_group = ctx.type
+            cell_on_grids.append(
+                CellOnBorderGrid(self._proxy, tcBorders_elm, grid_group)
+            )
+        return cell_on_grids
+
+    @cached_property
+    def _tcBordersCtx(
+        self,
+    ) -> list[tuple[CT_TcBorders, None | TableStyle | CT_TblStylePr]] | None:
+        path = PropertyPath.base("tcBorders", "tcPr")
+        tcBorders_elm = self._prop(path)
+        if not isinstance(tcBorders_elm, NotFound):
+            return [(tcBorders_elm, None)]
+        ctx_list: list[
+            tuple[CT_TcBorders, None | TableStyle | CT_TblStylePr]
+        ] = []
+        override_type_seen = set()
+        for tbl_style, tbl_style_props in self._tbl_style_props_deep:
+            if not tbl_style_props:
+                tcBorders_elm = safe_get_prop(tbl_style.element, path, False)
+                if not isinstance(tcBorders_elm, NotFound):
+                    return [(tcBorders_elm, tbl_style)]
+            for prop in tbl_style_props:
+                tcBorders_elm = safe_get_prop(prop, path, False)
+                if (
+                    not isinstance(tcBorders_elm, NotFound)
+                    and prop.type not in override_type_seen
+                ):
+                    ctx_list.append((tcBorders_elm, prop))
+                    override_type_seen.add(prop.type)
+        if ctx_list:
+            return ctx_list
+        return None
+
+    def _spacing_non_zero(self) -> BordersInfo:
+        inf: BordersInfo = {
+            "top": None,
+            "bottom": None,
+            "left": None,
+            "right": None,
+            "spacing": None,
+        }
+        sides = ["top", "bottom", "left", "right"]
+        for side_n in sides:
+            self._choose_side(inf, cast("_Side", side_n))
+        return inf
+
+    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
+        self._vert_borders_conflict(inf)
+        self._horz_borders_conflict(inf)
+        return inf
+
+    def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
+        row_h2d = self.row.h2d
+        if side_n in ("top", "bottom"):
+            table_inside = row_h2d._table_insideH
+        else:
+            table_inside = row_h2d._table_insideV
+        side: Border | None = getattr(self, f"_self_{side_n}")
+        if side is None and table_inside is not None:
+            # Small hack to make the border comparator think that this side is more important
+            table_inside._parent = self._proxy
+            side = table_inside
+        inf[side_n] = side
+
+    def _self_border(self, border: _Border) -> Border | None:
+        border_proxy = None
+        for cell_grid in self.border_grid_cells:
+            if border_proxy is None:
+                border_proxy = getattr(cell_grid, border, None)
+        return border_proxy
+
+    def _vert_borders_conflict(self, inf: BordersInfo) -> None:
+        cell = self._proxy
+        row_h2d = self.row.h2d
+        tbl_left = row_h2d._table_left
+        tbl_right = row_h2d._table_right
+        tbl_vert = row_h2d._table_insideV
+        cell_prev = cell.cell_prev
+        cell_prev_h2d = cell_prev.h2d if cell_prev is not None else None
+        cell_next = cell.cell_next
+        cell_next_h2d = cell_next.h2d if cell_next is not None else None
+        left_n, right_n = TBL_POSITIONING[cell.pos]["cell"]
+        if left_n == "left":
+            inf["left"] = Border.oppose(inf["left"], tbl_left)
+        elif left_n == "insideV" and cell_prev_h2d is not None:
+            prev_inf = cell_prev_h2d._borders_non_zero_spacing_info
+            inf["left"] = Border.oppose(
+                inf["left"], prev_inf["right"] or tbl_vert
+            )
+        if right_n == "right":
+            inf["right"] = Border.oppose(inf["right"], tbl_right)
+        elif right_n == "insideV" and cell_next_h2d is not None:
+            next_inf = cell_next_h2d._borders_non_zero_spacing_info
+            inf["right"] = Border.oppose(
+                inf["right"], next_inf["left"] or tbl_vert
+            )
+
+    def _horz_borders_conflict(self, inf: BordersInfo) -> None:
+        cell = self._proxy
+        row_h2d = self.row.h2d
+        tbl_top = row_h2d._table_top
+        tbl_bottom = row_h2d._table_bottom
+        tbl_horz = row_h2d._table_insideH
+        cell_above = cell.cell_above
+        cell_above_h2d = cell_above.h2d if cell_above is not None else None
+        cell_below = cell.cell_below
+        cell_below_h2d = cell_below.h2d if cell_below is not None else None
+        top_n, bottom_n = TBL_POSITIONING[self.row.pos]["row"]
+
+        if top_n == "top":
+            inf["top"] = Border.oppose(inf["top"], tbl_top)
+        elif top_n == "insideH" and cell_above_h2d is not None:
+            above_inf = cell_above_h2d._borders_non_zero_spacing_info
+            inf["top"] = Border.oppose(
+                inf["top"], above_inf["bottom"] or tbl_horz
+            )
+        if bottom_n == "bottom":
+            inf["bottom"] = Border.oppose(inf["bottom"], tbl_bottom)
+        elif bottom_n == "insideH" and cell_below_h2d is not None:
+            below_inf = cell_below_h2d._borders_non_zero_spacing_info
+            inf["bottom"] = Border.oppose(
+                inf["bottom"], below_inf["top"] or tbl_horz
+            )
+
+    def _prop_with_ctx(
+        self, name: str
+    ) -> tuple[Any | None, TableStyle | CT_TblStylePr | None]:
+        elm = self._prop(name)
+        if not isinstance(elm, NotFound):
+            return elm, None
+        path = self._prop_path(name, self._path_base)
+        tc_ctx = self._from_tbl_style_hierarchy(
+            self._tbl_style_props_deep, path
+        )
+        if not isinstance(tc_ctx[0], NotFound):
+            return tc_ctx
+        return None, None
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any

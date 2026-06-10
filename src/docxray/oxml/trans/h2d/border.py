@@ -1,8 +1,15 @@
+from __future__ import annotations
+
 from functools import cached_property
+from typing import Literal
 
 # docxray stuff
-from docxray.oxml.trans.enums import _SE_BORDER_TO_ECMA_NUMBER
+from docxray.oxml.trans.enums import (
+    _SE_BORDER_TO_ECMA_NUMBER,
+    _SE_BORDER_TO_LINES_COUNT,
+)
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
+from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,
@@ -11,8 +18,70 @@ from docxray.oxml.trans.st.enums import (
 
 from .colorize import Colorize
 
+type _WhichParent = Literal["cell", "table"]
+
 
 class Border(ElementProxy[CT_Border]):
+    @classmethod
+    def oppose(
+        cls, side_1: Border | None, side_2: Border | None
+    ) -> Border | None:
+        """Determine which border-side must be rendered.
+
+        From spec ECMA-376, Part 1, 17.4.66:
+        1) If either conflicting table cell border is nil or none (no border),
+        then the opposing border shall be displayed.
+        2) If a cell border conflicts with a table border, the cell border always wins.
+        3) Each border shall then be assigned a weight using the following formula,
+        and the border value using this calculation shall be displayed over the alternative border =>
+        `Wborder = # of lines in border ∗ border number`
+        4) If the borders have an equal weight, than the higher of the two on this precedence list shall win:
+        `_SE_BORDER_TO_ECMA_NUMBER`.
+
+        Args:
+            side_1 (Border | None): Opposed border-side.
+            side_2 (Border | None): Opposed border-side.
+
+        Returns:
+            Border | None: Won opposed border-side (or None if passed `None`).
+        """
+        none = (SE_BORDER.NULL, SE_BORDER.NONE)
+        # Our border ommitted - return opposed, same for opposed
+        if side_1 is None:
+            return side_2
+        if side_2 is None:
+            return side_1
+        # Cell always wins
+        if side_1._which_parent == "table":
+            return side_2
+        if side_2._which_parent == "table":
+            return side_1
+        # Render side that is not in none border types
+        if side_1.border_type in none:
+            return side_2
+        elif side_2.border_type in none:
+            return side_1
+        # Compare weights
+        return cls._which_heavier(side_1, side_2)
+
+    @classmethod
+    def _which_heavier(cls, side_1: Border, side_2: Border) -> Border:
+        # Art borders
+        if side_1._weight is None:
+            return side_1
+        if side_2._weight is None:
+            return side_2
+        # Common borders
+        if side_1._weight > side_2._weight:
+            return side_1
+        elif side_1._weight < side_2._weight:
+            return side_2
+        side_1_n = _SE_BORDER_TO_ECMA_NUMBER[side_1.border_type]
+        side_2_n = _SE_BORDER_TO_ECMA_NUMBER[side_2.border_type]
+        if side_1_n <= side_2_n:
+            return side_1
+        return side_2
+
     @cached_property
     def border_type(self) -> SE_BORDER:
         return self.element.val
@@ -60,6 +129,20 @@ class Border(ElementProxy[CT_Border]):
         if self.element.shadow is None:
             return False
         return self.element.shadow
+
+    @property
+    def _which_parent(self) -> _WhichParent:
+        if isinstance(self._parent, Cell):
+            return "cell"
+        return "table"
+
+    @cached_property
+    def _weight(self) -> int | None:
+        lines_count = _SE_BORDER_TO_LINES_COUNT.get(self.border_type)
+        border_number = _SE_BORDER_TO_ECMA_NUMBER.get(self.border_type)
+        if lines_count is None or border_number is None:
+            return None
+        return lines_count * border_number
 
     @cached_property
     def _is_art_border(self) -> bool:

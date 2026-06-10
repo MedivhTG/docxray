@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, Literal
 
 # docxray stuff
 from docxray.oxml.trans.enums import (
@@ -7,6 +7,7 @@ from docxray.oxml.trans.enums import (
     WD_CNF_TABLE_LOOK,
     CnfLookName,
 )
+from docxray.oxml.trans.h2d.border import Border
 from docxray.oxml.trans.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
@@ -24,6 +25,11 @@ from docxray.oxml.trans.table.table_props import (
     CT_TblCellMar,
     CT_TblLayoutType,
 )
+
+type _TblBorder = Literal[
+    "top", "bottom", "left", "right", "insideH", "insideV"
+]
+
 
 SHIFT_HORZ_BANDS = {
     SE_TblStyleOverrideType.HEADER_ROW,
@@ -114,6 +120,30 @@ class RowH2D(How2Display[Row]):
         return self._table_prop("tblBorders")
 
     @cached_property
+    def _table_top(self) -> Border | None:
+        return self._table_border("top")
+
+    @cached_property
+    def _table_bottom(self) -> Border | None:
+        return self._table_border("bottom")
+
+    @cached_property
+    def _table_left(self) -> Border | None:
+        return self._table_border("left")
+
+    @cached_property
+    def _table_right(self) -> Border | None:
+        return self._table_border("right")
+
+    @cached_property
+    def _table_insideH(self) -> Border | None:
+        return self._table_border("insideH")
+
+    @cached_property
+    def _table_insideV(self) -> Border | None:
+        return self._table_border("insideV")
+
+    @cached_property
     def _shd(self) -> CT_Shd | None:
         return self._table_prop("shd")
 
@@ -138,6 +168,14 @@ class RowH2D(How2Display[Row]):
         if isinstance(prop, NotFound):
             return self.table.h2d._table_prop(name)
         return prop
+
+    def _table_border(self, side: _TblBorder) -> Border | None:
+        side_elm = safe_get_prop(
+            self._tblBorders, PropertyPath.base(side), False
+        )
+        if not isinstance(side_elm, NotFound):
+            return Border(side_elm, self._proxy)
+        return None
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
