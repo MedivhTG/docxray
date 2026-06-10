@@ -480,44 +480,6 @@ class CellH2D(How2Display[Cell]):
             tbl_style = self._styles.base_style(tbl_style)  # type: ignore[assignment]
         return props_leveled
 
-    def _spacing_non_zero(self) -> BordersInfo:
-        inf: BordersInfo = {
-            "top": None,
-            "bottom": None,
-            "left": None,
-            "right": None,
-            "spacing": None,
-        }
-        sides = ["top", "bottom", "left", "right"]
-        for side_n in sides:
-            self._choose_side(inf, cast("_Side", side_n))
-        return inf
-
-    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
-        self._vert_borders_conflict(inf)
-        self._horz_borders_conflict(inf)
-        return inf
-
-    def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
-        row_h2d = self.row.h2d
-        if side_n in ("top", "bottom"):
-            table_inside = row_h2d._table_insideH
-        else:
-            table_inside = row_h2d._table_insideV
-        side: Border | None = getattr(self, f"_self_{side_n}")
-        if side is None and table_inside is not None:
-            # Small hack to make the border comparator think that this side is more important
-            table_inside._parent = self._proxy
-            side = table_inside
-        inf[side_n] = side
-
-    def _self_border(self, border: _Border) -> Border | None:
-        border_proxy = None
-        for cell_grid in self.border_grid_cells:
-            if border_proxy is None:
-                border_proxy = getattr(cell_grid, border, None)
-        return border_proxy
-
     @cached_property
     def border_grid_cells(self) -> list[CellOnBorderGrid]:
         cell_on_grids: list[CellOnBorderGrid] = []
@@ -562,6 +524,44 @@ class CellH2D(How2Display[Cell]):
         if ctx_list:
             return ctx_list
         return None
+
+    def _spacing_non_zero(self) -> BordersInfo:
+        inf: BordersInfo = {
+            "top": None,
+            "bottom": None,
+            "left": None,
+            "right": None,
+            "spacing": None,
+        }
+        sides = ["top", "bottom", "left", "right"]
+        for side_n in sides:
+            self._choose_side(inf, cast("_Side", side_n))
+        return inf
+
+    def _spacing_zero(self, inf: BordersInfo) -> BordersInfo:
+        self._vert_borders_conflict(inf)
+        self._horz_borders_conflict(inf)
+        return inf
+
+    def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
+        row_h2d = self.row.h2d
+        if side_n in ("top", "bottom"):
+            table_inside = row_h2d._table_insideH
+        else:
+            table_inside = row_h2d._table_insideV
+        side: Border | None = getattr(self, f"_self_{side_n}")
+        if side is None and table_inside is not None:
+            # Small hack to make the border comparator think that this side is more important
+            table_inside._parent = self._proxy
+            side = table_inside
+        inf[side_n] = side
+
+    def _self_border(self, border: _Border) -> Border | None:
+        border_proxy = None
+        for cell_grid in self.border_grid_cells:
+            if border_proxy is None:
+                border_proxy = getattr(cell_grid, border, None)
+        return border_proxy
 
     def _vert_borders_conflict(self, inf: BordersInfo) -> None:
         cell = self._proxy
