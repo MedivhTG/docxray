@@ -74,6 +74,11 @@ class OxmlElement(BaseOxmlElement):
     ) -> Any:
         """Get optional attribute from element with XSD validation.
 
+        Passed kwargs `facets` type of `XsdFacet` is an additional validation params for current `XsdSimpleType`.
+
+        If `simple_type` passed as `None`, then will be used default `XsdString`
+        validation type.
+
         Args:
             elm_qn (str): Qalified name of an desired element.
             simple_type (type[ST_T] | None, optional): Validation XSD cls type on found element. Defaults to None.
@@ -92,13 +97,18 @@ class OxmlElement(BaseOxmlElement):
         return simple_type(attr).validate()
 
     def attr_required(
-        self, elm_qn: str, simple_type: type[ST_T], **facets: dict[str, Any]
+        self, elm_qn: str, simple_type: type[ST_T] | None = None, **facets: Any
     ) -> Any:
         """Get required attribute from element with XSD validation.
 
+        Passed kwargs `facets` type of `XsdFacet` is an additional validation params for current `XsdSimpleType`.
+
+        If `simple_type` passed as `None`, then will be used default `XsdString`
+        validation type.
+
         Args:
             elm_qn (str): Qalified name of an desired element.
-            simple_type (type[ST_T]): Validation XSD cls type on found element.
+            simple_type (type[ST_T] | None, optional): Validation XSD cls type on found element. Defaults to None.
 
         Raises:
             InvalidXmlError: If required lement is not found.
@@ -112,6 +122,8 @@ class OxmlElement(BaseOxmlElement):
                 f"Attribute {elm_qn} was None when one was required for {self}"
             )
             raise InvalidXmlError(msg)
+        if simple_type is None:
+            return XsdString.validate(attr, **facets)
         if issubclass(simple_type, XsdPrimitive):
             return simple_type.validate(attr, **facets)
         return simple_type(attr).validate()
