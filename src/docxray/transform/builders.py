@@ -627,8 +627,7 @@ class _RunsHtmlBuilder:
             idxed = self._same_idx_intersects(between, idx)
             if idxed:
                 top, bottom = self._chained_tag_tree(idxed)
-                exclude = {chain.key: chain for chain in idxed}
-                exclude[main.key] = main
+                exclude = set(idxed) | {main}
                 skip_until = self._chained_recursive(
                     bottom, idxed[-1], exclude
                 )
@@ -704,11 +703,11 @@ class _RunsHtmlBuilder:
         return top, bottom
 
     def _same_idx_intersects(
-        self, between: dict[tuple[str, Any], RunChain], idx: int
+        self, between: list[RunChain], idx: int
     ) -> list[RunChain]:
         """Filter by index and topological sorting by length of run chain."""
         return sorted(
-            [chain for chain in between.values() if chain.start == idx],
+            [chain for chain in between if chain.start == idx],
             key=lambda c: len(c),
         )
 
@@ -716,7 +715,7 @@ class _RunsHtmlBuilder:
         self,
         bottom: HtmlElement,
         bottom_chain: RunChain,
-        exclude: dict[tuple[str, Any], RunChain] | None = None,
+        exclude: set[RunChain] | None = None,
         skip_until: int = -1,
     ) -> int:
         """Recursively traverses run chains and build up format tag trees.
@@ -724,7 +723,7 @@ class _RunsHtmlBuilder:
         Args:
             bottom (_Element): Current bottom element of an format tag tree.
             bottom_chain (RunChain): Current bottom chain.
-            exclude (dict[tuple[str, Any], RunChain] | None, optional): Exclude processed
+            exclude (set[RunChain] | None, optional): Exclude processed
                 run chains to avoid infinite calls. Defaults to None.
             skip_until (int, optional): Rightmost end index of processed
                 run chains. Defaults to -1.
@@ -734,12 +733,7 @@ class _RunsHtmlBuilder:
         """
         between = bottom_chain.chains_between()
         if exclude:
-            exclude_set = set(exclude)
-            between = {
-                key: chain
-                for key, chain in between.items()
-                if key not in exclude_set
-            }
+            between = [ch for ch in between if ch not in exclude]
         for idx in range(bottom_chain.start, bottom_chain.end + 1):
             bottom_link = bottom_chain.link(idx)
             if bottom_link is None:
@@ -747,8 +741,7 @@ class _RunsHtmlBuilder:
             idxed = self._same_idx_intersects(between, idx)
             if idxed:
                 t, b = self._chained_tag_tree(idxed)
-                exclude = {chain.key: chain for chain in idxed}
-                exclude[bottom_chain.key] = bottom_chain
+                exclude = set(idxed) | {bottom_chain}
                 skip_until = self._chained_recursive(b, idxed[-1], exclude)
                 bottom.append(t)
             else:

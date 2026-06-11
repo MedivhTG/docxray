@@ -82,7 +82,7 @@ class RunChainsMap:
         For every index we get unchained format or main chain - chain with
         the smallest start index and longest length.
         """
-        chains_seen: dict[tuple[str, Any], RunChain] = {}
+        chains_seen: set[RunChain] = set()
 
         for i in range(len(self)):
             unchained = self.get_unchained(i)
@@ -91,19 +91,19 @@ class RunChainsMap:
                 continue
             for name in self._tags_for_map:
                 chain = self.get_chain(i, name)
-                if chain is None or chain.key in chains_seen:
+                if chain is None or chain in chains_seen:
                     continue
-                all = {chain.key: chain}
-                all.update(chain.intersections)
-                del_seen_set = set(chains_seen)
-                all_remained = {
-                    k: v for k, v in all.items() if k not in del_seen_set
-                }
-                # Topological sorting by start index
+                all = [chain]
+                for intersection in chain.intersections:
+                    if intersection not in all:
+                        all.append(intersection)
+
+                all_remained = [ch for ch in all if ch not in chains_seen]
+                # Topological sorting by start index and length (the longest ones first)
                 all_sorted = sorted(
-                    all_remained.values(), key=lambda c: (c.start, len(c))
+                    all_remained, key=lambda c: (c.start, -len(c))
                 )
-                chains_seen.update({item.key: item for item in all_sorted})
+                chains_seen.update({item for item in all_sorted})
                 yield all_sorted[0]
 
     def get_chain(self, idx: int, name: str) -> RunChain | None:
@@ -181,7 +181,7 @@ class RunChain:
         self._comparable = attr
         self._links: dict[int, Run] = {}
         self._start = start
-        self.__intersections: dict[tuple[str, Any], RunChain] = {}
+        self.__intersections: list[RunChain] = []
 
     def __len__(self) -> int:
         """Length of chain in single run chain."""
@@ -203,7 +203,7 @@ class RunChain:
         return self._start + self.__len__() - 1
 
     @property
-    def intersections(self) -> dict[tuple[str, Any], RunChain]:
+    def intersections(self) -> list[RunChain]:
         """Run chain references inetersected."""
         return self.__intersections
 
@@ -217,28 +217,25 @@ class RunChain:
         """Main value for chain that applied for runs."""
         return self._comparable
 
-    @property
-    def key(self) -> tuple[str, Any]:
-        """Determines this RunChain as unique instance in RunChainsMap."""
-        return self._name, self._comparable
-
     def add_intersection(self, chain: RunChain) -> None:
         """Add new intersection."""
-        self.__intersections[chain.key] = chain
+        if chain not in self.__intersections:
+            self.__intersections.append(chain)
 
     def in_range_of(self, upper: RunChain) -> bool:
         """If current chain between indexes of upper chain."""
         return self.start >= upper.start and self.end <= upper.end
 
-    def chains_between(self) -> dict[tuple[str, Any], RunChain]:
+    def chains_between(self) -> list[RunChain]:
         """All chains that between current from intersections.
 
         It is determined using the start and end indexes.
         """
-        chains_inside = {}
-        for key, intersection in self.intersections.items():
+        chains_inside = []
+        for intersection in self.intersections:
             if intersection.in_range_of(self):
-                chains_inside[key] = intersection
+                if intersection not in chains_inside:
+                    chains_inside.append(intersection)
         return chains_inside
 
     def link(self, idx: int) -> Run | None:
