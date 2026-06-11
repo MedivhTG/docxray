@@ -1,10 +1,10 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.xsd.primitives import XsdToken
+from docxray.xsd.primitives import XsdBoolean, XsdToken
 
 from .ns import PIC, WP, A, NoNS, R
-from .st.dml_main import ST_PositiveCoordinate
+from .st.dml_main import ST_DrawingElementId, ST_PositiveCoordinate
 from .st.dml_wordprocessing_drawing import ST_WrapDistance
 from .xmlchemy import OxmlElement
 
@@ -20,7 +20,25 @@ class CT_PositiveSize2D(OxmlElement):
 
 
 class CT_NonVisualDrawingProps(OxmlElement):
-    pass
+    @cached_property
+    def id(self) -> int:
+        return self.attr_required(NoNS.ID, ST_DrawingElementId)
+
+    @cached_property
+    def name(self) -> str:
+        return self.attr_required(NoNS.NAME)
+
+    @cached_property
+    def descr(self) -> str:
+        return self.attr_optional(NoNS.DESCR, default="")
+
+    @cached_property
+    def hidden(self) -> bool:
+        return self.attr_optional(NoNS.HIDDEN, XsdBoolean, default=False)
+
+    @cached_property
+    def title(self) -> str:
+        return self.attr_optional(NoNS.TITLE, default="")
 
 
 class CT_NonVisualGraphicFrameProperties(OxmlElement):

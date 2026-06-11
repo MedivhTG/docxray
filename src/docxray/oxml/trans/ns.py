@@ -335,6 +335,12 @@ class R:
 
 
 class NoNS:
+    ID = "id"
+    NAME = "name"
+    DESCR = "descr"
+    HIDDEN = "hidden"
+    TITLE = "title"
+
     CX = "cx"
     CY = "cy"
 

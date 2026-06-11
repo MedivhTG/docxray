@@ -355,9 +355,16 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
     def _attrs(cls, proxy: Drawing) -> dict[str, str]:
         pic = proxy.picture
         if pic is None:
-            return {"width": f"{proxy.width}px", "height": f"{proxy.height}px"}
+            return {
+                "width": f"{proxy.width.px()}px",
+                "height": f"{proxy.height.px()}px",
+                "alt": proxy.name,
+            }
         base64 = b64encode(pic.resized(proxy.size_px).blob).decode()
-        return {"src": f"data:{pic.content_type};base64,{base64}"}
+        return {
+            "src": f"data:{pic.content_type};base64,{base64}",
+            "alt": proxy.name,
+        }
 
 
 class HtmlListViewInterrupted(HtmlBuilder["ListViewInterrupted"]):
