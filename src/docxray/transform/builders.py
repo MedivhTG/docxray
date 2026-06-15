@@ -14,6 +14,7 @@ from docxray.oxml.trans.h2d.border import Border
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,
@@ -196,11 +197,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             elm.text = SPACEBREAK_MNEMONIC
             return
         chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
-        for run_or_hlink in proxy.iter_inner_content():
-            if isinstance(run_or_hlink, Run):
-                chain_map.chain(run_or_hlink)
-            else:
-                for run in run_or_hlink.iter_inner_content():
+        for item in proxy.iter_inner_content():
+            if isinstance(item, Run):
+                chain_map.chain(item)
+            elif isinstance(item, Hyperlink):
+                for run in item.iter_inner_content():
                     chain_map.chain(run)
         runs_builder = _RunsHtmlBuilder(elm, cls.ATTR_TO_ELMMAKER, ruleset)
         for unchained_or_chain in chain_map.chains_ordered():

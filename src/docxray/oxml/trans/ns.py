@@ -334,6 +334,14 @@ class R:
     EMBED = qn("r:embed")
 
 
+class M:
+    O_MATH_PARA_PR = qn("m:oMathParaPr")
+    JC = qn("m:jc")
+    VAL = qn("m:val")
+
+    O_MATH = qn("m:oMath")
+
+
 class NoNS:
     ID = "id"
     NAME = "name"

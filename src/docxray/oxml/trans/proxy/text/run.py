@@ -98,6 +98,14 @@ class Run(StoryChild[CT_R]):
     def vertical_alignment(self) -> SE_VerticalAlignRun | None:
         return self.h2d.vertical_alignment
 
+    @cached_property
+    def raw_text(self) -> str:
+        txt = ""
+        for item in self.iter_inner_content():
+            if isinstance(item, TxtFragment):
+                txt += item.raw
+        return txt
+
     def iter_inner_content(
         self,
     ) -> Iterator[TxtFragment | Drawing | Break | Tab]:

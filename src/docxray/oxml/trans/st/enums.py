@@ -462,3 +462,10 @@ class SE_JC_TABLE(StrEnum):
 class SE_TBL_LAYOUT_TYPE(StrEnum):
     FIXED = "fixed"
     AUTOFIT = "autofit"
+
+
+class SE_JC_OMATH(StrEnum):
+    LEFT = "left"
+    RIGHT = "right"
+    CENTER = "center"
+    CENTER_GROUP = "centerGroup"

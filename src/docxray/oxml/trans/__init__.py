@@ -42,6 +42,13 @@ from .text.paragraph import CT_P
 
 register_element_cls("w:p", CT_P)
 
+from .text.omath import CT_OMath, CT_OMathJc, CT_OMathPara, CT_OMathParaPr
+
+register_element_cls("m:oMathPara", CT_OMathPara)
+register_element_cls("m:oMathParaPr", CT_OMathParaPr)
+register_element_cls("m:jc", CT_OMathJc)
+register_element_cls("m:oMath", CT_OMath)
+
 from .text.paragraph_props import (
     CT_Ind,
     CT_PBdr,
