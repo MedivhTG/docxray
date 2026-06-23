@@ -32,8 +32,8 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 from .run import RUN_INNER_CONTENT_XPATH, RunInnerContent
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad | CT_SPre | CT_SSub | CT_SSubSup | CT_SSup
-OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary | m:phant | m:rad | m:sPre | m:sSub | m:sSubSup | m:sSup"
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad | CT_SPre | CT_SSub | CT_SSubSup | CT_SSup | CT_R_OMath
+OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary | m:phant | m:rad | m:sPre | m:sSub | m:sSubSup | m:sSup | m:r"
 
 
 class CT_Integer2(OxmlElement):
@@ -65,6 +65,7 @@ class CT_OMathArg(OxmlElement):
     def argPr(self) -> CT_OMathArgPr | None:
         return self.child_zero_or_one(M.ARG_PR, CT_OMathArgPr)
 
+    # TODO: look for paragraph content too
     @cached_property
     def inner_content_items(self) -> list[OMathElements]:
         return self.xpath(OMATH_ELEMENTS_XPATH)

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.list_view import ListViewInterrupted
     from docxray.oxml.trans.proxy.table import Table
+    from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 
     from .ruleset import RuleSet
@@ -64,7 +65,7 @@ class ListViewInterruptedT(Transformer["ListViewInterrupted"]):
     ) -> HtmlElement:
         rule = ruleset.html_rules.get("ListViewInterrupted")
         if rule is None:
-            raise ValueError("No such rule for Paragraph found in rule set")
+            raise ValueError("No such rule for List found in rule set")
         return rule.builder.element(proxy, ruleset)
 
 
@@ -74,4 +75,24 @@ class TablleT(Transformer["Table"]):
         rule = ruleset.html_rules.get("Table")
         if rule is None:
             raise ValueError("No such rule for Table found in rule set")
+        return rule.builder.element(proxy, ruleset)
+
+
+class OMathParaT(Transformer["OMathParagraph"]):
+    @classmethod
+    def transform_html(
+        cls, proxy: OMathParagraph, ruleset: RuleSet
+    ) -> HtmlElement:
+        rule = ruleset.html_rules.get("OMathParagraph")
+        if rule is None:
+            raise ValueError("No such rule for OMath para found in rule set")
+        return rule.builder.element(proxy, ruleset)
+
+
+class OMathT(Transformer["OMath"]):
+    @classmethod
+    def transform_html(cls, proxy: OMath, ruleset: RuleSet) -> HtmlElement:
+        rule = ruleset.html_rules.get("OMath")
+        if rule is None:
+            raise ValueError("No such rule for OMath found in rule set")
         return rule.builder.element(proxy, ruleset)

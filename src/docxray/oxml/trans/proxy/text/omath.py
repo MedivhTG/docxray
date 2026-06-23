@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from functools import cached_property
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.trans.proxy.shared import (
@@ -9,12 +12,40 @@ from docxray.oxml.trans.proxy.shared import (
 )
 from docxray.oxml.trans.st.enums import SE_JC_OMATH
 from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
+from docxray.oxml.trans.text.omath_elm import CT_Text_OMath
+from docxray.oxml.trans.text.run import CT_Text
+
+if TYPE_CHECKING:
+    # docxray stuff
+    from docxray.transform.ruleset import RuleSet
+    from docxray.transform.transformers import TransformMethod
 
 
 class OMath(StoryChild[CT_OMath]):
     @cached_property
     def raw_text(self) -> str:
-        return ""
+        txt = ""
+        txt_elms: list[CT_Text_OMath | CT_Text] = self.element.xpath(
+            ".//m:t | .//w:t"
+        )
+        for txt_elm in txt_elms:
+            txt += txt_elm.txt
+        return txt
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformers import OMathT
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return OMathT.transform(self, ruleset, stringify, method)
 
 
 class OMathParagraph(StoryChild[CT_OMathPara]):
@@ -29,4 +60,25 @@ class OMathParagraph(StoryChild[CT_OMathPara]):
 
     @cached_property
     def raw_text(self) -> str:
-        return ""
+        txt = ""
+        txt_elms: list[CT_Text_OMath | CT_Text] = self.element.xpath(
+            ".//m:t | .//w:t"
+        )
+        for txt_elm in txt_elms:
+            txt += txt_elm.txt
+        return txt
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformers import OMathParaT
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return OMathParaT.transform(self, ruleset, stringify, method)

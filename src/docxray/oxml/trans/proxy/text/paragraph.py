@@ -34,6 +34,8 @@ if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
     from docxray.transform.transformers import TransformMethod
 
+type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath
+
 
 class Paragraph(StoryChild[CT_P]):
     @cached_property
@@ -165,7 +167,7 @@ class Paragraph(StoryChild[CT_P]):
 
     @cached_property
     def has_text(self) -> bool:
-        return self.element.xpath("boolean(.//w:t)")
+        return self.element.xpath("boolean(.//w:t | .//m:t)")
 
     @cached_property
     def has_picture(self) -> bool:
@@ -197,7 +199,7 @@ class Paragraph(StoryChild[CT_P]):
 
     def iter_inner_content(
         self,
-    ) -> Iterator[Run | Hyperlink | OMathParagraph | OMath]:
+    ) -> Iterator[ParaContentProxy]:
         for item in self.element.inner_content_elements:
             if isinstance(item, CT_R):
                 yield Run(item, self)
