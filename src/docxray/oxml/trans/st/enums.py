@@ -469,3 +469,8 @@ class SE_JC_OMATH(StrEnum):
     RIGHT = "right"
     CENTER = "center"
     CENTER_GROUP = "centerGroup"
+
+
+class SE_TOP_BOT(StrEnum):
+    TOP = "top"
+    BOT = "bot"

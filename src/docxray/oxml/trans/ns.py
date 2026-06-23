@@ -339,7 +339,17 @@ class M:
     JC = qn("m:jc")
     VAL = qn("m:val")
 
+    E = qn("m:e")
+    ARG_PR = qn("m:argPr")
+    ARG_SZ = qn("m:argSz")
+
     O_MATH = qn("m:oMath")
+
+    ACC_PR = qn("m:accPr")
+    CHR = qn("m:chr")
+    CTRL_PR = qn("m:ctrlPr")
+    BAR_PR = qn("m:barPr")
+    POS = qn("m:pos")
 
 
 class NoNS:

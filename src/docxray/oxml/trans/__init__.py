@@ -49,6 +49,30 @@ register_element_cls("m:oMathParaPr", CT_OMathParaPr)
 register_element_cls("m:jc", CT_OMathJc)
 register_element_cls("m:oMath", CT_OMath)
 
+from .text.omath_elm import (
+    CT_Acc,
+    CT_AccPr,
+    CT_Bar,
+    CT_BarPr,
+    CT_Char,
+    CT_CtrlPr,
+    CT_Integer2,
+    CT_OMathArg,
+    CT_OMathArgPr,
+    CT_TopBot,
+)
+
+register_element_cls("m:e", CT_OMathArg)
+register_element_cls("m:argPr", CT_OMathArgPr)
+register_element_cls("m:argSz", CT_Integer2)
+register_element_cls("m:acc", CT_Acc)
+register_element_cls("m:accPr", CT_AccPr)
+register_element_cls("m:chr", CT_Char)
+register_element_cls("m:ctrlPr", CT_CtrlPr)
+register_element_cls("m:bar", CT_Bar)
+register_element_cls("m:barPr", CT_BarPr)
+register_element_cls("m:pos", CT_TopBot)
+
 from .text.paragraph_props import (
     CT_Ind,
     CT_PBdr,
