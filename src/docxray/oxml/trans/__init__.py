@@ -67,6 +67,10 @@ from .text.omath_elm import (
     CT_EqArrPr,
     CT_FPr,
     CT_FType,
+    CT_Func,
+    CT_FuncPr,
+    CT_GroupChr,
+    CT_GroupChrPr,
     CT_Integer2,
     CT_ManualBreak,
     CT_OMathArg,
@@ -132,6 +136,14 @@ register_element_cls("m:fPr", CT_FPr)
 register_element_cls("m:type", CT_FType)
 register_element_cls("m:num", CT_OMathArg)
 register_element_cls("m:den", CT_OMathArg)
+
+register_element_cls("m:func", CT_Func)
+register_element_cls("m:funcPr", CT_FuncPr)
+register_element_cls("m:fName", CT_OMathArg)
+
+register_element_cls("m:groupChr", CT_GroupChr)
+register_element_cls("m:groupChrPr", CT_GroupChrPr)
+register_element_cls("m:vertJc", CT_TopBot)
 
 from .text.paragraph_props import (
     CT_Ind,

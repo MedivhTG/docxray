@@ -390,6 +390,12 @@ class M:
     NUM = qn("m:num")
     DEN = qn("m:den")
 
+    FUNC_PR = qn("m:funcPr")
+    F_NAME = qn("m:fName")
+
+    GROUP_CHR_PR = qn("m:groupChrPr")
+    VERT_JC = qn("m:vertJc")
+
 
 class NoNS:
     ID = "id"

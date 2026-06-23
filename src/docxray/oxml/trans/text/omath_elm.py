@@ -24,10 +24,8 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F
-OMATH_ELEMENTS_XPATH = (
-    "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f"
-)
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr
+OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr"
 
 
 class CT_Integer2(OxmlElement):
@@ -316,3 +314,51 @@ class CT_F(OxmlElement):
     @cached_property
     def den(self) -> CT_OMathArg | None:
         return self.child_zero_or_one(M.DEN, CT_OMathArg)
+
+
+class CT_FuncPr(OxmlElement):
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_Func(OxmlElement):
+    @cached_property
+    def funcPr(self) -> CT_FuncPr | None:
+        return self.child_zero_or_one(M.FUNC_PR, CT_FuncPr)
+
+    @cached_property
+    def fName(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.F_NAME, CT_OMathArg)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
+
+class CT_GroupChrPr(OxmlElement):
+    @cached_property
+    def chr(self) -> CT_Char | None:
+        return self.child_zero_or_one(M.CHR, CT_Char)
+
+    @cached_property
+    def pos(self) -> CT_TopBot | None:
+        return self.child_zero_or_one(M.POS, CT_TopBot)
+
+    @cached_property
+    def vertJc(self) -> CT_TopBot | None:
+        return self.child_zero_or_one(M.VERT_JC, CT_TopBot)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_GroupChr(OxmlElement):
+    @cached_property
+    def groupChrPr(self) -> CT_GroupChrPr | None:
+        return self.child_zero_or_one(M.GROUP_CHR_PR, CT_GroupChrPr)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
