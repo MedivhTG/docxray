@@ -3,13 +3,16 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import M, W
 from docxray.oxml.trans.shared import CT_OnOff
-from docxray.oxml.trans.st.enums import SE_SHP, SE_TOP_BOT
+from docxray.oxml.trans.st.enums import SE_SHP, SE_TOP_BOT, SE_Y_ALIGN
+from docxray.oxml.trans.st.shared_common import ST_YAlign
 from docxray.oxml.trans.st.shared_math import (
     ST_Char,
     ST_Integer2,
     ST_Integer255,
     ST_Shp,
+    ST_SpacingRule,
     ST_TopBot,
+    ST_UnSignedInteger,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
@@ -208,5 +211,59 @@ class CT_D(OxmlElement):
         return self.child_zero_or_one(M.D_PR, CT_DPr)
 
     @cached_property
-    def e(self) -> CT_OMathArg | None:
-        return self.child_zero_or_one(M.E, CT_OMathArg)
+    def e(self) -> list[CT_OMathArg]:
+        return self.child_zero_or_more(M.E, CT_OMathArg)
+
+
+class CT_YAlign(OxmlElement):
+    @cached_property
+    def val(self) -> SE_Y_ALIGN:
+        return self.attr_required(M.VAL, ST_YAlign)
+
+
+class CT_SpacingRule(OxmlElement):
+    @cached_property
+    def val(self) -> int:
+        return self.attr_required(M.VAL, ST_SpacingRule)
+
+
+class CT_UnSignedInteger(OxmlElement):
+    @cached_property
+    def val(self) -> int:
+        return self.attr_required(M.VAL, ST_UnSignedInteger)
+
+
+class CT_EqArrPr(OxmlElement):
+    @cached_property
+    def baseJc(self) -> CT_YAlign | None:
+        return self.child_zero_or_one(M.BASE_JC, CT_YAlign)
+
+    @cached_property
+    def maxDist(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.MAX_DIST, CT_OnOff)
+
+    @cached_property
+    def objDist(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.OBJ_DIST, CT_OnOff)
+
+    @cached_property
+    def rSpRule(self) -> CT_SpacingRule | None:
+        return self.child_zero_or_one(M.R_SP_RULE, CT_SpacingRule)
+
+    @cached_property
+    def rSp(self) -> CT_UnSignedInteger | None:
+        return self.child_zero_or_one(M.R_SP, CT_UnSignedInteger)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_EqArr(OxmlElement):
+    @cached_property
+    def eqArrPr(self) -> CT_EqArrPr | None:
+        return self.child_zero_or_one(M.EQ_ARR_PR, CT_EqArrPr)
+
+    @cached_property
+    def e(self) -> list[CT_OMathArg]:
+        return self.child_zero_or_more(M.E, CT_OMathArg)

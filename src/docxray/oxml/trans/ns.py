@@ -378,6 +378,13 @@ class M:
     GROW = qn("m:grow")
     SHP = qn("m:shp")
 
+    EQ_ARR_PR = qn("m:eqArrPr")
+    BASE_JC = qn("m:baseJc")
+    MAX_DIST = qn("m:maxDist")
+    OBJ_DIST = qn("m:objDist")
+    R_SP_RULE = qn("m:rSpRule")
+    R_SP = qn("m:rSp")
+
 
 class NoNS:
     ID = "id"

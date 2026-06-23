@@ -62,12 +62,17 @@ from .text.omath_elm import (
     CT_Char,
     CT_CtrlPr,
     CT_DPr,
+    CT_EqArr,
+    CT_EqArrPr,
     CT_Integer2,
     CT_ManualBreak,
     CT_OMathArg,
     CT_OMathArgPr,
     CT_Shp,
+    CT_SpacingRule,
     CT_TopBot,
+    CT_UnSignedInteger,
+    CT_YAlign,
 )
 
 register_element_cls("m:e", CT_OMathArg)
@@ -110,6 +115,14 @@ register_element_cls("m:sepChr", CT_Char)
 register_element_cls("m:endChr", CT_Char)
 register_element_cls("m:grow", CT_OnOff)
 register_element_cls("m:shp", CT_Shp)
+
+register_element_cls("m:eqArr", CT_EqArr)
+register_element_cls("m:eqArrPr", CT_EqArrPr)
+register_element_cls("m:baseJc", CT_YAlign)
+register_element_cls("m:maxDist", CT_OnOff)
+register_element_cls("m:objDist", CT_OnOff)
+register_element_cls("m:rSpRule", CT_SpacingRule)
+register_element_cls("m:rSp", CT_UnSignedInteger)
 
 from .text.paragraph_props import (
     CT_Ind,

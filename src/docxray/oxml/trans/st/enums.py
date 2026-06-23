@@ -479,3 +479,12 @@ class SE_TOP_BOT(StrEnum):
 class SE_SHP(StrEnum):
     CENTERED = "centered"
     MATCH = "match"
+
+
+class SE_Y_ALIGN(StrEnum):
+    INLINE = "inline"
+    TOP = "top"
+    CENTER = "center"
+    BOTTOM = "bottom"
+    INSIDE = "inside"
+    OUTSIDE = "outside"

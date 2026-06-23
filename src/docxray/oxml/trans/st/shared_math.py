@@ -5,7 +5,7 @@ from docxray.xsd.facets import (
     MaxLengthFacet,
     MinInclusiveFacet,
 )
-from docxray.xsd.primitives import XsdInteger, XsdString
+from docxray.xsd.primitives import XsdInteger, XsdString, XsdUnsignedInt
 from docxray.xsd.xsd import XsdRestriction, XsdSimpleType
 
 from .enums import SE_JC_OMATH, SE_SHP, SE_TOP_BOT
@@ -45,3 +45,15 @@ class ST_Integer255(XsdSimpleType):
 class ST_Shp(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_SHP)}
+
+
+class ST_SpacingRule(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdInteger)
+    FACETS = {
+        "min_inclusive": MinInclusiveFacet(0),
+        "max_inclusive": MaxInclusiveFacet(4),
+    }
+
+
+class ST_UnSignedInteger(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdUnsignedInt)
