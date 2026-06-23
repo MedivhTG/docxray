@@ -396,6 +396,24 @@ class M:
     GROUP_CHR_PR = qn("m:groupChrPr")
     VERT_JC = qn("m:vertJc")
 
+    LIM_LOW_PR = qn("m:limLowPr")
+    LIM = qn("m:lim")
+
+    LIM_UPP_PR = qn("m:limUppPr")
+
+    M_PR = qn("m:mPr")
+    PLC_HIDE = qn("m:plcHide")
+    C_GP_RULE = qn("m:cGpRule")
+    C_SP = qn("m:cSp")
+    C_GP = qn("m:cGp")
+    MCS = qn("m:mcs")
+    MC = qn("m:mc")
+
+    MC_PR = qn("m:mcPr")
+    COUNT = qn("m:count")
+    MC_JC = qn("m:mcJc")
+    MR = qn("m:mr")
+
 
 class NoNS:
     ID = "id"

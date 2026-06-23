@@ -495,3 +495,11 @@ class SE_F_TYPE(StrEnum):
     SKW = "skw"
     LIN = "lin"
     NO_BAR = "noBar"
+
+
+class SE_X_ALIGN(StrEnum):
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
+    INSIDE = "inside"
+    OUTSIDE = "outside"

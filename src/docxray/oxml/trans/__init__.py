@@ -52,6 +52,10 @@ register_element_cls("m:oMath", CT_OMath)
 from .text.omath_elm import (
     CT_D,
     CT_F,
+    CT_M,
+    CT_MC,
+    CT_MCS,
+    CT_MR,
     CT_Acc,
     CT_AccPr,
     CT_Bar,
@@ -72,13 +76,21 @@ from .text.omath_elm import (
     CT_GroupChr,
     CT_GroupChrPr,
     CT_Integer2,
+    CT_Integer255,
+    CT_LimLow,
+    CT_LimLowPr,
+    CT_LimUpp,
+    CT_LimUppPr,
     CT_ManualBreak,
+    CT_MCPr,
+    CT_MPr,
     CT_OMathArg,
     CT_OMathArgPr,
     CT_Shp,
     CT_SpacingRule,
     CT_TopBot,
     CT_UnSignedInteger,
+    CT_XAlign,
     CT_YAlign,
 )
 
@@ -144,6 +156,27 @@ register_element_cls("m:fName", CT_OMathArg)
 register_element_cls("m:groupChr", CT_GroupChr)
 register_element_cls("m:groupChrPr", CT_GroupChrPr)
 register_element_cls("m:vertJc", CT_TopBot)
+
+register_element_cls("m:limLow", CT_LimLow)
+register_element_cls("m:limLowPr", CT_LimLowPr)
+register_element_cls("m:lim", CT_OMathArg)
+
+register_element_cls("m:limUpp", CT_LimUpp)
+register_element_cls("m:limUppPr", CT_LimUppPr)
+
+register_element_cls("m:m", CT_M)
+register_element_cls("m:mPr", CT_MPr)
+register_element_cls("m:plcHide", CT_OnOff)
+register_element_cls("m:cGpRule", CT_SpacingRule)
+register_element_cls("m:cSp", CT_UnSignedInteger)
+register_element_cls("m:cGp", CT_UnSignedInteger)
+register_element_cls("m:mcs", CT_MCS)
+register_element_cls("m:mr", CT_MR)
+
+register_element_cls("m:mc", CT_MC)
+register_element_cls("m:mcPr", CT_MCPr)
+register_element_cls("m:count", CT_Integer255)
+register_element_cls("m:mcJc", CT_XAlign)
 
 from .text.paragraph_props import (
     CT_Ind,

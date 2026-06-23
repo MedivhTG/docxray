@@ -12,7 +12,7 @@ from docxray.xsd.xsd import (
     XsdUnion,
 )
 
-from .enums import SE_Y_ALIGN, SE_OnOff1, SE_VerticalAlignRun
+from .enums import SE_X_ALIGN, SE_Y_ALIGN, SE_OnOff1, SE_VerticalAlignRun
 
 
 class ST_String(XsdSimpleType):
@@ -70,3 +70,8 @@ class ST_HexColorRGB(XsdSimpleType):
 class ST_YAlign(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(SE_Y_ALIGN)}
+
+
+class ST_XAlign(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(SE_X_ALIGN)}

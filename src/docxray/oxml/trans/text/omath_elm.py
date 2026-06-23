@@ -7,9 +7,10 @@ from docxray.oxml.trans.st.enums import (
     SE_F_TYPE,
     SE_SHP,
     SE_TOP_BOT,
+    SE_X_ALIGN,
     SE_Y_ALIGN,
 )
-from docxray.oxml.trans.st.shared_common import ST_YAlign
+from docxray.oxml.trans.st.shared_common import ST_XAlign, ST_YAlign
 from docxray.oxml.trans.st.shared_math import (
     ST_Char,
     ST_FType,
@@ -24,14 +25,20 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr
-OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr"
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M
+OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m"
 
 
 class CT_Integer2(OxmlElement):
     @cached_property
     def val(self) -> int:
         return self.attr_required(M.VAL, ST_Integer2)
+
+
+class CT_Integer255(OxmlElement):
+    @cached_property
+    def val(self) -> int:
+        return self.attr_required(M.VAL, ST_Integer255)
 
 
 class CT_OMathArgPr(OxmlElement):
@@ -362,3 +369,125 @@ class CT_GroupChr(OxmlElement):
     @cached_property
     def e(self) -> CT_OMathArg | None:
         return self.child_zero_or_one(M.E, CT_OMathArg)
+
+
+class CT_LimLowPr(OxmlElement):
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_LimUppPr(OxmlElement):
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_LimLow(OxmlElement):
+    @cached_property
+    def limLowPr(self) -> CT_LimLowPr | None:
+        return self.child_zero_or_one(M.LIM_LOW_PR, CT_LimLowPr)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
+    @cached_property
+    def lim(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.LIM, CT_OMathArg)
+
+
+class CT_LimUpp(OxmlElement):
+    @cached_property
+    def limUppPr(self) -> CT_LimUppPr | None:
+        return self.child_zero_or_one(M.LIM_UPP_PR, CT_LimUppPr)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
+    @cached_property
+    def lim(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.LIM, CT_OMathArg)
+
+
+class CT_XAlign(OxmlElement):
+    @cached_property
+    def val(self) -> SE_X_ALIGN:
+        return self.attr_required(M.VAL, ST_XAlign)
+
+
+class CT_MCPr(OxmlElement):
+    @cached_property
+    def count(self) -> CT_Integer255 | None:
+        return self.child_zero_or_one(M.COUNT, CT_Integer255)
+
+    @cached_property
+    def mcJc(self) -> CT_XAlign | None:
+        return self.child_zero_or_one(M.MC_JC, CT_XAlign)
+
+
+class CT_MC(OxmlElement):
+    @cached_property
+    def mcPr(self) -> CT_MCPr | None:
+        return self.child_zero_or_one(M.MC_PR, CT_MCPr)
+
+
+class CT_MCS(OxmlElement):
+    @cached_property
+    def mc(self) -> list[CT_MC]:
+        return self.child_zero_or_more(M.MC, CT_MC)
+
+
+class CT_MPr(OxmlElement):
+    @cached_property
+    def baseJc(self) -> CT_YAlign | None:
+        return self.child_zero_or_one(M.BASE_JC, CT_YAlign)
+
+    @cached_property
+    def plcHide(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.PLC_HIDE, CT_OnOff)
+
+    @cached_property
+    def rSpRule(self) -> CT_SpacingRule | None:
+        return self.child_zero_or_one(M.R_SP_RULE, CT_SpacingRule)
+
+    @cached_property
+    def cGpRule(self) -> CT_SpacingRule | None:
+        return self.child_zero_or_one(M.C_GP_RULE, CT_SpacingRule)
+
+    @cached_property
+    def rSp(self) -> CT_UnSignedInteger | None:
+        return self.child_zero_or_one(M.R_SP, CT_UnSignedInteger)
+
+    @cached_property
+    def cSp(self) -> CT_UnSignedInteger | None:
+        return self.child_zero_or_one(M.C_SP, CT_UnSignedInteger)
+
+    @cached_property
+    def cGp(self) -> CT_UnSignedInteger | None:
+        return self.child_zero_or_one(M.C_GP, CT_UnSignedInteger)
+
+    @cached_property
+    def mcs(self) -> CT_MCS | None:
+        return self.child_zero_or_one(M.MCS, CT_MCS)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_MR(OxmlElement):
+    @cached_property
+    def e(self) -> list[CT_OMathArg]:
+        return self.child_zero_or_more(M.E, CT_OMathArg)
+
+
+class CT_M(OxmlElement):
+    @cached_property
+    def mPr(self) -> CT_MPr | None:
+        return self.child_zero_or_one(M.M_PR, CT_MPr)
+
+    @cached_property
+    def mr(self) -> list[CT_MR]:
+        return self.child_zero_or_more(M.MR, CT_MR)
