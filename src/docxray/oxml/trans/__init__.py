@@ -89,6 +89,10 @@ from .text.omath_elm import (
     CT_NaryPr,
     CT_OMathArg,
     CT_OMathArgPr,
+    CT_Phant,
+    CT_PhantPr,
+    CT_Rad,
+    CT_RadPr,
     CT_Shp,
     CT_SpacingRule,
     CT_TopBot,
@@ -188,6 +192,19 @@ register_element_cls("m:subHide", CT_OnOff)
 register_element_cls("m:supHide", CT_OnOff)
 register_element_cls("m:sub", CT_OMathArg)
 register_element_cls("m:sup", CT_OMathArg)
+
+register_element_cls("m:phant", CT_Phant)
+register_element_cls("m:phantPr", CT_PhantPr)
+register_element_cls("m:show", CT_OnOff)
+register_element_cls("m:zeroWid", CT_OnOff)
+register_element_cls("m:zeroAsc", CT_OnOff)
+register_element_cls("m:zeroDesc", CT_OnOff)
+register_element_cls("m:transp", CT_OnOff)
+
+register_element_cls("m:rad", CT_Rad)
+register_element_cls("m:radPr", CT_RadPr)
+register_element_cls("m:degHide", CT_OnOff)
+register_element_cls("m:deg", CT_OMathArg)
 
 from .text.paragraph_props import (
     CT_Ind,

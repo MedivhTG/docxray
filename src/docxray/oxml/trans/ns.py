@@ -421,6 +421,17 @@ class M:
     SUB_HIDE = qn("m:subHide")
     SUP_HIDE = qn("m:supHide")
 
+    PHANT_PR = qn("m:phantPr")
+    SHOW = qn("m:show")
+    ZERO_WID = qn("m:zeroWid")
+    ZERO_ASC = qn("m:zeroAsc")
+    ZERO_DESC = qn("m:zeroDesc")
+    TRANSP = qn("m:transp")
+
+    RAD_PR = qn("m:radPr")
+    DEG_HIDE = qn("m:degHide")
+    DEG = qn("m:deg")
+
 
 class NoNS:
     ID = "id"

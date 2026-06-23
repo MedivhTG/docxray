@@ -27,8 +27,8 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary
-OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary"
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad
+OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary | m:phant | m:rad"
 
 
 class CT_Integer2(OxmlElement):
@@ -539,6 +539,66 @@ class CT_Nary(OxmlElement):
     @cached_property
     def sup(self) -> CT_OMathArg | None:
         return self.child_zero_or_one(M.SUP, CT_OMathArg)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
+
+class CT_PhantPr(OxmlElement):
+    @cached_property
+    def show(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.SHOW, CT_OnOff)
+
+    @cached_property
+    def zeroWid(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.ZERO_WID, CT_OnOff)
+
+    @cached_property
+    def zeroAsc(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.ZERO_ASC, CT_OnOff)
+
+    @cached_property
+    def zeroDesc(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.ZERO_DESC, CT_OnOff)
+
+    @cached_property
+    def transp(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.TRANSP, CT_OnOff)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_Phant(OxmlElement):
+    @cached_property
+    def phantPr(self) -> CT_PhantPr | None:
+        return self.child_zero_or_one(M.PHANT_PR, CT_PhantPr)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
+
+class CT_RadPr(OxmlElement):
+    @cached_property
+    def degHide(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.DEG_HIDE, CT_OnOff)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_Rad(OxmlElement):
+    @cached_property
+    def radPr(self) -> CT_RadPr | None:
+        return self.child_zero_or_one(M.RAD_PR, CT_RadPr)
+
+    @cached_property
+    def deg(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.DEG, CT_OMathArg)
 
     @cached_property
     def e(self) -> CT_OMathArg | None:
