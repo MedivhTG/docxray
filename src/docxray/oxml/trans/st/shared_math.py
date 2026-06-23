@@ -8,7 +8,15 @@ from docxray.xsd.facets import (
 from docxray.xsd.primitives import XsdInteger, XsdString, XsdUnsignedInt
 from docxray.xsd.xsd import XsdRestriction, XsdSimpleType
 
-from .enums import SE_F_TYPE, SE_JC_OMATH, SE_LIM_LOC, SE_SHP, SE_TOP_BOT
+from .enums import (
+    SE_F_TYPE,
+    SE_JC_OMATH,
+    SE_LIM_LOC,
+    SE_SCRIPT,
+    SE_SHP,
+    SE_STYLE,
+    SE_TOP_BOT,
+)
 
 
 class ST_Jc(XsdSimpleType):
@@ -67,3 +75,13 @@ class ST_FType(XsdSimpleType):
 class ST_LimLoc(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_LIM_LOC)}
+
+
+class ST_Script(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_SCRIPT)}
+
+
+class ST_Style(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_STYLE)}

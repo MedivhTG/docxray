@@ -56,6 +56,7 @@ from .text.omath_elm import (
     CT_MC,
     CT_MCS,
     CT_MR,
+    CT_RPR,
     CT_Acc,
     CT_AccPr,
     CT_Bar,
@@ -91,8 +92,10 @@ from .text.omath_elm import (
     CT_OMathArgPr,
     CT_Phant,
     CT_PhantPr,
+    CT_R_OMath,
     CT_Rad,
     CT_RadPr,
+    CT_Script,
     CT_Shp,
     CT_SpacingRule,
     CT_SPre,
@@ -103,6 +106,8 @@ from .text.omath_elm import (
     CT_SSubSupPr,
     CT_SSup,
     CT_SSupPr,
+    CT_Style_OMath,
+    CT_Text_OMath,
     CT_TopBot,
     CT_UnSignedInteger,
     CT_XAlign,
@@ -226,6 +231,14 @@ register_element_cls("m:alnScr", CT_OnOff)
 
 register_element_cls("m:sSup", CT_SSup)
 register_element_cls("m:sSupPr", CT_SSupPr)
+
+register_element_cls("m:r", CT_R_OMath)
+register_element_cls("m:rPr", CT_RPR)
+register_element_cls("m:lit", CT_OnOff)
+register_element_cls("m:nor", CT_OnOff)
+register_element_cls("m:scr", CT_Script)
+register_element_cls("m:sty", CT_Style_OMath)
+register_element_cls("m:t", CT_Text_OMath)
 
 from .text.paragraph_props import (
     CT_Ind,

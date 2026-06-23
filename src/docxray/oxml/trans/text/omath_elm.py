@@ -1,30 +1,35 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.ns import M, W
+from docxray.oxml.trans.ns import XML, M, W
 from docxray.oxml.trans.shared import CT_OnOff
 from docxray.oxml.trans.st.enums import (
     SE_F_TYPE,
     SE_LIM_LOC,
+    SE_SCRIPT,
     SE_SHP,
+    SE_STYLE,
     SE_TOP_BOT,
     SE_X_ALIGN,
     SE_Y_ALIGN,
 )
-from docxray.oxml.trans.st.shared_common import ST_XAlign, ST_YAlign
+from docxray.oxml.trans.st.shared_common import ST_String, ST_XAlign, ST_YAlign
 from docxray.oxml.trans.st.shared_math import (
     ST_Char,
     ST_FType,
     ST_Integer2,
     ST_Integer255,
     ST_LimLoc,
+    ST_Script,
     ST_Shp,
     ST_SpacingRule,
+    ST_Style,
     ST_TopBot,
     ST_UnSignedInteger,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
+from .run import RUN_INNER_CONTENT_XPATH, RunInnerContent
 from .run_props import CT_RPr
 
 type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad | CT_SPre | CT_SSub | CT_SSubSup | CT_SSup
@@ -695,3 +700,65 @@ class CT_SSup(OxmlElement):
     @cached_property
     def sup(self) -> CT_OMathArg | None:
         return self.child_zero_or_one(M.SUP, CT_OMathArg)
+
+
+class CT_Text_OMath(OxmlElement):
+    @cached_property
+    def txt(self) -> str:
+        return self.text or ""
+
+    @cached_property
+    def space(self) -> str | None:
+        return self.attr_optional(XML.SPACE, ST_String)
+
+
+class CT_Script(OxmlElement):
+    @cached_property
+    def val(self) -> SE_SCRIPT:
+        return self.attr_optional(M.VAL, ST_Script)
+
+
+class CT_Style_OMath(OxmlElement):
+    @cached_property
+    def val(self) -> SE_STYLE:
+        return self.attr_optional(M.VAL, ST_Style)
+
+
+class CT_RPR(OxmlElement):
+    @cached_property
+    def lit(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.LIT, CT_OnOff)
+
+    @cached_property
+    def brk(self) -> CT_ManualBreak | None:
+        return self.child_zero_or_one(M.BRK, CT_ManualBreak)
+
+    @cached_property
+    def nor(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.NOR, CT_OnOff)
+
+    @cached_property
+    def scr(self) -> CT_Script | None:
+        return self.child_zero_or_one(M.SCR, CT_Script)
+
+    @cached_property
+    def sty(self) -> CT_Style_OMath | None:
+        return self.child_zero_or_one(M.STY, CT_Style_OMath)
+
+    @cached_property
+    def aln(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.ALN, CT_OnOff)
+
+
+class CT_R_OMath(OxmlElement):
+    @cached_property
+    def rPr_omath(self) -> CT_RPR | None:
+        return self.child_zero_or_one(M.R_PR, CT_RPR)
+
+    @cached_property
+    def rPr_run(self) -> CT_RPr | None:
+        return self.child_zero_or_one(W.R_PR, CT_RPr)
+
+    @cached_property
+    def inner_content_items(self) -> list[RunInnerContent | CT_Text_OMath]:
+        return self.xpath(f"{RUN_INNER_CONTENT_XPATH} | m:t")

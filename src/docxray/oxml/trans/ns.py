@@ -441,6 +441,12 @@ class M:
 
     S_SUP_PR = qn("m:sSupPr")
 
+    R_PR = qn("m:rPr")
+    LIT = qn("m:lit")
+    NOR = qn("m:nor")
+    SCR = qn("m:scr")
+    STY = qn("m:sty")
+
 
 class NoNS:
     ID = "id"
