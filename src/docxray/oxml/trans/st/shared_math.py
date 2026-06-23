@@ -32,3 +32,11 @@ class ST_Integer2(XsdSimpleType):
         "min_inclusive": MinInclusiveFacet(-2),
         "max_inclusive": MaxInclusiveFacet(2),
     }
+
+
+class ST_Integer255(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdInteger)
+    FACETS = {
+        "min_inclusive": MinInclusiveFacet(1),
+        "max_inclusive": MaxInclusiveFacet(255),
+    }

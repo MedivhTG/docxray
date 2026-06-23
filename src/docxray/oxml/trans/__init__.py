@@ -54,9 +54,14 @@ from .text.omath_elm import (
     CT_AccPr,
     CT_Bar,
     CT_BarPr,
+    CT_BorderBox,
+    CT_BorderBoxPr,
+    CT_Box,
+    CT_BoxPr,
     CT_Char,
     CT_CtrlPr,
     CT_Integer2,
+    CT_ManualBreak,
     CT_OMathArg,
     CT_OMathArgPr,
     CT_TopBot,
@@ -65,13 +70,35 @@ from .text.omath_elm import (
 register_element_cls("m:e", CT_OMathArg)
 register_element_cls("m:argPr", CT_OMathArgPr)
 register_element_cls("m:argSz", CT_Integer2)
+
 register_element_cls("m:acc", CT_Acc)
 register_element_cls("m:accPr", CT_AccPr)
+
 register_element_cls("m:chr", CT_Char)
 register_element_cls("m:ctrlPr", CT_CtrlPr)
+
 register_element_cls("m:bar", CT_Bar)
 register_element_cls("m:barPr", CT_BarPr)
 register_element_cls("m:pos", CT_TopBot)
+
+register_element_cls("m:box", CT_Box)
+register_element_cls("m:boxPr", CT_BoxPr)
+register_element_cls("m:opEmu", CT_OnOff)
+register_element_cls("m:noBreak", CT_OnOff)
+register_element_cls("m:diff", CT_OnOff)
+register_element_cls("m:brk", CT_ManualBreak)
+register_element_cls("m:aln", CT_OnOff)
+
+register_element_cls("m:borderBox", CT_BorderBox)
+register_element_cls("m:borderBoxPr", CT_BorderBoxPr)
+register_element_cls("m:hideTop", CT_OnOff)
+register_element_cls("m:hideBot", CT_OnOff)
+register_element_cls("m:hideLeft", CT_OnOff)
+register_element_cls("m:hideRight", CT_OnOff)
+register_element_cls("m:strikeH", CT_OnOff)
+register_element_cls("m:strikeV", CT_OnOff)
+register_element_cls("m:strikeBLTR", CT_OnOff)
+register_element_cls("m:strikeTLBR", CT_OnOff)
 
 from .text.paragraph_props import (
     CT_Ind,

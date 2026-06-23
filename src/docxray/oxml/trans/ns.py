@@ -346,10 +346,30 @@ class M:
     O_MATH = qn("m:oMath")
 
     ACC_PR = qn("m:accPr")
+
     CHR = qn("m:chr")
     CTRL_PR = qn("m:ctrlPr")
+
     BAR_PR = qn("m:barPr")
     POS = qn("m:pos")
+
+    BOX_PR = qn("m:boxPr")
+    OP_EMU = qn("m:opEmu")
+    NO_BREAK = qn("m:noBreak")
+    DIFF = qn("m:diff")
+    BRK = qn("m:brk")
+    ALN_AT = qn("m:alnAt")
+    ALN = qn("m:aln")
+
+    BORDER_BOX_PR = qn("m:borderBoxPr")
+    HIDE_TOP = qn("m:hideTop")
+    HIDE_BOT = qn("m:hideBot")
+    HIDE_LEFT = qn("m:hideLeft")
+    HIDE_RIGHT = qn("m:hideRight")
+    STRIKE_H = qn("m:strikeH")
+    STRIKE_V = qn("m:strikeV")
+    STRIKE_BLTR = qn("m:strikeBLTR")
+    STRIKE_TLBR = qn("m:strikeTLBR")
 
 
 class NoNS:
