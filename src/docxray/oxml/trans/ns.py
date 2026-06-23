@@ -414,6 +414,13 @@ class M:
     MC_JC = qn("m:mcJc")
     MR = qn("m:mr")
 
+    NARY_PR = qn("m:naryPr")
+    LIM_LOC = qn("m:limLoc")
+    SUB = qn("m:sub")
+    SUP = qn("m:sup")
+    SUB_HIDE = qn("m:subHide")
+    SUP_HIDE = qn("m:supHide")
+
 
 class NoNS:
     ID = "id"

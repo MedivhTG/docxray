@@ -77,6 +77,7 @@ from .text.omath_elm import (
     CT_GroupChrPr,
     CT_Integer2,
     CT_Integer255,
+    CT_LimLoc,
     CT_LimLow,
     CT_LimLowPr,
     CT_LimUpp,
@@ -84,6 +85,8 @@ from .text.omath_elm import (
     CT_ManualBreak,
     CT_MCPr,
     CT_MPr,
+    CT_Nary,
+    CT_NaryPr,
     CT_OMathArg,
     CT_OMathArgPr,
     CT_Shp,
@@ -177,6 +180,14 @@ register_element_cls("m:mc", CT_MC)
 register_element_cls("m:mcPr", CT_MCPr)
 register_element_cls("m:count", CT_Integer255)
 register_element_cls("m:mcJc", CT_XAlign)
+
+register_element_cls("m:nary", CT_Nary)
+register_element_cls("m:naryPr", CT_NaryPr)
+register_element_cls("m:limLoc", CT_LimLoc)
+register_element_cls("m:subHide", CT_OnOff)
+register_element_cls("m:supHide", CT_OnOff)
+register_element_cls("m:sub", CT_OMathArg)
+register_element_cls("m:sup", CT_OMathArg)
 
 from .text.paragraph_props import (
     CT_Ind,

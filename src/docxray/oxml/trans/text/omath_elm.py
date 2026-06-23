@@ -5,6 +5,7 @@ from docxray.oxml.trans.ns import M, W
 from docxray.oxml.trans.shared import CT_OnOff
 from docxray.oxml.trans.st.enums import (
     SE_F_TYPE,
+    SE_LIM_LOC,
     SE_SHP,
     SE_TOP_BOT,
     SE_X_ALIGN,
@@ -16,6 +17,7 @@ from docxray.oxml.trans.st.shared_math import (
     ST_FType,
     ST_Integer2,
     ST_Integer255,
+    ST_LimLoc,
     ST_Shp,
     ST_SpacingRule,
     ST_TopBot,
@@ -25,8 +27,8 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M
-OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m"
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary
+OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary"
 
 
 class CT_Integer2(OxmlElement):
@@ -491,3 +493,53 @@ class CT_M(OxmlElement):
     @cached_property
     def mr(self) -> list[CT_MR]:
         return self.child_zero_or_more(M.MR, CT_MR)
+
+
+class CT_LimLoc(OxmlElement):
+    @cached_property
+    def val(self) -> SE_LIM_LOC:
+        return self.attr_required(M.VAL, ST_LimLoc)
+
+
+class CT_NaryPr(OxmlElement):
+    @cached_property
+    def chr(self) -> CT_Char | None:
+        return self.child_zero_or_one(M.CHR, CT_Char)
+
+    @cached_property
+    def limLoc(self) -> CT_LimLoc | None:
+        return self.child_zero_or_one(M.LIM_LOC, CT_LimLoc)
+
+    @cached_property
+    def grow(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.GROW, CT_OnOff)
+
+    @cached_property
+    def subHide(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.SUB_HIDE, CT_OnOff)
+
+    @cached_property
+    def supHide(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.SUP_HIDE, CT_OnOff)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_Nary(OxmlElement):
+    @cached_property
+    def naryPr(self) -> CT_NaryPr | None:
+        return self.child_zero_or_one(M.NARY_PR, CT_NaryPr)
+
+    @cached_property
+    def sub(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.SUB, CT_OMathArg)
+
+    @cached_property
+    def sup(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.SUP, CT_OMathArg)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)

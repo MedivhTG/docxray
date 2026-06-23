@@ -503,3 +503,8 @@ class SE_X_ALIGN(StrEnum):
     RIGHT = "right"
     INSIDE = "inside"
     OUTSIDE = "outside"
+
+
+class SE_LIM_LOC(StrEnum):
+    UND_OVR = "undOvr"
+    SUB_SUP = "subSup"
