@@ -432,6 +432,15 @@ class M:
     DEG_HIDE = qn("m:degHide")
     DEG = qn("m:deg")
 
+    S_PRE_PR = qn("m:sPrePr")
+
+    S_SUB_PR = qn("m:sSubPr")
+
+    S_SUB_SUP_PR = qn("m:sSubSupPr")
+    ALN_SCR = qn("m:alnScr")
+
+    S_SUP_PR = qn("m:sSupPr")
+
 
 class NoNS:
     ID = "id"

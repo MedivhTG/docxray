@@ -95,6 +95,14 @@ from .text.omath_elm import (
     CT_RadPr,
     CT_Shp,
     CT_SpacingRule,
+    CT_SPre,
+    CT_SPrePr,
+    CT_SSub,
+    CT_SSubPr,
+    CT_SSubSup,
+    CT_SSubSupPr,
+    CT_SSup,
+    CT_SSupPr,
     CT_TopBot,
     CT_UnSignedInteger,
     CT_XAlign,
@@ -205,6 +213,19 @@ register_element_cls("m:rad", CT_Rad)
 register_element_cls("m:radPr", CT_RadPr)
 register_element_cls("m:degHide", CT_OnOff)
 register_element_cls("m:deg", CT_OMathArg)
+
+register_element_cls("m:sPre", CT_SPre)
+register_element_cls("m:sPrePr", CT_SPrePr)
+
+register_element_cls("m:sSub", CT_SSub)
+register_element_cls("m:sSubPr", CT_SSubPr)
+
+register_element_cls("m:sSubSup", CT_SSubSup)
+register_element_cls("m:sSubSupPr", CT_SSubSupPr)
+register_element_cls("m:alnScr", CT_OnOff)
+
+register_element_cls("m:sSup", CT_SSup)
+register_element_cls("m:sSupPr", CT_SSupPr)
 
 from .text.paragraph_props import (
     CT_Ind,
