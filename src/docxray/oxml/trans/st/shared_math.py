@@ -8,7 +8,7 @@ from docxray.xsd.facets import (
 from docxray.xsd.primitives import XsdInteger, XsdString, XsdUnsignedInt
 from docxray.xsd.xsd import XsdRestriction, XsdSimpleType
 
-from .enums import SE_JC_OMATH, SE_SHP, SE_TOP_BOT
+from .enums import SE_F_TYPE, SE_JC_OMATH, SE_SHP, SE_TOP_BOT
 
 
 class ST_Jc(XsdSimpleType):
@@ -57,3 +57,8 @@ class ST_SpacingRule(XsdSimpleType):
 
 class ST_UnSignedInteger(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdUnsignedInt)
+
+
+class ST_FType(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_F_TYPE)}

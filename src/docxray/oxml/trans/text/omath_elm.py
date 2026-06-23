@@ -3,10 +3,16 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import M, W
 from docxray.oxml.trans.shared import CT_OnOff
-from docxray.oxml.trans.st.enums import SE_SHP, SE_TOP_BOT, SE_Y_ALIGN
+from docxray.oxml.trans.st.enums import (
+    SE_F_TYPE,
+    SE_SHP,
+    SE_TOP_BOT,
+    SE_Y_ALIGN,
+)
 from docxray.oxml.trans.st.shared_common import ST_YAlign
 from docxray.oxml.trans.st.shared_math import (
     ST_Char,
+    ST_FType,
     ST_Integer2,
     ST_Integer255,
     ST_Shp,
@@ -17,6 +23,11 @@ from docxray.oxml.trans.st.shared_math import (
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
+
+type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F
+OMATH_ELEMENTS_XPATH = (
+    "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f"
+)
 
 
 class CT_Integer2(OxmlElement):
@@ -31,16 +42,24 @@ class CT_OMathArgPr(OxmlElement):
         return self.child_zero_or_one(M.ARG_SZ, CT_Integer2)
 
 
+class CT_CtrlPr(OxmlElement):
+    @cached_property
+    def rPr(self) -> CT_RPr | None:
+        return self.child_zero_or_one(W.R_PR, CT_RPr)
+
+
 class CT_OMathArg(OxmlElement):
     @cached_property
     def argPr(self) -> CT_OMathArgPr | None:
         return self.child_zero_or_one(M.ARG_PR, CT_OMathArgPr)
 
-
-class CT_CtrlPr(OxmlElement):
     @cached_property
-    def rPr(self) -> CT_RPr | None:
-        return self.child_zero_or_one(W.R_PR, CT_RPr)
+    def inner_content_items(self) -> list[OMathElements]:
+        return self.xpath(OMATH_ELEMENTS_XPATH)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
 
 
 class CT_Char(OxmlElement):
@@ -267,3 +286,33 @@ class CT_EqArr(OxmlElement):
     @cached_property
     def e(self) -> list[CT_OMathArg]:
         return self.child_zero_or_more(M.E, CT_OMathArg)
+
+
+class CT_FType(OxmlElement):
+    @cached_property
+    def val(self) -> SE_F_TYPE:
+        return self.attr_required(M.VAL, ST_FType)
+
+
+class CT_FPr(OxmlElement):
+    @cached_property
+    def type(self) -> CT_FType | None:
+        return self.child_zero_or_one(M.TYPE, CT_FType)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_F(OxmlElement):
+    @cached_property
+    def fPr(self) -> CT_FPr | None:
+        return self.child_zero_or_one(M.F_PR, CT_FPr)
+
+    @cached_property
+    def num(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.NUM, CT_OMathArg)
+
+    @cached_property
+    def den(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.DEN, CT_OMathArg)

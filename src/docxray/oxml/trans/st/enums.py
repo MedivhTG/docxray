@@ -488,3 +488,10 @@ class SE_Y_ALIGN(StrEnum):
     BOTTOM = "bottom"
     INSIDE = "inside"
     OUTSIDE = "outside"
+
+
+class SE_F_TYPE(StrEnum):
+    BAR = "bar"
+    SKW = "skw"
+    LIN = "lin"
+    NO_BAR = "noBar"

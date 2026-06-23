@@ -338,6 +338,7 @@ class M:
     O_MATH_PARA_PR = qn("m:oMathParaPr")
     JC = qn("m:jc")
     VAL = qn("m:val")
+    TYPE = qn("m:type")
 
     E = qn("m:e")
     ARG_PR = qn("m:argPr")
@@ -384,6 +385,10 @@ class M:
     OBJ_DIST = qn("m:objDist")
     R_SP_RULE = qn("m:rSpRule")
     R_SP = qn("m:rSp")
+
+    F_PR = qn("m:fPr")
+    NUM = qn("m:num")
+    DEN = qn("m:den")
 
 
 class NoNS:

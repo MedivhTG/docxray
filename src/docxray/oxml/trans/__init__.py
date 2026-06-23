@@ -51,6 +51,7 @@ register_element_cls("m:oMath", CT_OMath)
 
 from .text.omath_elm import (
     CT_D,
+    CT_F,
     CT_Acc,
     CT_AccPr,
     CT_Bar,
@@ -64,6 +65,8 @@ from .text.omath_elm import (
     CT_DPr,
     CT_EqArr,
     CT_EqArrPr,
+    CT_FPr,
+    CT_FType,
     CT_Integer2,
     CT_ManualBreak,
     CT_OMathArg,
@@ -123,6 +126,12 @@ register_element_cls("m:maxDist", CT_OnOff)
 register_element_cls("m:objDist", CT_OnOff)
 register_element_cls("m:rSpRule", CT_SpacingRule)
 register_element_cls("m:rSp", CT_UnSignedInteger)
+
+register_element_cls("m:f", CT_F)
+register_element_cls("m:fPr", CT_FPr)
+register_element_cls("m:type", CT_FType)
+register_element_cls("m:num", CT_OMathArg)
+register_element_cls("m:den", CT_OMathArg)
 
 from .text.paragraph_props import (
     CT_Ind,

@@ -6,9 +6,7 @@ from docxray.oxml.trans.st.enums import SE_JC_OMATH
 from docxray.oxml.trans.st.shared_math import ST_Jc
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
-from .omath_elm import CT_D, CT_Acc, CT_Bar, CT_BorderBox, CT_Box, CT_EqArr
-
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr
+from .omath_elm import OMATH_ELEMENTS_XPATH, OMathElements
 
 
 class CT_OMathJc(OxmlElement):
@@ -28,9 +26,7 @@ class CT_OMath(OxmlElement):
     def inner_content_items(
         self,
     ) -> list[OMathElements]:
-        return self.xpath(
-            "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr"
-        )
+        return self.xpath(OMATH_ELEMENTS_XPATH)
 
 
 class CT_OMathPara(OxmlElement):
