@@ -3,11 +3,12 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.trans.ns import M, W
 from docxray.oxml.trans.shared import CT_OnOff
-from docxray.oxml.trans.st.enums import SE_TOP_BOT
+from docxray.oxml.trans.st.enums import SE_SHP, SE_TOP_BOT
 from docxray.oxml.trans.st.shared_math import (
     ST_Char,
     ST_Integer2,
     ST_Integer255,
+    ST_Shp,
     ST_TopBot,
 )
 from docxray.oxml.trans.xmlchemy import OxmlElement
@@ -167,3 +168,45 @@ class CT_BorderBox(OxmlElement):
     @cached_property
     def borderBoxPr(self) -> CT_BorderBoxPr | None:
         return self.child_zero_or_one(M.BORDER_BOX_PR, CT_BorderBoxPr)
+
+
+class CT_Shp(OxmlElement):
+    @cached_property
+    def val(self) -> SE_SHP:
+        return self.attr_required(M.VAL, ST_Shp)
+
+
+class CT_DPr(OxmlElement):
+    @cached_property
+    def begChr(self) -> CT_Char | None:
+        return self.child_zero_or_one(M.BEG_CHR, CT_Char)
+
+    @cached_property
+    def sepChr(self) -> CT_Char | None:
+        return self.child_zero_or_one(M.SEP_CHR, CT_Char)
+
+    @cached_property
+    def endChr(self) -> CT_Char | None:
+        return self.child_zero_or_one(M.END_CHR, CT_Char)
+
+    @cached_property
+    def grow(self) -> CT_OnOff | None:
+        return self.child_zero_or_one(M.GROW, CT_OnOff)
+
+    @cached_property
+    def shp(self) -> CT_Shp | None:
+        return self.child_zero_or_one(M.SHP, CT_Shp)
+
+    @cached_property
+    def ctrlPr(self) -> CT_CtrlPr | None:
+        return self.child_zero_or_one(M.CTRL_PR, CT_CtrlPr)
+
+
+class CT_D(OxmlElement):
+    @cached_property
+    def dPr(self) -> CT_DPr | None:
+        return self.child_zero_or_one(M.D_PR, CT_DPr)
+
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)

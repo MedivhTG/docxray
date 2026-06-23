@@ -8,7 +8,7 @@ from docxray.xsd.facets import (
 from docxray.xsd.primitives import XsdInteger, XsdString
 from docxray.xsd.xsd import XsdRestriction, XsdSimpleType
 
-from .enums import SE_JC_OMATH, SE_TOP_BOT
+from .enums import SE_JC_OMATH, SE_SHP, SE_TOP_BOT
 
 
 class ST_Jc(XsdSimpleType):
@@ -40,3 +40,8 @@ class ST_Integer255(XsdSimpleType):
         "min_inclusive": MinInclusiveFacet(1),
         "max_inclusive": MaxInclusiveFacet(255),
     }
+
+
+class ST_Shp(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_SHP)}

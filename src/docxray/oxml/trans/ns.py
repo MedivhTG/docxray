@@ -371,6 +371,13 @@ class M:
     STRIKE_BLTR = qn("m:strikeBLTR")
     STRIKE_TLBR = qn("m:strikeTLBR")
 
+    D_PR = qn("m:dPr")
+    BEG_CHR = qn("m:begChr")
+    SEP_CHR = qn("m:sepChr")
+    END_CHR = qn("m:endChr")
+    GROW = qn("m:grow")
+    SHP = qn("m:shp")
+
 
 class NoNS:
     ID = "id"

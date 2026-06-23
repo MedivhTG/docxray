@@ -474,3 +474,8 @@ class SE_JC_OMATH(StrEnum):
 class SE_TOP_BOT(StrEnum):
     TOP = "top"
     BOT = "bot"
+
+
+class SE_SHP(StrEnum):
+    CENTERED = "centered"
+    MATCH = "match"
