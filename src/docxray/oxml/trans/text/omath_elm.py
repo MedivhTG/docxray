@@ -96,6 +96,10 @@ class CT_Acc(OxmlElement):
     def accPr(self) -> CT_AccPr | None:
         return self.child_zero_or_one(M.ACC_PR, CT_AccPr)
 
+    @cached_property
+    def e(self) -> CT_OMathArg | None:
+        return self.child_zero_or_one(M.E, CT_OMathArg)
+
 
 class CT_TopBot(OxmlElement):
     @cached_property

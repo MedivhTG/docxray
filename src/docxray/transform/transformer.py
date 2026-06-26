@@ -9,8 +9,7 @@ from ._lxml import to_str_html
 type TransformMethod = Literal["html"]
 
 if TYPE_CHECKING:
-    # docxray stuff
-    from .ruleset import RuleSet, RuleProxy
+    from .ruleset import RuleProxy, RuleSet
 
 
 class Transformer:
