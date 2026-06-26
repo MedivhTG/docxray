@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.trans.drawing import CT_Drawing
@@ -16,13 +16,40 @@ from docxray.oxml.trans.st.enums import (
     SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
-from docxray.oxml.trans.text.run import CT_R, CT_Br, CT_PTab, CT_Text
+from docxray.oxml.trans.text.run import (
+    CT_R,
+    CT_Br,
+    CT_PTab,
+    CT_Text,
+    RunInnerContent,
+)
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.run_h2d import CharsCase, RunH2D
 
     from .paragraph import Paragraph
+
+type RunContentProxy = TxtFragment | Drawing | Break | Tab
+
+
+def run_content(
+    item: RunInnerContent, instance: Any
+) -> RunContentProxy | None:
+    if isinstance(item, CT_Text):
+        return TxtFragment(item, instance)
+    elif isinstance(item, CT_Drawing):
+        return Drawing(item, instance)
+    elif isinstance(item, CT_Br):
+        return Break(item, instance)
+    # TODO: extend
+    elif isinstance(item, CT_PTab):
+        return None
+    # TODO: extend
+    elif isinstance(item, CT_Empty):
+        if item.tag == W.TAB:
+            return Tab(item, instance)
+    return None
 
 
 class Tab(ElementProxy[CT_Empty]):
@@ -108,18 +135,8 @@ class Run(StoryChild[CT_R]):
 
     def iter_inner_content(
         self,
-    ) -> Iterator[TxtFragment | Drawing | Break | Tab]:
+    ) -> Iterator[RunContentProxy]:
         for item in self.element.inner_content_items:
-            if isinstance(item, CT_Text):
-                yield TxtFragment(item, self)
-            elif isinstance(item, CT_Drawing):
-                yield Drawing(item, self)
-            elif isinstance(item, CT_Br):
-                yield Break(item, self)
-            # TODO: extend
-            elif isinstance(item, CT_PTab):
-                continue
-            # TODO: extend
-            elif isinstance(item, CT_Empty):
-                if item.tag == W.TAB:
-                    yield Tab(item, self)
+            proxy = run_content(item, self)
+            if proxy:
+                yield proxy

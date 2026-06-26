@@ -1,16 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from lxml.html import Element, HtmlElement
+from lxml.html import HtmlElement
 
-# docxray stuff
-from docxray.oxml.trans.proxy.drawing import Drawing
-from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
-from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
-from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
+from .std import content_append, paragraph_content
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -34,48 +29,6 @@ class HtmlRun:
         self._attr_elm_map = attr_to_elm_maker
         self._ruleset = ruleset
 
-    def content(
-        self, upper_elm: HtmlElement, p_content: ParaContentProxy
-    ) -> None:
-        if isinstance(p_content, Run):
-            self.run(upper_elm, p_content)
-        elif isinstance(p_content, Hyperlink):
-            self.hyperlink(upper_elm, p_content)
-        elif isinstance(p_content, OMathParagraph):
-            self.omath_para(upper_elm, p_content)
-
-    def run(self, upper_elm: HtmlElement, run: Run) -> None:
-        for item in run.iter_inner_content():
-            content: str | HtmlElement | None = None
-            if isinstance(item, TxtFragment):
-                if run.chars_case is None:
-                    content = item.raw
-                elif run.chars_case == "up":
-                    content = item.raw.upper()
-                else:
-                    content = item.raw.lower()
-            elif isinstance(item, Drawing):
-                content = self._img_elm(item)
-            elif isinstance(item, Tab):
-                content = TAB_MNEMONIC
-            else:
-                if item.which_break == "textWrapping":
-                    content = Element("br")
-            if content is not None:
-                self._content(upper_elm, content)
-
-    def omath_para(
-        self, upper_elm: HtmlElement, omath_para: OMathParagraph
-    ) -> None:
-        self._content(upper_elm, omath_para.transform(self._ruleset, False))
-
-    def omath(self, upper_elm: HtmlElement, omath: OMath) -> None:
-        self._content(upper_elm, omath.transform(self._ruleset, False))
-
-    def hyperlink(self, upper_elm: HtmlElement, hyperlink: Hyperlink) -> None:
-        for run in hyperlink.iter_inner_content():
-            self.run(upper_elm, run)
-
     def run_chain(self, main: RunChain) -> None:
         main_tag = self._attr_elm_map[main.name](main.comparable)
         between = main.chains_between()
@@ -95,62 +48,8 @@ class HtmlRun:
                 )
                 main_tag.append(top)
             else:
-                self.content(main_tag, main_link)
-        self._content(self._p_elm, main_tag)
-
-    def _txt_append(self, element: HtmlElement, txt: str) -> None:
-        if element.text is None:
-            element.text = txt
-        else:
-            element.text = element.text + txt
-
-    def _tail_append(self, element: HtmlElement, txt: str) -> None:
-        if element.tail is None:
-            element.tail = txt
-        else:
-            element.tail = element.tail + txt
-
-    def _elm_append(
-        self, parent_elm: HtmlElement, content: str | HtmlElement
-    ) -> None:
-        """Append text to parent or append element to parent"""
-        if isinstance(content, str):
-            self._txt_append(parent_elm, content)
-        elif isinstance(content, HtmlElement):
-            parent_elm.append(content)
-
-    def _elm_append_child_or_tail(
-        self,
-        parent_elm: HtmlElement,
-        last_child_elm: HtmlElement,
-        content: str | HtmlElement,
-    ) -> None:
-        """Append text to last child else append element to parent."""
-        if isinstance(content, str):
-            self._tail_append(last_child_elm, content)
-        elif isinstance(content, HtmlElement):
-            parent_elm.append(content)
-
-    def _last_child(self, element: HtmlElement) -> HtmlElement | None:
-        """Get last child of an element. None if it has not."""
-        childs = cast("list[HtmlElement]", element.xpath("./*[last()]"))
-        if childs:
-            return childs[0]
-        return None
-
-    def _content(
-        self, upper_elm: HtmlElement, content: str | HtmlElement
-    ) -> None:
-        last_child_elm = self._last_child(upper_elm)
-        if last_child_elm is None:
-            self._elm_append(upper_elm, content)
-        else:
-            self._elm_append_child_or_tail(upper_elm, last_child_elm, content)
-
-    def _img_elm(self, drawing: Drawing) -> HtmlElement:
-        return self._ruleset.html_rules["Drawing"].builder.element(
-            drawing, self._ruleset
-        )
+                paragraph_content(main_tag, main_link, self._ruleset)
+        content_append(self._p_elm, main_tag)
 
     def _chained_tag_tree(
         self, indexed: list[RunChain]
@@ -207,6 +106,6 @@ class HtmlRun:
                 skip_until = self._chained_recursive(b, idxed[-1], exclude)
                 bottom.append(t)
             else:
-                self.content(bottom, bottom_link)
+                paragraph_content(bottom, bottom_link, self._ruleset)
             skip_until = idx
         return skip_until

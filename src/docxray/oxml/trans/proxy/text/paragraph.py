@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
@@ -16,7 +16,6 @@ from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
-from docxray.transform.transformer import Transformer
 
 from .hyperlink import Hyperlink
 from .omath import OMath, OMathParagraph
@@ -32,8 +31,6 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.paragraph_h2d import ParagraphH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
-    from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformer import TransformMethod
 
 type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath
 
@@ -182,22 +179,6 @@ class Paragraph(StoryChild[CT_P]):
         for item in self.iter_inner_content():
             txt += item.raw_text
         return txt
-
-    def transform(
-        self,
-        ruleset: RuleSet | None = None,
-        stringify: bool = True,
-        method: TransformMethod = "html",
-    ) -> Any:
-        # docxray stuff
-        from docxray.oxml.trans.parts.document import DocumentPart
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return Transformer.transform(
-            self, ruleset, "Paragraph", stringify, method
-        )
 
     def iter_inner_content(
         self,

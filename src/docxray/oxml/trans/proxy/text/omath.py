@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import Any, TypeVar
 
 # docxray stuff
 from docxray.oxml.trans.proxy.shared import (
@@ -12,6 +12,7 @@ from docxray.oxml.trans.proxy.shared import (
     StoryChild,
     safe_get_prop,
 )
+from docxray.oxml.trans.proxy.text.run import RunContentProxy, run_content
 from docxray.oxml.trans.st.enums import SE_JC_OMATH
 from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.trans.text.omath_elm import (
@@ -22,19 +23,13 @@ from docxray.oxml.trans.text.omath_elm import (
     OMathElements,
 )
 from docxray.oxml.trans.text.run import CT_Text
-from docxray.transform.transformer import Transformer
-
-if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformer import TransformMethod
 
 OMATH_ELM = TypeVar("OMATH_ELM", bound=OMathElements)
 
-# TODO: Add other proxy fo iteration etc.
+# TODO: Add other proxy for iteration etc.
 
 type OMathElementsProxy = Accent | RunOMath
-type RunOMathContent = TxtFragmentOMath
+type RunOMathContent = TxtFragmentOMath | RunContentProxy
 
 
 def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathElementsProxy]:
@@ -86,6 +81,10 @@ class RunOMath(OMathElement[CT_R_OMath]):
         for item in self.element.inner_content_items:
             if isinstance(item, CT_Text_OMath):
                 yield TxtFragmentOMath(item, self)
+            else:
+                proxy = run_content(item, self)
+                if proxy:
+                    yield proxy
 
 
 class OMath(StoryChild[CT_OMath]):
@@ -101,20 +100,6 @@ class OMath(StoryChild[CT_OMath]):
 
     def iter_inner_content(self) -> Iterator[OMathElementsProxy]:
         return iter_omath_content(self)
-
-    def transform(
-        self,
-        ruleset: RuleSet | None = None,
-        stringify: bool = True,
-        method: TransformMethod = "html",
-    ) -> Any:
-        # docxray stuff
-        from docxray.oxml.trans.parts.document import DocumentPart
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return Transformer.transform(self, ruleset, "OMath", stringify, method)
 
 
 class OMathParagraph(StoryChild[CT_OMathPara]):
@@ -140,19 +125,3 @@ class OMathParagraph(StoryChild[CT_OMathPara]):
     def iter_inner_content(self) -> Iterator[OMath]:
         for item in self.element.inner_content_items:
             yield OMath(item, self)
-
-    def transform(
-        self,
-        ruleset: RuleSet | None = None,
-        stringify: bool = True,
-        method: TransformMethod = "html",
-    ) -> Any:
-        # docxray stuff
-        from docxray.oxml.trans.parts.document import DocumentPart
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return Transformer.transform(
-            self, ruleset, "OMathParagraph", stringify, method
-        )

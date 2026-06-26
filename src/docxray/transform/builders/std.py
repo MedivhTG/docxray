@@ -1,14 +1,29 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, cast
 
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
+from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
+from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
+from docxray.oxml.trans.proxy.text.omath import (
+    OMath,
+    OMathParagraph,
+    RunOMath,
+    TxtFragmentOMath,
+)
+from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
+from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
+
+if TYPE_CHECKING:
+    from docxray.transform.ruleset import RuleSet
 
 from .types import ElmMaker
 
@@ -98,3 +113,124 @@ def tag_tree(
     if top is None or bottom is None:
         return None
     return top, bottom
+
+
+def txt_append(element: HtmlElement, txt: str) -> None:
+    if element.text is None:
+        element.text = txt
+    else:
+        element.text = element.text + txt
+
+
+def tail_append(element: HtmlElement, txt: str) -> None:
+    if element.tail is None:
+        element.tail = txt
+    else:
+        element.tail = element.tail + txt
+
+
+def elm_append(parent_elm: HtmlElement, content: str | HtmlElement) -> None:
+    """Append text to parent or append element to parent"""
+    if isinstance(content, str):
+        txt_append(parent_elm, content)
+    elif isinstance(content, HtmlElement):
+        parent_elm.append(content)
+
+
+def elm_append_child_or_tail(
+    parent_elm: HtmlElement,
+    last_child_elm: HtmlElement,
+    content: str | HtmlElement,
+) -> None:
+    """Append text to last child else append element to parent."""
+    if isinstance(content, str):
+        tail_append(last_child_elm, content)
+    elif isinstance(content, HtmlElement):
+        parent_elm.append(content)
+
+
+def last_child(element: HtmlElement) -> HtmlElement | None:
+    """Get last child of an element. None if it has not."""
+    childs = cast("list[HtmlElement]", element.xpath("./*[last()]"))
+    if childs:
+        return childs[0]
+    return None
+
+
+def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
+    last_child_elm = last_child(upper_elm)
+    if last_child_elm is None:
+        elm_append(upper_elm, content)
+    else:
+        elm_append_child_or_tail(upper_elm, last_child_elm, content)
+
+
+def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
+    for item in run.iter_inner_content():
+        content: str | HtmlElement | None = None
+        if isinstance(item, TxtFragment):
+            if run.chars_case is None:
+                content = item.raw
+            elif run.chars_case == "up":
+                content = item.raw.upper()
+            else:
+                content = item.raw.lower()
+        elif isinstance(item, Drawing):
+            content = drawing(item, ruleset)
+        elif isinstance(item, Tab):
+            content = TAB_MNEMONIC
+        else:
+            if item.which_break == "textWrapping":
+                content = Element("br")
+        if content is not None:
+            content_append(upper_elm, content)
+
+
+def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
+    for item in run.iter_inner_content():
+        content: str | HtmlElement | None = None
+        if isinstance(item, (TxtFragmentOMath, TxtFragment)):
+            content = item.raw
+        elif isinstance(item, Drawing):
+            content = drawing(item, ruleset)
+        elif isinstance(item, Tab):
+            content = TAB_MNEMONIC
+        else:
+            if item.which_break == "textWrapping":
+                content = Element("br")
+        if content is not None:
+            content_append(upper_elm, content)
+
+
+def hyperlink(
+    upper_elm: HtmlElement, hyperlink: Hyperlink, ruleset: RuleSet
+) -> None:
+    for run_proxy in hyperlink.iter_inner_content():
+        run(upper_elm, run_proxy, ruleset)
+
+
+def drawing(drawing: Drawing, ruleset: RuleSet) -> HtmlElement:
+    return drawing.transform(ruleset, False)
+
+
+def omath_para(
+    upper_elm: HtmlElement, omath_para: OMathParagraph, ruleset: RuleSet
+) -> None:
+    content_append(upper_elm, omath_para.transform(ruleset, False))
+
+
+def omath(upper_elm: HtmlElement, omath: OMath, ruleset: RuleSet) -> None:
+    content_append(upper_elm, omath.transform(ruleset, False))
+
+
+def paragraph_content(
+    upper_elm: HtmlElement, p_content: ParaContentProxy, ruleset: RuleSet
+) -> None:
+    if isinstance(p_content, Run):
+        run(upper_elm, p_content, ruleset)
+    elif isinstance(p_content, Hyperlink):
+        hyperlink(upper_elm, p_content, ruleset)
+    elif isinstance(p_content, OMathParagraph):
+        omath_para(upper_elm, p_content, ruleset)
+    elif isinstance(p_content, OMath):
+        omath(upper_elm, p_content, ruleset)

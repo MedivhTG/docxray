@@ -30,6 +30,7 @@ from .std import (
     TEXT_FLOW_TO_WRITING_MODE,
     b_elm,
     i_elm,
+    paragraph_content,
     strike_elm,
     tag_tree,
     underline_elm,
@@ -103,7 +104,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             if isinstance(unchained_or_chain, RunChain):
                 runs_builder.run_chain(unchained_or_chain)
             else:
-                runs_builder.content(elm, unchained_or_chain)
+                paragraph_content(elm, unchained_or_chain, ruleset)
 
     @classmethod
     def _list_item_content(cls, proxy: Paragraph) -> str | HtmlElement:
