@@ -17,6 +17,7 @@ from docxray.oxml.trans.st.enums import (
 )
 from docxray.oxml.trans.table.row_props import CT_Height
 from docxray.oxml.trans.table.table import CT_Row, CT_Tbl, CT_Tc
+from docxray.transform.transformer import Transformer
 
 from .compute import twips_measure, width
 from .shared import ElementProxy, Length, NotFound, StoryChild, Twips
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import TransformMethod
+    from docxray.transform.transformer import TransformMethod
 
 
 class TblPosError(Exception):
@@ -456,9 +457,8 @@ class Table(StoryChild[CT_Tbl]):
     ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
-        from docxray.transform.transformers import TablleT
 
         ruleset = (
             ruleset or cast("DocumentPart", self.part)._default_html_ruleset
         )
-        return TablleT.transform(self, ruleset, stringify, method)
+        return Transformer.transform(self, ruleset, "Table", stringify, method)

@@ -27,11 +27,12 @@ from docxray.oxml.trans.st.enums import (
 )
 from docxray.oxml.trans.text.num_props import CT_NumPr
 from docxray.shared import os_locale
+from docxray.transform.transformer import Transformer
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import TransformMethod
+    from docxray.transform.transformer import TransformMethod
 
 type CharsCase = Literal["up", "down"]
 
@@ -164,7 +165,6 @@ class ListViewInterrupted(ListView):
     ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
-        from docxray.transform.transformers import ListViewInterruptedT
 
         ruleset = (
             ruleset
@@ -172,7 +172,9 @@ class ListViewInterrupted(ListView):
                 "DocumentPart", self._li.paragraph.part
             )._default_html_ruleset
         )
-        return ListViewInterruptedT.transform(self, ruleset, stringify, method)
+        return Transformer.transform(
+            self, ruleset, "ListViewInterrupted", stringify, method
+        )
 
 
 class ListItem:

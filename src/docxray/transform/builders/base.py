@@ -7,8 +7,6 @@ from lxml.html import HtmlElement
 
 if TYPE_CHECKING:
     # docxray stuff
-
-    # docxray stuff
     from docxray.transform.ruleset import RuleSet
 
 T = TypeVar("T")

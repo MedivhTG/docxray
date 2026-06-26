@@ -16,6 +16,7 @@ from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.trans.text.paragraph import CT_P
 from docxray.oxml.trans.text.run import CT_R
+from docxray.transform.transformer import Transformer
 
 from .hyperlink import Hyperlink
 from .omath import OMath, OMathParagraph
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
     from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import TransformMethod
+    from docxray.transform.transformer import TransformMethod
 
 type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath
 
@@ -190,12 +191,13 @@ class Paragraph(StoryChild[CT_P]):
     ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
-        from docxray.transform.transformers import ParagraphT
 
         ruleset = (
             ruleset or cast("DocumentPart", self.part)._default_html_ruleset
         )
-        return ParagraphT.transform(self, ruleset, stringify, method)
+        return Transformer.transform(
+            self, ruleset, "Paragraph", stringify, method
+        )
 
     def iter_inner_content(
         self,
