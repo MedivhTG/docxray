@@ -71,4 +71,5 @@ class HtmlOMath(HtmlBuilder["OMath"]):
         mover_elm.append(mrow_elm)
         mo_elm = Element("mo")
         mo_elm.text = chr
+        mover_elm.append(mo_elm)
         return mover_elm

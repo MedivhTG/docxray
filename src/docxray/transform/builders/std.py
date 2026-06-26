@@ -190,7 +190,9 @@ def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, (TxtFragmentOMath, TxtFragment)):
-            content = item.raw
+            mi_elm = Element("mi")
+            mi_elm.text = item.raw
+            content = mi_elm
         elif isinstance(item, Drawing):
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):
