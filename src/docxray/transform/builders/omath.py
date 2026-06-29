@@ -13,7 +13,7 @@ from docxray.oxml.trans.proxy.text.omath import (
     OMathParagraph,
     RunOMath,
 )
-from docxray.oxml.trans.st.enums import SE_TOP_BOT
+from docxray.oxml.trans.st.enums import SE_JC_OMATH, SE_TOP_BOT
 
 from .base import HtmlBuilder
 from .html_std import content_append, run_omath
@@ -24,11 +24,22 @@ if TYPE_CHECKING:
 
 
 class HtmlOMathPara(HtmlBuilder["OMathParagraph"]):
+    ALGN_MAP = {
+        SE_JC_OMATH.CENTER_GROUP: "center",
+        SE_JC_OMATH.LEFT: "left",
+        SE_JC_OMATH.CENTER: "center",
+        SE_JC_OMATH.RIGHT: "right",
+    }
+
     @classmethod
     def element(cls, proxy: OMathParagraph, ruleset: RuleSet) -> HtmlElement:
-        elm = Element("div")
+        elm = Element("div", cls._attrs(proxy))
         cls._fill_content(elm, proxy, ruleset)
         return elm
+
+    @classmethod
+    def _attrs(cls, proxy: OMathParagraph):
+        return {"style": f"text-align: {cls.ALGN_MAP[proxy.alignment]};"}
 
     @classmethod
     def _fill_content(
@@ -50,9 +61,19 @@ class HtmlOMath(HtmlBuilder["OMath"]):
 
     @classmethod
     def element(cls, proxy: OMath, ruleset: RuleSet) -> HtmlElement:
-        elm = Element("math")
+        elm = Element("math", cls._attrs(proxy))
         cls._fill_content(elm, proxy, ruleset)
         return elm
+
+    @classmethod
+    def _attrs(cls, proxy: OMath) -> dict:
+        attrs = {}
+        if (
+            isinstance(proxy._parent, OMathParagraph)
+            and proxy._parent.alignment == SE_JC_OMATH.CENTER_GROUP
+        ):
+            attrs["style"] = "text-align: left;"
+        return attrs
 
     @classmethod
     def _fill_content(
