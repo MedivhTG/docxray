@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from lxml.html import HtmlElement
 
-from .std import content_append, paragraph_content
+from .html_std import content_append, paragraph_content
 
 if TYPE_CHECKING:
     # docxray stuff

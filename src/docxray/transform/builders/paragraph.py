@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
 
-from .std import (
+from .html_std import (
     SPACEBREAK_MNEMONIC,
     TAB_MNEMONIC,
     TEXT_FLOW_TO_WRITING_MODE,

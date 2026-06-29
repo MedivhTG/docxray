@@ -58,14 +58,14 @@ class Tab(ElementProxy[CT_Empty]):
 
 class Break(ElementProxy[CT_Br]):
     @cached_property
-    def which_break(self) -> SE_BR_TYPE:
+    def break_type(self) -> SE_BR_TYPE:
         if self.element.type is None:
             return SE_BR_TYPE.TEXT_WRAPPING
         return self.element.type
 
     @cached_property
     def how_wrap(self) -> SE_BR_CLEAR:
-        if self.which_break != SE_BR_TYPE.TEXT_WRAPPING:
+        if self.break_type != SE_BR_TYPE.TEXT_WRAPPING:
             return SE_BR_CLEAR.NONE
         if self.element.clear_attr is None:
             return SE_BR_CLEAR.NONE
@@ -75,10 +75,12 @@ class Break(ElementProxy[CT_Br]):
 class TxtFragment(ElementProxy[CT_Text]):
     @cached_property
     def raw(self) -> str:
+        """Text inside of txt tag `as-is`."""
         return self._element.txt
 
     @cached_property
     def preserve(self) -> bool:
+        """Preserve space chars inside of txt tag or not."""
         return self.element.space == "preserve"
 
 

@@ -13,10 +13,11 @@ from docxray.oxml.trans.proxy.shared import (
     safe_get_prop,
 )
 from docxray.oxml.trans.proxy.text.run import RunContentProxy, run_content
-from docxray.oxml.trans.st.enums import SE_JC_OMATH
+from docxray.oxml.trans.st.enums import SE_JC_OMATH, SE_TOP_BOT
 from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.trans.text.omath_elm import (
     CT_Acc,
+    CT_Bar,
     CT_OMathArg,
     CT_R_OMath,
     CT_Text_OMath,
@@ -28,7 +29,7 @@ OMATH_ELM = TypeVar("OMATH_ELM", bound=OMathElements)
 
 # TODO: Add other proxy for iteration etc.
 
-type OMathElementsProxy = Accent | RunOMath
+type OMathElementsProxy = Accent | Bar | RunOMath
 type RunOMathContent = TxtFragmentOMath | RunContentProxy
 
 
@@ -36,6 +37,8 @@ def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathElementsProxy]:
     for elm in parent.element.inner_content_items:
         if isinstance(elm, CT_Acc):
             yield Accent(elm, parent)
+        elif isinstance(elm, CT_Bar):
+            yield Bar(elm, parent)
         elif isinstance(elm, CT_R_OMath):
             yield RunOMath(elm, parent)
 
@@ -66,13 +69,31 @@ class Accent(OMathElement[CT_Acc]):
         return Arg(arg, self)
 
 
+class Bar(OMathElement[CT_Bar]):
+    @cached_property
+    def position(self) -> SE_TOP_BOT:
+        pos = self._prop(PropertyPath.base("val", "barPr.pos"))
+        if isinstance(pos, NotFound):
+            return SE_TOP_BOT.TOP
+        return pos
+
+    @cached_property
+    def argument(self) -> Arg | None:
+        arg = self.element.e
+        if arg is None:
+            return None
+        return Arg(arg, self)
+
+
 class TxtFragmentOMath(ElementProxy[CT_Text_OMath]):
     @cached_property
     def raw(self) -> str:
+        """Text inside of txt tag `as-is`."""
         return self._element.txt
 
     @cached_property
     def preserve(self) -> bool:
+        """Preserve space chars inside of txt tag or not."""
         return self.element.space == "preserve"
 
 

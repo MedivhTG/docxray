@@ -180,7 +180,7 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
         elif isinstance(item, Tab):
             content = TAB_MNEMONIC
         else:
-            if item.which_break == "textWrapping":
+            if item.break_type == "textWrapping":
                 content = Element("br")
         if content is not None:
             content_append(upper_elm, content)
@@ -190,7 +190,12 @@ def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, (TxtFragmentOMath, TxtFragment)):
-            mi_elm = Element("mi")
+            attrs = {}
+            # Only for OMath elements cause of Readability in HTML -
+            # even with one space it will be collapsed
+            if item.preserve:
+                attrs["style"] = "white-space: pre-wrap;"
+            mi_elm = Element("mi", attrs)
             mi_elm.text = item.raw
             content = mi_elm
         elif isinstance(item, Drawing):
@@ -198,7 +203,7 @@ def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
         elif isinstance(item, Tab):
             content = TAB_MNEMONIC
         else:
-            if item.which_break == "textWrapping":
+            if item.break_type == "textWrapping":
                 content = Element("br")
         if content is not None:
             content_append(upper_elm, content)

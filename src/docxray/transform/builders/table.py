@@ -15,7 +15,7 @@ from docxray.oxml.trans.st.enums import (
 )
 
 from .base import HtmlBuilder
-from .std import TEXT_FLOW_TO_WRITING_MODE, pt
+from .html_std import TEXT_FLOW_TO_WRITING_MODE, pt
 
 if TYPE_CHECKING:
     # docxray stuff

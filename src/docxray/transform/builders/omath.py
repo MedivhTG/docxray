@@ -4,16 +4,19 @@ from typing import TYPE_CHECKING
 
 from lxml.html import Element, HtmlElement
 
-from .base import HtmlBuilder
-from .std import run_omath
-
+# docxray stuff
 from docxray.oxml.trans.proxy.text.omath import (
     Accent,
     Arg,
+    Bar,
     OMath,
     OMathParagraph,
     RunOMath,
 )
+from docxray.oxml.trans.st.enums import SE_TOP_BOT
+
+from .base import HtmlBuilder
+from .html_std import content_append, run_omath
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -57,7 +60,9 @@ class HtmlOMath(HtmlBuilder["OMath"]):
     ) -> None:
         for item in proxy.iter_inner_content():
             if isinstance(item, Accent):
-                upper_elm.append(cls._accent(item, ruleset))
+                content_append(upper_elm, cls._accent(item, ruleset))
+            elif isinstance(item, Bar):
+                content_append(upper_elm, cls._bar(item, ruleset))
             elif isinstance(item, RunOMath):
                 run_omath(upper_elm, item, ruleset)
 
@@ -73,3 +78,14 @@ class HtmlOMath(HtmlBuilder["OMath"]):
         mo_elm.text = chr
         mover_elm.append(mo_elm)
         return mover_elm
+
+    # There is good analog with tag `<menclose>` but problem is.. not all browsers
+    # support it (in this case - browsers with Chromium engine).
+    # Info from https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element/menclose
+    @classmethod
+    def _bar(cls, bar: Bar, ruleset: RuleSet) -> HtmlElement:
+        decor = "overline" if bar.position == SE_TOP_BOT.TOP else "underline"
+        span_elm = Element("span", {"style": f"text-decoration: {decor};"})
+        if bar.argument:
+            cls._fill_content(span_elm, bar.argument, ruleset)
+        return span_elm
