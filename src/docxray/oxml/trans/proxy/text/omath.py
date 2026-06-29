@@ -5,6 +5,7 @@ from functools import cached_property
 from typing import Any, TypeVar
 
 # docxray stuff
+from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.shared import (
     ElementProxy,
     NotFound,
@@ -18,6 +19,7 @@ from docxray.oxml.trans.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.trans.text.omath_elm import (
     CT_Acc,
     CT_Bar,
+    CT_Box,
     CT_OMathArg,
     CT_R_OMath,
     CT_Text_OMath,
@@ -76,6 +78,30 @@ class Bar(OMathElement[CT_Bar]):
         if isinstance(pos, NotFound):
             return SE_TOP_BOT.TOP
         return pos
+
+    @cached_property
+    def argument(self) -> Arg | None:
+        arg = self.element.e
+        if arg is None:
+            return None
+        return Arg(arg, self)
+
+
+class BoxObject(OMathElement[CT_Box]):
+    def _prop_on_off(self, prop: str) -> bool:
+        return on_off(self._prop(PropertyPath.base("val", f"boxPr.{prop}")))
+
+    @cached_property
+    def emulate_operator(self) -> bool:
+        return self._prop_on_off("opEmu")
+
+    # @cached_property
+    # def no_break_line(self):
+    #     return self._prop_on_off("noBreak")
+
+    @cached_property
+    def math_differential(self) -> bool:
+        return self._prop_on_off("diff")
 
     @cached_property
     def argument(self) -> Arg | None:

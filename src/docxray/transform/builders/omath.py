@@ -38,7 +38,7 @@ class HtmlOMathPara(HtmlBuilder["OMathParagraph"]):
         return elm
 
     @classmethod
-    def _attrs(cls, proxy: OMathParagraph):
+    def _attrs(cls, proxy: OMathParagraph) -> dict:
         return {"style": f"text-align: {cls.ALGN_MAP[proxy.alignment]};"}
 
     @classmethod
