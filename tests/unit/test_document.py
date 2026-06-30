@@ -26,6 +26,8 @@ class TestDocument:
                 html += p_html
                 w = 1
         w = 1
+        # with open("check.html", "wt", encoding="utf-8") as f:
+        #     f.write(html)
         html = ""
         ruleset_table_lists_transform = RuleSet.html_default()
         ruleset_table_lists_transform.set_html_rule(

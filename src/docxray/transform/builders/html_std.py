@@ -1,22 +1,20 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
-from unicodedata import category
 
 from lxml.html import Element, HtmlElement
+from officemath2latex import (
+    OfficeMathFieldCodeText,
+    process_math_node,
+    OfficeMathRun,
+    qname,
+)
 
 # docxray stuff
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
-from docxray.oxml.trans.proxy.text.omath import (
-    Arg,
-    BoxObject,
-    OMath,
-    OMathParagraph,
-    RunOMath,
-    TxtFragmentOMath,
-)
+from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
 from docxray.oxml.trans.proxy.text.run import Break, Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
@@ -202,53 +200,151 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
             content_append(upper_elm, content)
 
 
-def is_math_op(chr: str) -> bool:
-    return category(chr) == "Sm"
+__OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC = OfficeMathRun.process
 
 
-def txt_elm_omath(txt_fgmt: TxtFragmentOMath | TxtFragment) -> HtmlElement:
-    def _mo_elm(txt: str) -> HtmlElement:
-        mo_elm = Element("mo")
-        mo_elm.text = txt
-        return mo_elm
+# TODO: look for other content process
+def omath_to_latex(
+    omath: OMath,
+    ruleset: RuleSet | None = None,
+    include_run_content: bool = True,
+) -> str:
+    from docxray.oxml.trans.parts.document import DocumentPart
 
-    as_op = False
-    if isinstance(txt_fgmt._parent, Arg):
-        if isinstance(txt_fgmt._parent._parent, BoxObject):
-            box = txt_fgmt._parent._parent
-            if box.emulate_operator:
-                as_op = True
-    mrow_elm = Element("mrow")
-    elms: list[HtmlElement] = []
-    if as_op:
-        elms.append(_mo_elm(txt_fgmt.raw))
-    else:
-        for chr in txt_fgmt.raw:
-            elm = Element("mo") if is_math_op(chr) else Element("mi")
-            elm.text = chr
-            elms.append(elm)
-    for elm in elms:
-        # Only for OMath elements cause of Readability in HTML -
-        # even with one space it will be collapsed
-        if txt_fgmt.preserve:
-            elm.set("style", "white-space: pre-wrap;")
-        mrow_elm.append(elm)
-    return mrow_elm
+    ruleset = ruleset or cast("DocumentPart", omath.part)._default_html_ruleset
 
-
-def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
-    for item in run.iter_inner_content():
-        content: str | HtmlElement | None = None
-        if isinstance(item, (TxtFragmentOMath, TxtFragment)):
-            content = txt_elm_omath(item)
-        elif isinstance(item, Drawing):
-            content = drawing(item, ruleset)
-        elif isinstance(item, Tab):
-            content = tab(item)
+    def _drawing_latex(drawing: Drawing) -> str:
+        img_elm: HtmlElement = drawing.transform(ruleset, False)
+        src = img_elm.get("src")
+        if src:
+            background = f"background: url('{src}') no-repeat center; background-size: contain;"
         else:
-            content = break_elm(item)
-        if content is not None:
-            content_append(upper_elm, content)
+            background = ""
+        width_px = drawing.width.px()
+        height_px = drawing.height.px()
+        return f"\\style{{display: inline-block; width: {width_px}px; height: {height_px}px; {background}}}{{}}"
+
+    def _process_run(self: OfficeMathRun, chr_: str = "") -> str:
+        replacements = [
+            (r"π", r"\pi "),
+            (r"∞", r"\infty "),
+            (r"→", r"\rightarrow "),
+            (r"±", r"\pm "),
+            (r"∓", r"\mp "),
+            (r"α", r"\alpha "),
+            (r"β", r"\beta "),
+            (r"γ", r"\gamma "),
+            (r"…", r"\ldots "),
+            (r"⋅", r"\cdot "),
+            (r"×", r"\times "),
+            (r"θ", r"\theta "),
+            (r"Γ", r"\Gamma "),
+            (r"≈", r"\approx "),
+            (r"ⅈ", r"i "),
+            (r"∇", r"\nabla "),
+            (r"ⅆ", r"d "),
+            (r"≥", r"\geq "),
+            (r"∀", r"\forall "),
+            (r"∃", r"\exists "),
+            (r"∧", r"\land "),
+            (r"⇒", r"\Rightarrow "),
+            (r"ψ", r"\psi "),
+            (r"∂", r"\partial "),
+            (r"≠", r"\neq "),
+            (r"~", r"\sim "),
+            (r"÷", r"\div "),
+            (r"∝", r"\propto "),
+            (r"≪", r"\ll "),
+            (r"≫", r"\gg "),
+            (r"≤", r"\leq "),
+            (r"≅", r"\cong "),
+            (r"≡", r"\equiv "),
+            (r"∁", r"\complement "),
+            (r"∪", r"\cup "),
+            (r"∩", r"\cap "),
+            (r"∅", r"\varnothing "),
+            (r"∆", r"\mathrm{\\Delta} "),
+            (r"∄", r"\nexists "),
+            (r"∈", r"\in "),
+            (r"∋", r"\ni "),
+            (r"←", r"\leftarrow "),
+            (r"↑", r"\uparrow "),
+            (r"↓", r"\downarrow "),
+            (r"↔", r"\leftrightarrow "),
+            (r"∴", r"\therefore "),
+            (r"¬", r"\neg "),
+            (r"δ", r"\delta "),
+            (r"ε", r"\varepsilon "),
+            (r"ϵ", r"\epsilon "),
+            (r"ϑ", r"\vartheta "),
+            (r"μ", r"\mu "),
+            (r"ρ", r"\rho "),
+            (r"σ", r"\sigma "),
+            (r"τ", r"\tau "),
+            (r"φ", r"\varphi "),
+            (r"ω", r"\omega "),
+            (r"∙", r"\bullet "),
+            (r"⋮", r"\vdots "),
+            (r"⋱", r"\ddots "),
+            (r"ℵ", r"\aleph "),
+            (r"ℶ", r"\beth "),
+            (r"∎", r"\blacksquare "),
+            (r"%°", r"\%{^\\circ} "),
+            (r"√", r"\sqrt{} "),
+            (r"∛", r"\sqrt[3]{} "),
+            (r"∜", r"\sqrt[4]{} "),
+            (r"≜", r"\triangleq "),
+            (r"<", r"\lt "),
+            (r">", r"\gt "),
+            (r"|", r"\mid "),
+            (r"∣", r"\mid "),
+        ]
+
+        math_string = ""
+        flag_bold = False
+        for el in self.node:
+            if el.tag == qname("m", "rPr"):
+                for rpr in el:
+                    if (
+                        rpr.tag == qname("m", "sty")
+                        and rpr.get(qname("m", "val")) == "b"
+                    ):
+                        flag_bold = True
+            elif el.tag == qname("m", "t"):
+                text_content = (el.text or "").strip()
+                if el.get(qname("xml", "space")) == "preserve":
+                    math_string += (
+                        "\\ \\ "
+                        if text_content == ""
+                        else OfficeMathFieldCodeText(text_content).process(
+                            chr_
+                        )
+                    )
+                else:
+                    math_string += (
+                        text_content.replace("_", "\\_")
+                        .replace("^", "\\^")
+                        .replace("{", "\\{")
+                        .replace("}", "\\}")
+                    )
+            elif el.tag == qname("w", "drawing"):
+                math_string += _drawing_latex(
+                    Drawing(el, omath)  # pyright: ignore[reportArgumentType]
+                )
+
+        for pre, post in replacements:
+            math_string = math_string.replace(pre, post)
+
+        if flag_bold:
+            math_string = f"\\mathbf{{{math_string}}}"
+        return math_string
+
+    if include_run_content:
+        # MonkeyPatch (external lib can't parse run content)
+        OfficeMathRun.process = _process_run
+    else:
+        OfficeMathRun.process = __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC
+    return process_math_node(omath.element)
 
 
 def hyperlink(
