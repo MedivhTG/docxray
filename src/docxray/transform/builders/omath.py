@@ -9,6 +9,7 @@ from docxray.oxml.trans.proxy.text.omath import (
     Accent,
     Arg,
     Bar,
+    BoxObject,
     OMath,
     OMathParagraph,
     RunOMath,
@@ -84,6 +85,8 @@ class HtmlOMath(HtmlBuilder["OMath"]):
                 content_append(upper_elm, cls._accent(item, ruleset))
             elif isinstance(item, Bar):
                 content_append(upper_elm, cls._bar(item, ruleset))
+            elif isinstance(item, BoxObject):
+                content_append(upper_elm, cls._box_object(item, ruleset))
             elif isinstance(item, RunOMath):
                 run_omath(upper_elm, item, ruleset)
 
@@ -92,7 +95,7 @@ class HtmlOMath(HtmlBuilder["OMath"]):
         mover_elm = Element("mover", {"accent": "true"})
         chr = cls.WORD_TO_HTML_STRETCHY.get(accent.char, accent.char)
         mrow_elm = Element("mrow")
-        if accent.argument:
+        if accent.argument is not None:
             cls._fill_content(mrow_elm, accent.argument, ruleset)
         mover_elm.append(mrow_elm)
         mo_elm = Element("mo")
@@ -106,7 +109,24 @@ class HtmlOMath(HtmlBuilder["OMath"]):
     @classmethod
     def _bar(cls, bar: Bar, ruleset: RuleSet) -> HtmlElement:
         decor = "overline" if bar.position == SE_TOP_BOT.TOP else "underline"
-        span_elm = Element("span", {"style": f"text-decoration: {decor};"})
-        if bar.argument:
-            cls._fill_content(span_elm, bar.argument, ruleset)
-        return span_elm
+        mrow_elm = Element("mrow", {"style": f"text-decoration: {decor};"})
+        if bar.argument is not None:
+            cls._fill_content(mrow_elm, bar.argument, ruleset)
+        return mrow_elm
+
+    # The specification provides too little information about the attributes,
+    # so we do not interpret `as_differential` (m:diff) and `as_inline_block` (m:aln)
+    # and they do not have effect on text render as i saw..?
+    # Plus `aln_break_at` (m:brk or Manualbreak) idk how to render with no tables (hard)
+    # so we just append `br` tag and that's all (but it will break math render)
+    @classmethod
+    def _box_object(cls, box: BoxObject, ruleset: RuleSet) -> HtmlElement:
+        attrs = {}
+        if box.no_wrap:
+            attrs["style"] = "white-space: nowrap;"
+        mrow_elm = Element("mrow", attrs)
+        if box.align_break_at:
+            mrow_elm.append(Element("br"))
+        if box.argument is not None:
+            cls._fill_content(mrow_elm, box.argument, ruleset)
+        return mrow_elm

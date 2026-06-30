@@ -20,6 +20,7 @@ from docxray.oxml.trans.text.omath_elm import (
     CT_Acc,
     CT_Bar,
     CT_Box,
+    CT_ManualBreak,
     CT_OMathArg,
     CT_R_OMath,
     CT_Text_OMath,
@@ -31,7 +32,7 @@ OMATH_ELM = TypeVar("OMATH_ELM", bound=OMathElements)
 
 # TODO: Add other proxy for iteration etc.
 
-type OMathElementsProxy = Accent | Bar | RunOMath
+type OMathElementsProxy = Accent | Bar | BoxObject | RunOMath
 type RunOMathContent = TxtFragmentOMath | RunContentProxy
 
 
@@ -41,6 +42,8 @@ def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathElementsProxy]:
             yield Accent(elm, parent)
         elif isinstance(elm, CT_Bar):
             yield Bar(elm, parent)
+        elif isinstance(elm, CT_Box):
+            yield BoxObject(elm, parent)
         elif isinstance(elm, CT_R_OMath):
             yield RunOMath(elm, parent)
 
@@ -89,19 +92,37 @@ class Bar(OMathElement[CT_Bar]):
 
 class BoxObject(OMathElement[CT_Box]):
     def _prop_on_off(self, prop: str) -> bool:
-        return on_off(self._prop(PropertyPath.base("val", f"boxPr.{prop}")))
+        return on_off(
+            self._prop(PropertyPath.base("val", f"boxPr.{prop}")), True
+        )
 
     @cached_property
     def emulate_operator(self) -> bool:
         return self._prop_on_off("opEmu")
 
-    # @cached_property
-    # def no_break_line(self):
-    #     return self._prop_on_off("noBreak")
+    @cached_property
+    def no_wrap(self) -> bool:
+        return self._prop_on_off("noBreak")
 
     @cached_property
-    def math_differential(self) -> bool:
+    def as_differential(self) -> bool:
         return self._prop_on_off("diff")
+
+    @cached_property
+    def align_break_at(self) -> int | None:
+        brk_elm: CT_ManualBreak | NotFound = self._prop(
+            PropertyPath.base("brk", "boxPr")
+        )
+        if isinstance(brk_elm, NotFound):
+            return None
+        aln = brk_elm.alnAt
+        if aln is None:
+            return 1
+        return aln
+
+    @cached_property
+    def as_inline_block(self) -> bool:
+        return self._prop_on_off("aln")
 
     @cached_property
     def argument(self) -> Arg | None:

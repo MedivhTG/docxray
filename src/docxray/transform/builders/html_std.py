@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
+from unicodedata import category
 
 from lxml.html import Element, HtmlElement
 
@@ -9,13 +10,15 @@ from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.omath import (
+    Arg,
+    BoxObject,
     OMath,
     OMathParagraph,
     RunOMath,
     TxtFragmentOMath,
 )
 from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.trans.proxy.text.run import Run, Tab, TxtFragment
+from docxray.oxml.trans.proxy.text.run import Break, Run, Tab, TxtFragment
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
@@ -165,46 +168,85 @@ def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
         elm_append_child_or_tail(upper_elm, last_child_elm, content)
 
 
+def txt(run: Run, txt_fgmt: TxtFragment) -> str:
+    if run.chars_case is None:
+        return txt_fgmt.raw
+    elif run.chars_case == "up":
+        return txt_fgmt.raw.upper()
+    else:
+        return txt_fgmt.raw.lower()
+
+
+def break_elm(br: Break) -> HtmlElement | None:
+    if br.break_type == "textWrapping":
+        return Element("br")
+    return None
+
+
+def tab(tab: Tab) -> str:
+    return TAB_MNEMONIC
+
+
 def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, TxtFragment):
-            if run.chars_case is None:
-                content = item.raw
-            elif run.chars_case == "up":
-                content = item.raw.upper()
-            else:
-                content = item.raw.lower()
+            content = txt(run, item)
         elif isinstance(item, Drawing):
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):
-            content = TAB_MNEMONIC
+            content = tab(item)
         else:
-            if item.break_type == "textWrapping":
-                content = Element("br")
+            content = break_elm(item)
         if content is not None:
             content_append(upper_elm, content)
+
+
+def is_math_op(chr: str) -> bool:
+    return category(chr) == "Sm"
+
+
+def txt_elm_omath(txt_fgmt: TxtFragmentOMath | TxtFragment) -> HtmlElement:
+    def _mo_elm(txt: str) -> HtmlElement:
+        mo_elm = Element("mo")
+        mo_elm.text = txt
+        return mo_elm
+
+    as_op = False
+    if isinstance(txt_fgmt._parent, Arg):
+        if isinstance(txt_fgmt._parent._parent, BoxObject):
+            box = txt_fgmt._parent._parent
+            if box.emulate_operator:
+                as_op = True
+    mrow_elm = Element("mrow")
+    elms: list[HtmlElement] = []
+    if as_op:
+        elms.append(_mo_elm(txt_fgmt.raw))
+    else:
+        for chr in txt_fgmt.raw:
+            elm = Element("mo") if is_math_op(chr) else Element("mi")
+            elm.text = chr
+            elms.append(elm)
+    for elm in elms:
+        # Only for OMath elements cause of Readability in HTML -
+        # even with one space it will be collapsed
+        if txt_fgmt.preserve:
+            elm.set("style", "white-space: pre-wrap;")
+        mrow_elm.append(elm)
+    return mrow_elm
 
 
 def run_omath(upper_elm: HtmlElement, run: RunOMath, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, (TxtFragmentOMath, TxtFragment)):
-            attrs = {}
-            # Only for OMath elements cause of Readability in HTML -
-            # even with one space it will be collapsed
-            if item.preserve:
-                attrs["style"] = "white-space: pre-wrap;"
-            mi_elm = Element("mi", attrs)
-            mi_elm.text = item.raw
-            content = mi_elm
+            content = txt_elm_omath(item)
         elif isinstance(item, Drawing):
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):
-            content = TAB_MNEMONIC
+            content = tab(item)
         else:
-            if item.break_type == "textWrapping":
-                content = Element("br")
+            content = break_elm(item)
         if content is not None:
             content_append(upper_elm, content)
 
