@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
@@ -32,8 +32,6 @@ if TYPE_CHECKING:
     from docxray.oxml.trans.h2d.table_h2d import TableH2D
     from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.text.paragraph import Paragraph
-    from docxray.transform.ruleset import RuleSet
-    from docxray.transform.transformers import TransformMethod
 
 
 class TblPosError(Exception):
@@ -447,18 +445,3 @@ class Table(StoryChild[CT_Tbl]):
     def iter_rows(self) -> Iterator[Row]:
         for row in self.rows:
             yield row
-
-    def transform(
-        self,
-        ruleset: RuleSet | None = None,
-        stringify: bool = True,
-        method: TransformMethod = "html",
-    ) -> Any:
-        # docxray stuff
-        from docxray.oxml.trans.parts.document import DocumentPart
-        from docxray.transform.transformers import TablleT
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return TablleT.transform(self, ruleset, stringify, method)

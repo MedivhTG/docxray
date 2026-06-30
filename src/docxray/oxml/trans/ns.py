@@ -334,6 +334,120 @@ class R:
     EMBED = qn("r:embed")
 
 
+class M:
+    O_MATH_PARA_PR = qn("m:oMathParaPr")
+    JC = qn("m:jc")
+    VAL = qn("m:val")
+    TYPE = qn("m:type")
+
+    E = qn("m:e")
+    ARG_PR = qn("m:argPr")
+    ARG_SZ = qn("m:argSz")
+
+    O_MATH = qn("m:oMath")
+
+    ACC_PR = qn("m:accPr")
+
+    CHR = qn("m:chr")
+    CTRL_PR = qn("m:ctrlPr")
+
+    BAR_PR = qn("m:barPr")
+    POS = qn("m:pos")
+
+    BOX_PR = qn("m:boxPr")
+    OP_EMU = qn("m:opEmu")
+    NO_BREAK = qn("m:noBreak")
+    DIFF = qn("m:diff")
+    BRK = qn("m:brk")
+    ALN_AT = qn("m:alnAt")
+    ALN = qn("m:aln")
+
+    BORDER_BOX_PR = qn("m:borderBoxPr")
+    HIDE_TOP = qn("m:hideTop")
+    HIDE_BOT = qn("m:hideBot")
+    HIDE_LEFT = qn("m:hideLeft")
+    HIDE_RIGHT = qn("m:hideRight")
+    STRIKE_H = qn("m:strikeH")
+    STRIKE_V = qn("m:strikeV")
+    STRIKE_BLTR = qn("m:strikeBLTR")
+    STRIKE_TLBR = qn("m:strikeTLBR")
+
+    D_PR = qn("m:dPr")
+    BEG_CHR = qn("m:begChr")
+    SEP_CHR = qn("m:sepChr")
+    END_CHR = qn("m:endChr")
+    GROW = qn("m:grow")
+    SHP = qn("m:shp")
+
+    EQ_ARR_PR = qn("m:eqArrPr")
+    BASE_JC = qn("m:baseJc")
+    MAX_DIST = qn("m:maxDist")
+    OBJ_DIST = qn("m:objDist")
+    R_SP_RULE = qn("m:rSpRule")
+    R_SP = qn("m:rSp")
+
+    F_PR = qn("m:fPr")
+    NUM = qn("m:num")
+    DEN = qn("m:den")
+
+    FUNC_PR = qn("m:funcPr")
+    F_NAME = qn("m:fName")
+
+    GROUP_CHR_PR = qn("m:groupChrPr")
+    VERT_JC = qn("m:vertJc")
+
+    LIM_LOW_PR = qn("m:limLowPr")
+    LIM = qn("m:lim")
+
+    LIM_UPP_PR = qn("m:limUppPr")
+
+    M_PR = qn("m:mPr")
+    PLC_HIDE = qn("m:plcHide")
+    C_GP_RULE = qn("m:cGpRule")
+    C_SP = qn("m:cSp")
+    C_GP = qn("m:cGp")
+    MCS = qn("m:mcs")
+    MC = qn("m:mc")
+
+    MC_PR = qn("m:mcPr")
+    COUNT = qn("m:count")
+    MC_JC = qn("m:mcJc")
+    MR = qn("m:mr")
+
+    NARY_PR = qn("m:naryPr")
+    LIM_LOC = qn("m:limLoc")
+    SUB = qn("m:sub")
+    SUP = qn("m:sup")
+    SUB_HIDE = qn("m:subHide")
+    SUP_HIDE = qn("m:supHide")
+
+    PHANT_PR = qn("m:phantPr")
+    SHOW = qn("m:show")
+    ZERO_WID = qn("m:zeroWid")
+    ZERO_ASC = qn("m:zeroAsc")
+    ZERO_DESC = qn("m:zeroDesc")
+    TRANSP = qn("m:transp")
+
+    RAD_PR = qn("m:radPr")
+    DEG_HIDE = qn("m:degHide")
+    DEG = qn("m:deg")
+
+    S_PRE_PR = qn("m:sPrePr")
+
+    S_SUB_PR = qn("m:sSubPr")
+
+    S_SUB_SUP_PR = qn("m:sSubSupPr")
+    ALN_SCR = qn("m:alnScr")
+
+    S_SUP_PR = qn("m:sSupPr")
+
+    R_PR = qn("m:rPr")
+    LIT = qn("m:lit")
+    NOR = qn("m:nor")
+    SCR = qn("m:scr")
+    STY = qn("m:sty")
+
+
 class NoNS:
     ID = "id"
     NAME = "name"

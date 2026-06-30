@@ -42,6 +42,204 @@ from .text.paragraph import CT_P
 
 register_element_cls("w:p", CT_P)
 
+from .text.omath import CT_OMath, CT_OMathJc, CT_OMathPara, CT_OMathParaPr
+
+register_element_cls("m:oMathPara", CT_OMathPara)
+register_element_cls("m:oMathParaPr", CT_OMathParaPr)
+register_element_cls("m:jc", CT_OMathJc)
+register_element_cls("m:oMath", CT_OMath)
+
+from .text.omath_elm import (
+    CT_D,
+    CT_F,
+    CT_M,
+    CT_MC,
+    CT_MCS,
+    CT_MR,
+    CT_RPR,
+    CT_Acc,
+    CT_AccPr,
+    CT_Bar,
+    CT_BarPr,
+    CT_BorderBox,
+    CT_BorderBoxPr,
+    CT_Box,
+    CT_BoxPr,
+    CT_Char,
+    CT_CtrlPr,
+    CT_DPr,
+    CT_EqArr,
+    CT_EqArrPr,
+    CT_FPr,
+    CT_FType,
+    CT_Func,
+    CT_FuncPr,
+    CT_GroupChr,
+    CT_GroupChrPr,
+    CT_Integer2,
+    CT_Integer255,
+    CT_LimLoc,
+    CT_LimLow,
+    CT_LimLowPr,
+    CT_LimUpp,
+    CT_LimUppPr,
+    CT_ManualBreak,
+    CT_MCPr,
+    CT_MPr,
+    CT_Nary,
+    CT_NaryPr,
+    CT_OMathArg,
+    CT_OMathArgPr,
+    CT_Phant,
+    CT_PhantPr,
+    CT_R_OMath,
+    CT_Rad,
+    CT_RadPr,
+    CT_Script,
+    CT_Shp,
+    CT_SpacingRule,
+    CT_SPre,
+    CT_SPrePr,
+    CT_SSub,
+    CT_SSubPr,
+    CT_SSubSup,
+    CT_SSubSupPr,
+    CT_SSup,
+    CT_SSupPr,
+    CT_Style_OMath,
+    CT_Text_OMath,
+    CT_TopBot,
+    CT_UnSignedInteger,
+    CT_XAlign,
+    CT_YAlign,
+)
+
+register_element_cls("m:e", CT_OMathArg)
+register_element_cls("m:argPr", CT_OMathArgPr)
+register_element_cls("m:argSz", CT_Integer2)
+
+register_element_cls("m:acc", CT_Acc)
+register_element_cls("m:accPr", CT_AccPr)
+
+register_element_cls("m:chr", CT_Char)
+register_element_cls("m:ctrlPr", CT_CtrlPr)
+
+register_element_cls("m:bar", CT_Bar)
+register_element_cls("m:barPr", CT_BarPr)
+register_element_cls("m:pos", CT_TopBot)
+
+register_element_cls("m:box", CT_Box)
+register_element_cls("m:boxPr", CT_BoxPr)
+register_element_cls("m:opEmu", CT_OnOff)
+register_element_cls("m:noBreak", CT_OnOff)
+register_element_cls("m:diff", CT_OnOff)
+register_element_cls("m:brk", CT_ManualBreak)
+register_element_cls("m:aln", CT_OnOff)
+
+register_element_cls("m:borderBox", CT_BorderBox)
+register_element_cls("m:borderBoxPr", CT_BorderBoxPr)
+register_element_cls("m:hideTop", CT_OnOff)
+register_element_cls("m:hideBot", CT_OnOff)
+register_element_cls("m:hideLeft", CT_OnOff)
+register_element_cls("m:hideRight", CT_OnOff)
+register_element_cls("m:strikeH", CT_OnOff)
+register_element_cls("m:strikeV", CT_OnOff)
+register_element_cls("m:strikeBLTR", CT_OnOff)
+register_element_cls("m:strikeTLBR", CT_OnOff)
+
+register_element_cls("m:d", CT_D)
+register_element_cls("m:dPr", CT_DPr)
+register_element_cls("m:begChr", CT_Char)
+register_element_cls("m:sepChr", CT_Char)
+register_element_cls("m:endChr", CT_Char)
+register_element_cls("m:grow", CT_OnOff)
+register_element_cls("m:shp", CT_Shp)
+
+register_element_cls("m:eqArr", CT_EqArr)
+register_element_cls("m:eqArrPr", CT_EqArrPr)
+register_element_cls("m:baseJc", CT_YAlign)
+register_element_cls("m:maxDist", CT_OnOff)
+register_element_cls("m:objDist", CT_OnOff)
+register_element_cls("m:rSpRule", CT_SpacingRule)
+register_element_cls("m:rSp", CT_UnSignedInteger)
+
+register_element_cls("m:f", CT_F)
+register_element_cls("m:fPr", CT_FPr)
+register_element_cls("m:type", CT_FType)
+register_element_cls("m:num", CT_OMathArg)
+register_element_cls("m:den", CT_OMathArg)
+
+register_element_cls("m:func", CT_Func)
+register_element_cls("m:funcPr", CT_FuncPr)
+register_element_cls("m:fName", CT_OMathArg)
+
+register_element_cls("m:groupChr", CT_GroupChr)
+register_element_cls("m:groupChrPr", CT_GroupChrPr)
+register_element_cls("m:vertJc", CT_TopBot)
+
+register_element_cls("m:limLow", CT_LimLow)
+register_element_cls("m:limLowPr", CT_LimLowPr)
+register_element_cls("m:lim", CT_OMathArg)
+
+register_element_cls("m:limUpp", CT_LimUpp)
+register_element_cls("m:limUppPr", CT_LimUppPr)
+
+register_element_cls("m:m", CT_M)
+register_element_cls("m:mPr", CT_MPr)
+register_element_cls("m:plcHide", CT_OnOff)
+register_element_cls("m:cGpRule", CT_SpacingRule)
+register_element_cls("m:cSp", CT_UnSignedInteger)
+register_element_cls("m:cGp", CT_UnSignedInteger)
+register_element_cls("m:mcs", CT_MCS)
+register_element_cls("m:mr", CT_MR)
+
+register_element_cls("m:mc", CT_MC)
+register_element_cls("m:mcPr", CT_MCPr)
+register_element_cls("m:count", CT_Integer255)
+register_element_cls("m:mcJc", CT_XAlign)
+
+register_element_cls("m:nary", CT_Nary)
+register_element_cls("m:naryPr", CT_NaryPr)
+register_element_cls("m:limLoc", CT_LimLoc)
+register_element_cls("m:subHide", CT_OnOff)
+register_element_cls("m:supHide", CT_OnOff)
+register_element_cls("m:sub", CT_OMathArg)
+register_element_cls("m:sup", CT_OMathArg)
+
+register_element_cls("m:phant", CT_Phant)
+register_element_cls("m:phantPr", CT_PhantPr)
+register_element_cls("m:show", CT_OnOff)
+register_element_cls("m:zeroWid", CT_OnOff)
+register_element_cls("m:zeroAsc", CT_OnOff)
+register_element_cls("m:zeroDesc", CT_OnOff)
+register_element_cls("m:transp", CT_OnOff)
+
+register_element_cls("m:rad", CT_Rad)
+register_element_cls("m:radPr", CT_RadPr)
+register_element_cls("m:degHide", CT_OnOff)
+register_element_cls("m:deg", CT_OMathArg)
+
+register_element_cls("m:sPre", CT_SPre)
+register_element_cls("m:sPrePr", CT_SPrePr)
+
+register_element_cls("m:sSub", CT_SSub)
+register_element_cls("m:sSubPr", CT_SSubPr)
+
+register_element_cls("m:sSubSup", CT_SSubSup)
+register_element_cls("m:sSubSupPr", CT_SSubSupPr)
+register_element_cls("m:alnScr", CT_OnOff)
+
+register_element_cls("m:sSup", CT_SSup)
+register_element_cls("m:sSupPr", CT_SSupPr)
+
+register_element_cls("m:r", CT_R_OMath)
+register_element_cls("m:rPr", CT_RPR)
+register_element_cls("m:lit", CT_OnOff)
+register_element_cls("m:nor", CT_OnOff)
+register_element_cls("m:scr", CT_Script)
+register_element_cls("m:sty", CT_Style_OMath)
+register_element_cls("m:t", CT_Text_OMath)
+
 from .text.paragraph_props import (
     CT_Ind,
     CT_PBdr,

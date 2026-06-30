@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Generic, Self
+from typing import TYPE_CHECKING, Any, Generic, Self, cast
 
 # docxray stuff
 from docxray.oxml.trans.parts.story import StoryPart
@@ -12,10 +12,12 @@ from docxray.oxml.trans.proxy.types import (
     ProvidesXmlPart,
 )
 from docxray.oxml.trans.types import ELM_T
+from docxray.transform.transformer import Transformer, TransformMethod
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
+    from docxray.transform.ruleset import RuleProxy, RuleSet
 
 
 class ElementProxy(Generic[ELM_T]):
@@ -31,6 +33,26 @@ class ElementProxy(Generic[ELM_T]):
     @property
     def part(self) -> XmlPart:
         return self._parent.part
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return Transformer.transform(
+            self,
+            ruleset,
+            cast("RuleProxy", self.__class__.__name__),
+            stringify,
+            method,
+        )
 
 
 class StoryChild(Generic[ELM_T]):
@@ -64,6 +86,26 @@ class StoryChild(Generic[ELM_T]):
         if len(sibling_list) == 0:
             return None
         return self.__class__(sibling_list[0], self._parent)
+
+    def transform(
+        self,
+        ruleset: RuleSet | None = None,
+        stringify: bool = True,
+        method: TransformMethod = "html",
+    ) -> Any:
+        # docxray stuff
+        from docxray.oxml.trans.parts.document import DocumentPart
+
+        ruleset = (
+            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
+        )
+        return Transformer.transform(
+            self,
+            ruleset,
+            cast("RuleProxy", self.__class__.__name__),
+            stringify,
+            method,
+        )
 
 
 class PropertyPath(str):

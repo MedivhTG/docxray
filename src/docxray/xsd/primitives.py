@@ -13,6 +13,7 @@ from .facets import (
     EnumerationFacet,
     LengthFacet,
     MaxInclusiveFacet,
+    MaxLengthFacet,
     MinInclusiveFacet,
     PatternFacet,
 )
@@ -22,6 +23,7 @@ from .xsd import XsdPrimitive
 class StringFacets(TypedDict, total=False):
     enum: EnumerationFacet
     length: LengthFacet
+    max_length: MaxLengthFacet
     pattern: PatternFacet
 
 
@@ -40,6 +42,9 @@ class XsdString(XsdPrimitive):
         length = facets.pop("length", LengthFacet())
         if length.value and len(xml_obj) != length.value:
             cls.xsd_err(xml_obj, f"length expected {length.value}")
+        max_length = facets.pop("max_length", MaxLengthFacet())
+        if max_length.value and len(xml_obj) > max_length.value:
+            cls.xsd_err(xml_obj, f"max length exceeded {max_length.value}")
         pattern = facets.pop("pattern", PatternFacet())
         if pattern.value and not re.match(pattern.value, xml_obj):
             cls.xsd_err(xml_obj, f"pattern mismatch {pattern.value}")
@@ -61,14 +66,26 @@ class XsdDateTime(XsdPrimitive):
             )
 
 
+class IntegerFacets(TypedDict, total=False):
+    min_inclusive: MinInclusiveFacet
+    max_inclusive: MaxInclusiveFacet
+
+
 class XsdInteger(XsdPrimitive):
     INT_RE: str = r"^[+-]?\d+$"
 
     @classmethod
-    def validate(cls, xml_obj: str, **facets: Any) -> int:
+    def validate(cls, xml_obj: str, **facets: Unpack[IntegerFacets]) -> int:
         if not re.match(cls.INT_RE, xml_obj):
             cls.xsd_err(xml_obj, f"pattern mismatch {cls.INT_RE}")
-        return int(xml_obj)
+        integer = int(xml_obj)
+        min_facet = facets.pop("min_inclusive", MinInclusiveFacet())
+        if min_facet.value is not None and integer < min_facet.value:
+            cls.xsd_err(integer, f"value was less than {min_facet.value}")
+        max_facet = facets.pop("max_inclusive", MaxInclusiveFacet())
+        if max_facet.value is not None and integer > max_facet.value:
+            cls.xsd_err(integer, f"value was greater than {max_facet.value}")
+        return integer
 
 
 class HexBinaryFacets(TypedDict, total=False):

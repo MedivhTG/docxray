@@ -8,6 +8,7 @@ from docxray.oxml.trans.st.wml import ST_LongHexNumber
 from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .hyperlink import CT_Hyperlink
+from .omath import CT_OMath, CT_OMathPara
 from .paragraph_props import CT_PPr
 from .run import CT_R
 
@@ -46,5 +47,7 @@ class CT_P(OxmlElement):
         return self.child_zero_or_one(W.P_PR, CT_PPr)
 
     @cached_property
-    def inner_content_elements(self) -> list[CT_R | CT_Hyperlink]:
-        return self.xpath("w:r | w:hyperlink")
+    def inner_content_elements(
+        self,
+    ) -> list[CT_R | CT_Hyperlink | CT_OMathPara | CT_OMath]:
+        return self.xpath("w:r | w:hyperlink | m:oMathPara | m:oMath")

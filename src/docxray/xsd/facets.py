@@ -23,6 +23,15 @@ class LengthFacet(XsdFacet):
         return self._fixed
 
 
+class MaxLengthFacet(XsdFacet):
+    def __init__(self, value: int | None = None) -> None:
+        self._value = value
+
+    @property
+    def value(self) -> int | None:
+        return self._value
+
+
 class PatternFacet(XsdFacet):
     def __init__(self, value: str | None = None) -> None:
         self._value = value

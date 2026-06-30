@@ -1,17 +1,21 @@
 from typing import Any, Literal, Self
 
-from .builders import (
-    HtmlBuilder,
-    HtmlDrawing,
-    HtmlListViewInterrupted,
-    HtmlParagraph,
-    HtmlParagraphInList,
-    HtmlTable,
-)
+from .builders.base import HtmlBuilder
+from .builders.drawing import HtmlDrawing
+from .builders.list import HtmlListViewInterrupted
+from .builders.omath import HtmlOMath, HtmlOMathPara
+from .builders.paragraph import HtmlParagraph, HtmlParagraphInList
+from .builders.table import HtmlTable
 
 type RuleMethod = Literal["html"]
 type RuleProxy = Literal[
-    "Paragraph", "ParagraphInList", "Drawing", "ListViewInterrupted", "Table"
+    "Paragraph",
+    "ParagraphInList",
+    "Drawing",
+    "ListViewInterrupted",
+    "Table",
+    "OMathParagraph",
+    "OMath",
 ]
 
 
@@ -52,5 +56,7 @@ class RuleSet:
                 "Drawing": Rule(HtmlDrawing),
                 "ListViewInterrupted": Rule(HtmlListViewInterrupted),
                 "Table": Rule(HtmlTable),
+                "OMathParagraph": Rule(HtmlOMathPara),
+                "OMath": Rule(HtmlOMath),
             },
         )

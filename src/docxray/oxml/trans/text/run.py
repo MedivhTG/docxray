@@ -13,6 +13,9 @@ from docxray.oxml.trans.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
+type RunInnerContent = CT_Br | CT_Text | CT_Empty | CT_Drawing | CT_PTab
+RUN_INNER_CONTENT_XPATH = "w:br | w:t | w:noBreakHyphen | w:softHyphen | w:sym | w:cr | w:tab | w:drawing | w:ptab"
+
 
 class CT_RunTrackChange(OxmlElement):
     pass
@@ -76,9 +79,6 @@ class CT_PTab(OxmlElement):
     pass
 
 
-type RunInnerContent = list[CT_Br | CT_Text | CT_Empty | CT_Drawing | CT_PTab]
-
-
 class CT_R(OxmlElement):
     @cached_property
     def t(self) -> CT_Text | None:
@@ -89,9 +89,5 @@ class CT_R(OxmlElement):
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
     @cached_property
-    def inner_content_items(self) -> RunInnerContent:
-        xpath = (
-            "w:br | w:t | w:noBreakHyphen | w:softHyphen | w:sym | w:cr | w:tab | "
-            "w:drawing | w:ptab"
-        )
-        return self.xpath(xpath)
+    def inner_content_items(self) -> list[RunInnerContent]:
+        return self.xpath(RUN_INNER_CONTENT_XPATH)

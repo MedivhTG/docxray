@@ -188,12 +188,13 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf57
 
 [[package]]
 name = "docxray"
-version = "0.0.0a12"
+version = "0.0.0a13"
 source = { virtual = "." }
 dependencies = [
     { name = "homoglyphs" },
     { name = "lxml" },
     { name = "num2words" },
+    { name = "officemath2latex" },
     { name = "pillow" },
     { name = "python-dateutil" },
     { name = "unicode-rbnf" },
@@ -219,6 +220,7 @@ requires-dist = [
     { name = "homoglyphs", specifier = ">=2.0.4" },
     { name = "lxml", specifier = ">=6.1.0" },
     { name = "num2words", specifier = ">=0.5.14" },
+    { name = "officemath2latex", specifier = ">=0.1.1" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "unicode-rbnf", specifier = ">=2.4.0" },
@@ -430,6 +432,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f6/58/ad645bd38b4b648eb2fc2ba1b909398e54eb0cbb6a7dbd2b4953e38c9621/num2words-0.5.14.tar.gz", hash = "sha256:b066ec18e56b6616a3b38086b5747daafbaa8868b226a36127e0451c0cf379c6", size = 218213, upload-time = "2024-12-17T20:17:10.191Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d6/5b/545e9267a1cc080c8a1be2746113a063e34bcdd0f5173fd665a5c13cb234/num2words-0.5.14-py3-none-any.whl", hash = "sha256:1c8e5b00142fc2966fd8d685001e36c4a9911e070d1b120e1beb721fa1edb33d", size = 163525, upload-time = "2024-12-17T20:17:06.074Z" },
+]
+
+[[package]]
+name = "officemath2latex"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lxml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/22/4f398f0197246a4b57ade9fc6ddbe84b97c8adf6b793580ac3eddb35e742/officemath2latex-0.1.1.tar.gz", hash = "sha256:7958e4e26cf35d9941305ce05571ac3d72ce05e7f6bcbed3a68915343b752276", size = 7071, upload-time = "2026-03-13T07:24:24.481Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/ed/d3b429e16f9b8ba58553003163d0c2179ee3b2b15d90ce186383fcdbb6f2/officemath2latex-0.1.1-py3-none-any.whl", hash = "sha256:e349d9fcd8a914066bd68ab520be938b487c535e18dafc217f0059c6dbe1aa2d", size = 7828, upload-time = "2026-03-13T07:24:23.093Z" },
 ]
 
 [[package]]

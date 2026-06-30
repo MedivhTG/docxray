@@ -462,3 +462,65 @@ class SE_JC_TABLE(StrEnum):
 class SE_TBL_LAYOUT_TYPE(StrEnum):
     FIXED = "fixed"
     AUTOFIT = "autofit"
+
+
+class SE_JC_OMATH(StrEnum):
+    LEFT = "left"
+    RIGHT = "right"
+    CENTER = "center"
+    CENTER_GROUP = "centerGroup"
+
+
+class SE_TOP_BOT(StrEnum):
+    TOP = "top"
+    BOT = "bot"
+
+
+class SE_SHP(StrEnum):
+    CENTERED = "centered"
+    MATCH = "match"
+
+
+class SE_Y_ALIGN(StrEnum):
+    INLINE = "inline"
+    TOP = "top"
+    CENTER = "center"
+    BOTTOM = "bottom"
+    INSIDE = "inside"
+    OUTSIDE = "outside"
+
+
+class SE_F_TYPE(StrEnum):
+    BAR = "bar"
+    SKW = "skw"
+    LIN = "lin"
+    NO_BAR = "noBar"
+
+
+class SE_X_ALIGN(StrEnum):
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
+    INSIDE = "inside"
+    OUTSIDE = "outside"
+
+
+class SE_LIM_LOC(StrEnum):
+    UND_OVR = "undOvr"
+    SUB_SUP = "subSup"
+
+
+class SE_SCRIPT(StrEnum):
+    ROMAN = "roman"
+    SCRIPT = "script"
+    FRAKTUR = "fraktur"
+    DOUBLE_STRUCK = "double-struck"
+    SANS_SERIF = "sans-serif"
+    MONOSPACE = "monospace"
+
+
+class SE_STYLE(StrEnum):
+    PLAIN = "p"
+    BOLD = "b"
+    ITALIC = "i"
+    BOLD_ITALIC = "bi"

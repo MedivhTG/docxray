@@ -4,9 +4,8 @@ from collections.abc import Iterator
 from typing import Any
 
 # docxray stuff
+from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
 from docxray.oxml.trans.proxy.text.run import Run
-
-# docx_tools stuff
 
 
 class RunChainsMap:
@@ -25,15 +24,15 @@ class RunChainsMap:
     def __init__(self, attrs_for_map: list[str]) -> None:
         self._tags_for_map = attrs_for_map
         self._idx_chains: dict[int, dict[str, RunChain]] = {}
-        self._unchained: dict[int, Run] = {}
+        self._unchained: dict[int, ParaContentProxy] = {}
         self._last_idx = -1
 
     def __len__(self) -> int:
         """Length of run formatting index-axis."""
         return self._last_idx + 1
 
-    def chain(self, run: Run) -> None:
-        """Add format chains for this run wrapper.
+    def chain(self, content: ParaContentProxy) -> None:
+        """Add format chains for this content.
 
         We try ty continue one char format (e.g. italic) as chain.
         If chain at last index is not found than we create new named chain.
@@ -41,15 +40,21 @@ class RunChainsMap:
         If run has no formatting than it's appended to unchained list.
 
         Args:
-            run (Run): Chained run wrapper.
+            content (ParaContentProxy): Content proxy.
         """
         new_idx = self._last_idx + 1
         self._create_idx(new_idx)
+        # Other items is unchained
+        if not isinstance(content, Run):
+            self._index_unchained(new_idx, content)
+            self._last_idx = new_idx
+            return
+
         # Flag for chained or unchained char format
         is_chained = False
         # Iterate over all char format attributes
         for name in self._tags_for_map:
-            attr = getattr(run, name)
+            attr = getattr(content, name)
             # Boolean comparator?
             if not attr:
                 continue
@@ -58,25 +63,25 @@ class RunChainsMap:
             if not chain:
                 # New chain
                 chain = RunChain(name, attr, new_idx)
-                chain.append(run)
+                chain.append(content)
                 self._index_chain(new_idx, chain)
             else:
                 if chain.compare(attr):
                     # Continue last chain
-                    chain.append(run)
+                    chain.append(content)
                     self._index_chain(new_idx, chain)
                 # If value of attribute is different -> start new chain
                 else:
                     chain = RunChain(name, attr, new_idx)
-                    chain.append(run)
+                    chain.append(content)
                     self._index_chain(new_idx, chain)
         if is_chained:
             self._add_chain_intersections(new_idx)
         else:
-            self._index_unchained(new_idx, run)
+            self._index_unchained(new_idx, content)
         self._last_idx = new_idx
 
-    def chains_ordered(self) -> Iterator[Run | RunChain]:
+    def chains_ordered(self) -> Iterator[ParaContentProxy | RunChain]:
         """Iterate over the longest run chains or run wrappers by index.
 
         For every index we get unchained format or main chain - chain with
@@ -113,17 +118,17 @@ class RunChainsMap:
             return None
         return idx_chains.get(name)
 
-    def get_unchained(self, idx: int) -> Run | None:
-        """Get unchained run wrapper by index."""
+    def get_unchained(self, idx: int) -> ParaContentProxy | None:
+        """Get unchained content by index."""
         return self._unchained.get(idx)
 
     def _create_idx(self, idx: int) -> None:
         """Create space for new index in interval."""
         self._idx_chains[idx] = {}
 
-    def _index_unchained(self, idx: int, run: Run) -> None:
-        """Index unchained run wrapper in interval."""
-        self._unchained[idx] = run
+    def _index_unchained(self, idx: int, content: ParaContentProxy) -> None:
+        """Index unchained content in interval."""
+        self._unchained[idx] = content
 
     def _index_chain(self, idx: int, chain: RunChain) -> None:
         """Index chain in interval."""
