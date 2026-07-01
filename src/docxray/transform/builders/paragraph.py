@@ -128,9 +128,24 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             sep = " "
         else:
             sep = ""
+        if proxy.list_item.level.numbering_format == "bullet":
+            span_elm = Element("span")
+            font = proxy.list_item.level.font
+            # TODO: crutch
+            font_family = "Symbol" if font is None else font.font_name
+            span_elm.set("style", f"font-family: {font_family};")
+        else:
+            span_elm = None
         if tree is None:
+            if span_elm is not None:
+                span_elm.text = txt
+                span_elm.tail = sep
+                return span_elm
             return txt + sep
         top, bottom = tree
+        if span_elm is not None:
+            bottom.append(span_elm)
+            bottom = span_elm
         bottom.text = txt
         top.tail = sep
         return top

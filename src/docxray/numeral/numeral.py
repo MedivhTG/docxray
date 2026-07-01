@@ -12,7 +12,7 @@ import num2words
 from unicode_rbnf.engine import RbnfEngine
 
 from .bcp47 import script
-from .charset import DINGBAT_MAPPINGS, NAME_TO_CHARSET, CharsetName
+from .charset import NAME_TO_CHARSET, CharsetName
 
 
 class Numeral:
@@ -157,38 +157,6 @@ class Numeral:
     def iroha_full_width(cls, ord: int) -> str:
         """Get ordinal cyclic repeated character sequence for full-width iroha ordered katakana (イ, ロ, ハ, ..., ス, ン, イ, ロ, ハ, ...)."""
         return cls._cyclic(ord, CharsetName.IROHA_FULL_WIDTH)
-
-    @classmethod
-    def bullet(cls, char: str, font: str) -> str:
-        """Get an bullet character from dingbat mapping for chosen char (in PUA or not) and font.
-
-        **Example:**
-        ```python
-            bullet = Numeral.bullet(_here_pua_char_, "Symbol")
-            print(bullet) # will print `•`
-        ```
-
-        **NOTE**:
-        Not all characters/charsets supported.
-
-        Args:
-            char (str): Character in PUA (or not).
-            font (str): Selected font to getting alt_code if in PUA.
-
-        Raises:
-            ValueError: Provided only single character for `char`.
-
-        Returns:
-            str: Visible unicode chracter.
-        """
-        if not isinstance(char, str) and len(char) != 1:
-            raise ValueError("There's must be single char")
-        if not cls._in_private_use_char(char):
-            return char
-        alt_code = ord(char) - 0xF000
-        if font in DINGBAT_MAPPINGS and alt_code in DINGBAT_MAPPINGS[font]:
-            return chr(DINGBAT_MAPPINGS[font][alt_code])
-        return chr(alt_code) if 0x20 <= alt_code <= 0x7E else char
 
     @classmethod
     def decimal_zero(cls, ord: int) -> str:

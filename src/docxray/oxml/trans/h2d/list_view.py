@@ -417,16 +417,11 @@ class ListItem:
             level = for_leveled.level
         else:
             level = for_leveled
-
         format = level.numbering_format
         if format == SE_NUMBER_FORMAT.NONE:
             return ""
         if format == SE_NUMBER_FORMAT.BULLET:
-            if level.font is None:
-                font = "Symbol"
-            else:
-                font = level.font.font_name
-            return Numeral.bullet(level.pattern, font)
+            return level.pattern
         if format == SE_NUMBER_FORMAT.CUSTOM:
             return Numeral.custom(ord, level.numbering_custom_pattern)
         if level.all_decimal:
