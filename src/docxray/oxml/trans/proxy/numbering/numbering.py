@@ -93,6 +93,10 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def start_from(self) -> int:
+        if isinstance(self.parent, LevelOverride):
+            start = self.parent.start_from
+            if start is not None:
+                return start
         if self.element.start is None:
             return 0
         return self.element.start.val

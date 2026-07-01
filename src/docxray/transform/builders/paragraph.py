@@ -93,7 +93,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
-        if not proxy.has_text and not proxy.has_picture:
+        if (
+            not proxy.has_text
+            and not proxy.has_picture
+            and not proxy.list_item
+        ):
             elm.text = SPACEBREAK_MNEMONIC
             return
         chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))

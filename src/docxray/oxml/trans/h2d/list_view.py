@@ -201,7 +201,7 @@ class ListItem:
             if level.lvl is None:
                 if self._ilvl is None:
                     raise ListItemError(
-                        "Cannot instantiate list item wit `None` ilvl for LevelOverride"
+                        "Cannot instantiate list item with `None` ilvl for LevelOverride"
                     )
                 self._level = self._numbering.associated_lvl(
                     self._num_id, self._ilvl
@@ -265,38 +265,6 @@ class ListItem:
             count += 1
             prev_li = prev_li.prev_li_ilvl
         return count
-
-    @cached_property
-    def char_ord(self) -> int:
-        """Ordinal number of character in associated charset from `Numeral` module."""
-        if self.ilvl == 0:
-            # Never restarts (highest level)
-            return self.ilvl_ord + self.start - 1
-        if self.level.restart_from is None:
-            restart_lvl = None
-            upper_lvl = self.ilvl - 1
-        else:
-            restart_lvl = self.level.restart_from
-            upper_lvl = self.ilvl - restart_lvl
-
-        if restart_lvl == 0:
-            # Never restarts (restart level is 0)
-            return self.ilvl_ord + self.start - 1
-        restarting = False
-        same_level_count = 1
-        prev_li = self.prev_li
-        while prev_li:
-            if prev_li.ilvl == self.ilvl:
-                same_level_count += 1
-            if prev_li.ilvl <= upper_lvl:
-                restarting = True
-                break
-            prev_li = prev_li.prev_li
-        if restarting:
-            # Restart with count of the same level found before
-            return same_level_count + self.start - 1
-        # Not restarts (not found higher level)
-        return self.ilvl_ord + self.start - 1
 
     @cached_property
     def next_li(self) -> ListItem | None:
@@ -366,17 +334,12 @@ class ListItem:
 
     @cached_property
     def level_text(self) -> str:
-        """Get rendered level text as in WORD.
-
-        `NOTE`:
-        1) For future level text can return `Image` instance (str | Image) if numbering
-        format has picture reference (bullet format usually).
-        """
+        """Get rendered level text as in WORD."""
         level = self.level
         num_format = level.numbering_format
         if num_format in NUMERAL_SPECIFIC:
-            return self._level_char
-        return self._parse_pattern()
+            return self._char(self)
+        return self._parse_pattern(self)
 
     @cached_property
     def is_bullet_format(self) -> bool:
@@ -433,29 +396,6 @@ class ListItem:
     def _all_downcase(self) -> bool:
         return self._display_level_text_run_val_on_off("smallCaps")
 
-    # TODO: here can be an Image instance along with common chars
-    @cached_property
-    def _level_char(self) -> str:
-        format = self.level.numbering_format
-        if format == SE_NUMBER_FORMAT.NONE:
-            return ""
-        if format == SE_NUMBER_FORMAT.BULLET:
-            if self.level.font is None:
-                font = "Symbol"
-            else:
-                font = self.level.font.font_name
-            return Numeral.bullet(self.level.pattern, font)
-        if format == SE_NUMBER_FORMAT.CUSTOM:
-            return Numeral.custom(
-                self.char_ord, self.level.numbering_custom_pattern
-            )
-        if self.level.all_decimal:
-            return Numeral.decimal(self.char_ord)
-        if format in NUMERAL_WITH_LOCALE:
-            locale = self.locale or "en-US"
-            return NUMERAL_RULES[format](self.char_ord, locale)  # type: ignore[operator]
-        return NUMERAL_RULES[format](self.char_ord)  # type: ignore[operator]
-
     def _display_level_text_run_val(
         self, name: str, optional: bool = False
     ) -> Any:
@@ -465,27 +405,69 @@ class ListItem:
     def _display_level_text_run_val_on_off(self, name: str) -> bool:
         return on_off(self._display_level_text_run_val(name, True))
 
-    # FIXME: when try to get level char from upper level that restarted before -
-    # we get same char, but not restarted
-    def _parse_pattern(self) -> str:
+    def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
+        for_lvl = self._numbering.associated_lvl(current_li.num_id, for_ilvl)
+        restart_from = for_lvl.restart_from
+        prev_li: ListItem | None = current_li
+        count_ilvl = 0
+        while prev_li:
+            if prev_li.ilvl == for_ilvl:
+                count_ilvl += 1
+            elif prev_li.ilvl < for_ilvl:
+                # Restart every time when early levels occured
+                if restart_from is None and prev_li.ilvl < for_ilvl:
+                    break
+                # If restart_from is 0 - never restart, else restart from mentioned level or earlier
+                elif (
+                    restart_from is not None
+                    and restart_from != 0
+                    and prev_li.ilvl < restart_from
+                ):
+                    break
+            prev_li = prev_li.prev_li
+        if count_ilvl == 0:
+            count_ilvl = 1
+        return for_lvl.start_from + count_ilvl - 1
+
+    # TODO: here can be an Image instance along with common chars
+    def _char(self, for_leveled: ListItem | Level, ord: int = 1) -> str:
+        if isinstance(for_leveled, ListItem):
+            level = for_leveled.level
+        else:
+            level = for_leveled
+
+        format = level.numbering_format
+        if format == SE_NUMBER_FORMAT.NONE:
+            return ""
+        if format == SE_NUMBER_FORMAT.BULLET:
+            if level.font is None:
+                font = "Symbol"
+            else:
+                font = level.font.font_name
+            return Numeral.bullet(level.pattern, font)
+        if format == SE_NUMBER_FORMAT.CUSTOM:
+            return Numeral.custom(ord, level.numbering_custom_pattern)
+        if level.all_decimal:
+            return Numeral.decimal(ord)
+        if format in NUMERAL_WITH_LOCALE:
+            locale = for_leveled.locale or "en-US"
+            return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
+        return NUMERAL_RULES[format](ord)  # type: ignore[operator]
+
+    def _parse_pattern(self, li: ListItem) -> str:
         text = ""
-        percentage_followed = False
-        for ch in self.level.pattern:
+        pct_followed = False
+        for ch in li.level.pattern:
             if ch == "%":
-                percentage_followed = True
+                pct_followed = True
                 continue
-            if not (percentage_followed and ch in _ILVL_ALLOWED):
+            if not (pct_followed and ch in _ILVL_ALLOWED):
                 text += ch
                 continue
             ilvl_found = int(ch) - 1
-            if ilvl_found == self.ilvl:
-                text += self._level_char
-            elif ilvl_found < self.ilvl:
-                prev_li = self.prev_li
-                while prev_li:
-                    if prev_li.ilvl == ilvl_found:
-                        text += prev_li._level_char
-                        break
-                    prev_li = prev_li.prev_li
-            percentage_followed = False
+            char_ord = self._char_ord(li, ilvl_found)
+            text += self._char(
+                self._numbering.associated_lvl(li.num_id, ilvl_found), char_ord
+            )
+            pct_followed = False
         return text

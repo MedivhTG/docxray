@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Any, cast
 from lxml.html import Element, HtmlElement
 from officemath2latex import (
     OfficeMathFieldCodeText,
-    process_math_node,
     OfficeMathRun,
+    process_math_node,
     qname,
 )
 
@@ -209,6 +209,7 @@ def omath_to_latex(
     ruleset: RuleSet | None = None,
     include_run_content: bool = True,
 ) -> str:
+    # docxray stuff
     from docxray.oxml.trans.parts.document import DocumentPart
 
     ruleset = ruleset or cast("DocumentPart", omath.part)._default_html_ruleset
