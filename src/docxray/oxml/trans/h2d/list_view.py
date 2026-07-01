@@ -13,11 +13,7 @@ from docxray.oxml.trans.h2d.numeral_rules import (
     NUMERAL_WITH_LOCALE,
 )
 from docxray.oxml.trans.proxy.compute import on_off
-from docxray.oxml.trans.proxy.numbering.numbering import (
-    Level,
-    LevelOverride,
-    Numbering,
-)
+from docxray.oxml.trans.proxy.numbering.numbering import Level, Numbering
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
@@ -185,7 +181,7 @@ class ListItem:
         numbering: Numbering,
         paragraph: Paragraph,
         numPr_elm: CT_NumPr,
-        level: Level | LevelOverride,
+        level: Level,
     ) -> None:
         self._numbering = numbering
         self._paragraph = paragraph
@@ -195,27 +191,13 @@ class ListItem:
                 "Cannot instantiate list item with `None` numId"
             )
         self._num_id = numPr_elm.numId.val
-        self._ilvl = numPr_elm.ilvl.val if numPr_elm.ilvl is not None else None
-        self._start = None
-        if isinstance(level, LevelOverride):
-            if level.lvl is None:
-                if self._ilvl is None:
-                    raise ListItemError(
-                        "Cannot instantiate list item with `None` ilvl for LevelOverride"
-                    )
-                self._level = self._numbering.associated_lvl(
-                    self._num_id, self._ilvl
-                )
-            else:
-                self._level = level.lvl
-            self._start = level.start_from
-        else:
-            self._level = level
-            self._start = level.start_from
-        if self._ilvl is None:
-            self._ilvl = self._level.ilvl
-        if self._start is None:
-            self._start = 0
+        self._level = level
+        self._start = level.start_from
+        self._ilvl = (
+            numPr_elm.ilvl.val
+            if numPr_elm.ilvl is not None
+            else self._level.ilvl
+        )
 
     @cached_property
     def paragraph(self) -> Paragraph:
@@ -234,7 +216,7 @@ class ListItem:
     @cached_property
     def ilvl(self) -> int:
         """Hierarchy level of list item."""
-        return cast("int", self._ilvl)
+        return self._ilvl
 
     @cached_property
     def num_key(self) -> tuple[int, int]:
@@ -244,7 +226,7 @@ class ListItem:
     @cached_property
     def start(self) -> int:
         """Which number of ordinal (or 0) must be the start of list for `char_ord`."""
-        return cast("int", self._start)
+        return self._start
 
     @cached_property
     def ord(self) -> int:
@@ -406,7 +388,7 @@ class ListItem:
         return on_off(self._display_level_text_run_val(name, True))
 
     def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
-        for_lvl = self._numbering.associated_lvl(current_li.num_id, for_ilvl)
+        for_lvl = self._numbering.associated_level(current_li.num_id, for_ilvl)
         restart_from = for_lvl.restart_from
         prev_li: ListItem | None = current_li
         count_ilvl = 0
@@ -467,7 +449,8 @@ class ListItem:
             ilvl_found = int(ch) - 1
             char_ord = self._char_ord(li, ilvl_found)
             text += self._char(
-                self._numbering.associated_lvl(li.num_id, ilvl_found), char_ord
+                self._numbering.associated_level(li.num_id, ilvl_found),
+                char_ord,
             )
             pct_followed = False
         return text

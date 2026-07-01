@@ -279,11 +279,21 @@ class Numbering(ElementProxy[CT_Numbering]):
         self._cached_abstract_nums[abstract_num_id] = abstract_num
         return abstract_num
 
-    def associated_lvl(self, num_id: int, ilvl: int) -> Level:
+    def find_effective_num(self, num_id: int) -> Num:
         num = self.get_num(num_id)
-        lvl_override = num.associated_lvl_override(ilvl)
-        if lvl_override is not None:
-            lvl = lvl_override.lvl
-            if lvl is not None:
-                return lvl
-        return num.abstract_num.lvl_by_ilvl(ilvl)
+        abstract_num = num.abstract_num
+        num_style = abstract_num.numbering_style
+        # Real abstract num can be hidden in deep inheritance
+        while num_style:
+            num = num_style.num
+            abstract_num = num.abstract_num
+            num_style = abstract_num.numbering_style
+        return num
+
+    def associated_level(
+        self, num_id: int, ilvl_or_style_id: int | str
+    ) -> Level:
+        num = self.find_effective_num(num_id)
+        if isinstance(ilvl_or_style_id, int):
+            return num.abstract_num.lvl_by_ilvl(ilvl_or_style_id)
+        return num.abstract_num.lvl_by_para_style(ilvl_or_style_id)
