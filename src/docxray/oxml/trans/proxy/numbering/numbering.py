@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.trans.exceptions import InvalidXmlError
@@ -25,6 +25,7 @@ from docxray.oxml.trans.proxy.styles.style import (
 )
 from docxray.oxml.trans.proxy.styles.styles import Styles
 from docxray.oxml.trans.proxy.text.font import Font
+from docxray.oxml.trans.proxy.text.language import Language
 from docxray.oxml.trans.proxy.types import ProvidesXmlPart
 from docxray.oxml.trans.st.enums import (
     SE_JC,
@@ -138,11 +139,20 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def font(self) -> Font | None:
-        if self.element.rPr is None:
+        rFonts_elm = self._prop(PropertyPath.base("rFonts", "rPr"))
+        if isinstance(rFonts_elm, NotFound):
             return None
-        if self.element.rPr.rFonts is None:
+        return Font(rFonts_elm, self)
+
+    @cached_property
+    def language(self) -> Language | None:
+        lang_elm = self._prop(PropertyPath.base("lang", "rPr"))
+        if isinstance(lang_elm, NotFound):
             return None
-        return Font(self.element.rPr.rFonts, self)
+        return Language(lang_elm, self)
+
+    def _prop(self, path: PropertyPath, optional: bool = False) -> Any:
+        return safe_get_prop(self.element, path, optional)
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):

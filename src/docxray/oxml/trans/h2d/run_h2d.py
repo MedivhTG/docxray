@@ -10,6 +10,8 @@ from docxray.oxml.trans.proxy.styles.style import (
     CharacterStyle,
 )
 from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.text.font import Font
+from docxray.oxml.trans.proxy.text.language import Language
 from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.st.enums import (
     SE_UNDERLINE,
@@ -69,6 +71,20 @@ class RunH2D(How2Display[Run]):
         ):
             return None
         return align
+
+    @cached_property
+    def font(self) -> Font | None:
+        rFonts_elm = self._display_val("rFonts")
+        if isinstance(rFonts_elm, NotFound):
+            return None
+        return Font(rFonts_elm, self._proxy)
+
+    @cached_property
+    def language(self) -> Language | None:
+        lang_elm = self._display_val("lang", False)
+        if isinstance(lang_elm, NotFound):
+            return None
+        return Language(lang_elm, self._proxy)
 
     @cached_property
     def cell(self) -> Cell | None:
