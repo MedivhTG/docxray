@@ -1,7 +1,7 @@
 import colorsys
 
 # docxray stuff
-from docxray.oxml.trans.st.enums import SE_THEME_COLOR
+from docxray.oxml.trans.st.enums import SE_HEX_COLOR_AUTO, SE_THEME_COLOR
 
 # TODO: get values from theme.xml
 THEME_PALETTE = {
@@ -25,6 +25,29 @@ THEME_PALETTE = {
 
 
 class Colorize:
+    @classmethod
+    def colorize(
+        cls,
+        main: SE_HEX_COLOR_AUTO | bytes,
+        theme: SE_THEME_COLOR | None = None,
+        theme_tint: bytes | None = None,
+        theme_shade: bytes | None = None,
+    ) -> str | None:
+        color = main
+        if isinstance(color, SE_HEX_COLOR_AUTO):
+            return None
+        theme_color = theme
+        if theme_color:
+            base_color = Colorize.theme_color(theme_color)
+            if theme_tint:
+                return Colorize.apply_tint(base_color, theme_tint.hex())
+            elif theme_shade:
+                return Colorize.apply_shade(base_color, theme_shade.hex())
+            else:
+                return base_color
+        else:
+            return f"#{color.hex()}"
+
     @classmethod
     def theme_color(
         cls, theme: SE_THEME_COLOR, default: str = "#000000"

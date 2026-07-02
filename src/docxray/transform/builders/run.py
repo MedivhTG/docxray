@@ -5,12 +5,14 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from lxml.html import HtmlElement
 
-from .html_std import content_append, paragraph_content
+from .html_std import content_append
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.transform.builders.char_graph import RunChain
     from docxray.transform.ruleset import RuleSet
+
+    from .paragraph import HtmlParagraph
 
 T = TypeVar("T")
 
@@ -22,11 +24,12 @@ class HtmlRun:
     def __init__(
         self,
         paragraph_elm: HtmlElement,
-        attr_to_elm_maker: dict[str, ElmMaker],
+        p_builder: type[HtmlParagraph],
         ruleset: RuleSet,
     ) -> None:
         self._p_elm = paragraph_elm
-        self._attr_elm_map = attr_to_elm_maker
+        self._attr_elm_map = p_builder.ATTR_TO_ELMMAKER
+        self._p_content_func = p_builder.P_CONTENT_FUNC
         self._ruleset = ruleset
 
     def run_chain(self, main: RunChain) -> None:
@@ -48,7 +51,7 @@ class HtmlRun:
                 )
                 main_tag.append(top)
             else:
-                paragraph_content(main_tag, main_link, self._ruleset)
+                self._p_content_func(main_tag, main_link, self._ruleset)
         content_append(self._p_elm, main_tag)
 
     def _chained_tag_tree(
@@ -106,6 +109,6 @@ class HtmlRun:
                 skip_until = self._chained_recursive(b, idxed[-1], exclude)
                 bottom.append(t)
             else:
-                paragraph_content(bottom, bottom_link, self._ruleset)
+                self._p_content_func(bottom, bottom_link, self._ruleset)
             skip_until = idx
         return skip_until

@@ -9,7 +9,7 @@ from .base import HtmlBuilder
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.list_view import (
+    from docxray.oxml.trans.proxy.list import (
         ListViewIlvlBlock,
         ListViewInterrupted,
     )

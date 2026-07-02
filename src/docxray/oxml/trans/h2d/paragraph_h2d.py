@@ -10,6 +10,11 @@ from docxray.oxml.trans.proxy.compute import (
     signed_twips_measure,
     twips_measure,
 )
+from docxray.oxml.trans.proxy.list import (
+    ListItem,
+    ListView,
+    ListViewInterrupted,
+)
 from docxray.oxml.trans.proxy.numbering.numbering import Level
 from docxray.oxml.trans.proxy.shared import (
     Length,
@@ -33,7 +38,6 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.text.num_props import CT_NumPr
 
 from .how2display import How2Display
-from .list_view import ListItem, ListView, ListViewInterrupted
 
 type _DirectCase = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"

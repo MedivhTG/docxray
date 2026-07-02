@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docxray import Document
+from docxray import Document, VERSION
 from docxray.oxml.trans.proxy.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.transform.builders.table import HtmlTable
@@ -9,6 +9,7 @@ from docxray.transform.ruleset import Rule, RuleSet
 
 class TestDocument:
     def test_open(self, test_file: Path) -> None:
+        print(VERSION)
         doc = Document(test_file)
         assert doc is not None
 

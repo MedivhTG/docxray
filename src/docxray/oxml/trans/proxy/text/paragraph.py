@@ -23,13 +23,13 @@ from .run import Run
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.list_view import (
+    from docxray.oxml.trans.h2d.paragraph_h2d import ParagraphH2D
+    from docxray.oxml.trans.proxy.document import Body
+    from docxray.oxml.trans.proxy.list import (
         ListItem,
         ListView,
         ListViewInterrupted,
     )
-    from docxray.oxml.trans.h2d.paragraph_h2d import ParagraphH2D
-    from docxray.oxml.trans.proxy.document import Body
     from docxray.oxml.trans.proxy.table import Cell, Table
 
 type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath

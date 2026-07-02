@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from lxml.html import Element, HtmlElement
@@ -21,7 +22,10 @@ from .run import HtmlRun
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.proxy.table import Cell
-    from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+    from docxray.oxml.trans.proxy.text.paragraph import (
+        Paragraph,
+        ParaContentProxy,
+    )
     from docxray.transform.ruleset import RuleSet
 
 from .html_std import (
@@ -78,6 +82,12 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "strike": strike_elm,
     }
 
+    P_CONTENT_FUNC: Callable[
+        [HtmlElement, ParaContentProxy, RuleSet], None
+    ] = paragraph_content
+    R_BUILDER = HtmlRun
+    EMPTY_TEXT_FILLER = SPACEBREAK_MNEMONIC
+
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
         elm = Element(cls.HL_TO_P_TAG[proxy.header_level], cls._attrs(proxy))
@@ -98,17 +108,17 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             and not proxy.has_picture
             and not proxy.list_item
         ):
-            elm.text = SPACEBREAK_MNEMONIC
+            elm.text = cls.EMPTY_TEXT_FILLER
             return
         chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
         for item in proxy.iter_inner_content():
             chain_map.chain(item)
-        runs_builder = HtmlRun(elm, cls.ATTR_TO_ELMMAKER, ruleset)
+        runs_builder = cls.R_BUILDER(elm, cls, ruleset)
         for unchained_or_chain in chain_map.chains_ordered():
             if isinstance(unchained_or_chain, RunChain):
                 runs_builder.run_chain(unchained_or_chain)
             else:
-                paragraph_content(elm, unchained_or_chain, ruleset)
+                cls.P_CONTENT_FUNC(elm, unchained_or_chain, ruleset)
 
     @classmethod
     def _list_item_content(cls, proxy: Paragraph) -> str | HtmlElement:

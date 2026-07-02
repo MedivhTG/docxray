@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Literal
 
 # docxray stuff
+from docxray.colorize import Colorize
 from docxray.oxml.trans.enums import (
     _SE_BORDER_TO_ECMA_NUMBER,
     _SE_BORDER_TO_LINES_COUNT,
@@ -11,12 +12,7 @@ from docxray.oxml.trans.enums import (
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.shared import CT_Border
-from docxray.oxml.trans.st.enums import (
-    SE_BORDER,
-    SE_HEX_COLOR_AUTO,
-)
-
-from .colorize import Colorize
+from docxray.oxml.trans.st.enums import SE_BORDER
 
 type _WhichParent = Literal["cell", "table"]
 
@@ -105,24 +101,12 @@ class Border(ElementProxy[CT_Border]):
 
     @cached_property
     def final_color(self) -> str | None:
-        color = self.element.color
-        if isinstance(color, SE_HEX_COLOR_AUTO):
-            return None
-        theme_color = self.element.themeColor
-        if theme_color:
-            base_color = Colorize.theme_color(theme_color)
-            if self.element.themeTint:
-                return Colorize.apply_tint(
-                    base_color, self.element.themeTint.hex()
-                )
-            elif self.element.themeShade:
-                return Colorize.apply_shade(
-                    base_color, self.element.themeShade.hex()
-                )
-            else:
-                return base_color
-        else:
-            return f"#{color.hex()}"
+        return Colorize.colorize(
+            self.element.color,
+            self.element.themeColor,
+            self.element.themeTint,
+            self.element.themeShade,
+        )
 
     @cached_property
     def shadow(self) -> bool:

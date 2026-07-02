@@ -12,12 +12,12 @@ from docxray.oxml.trans.proxy.types import (
     ProvidesXmlPart,
 )
 from docxray.oxml.trans.types import ELM_T
-from docxray.transform.transformer import Transformer, TransformMethod
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
     from docxray.transform.ruleset import RuleProxy, RuleSet
+    from docxray.transform.transformer import TransformMethod
 
 
 class ElementProxy(Generic[ELM_T]):
@@ -42,6 +42,7 @@ class ElementProxy(Generic[ELM_T]):
     ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformer import Transformer
 
         ruleset = (
             ruleset or cast("DocumentPart", self.part)._default_html_ruleset
@@ -95,6 +96,7 @@ class StoryChild(Generic[ELM_T]):
     ) -> Any:
         # docxray stuff
         from docxray.oxml.trans.parts.document import DocumentPart
+        from docxray.transform.transformer import Transformer
 
         ruleset = (
             ruleset or cast("DocumentPart", self.part)._default_html_ruleset

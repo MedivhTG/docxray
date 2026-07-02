@@ -8,6 +8,7 @@ from docxray.enum.lxml import POS
 from docxray.oxml.trans.enums import (
     WD_CNF_FORMAT,
 )
+from docxray.oxml.trans.proxy.border import Border
 from docxray.oxml.trans.proxy.compute import width
 from docxray.oxml.trans.proxy.shared import (
     Length,
@@ -26,7 +27,6 @@ from docxray.oxml.trans.st.enums import (
 from docxray.oxml.trans.styles import CT_TblStylePr
 from docxray.oxml.trans.table.cell_props import CT_TcBorders, CT_TcMar
 
-from .border import Border
 from .how2display import How2Display
 
 type _Border = Literal["top", "bottom", "left", "right", "insideH", "insideV"]

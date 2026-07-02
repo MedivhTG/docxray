@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
-from docxray.oxml.trans.h2d.border import Border
+from docxray.oxml.trans.proxy.border import Border
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.st.enums import (
     SE_BORDER,

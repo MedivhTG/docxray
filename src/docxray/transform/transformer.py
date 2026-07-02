@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from lxml.html import HtmlElement
 
-from ._lxml import to_str_html
+from .better_lxml import to_str_html
 
 type TransformMethod = Literal["html"]
 

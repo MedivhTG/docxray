@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.trans.document import CT_Body, CT_Document
-from docxray.oxml.trans.h2d.list_view import ListViewInterrupted
+from docxray.oxml.trans.proxy.list import ListViewInterrupted
 
 from .blkcntnr import BlockItemContainer
 from .shared import ElementProxy

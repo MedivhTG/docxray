@@ -7,8 +7,8 @@ from docxray.oxml.trans.enums import (
     WD_CNF_TABLE_LOOK,
     CnfLookName,
 )
-from docxray.oxml.trans.h2d.border import Border
 from docxray.oxml.trans.h2d.how2display import How2Display
+from docxray.oxml.trans.proxy.border import Border
 from docxray.oxml.trans.proxy.shared import (
     NotFound,
     PropertyPath,
