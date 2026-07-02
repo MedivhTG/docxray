@@ -168,8 +168,19 @@ combined_set = (
 )
 
 CLASS_TABLE: list[tuple[set[int], FontSlot | Callable]] = [
-    # Basic Latin
-    (u_set(0x0000, 0x007F), FontSlot.ASCII),
+    # Basic Latin, Hebrew, Arabic, Syriac, Arabic Supplement, Thaana,
+    # Arabic Presentation Forms-A, Arabic Presentation Forms-B
+    (
+        u_set(0x0000, 0x007F)
+        | u_set(0x0590, 0x05FF)
+        | u_set(0x0600, 0x06FF)
+        | u_set(0x0700, 0x074F)
+        | u_set(0x0750, 0x077F)
+        | u_set(0x0780, 0x07BF)
+        | u_set(0xFB50, 0xFDFF)
+        | u_set(0xFE70, 0xFEFE),
+        FontSlot.ASCII,
+    ),
     # Latin-1 Supplement
     (u_set(0x00A0, 0x00FF), Font._latin_1_supplement_slot),
     # Latin Extended-A, Latin Extended-B, IPA Extensions
@@ -207,18 +218,6 @@ CLASS_TABLE: list[tuple[set[int], FontSlot | Callable]] = [
         | u_set(0x2700, 0x27BF)
         | u_set(0xE000, 0xF8FF),
         Font._high_ansi_or_east_asia,
-    ),
-    # Hebrew, Arabic, Syriac, Arabic Supplement, Thaana, Arabic Presentation Forms-A,
-    # Arabic Presentation Forms-B
-    (
-        u_set(0x0590, 0x05FF)
-        | u_set(0x0600, 0x06FF)
-        | u_set(0x0700, 0x074F)
-        | u_set(0x0750, 0x077F)
-        | u_set(0x0780, 0x07BF)
-        | u_set(0xFB50, 0xFDFF)
-        | u_set(0xFE70, 0xFEFE),
-        FontSlot.ASCII,
     ),
     # Hangul Jamo, CJK Radicals Supplement, Kangxi Radicals, Ideographic Description Characters,
     # CJK Symbols and Punctuation, Hiragana, Katakana, Bopomofo, Hangul Compatibility Jamo,
