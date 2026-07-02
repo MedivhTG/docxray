@@ -24,6 +24,9 @@ from docxray.oxml.trans.text.run import (
     RunInnerContent,
 )
 
+from .font import Font
+from .language import Language
+
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.h2d.run_h2d import CharsCase, RunH2D
@@ -126,6 +129,22 @@ class Run(StoryChild[CT_R]):
     @cached_property
     def vertical_alignment(self) -> SE_VerticalAlignRun | None:
         return self.h2d.vertical_alignment
+
+    @cached_property
+    def font(self) -> Font | None:
+        return self.h2d.font
+
+    @cached_property
+    def language(self) -> Language | None:
+        return self.h2d.language
+
+    @cached_property
+    def is_complex_script(self) -> bool:
+        return self.h2d.is_complex_script
+
+    @cached_property
+    def right_to_left(self) -> bool:
+        return self.h2d.right_to_left
 
     @cached_property
     def raw_text(self) -> str:

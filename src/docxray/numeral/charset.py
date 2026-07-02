@@ -224,66 +224,6 @@ IROHA_FULL_WIDTH = [
     chr(0x30B9),
     chr(0x30F3),
 ]
-# Extend if need
-DINGBAT_MAPPINGS = {
-    "Symbol": {
-        0xB7: 0x2022,  # • BULLET
-        0xA7: 0x25AA,  # ▪ SQUARE
-        0xD8: 0x2192,  # → RIGHTWARDS ARROW
-        0xD7: 0x2190,  # ← LEFTWARDS ARROW
-        0xD9: 0x2193,  # ↓ DOWNWARDS ARROW
-        0xDA: 0x2191,  # ↑ UPWARDS ARROW
-        0xB4: 0x25CB,  # ○ CIRCLE
-        0xB0: 0x2713,  # ✓ CHECK MARK
-        0xA8: 0x2666,  # ♦ DIAMOND
-        0xAA: 0x2022,  # • BULLET (альтернативный)
-        0xBA: 0x25C6,  # ◆ BLACK DIAMOND
-        0xAC: 0x221A,  # √ SQUARE ROOT
-        0xB1: 0x221E,  # ∞ INFINITY
-    },
-    "Wingdings": {
-        # Стрелки
-        0xD8: 0x2192,  # → RIGHTWARDS ARROW
-        0xD7: 0x2190,  # ← LEFTWARDS ARROW
-        0xD9: 0x2193,  # ↓ DOWNWARDS ARROW
-        0xDA: 0x2191,  # ↑ UPWARDS ARROW
-        0xD6: 0x2194,  # ↔ LEFT RIGHT ARROW
-        # Маркеры
-        0xFC: 0x2713,  # ✓ CHECK MARK
-        0xFB: 0x2717,  # ✗ CROSS MARK
-        0xA8: 0x2666,  # ♦ DIAMOND
-        0xA7: 0x25AA,  # ▪ SQUARE
-        0xB7: 0x2022,  # • BULLET
-        0xB4: 0x25CB,  # ○ CIRCLE
-        0xAC: 0x25A0,  # ■ BLACK SQUARE
-        # Звёзды и прочее
-        0xAA: 0x272A,  # ✪ CIRCLE STAR
-        0xAF: 0x270E,  # ✎ PEN
-        0xE1: 0x2706,  # ✆ TELEPHONE
-        0xE2: 0x2709,  # ✉ ENVELOPE
-        0xE3: 0x270F,  # ✏ PENCIL
-        # Смайлики
-        0xC0: 0x263A,  # ☺ WHITE SMILING FACE
-        0xC1: 0x263B,  # ☻ BLACK SMILING FACE
-        0xC2: 0x2639,  # ☹ WHITE FROWNING FACE
-    },
-    "Wingdings 2": {
-        0x41: 0x2708,  # ✈ AIRPLANE
-        0x42: 0x270C,  # ✌ VICTORY HAND
-        0x43: 0x270D,  # ✍ WRITING HAND
-        0x44: 0x2701,  # ✁ UPPER BLADE SCISSORS
-    },
-    "Wingdings 3": {
-        0x4C: 0x271D,  # ✝ LATIN CROSS
-        0x4F: 0x2720,  # ✠ MALTESE CROSS
-    },
-    "Webdings": {
-        0x4E: 0x2708,  # ✈ AIRPLANE
-        0x50: 0x260E,  # ☎ TELEPHONE
-        0x56: 0x2709,  # ✉ ENVELOPE
-        0x57: 0x2706,  # ✆ TELEPHONE
-    },
-}
 GANADA = [
     chr(0xAC00),
     chr(0xB098),
@@ -535,6 +475,19 @@ RUSSIAN_UPPER = [
     chr(0x042E),
     chr(0x042F),
 ]
+TAIWANESE_COUNTING = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+    chr(0x5341),
+]
 HEBREW_2 = [
     *charset(0x05D0, 0x05D9),
     chr(0x05DB),
@@ -677,6 +630,7 @@ class CharsetName(StrEnum):
     KOREAN_DIGITAL_2 = "koreanDigital2"
     RUSSIAN_LOWER = "russianLower"
     RUSSIAN_UPPER = "russianUpper"
+    TAIWANESE_COUNTING = "taiwaneseCounting"
     HEBREW_2 = "hebrew2"
     ARABIC_ALPHA = "arabicAlpha"
     ARABIC_ABJAD = "arabicAbjad"
@@ -719,6 +673,7 @@ NAME_TO_CHARSET = {
     CharsetName.KOREAN_DIGITAL_2: KOREAN_DIGITAL_2,
     CharsetName.RUSSIAN_LOWER: RUSSIAN_LOWER,
     CharsetName.RUSSIAN_UPPER: RUSSIAN_UPPER,
+    CharsetName.TAIWANESE_COUNTING: TAIWANESE_COUNTING,
     CharsetName.HEBREW_2: HEBREW_2,
     CharsetName.ARABIC_ALPHA: ARABIC_ALPHA,
     CharsetName.ARABIC_ABJAD: ARABIC_ABJAD,

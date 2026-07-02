@@ -385,7 +385,7 @@ class SE_TEXT_DIRECTION(StrEnum):
 
 class SE_HINT(StrEnum):
     DEFAULT = "default"
-    EAST_ASIA = "eastASia"
+    EAST_ASIA = "eastAsia"
 
 
 class SE_THEME(StrEnum):

@@ -16,16 +16,12 @@ NUMERAL_RULES = {
     F.HEX: Numeral.hex,
     F.CHICAGO: Numeral.chicago,
     F.IDEOGRAPH_DIGITAL: Numeral.ideograph_digital,
-    # TODO: after implement uncomment
-    # F.JAPANESE_COUNTING: Numeral.japanese_counting,
-    F.JAPANESE_COUNTING: Numeral.decimal,
+    F.JAPANESE_COUNTING: Numeral.japanese_counting,
     F.AIUEO: Numeral.aiueo,
     F.IROHA: Numeral.iroha,
     F.DECIMAL_FULL_WIDTH: Numeral.decimal_full_width,
     F.DECIMAL_HALF_WIDTH: Numeral.decimal_half_width,
-    # TODO: after implement uncomment
-    # F.JAPANESE_LEGAL: Numeral.japanese_legal,
-    F.JAPANESE_LEGAL: Numeral.decimal,
+    F.JAPANESE_LEGAL: Numeral.japanese_legal,
     F.JAPANESE_DIGITAL_TEN_THOUSAND: Numeral.japanese_digital_ten_thousand,
     F.DECIMAL_ENCLOSED_CIRCLE: Numeral.decimal_enclosed_circle,
     F.DECIMAL_FULL_WIDTH_2: Numeral.decimal_full_width_2,
@@ -41,39 +37,23 @@ NUMERAL_RULES = {
     F.IDEOGRAPH_TRADITIONAL: Numeral.ideograph_traditional,
     F.IDEOGRAPH_ZODIAC: Numeral.ideograph_zodiac,
     F.IDEOGRAPH_ZODIAC_TRADITIONAL: Numeral.ideograph_zodiac_traditional,
-    # TODO: after implement uncomment
-    # F.TAIWANESE_COUNTING: Numeral.taiwanise_counting
-    F.TAIWANESE_COUNTING: Numeral.decimal,
-    # TODO: after implement uncomment
-    # F.IDEOGRAPH_LEGAL_TRADITIONAL: Numeral.ideograph_legal_traditional,
-    F.IDEOGRAPH_LEGAL_TRADITIONAL: Numeral.decimal,
-    # TODO: after implement uncomment
-    # F.TAIWANESE_COUNTING_THOUSAND: Numeral.taiwanese_counting_thousand,
-    F.TAIWANESE_COUNTING_THOUSAND: Numeral.decimal,
+    F.TAIWANESE_COUNTING: Numeral.taiwanise_counting,
+    F.IDEOGRAPH_LEGAL_TRADITIONAL: Numeral.ideograph_legal_traditional,
+    F.TAIWANESE_COUNTING_THOUSAND: Numeral.taiwanese_counting_thousand,
     F.TAIWANESE_DIGITAL: Numeral.taiwanese_digital,
     F.CHINESE_COUNTING: Numeral.chinese_counting,
-    # TODO: after implement uncomment
-    # F.CHINESE_LEGAL_SIMPLIFIED: Numeral.chinese_legal_simplified,
-    F.CHINESE_LEGAL_SIMPLIFIED: Numeral.decimal,
-    # TODO: after implement uncomment
-    # F.CHINESE_COUNTING_THOUSAND: Numeral.chinese_counting_thousand,
-    F.CHINESE_COUNTING_THOUSAND: Numeral.decimal,
+    F.CHINESE_LEGAL_SIMPLIFIED: Numeral.chinese_legal_simplified,
+    F.CHINESE_COUNTING_THOUSAND: Numeral.chinese_counting_thousand,
     F.KOREAN_DIGITAL: Numeral.korean_digital,
-    # TODO: after implement uncomment
-    # F.KOREAN_COUNTING: Numeral.korean_counting,
-    F.KOREAN_COUNTING: Numeral.decimal,
-    # TODO: after implement uncomment
-    # F.KOREAN_LEGAL: Numeral.korean_legal,
-    F.KOREAN_LEGAL: Numeral.decimal,
+    F.KOREAN_COUNTING: Numeral.korean_counting,
+    F.KOREAN_LEGAL: Numeral.korean_legal,
     F.KOREAN_DIGITAL_2: Numeral.korean_digital_2,
     F.VIETNAMESE_COUNTING: Numeral.vietnamese_counting,
     F.RUSSIAN_LOWER: Numeral.russian_lower,
     F.RUSSIAN_UPPER: Numeral.russian_upper,
     F.NONE: Numeral.none,
     F.NUMBER_IN_DASH: Numeral.number_in_dash,
-    # TODO: after implement uncomment
-    # F.HEBREW_1: Numeral.hebrew1,
-    F.HEBREW_1: Numeral.decimal,
+    F.HEBREW_1: Numeral.hebrew1,
     F.HEBREW_2: Numeral.hebrew2,
     F.ARABIC_ALPHA: Numeral.arabic_alpha,
     F.ARABIC_ABJAD: Numeral.arabic_abjad,
@@ -86,7 +66,6 @@ NUMERAL_RULES = {
     F.THAI_COUNTING: Numeral.thai_counting,
     F.BAHT_TEXT: Numeral.baht_text,
     F.DOLLAR_TEXT: Numeral.dollar_text,
-    F.CUSTOM: Numeral.custom,
 }
 NUMERAL_WITH_LOCALE = {
     F.ORDINAL,

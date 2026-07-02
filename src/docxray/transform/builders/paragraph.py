@@ -93,7 +93,11 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     def _fill_content(
         cls, proxy: Paragraph, elm: HtmlElement, ruleset: RuleSet
     ) -> None:
-        if not proxy.has_text and not proxy.has_picture:
+        if (
+            not proxy.has_text
+            and not proxy.has_picture
+            and not proxy.list_item
+        ):
             elm.text = SPACEBREAK_MNEMONIC
             return
         chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
@@ -124,9 +128,23 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             sep = " "
         else:
             sep = ""
+        if proxy.list_item.level.numbering_format == "bullet":
+            span_elm = Element("span")
+            font = proxy.list_item.level.font
+            font_family = "Symbol" if font is None else font.guess_font(txt[0])
+            span_elm.set("style", f"font-family: {font_family};")
+        else:
+            span_elm = None
         if tree is None:
+            if span_elm is not None:
+                span_elm.text = txt
+                span_elm.tail = sep
+                return span_elm
             return txt + sep
         top, bottom = tree
+        if span_elm is not None:
+            bottom.append(span_elm)
+            bottom = span_elm
         bottom.text = txt
         top.tail = sep
         return top

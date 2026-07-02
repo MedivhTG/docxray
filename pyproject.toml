@@ -1,11 +1,12 @@
 [project]
 name = "docxray"
-version = "0.0.0.alpha13"
+version = "0.0.0.alpha14"
 description = "ReadOnly python-docx fork lib"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "homoglyphs>=2.0.4",
+    "jp-number>=0.1.1",
     "lxml>=6.1.0",
     "num2words>=0.5.14",
     "officemath2latex>=0.1.1",
