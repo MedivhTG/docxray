@@ -1145,29 +1145,6 @@ class Numeral:
 
     @classmethod
     @lru_cache
-    def _in_private_use_char(cls, char_or_code: int | str) -> bool:
-        """Check if characted or int code in PUA (private use area, e.g. reserved area for characters).
-
-        Args:
-            char_or_code (int | str): Character strin or int (Unicode) code.
-
-        Returns:
-            bool: If `char_or_code` in PUA.
-        """
-        if isinstance(char_or_code, str):
-            code = ord(char_or_code)
-        else:
-            code = char_or_code
-        if 0xE000 <= code <= 0xF8FF:
-            return True
-        if 0xF0000 <= code <= 0xFFFFD:
-            return True
-        if 0x100000 <= code <= 0x10FFFD:
-            return True
-        return False
-
-    @classmethod
-    @lru_cache
     def _alphabet(
         cls, locale: str = "en-US", case: Literal["lower", "upper"] = "upper"
     ) -> list[str]:
