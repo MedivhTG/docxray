@@ -131,8 +131,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         if proxy.list_item.level.numbering_format == "bullet":
             span_elm = Element("span")
             font = proxy.list_item.level.font
-            # TODO: crutch
-            font_family = "Symbol" if font is None else font.font_name
+            font_family = "Symbol" if font is None else font.guess_font(txt[0])
             span_elm.set("style", f"font-family: {font_family};")
         else:
             span_elm = None

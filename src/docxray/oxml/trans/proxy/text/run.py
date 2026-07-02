@@ -139,6 +139,14 @@ class Run(StoryChild[CT_R]):
         return self.h2d.language
 
     @cached_property
+    def is_complex_script(self) -> bool:
+        return self.h2d.is_complex_script
+
+    @cached_property
+    def right_to_left(self) -> bool:
+        return self.h2d.right_to_left
+
+    @cached_property
     def raw_text(self) -> str:
         txt = ""
         for item in self.iter_inner_content():

@@ -151,6 +151,14 @@ class Level(ElementProxy[CT_Lvl]):
             return None
         return Language(lang_elm, self)
 
+    @cached_property
+    def is_complex_script(self) -> bool:
+        return on_off(self._prop(PropertyPath.base("val", "rPr.cs"), True))
+
+    @cached_property
+    def right_to_left(self) -> bool:
+        return on_off(self._prop(PropertyPath.base("val", "rPr.rtl"), True))
+
     def _prop(self, path: PropertyPath, optional: bool = False) -> Any:
         return safe_get_prop(self.element, path, optional)
 

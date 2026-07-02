@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from enum import StrEnum
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
@@ -55,23 +55,10 @@ _ALPHA_P_FORMS_EAST_ASIA_EXC = u_set(0xFB00, 0xFB1C)
 _ALPHA_P_FORMS_ASCII_EXC = u_set(0xFB1D, 0xFB4F)
 
 
-# TODO: implement ECMA-376 full logic here
-# TODO: look for fonts inside of Theme
 class Font(ElementProxy[CT_Fonts]):
     @cached_property
     def parent(self) -> "Level | Run":
         return cast("Level | Run", self._parent)
-
-    @cached_property
-    def slot(self) -> FontSlot:
-        return FontSlot.ASCII
-
-    @cached_property
-    def font_name(self) -> str:
-        slot = self.slot
-        if slot == FontSlot.ASCII:
-            return self.element.ascii or "Symbol"
-        return "Symbol"
 
     @cached_property
     def _lang(self) -> Language | None:
@@ -103,16 +90,50 @@ class Font(ElementProxy[CT_Fonts]):
     def _cs(self) -> str | None:
         return self._prop_resolved("cs")
 
-    def guess_slot(self, char: str) -> FontSlot:
+    # TODO: look for fonts inside of Theme (if present)
+    @lru_cache
+    def guess_font(self, char: str) -> str | None:
+        """Guess single character font - which font slot must be used.
+
+        If `None` returned then the text shall be displayed
+        in any default font which supports these characters.
+
+        Args:
+            char (str): Character string
+
+        Returns:
+            str | None: Font-family or `None`.
+        """
+        slot = self._guess_slot(char)
+        if slot == "ascii":
+            return self._ascii
+        if slot == "hAnsi":
+            return self._hAnsi
+        if slot == "eastAsia":
+            return self._eastAsia
+        return self._cs
+
+    def _guess_slot(self, char: str) -> FontSlot:
         unicode = ord(char)
         for u_set, classificator in CLASS_TABLE:
             if unicode in u_set:
                 if isinstance(classificator, FontSlot):
-                    return classificator
-                return classificator(self, char)
+                    font_slot = classificator
+                else:
+                    font_slot = classificator(self, unicode)
+                if font_slot == "eastAsia" and self._hint == "eastAsia":
+                    return FontSlot.EAST_ASIA
+                elif (
+                    self.parent.is_complex_script or self.parent.right_to_left
+                ):
+                    return FontSlot.COMPLEX_SCRIPT
+                else:
+                    return font_slot
         raise ValueError(f"No font slot for given char `{char}`")
 
     def _prop_resolved(self, name: str) -> Any:
+        from docxray.oxml.trans.proxy.text.run import Run
+
         if isinstance(self.parent, Run):
             prop = self.parent.h2d._display_val(name, False)
             if isinstance(prop, NotFound):
@@ -160,14 +181,9 @@ class Font(ElementProxy[CT_Fonts]):
         return FontSlot.HIGH_ANSI
 
 
-combined_set = (
-    u_set(0x02B0, 0x02FF)
-    | u_set(0x0300, 0x036F)
-    | u_set(0x0370, 0x03CF)
-    | u_set(0x0400, 0x04FF)
-)
-
-CLASS_TABLE: list[tuple[set[int], FontSlot | Callable]] = [
+CLASS_TABLE: list[
+    tuple[set[int], FontSlot | Callable[[Font, int], FontSlot]]
+] = [
     # Basic Latin, Hebrew, Arabic, Syriac, Arabic Supplement, Thaana,
     # Arabic Presentation Forms-A, Arabic Presentation Forms-B
     (

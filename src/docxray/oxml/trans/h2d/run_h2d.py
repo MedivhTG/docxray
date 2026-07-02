@@ -87,6 +87,14 @@ class RunH2D(How2Display[Run]):
         return Language(lang_elm, self._proxy)
 
     @cached_property
+    def is_complex_script(self) -> bool:
+        return on_off(self._display_val("cs"))
+
+    @cached_property
+    def right_to_left(self) -> bool:
+        return on_off(self._display_val("rtl"))
+
+    @cached_property
     def cell(self) -> Cell | None:
         return self._proxy.paragraph.h2d.cell
 
