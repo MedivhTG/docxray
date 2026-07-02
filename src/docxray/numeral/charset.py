@@ -475,6 +475,19 @@ RUSSIAN_UPPER = [
     chr(0x042E),
     chr(0x042F),
 ]
+TAIWANESE_COUNTING = [
+    chr(0x25CB),
+    chr(0x4E00),
+    chr(0x4E8C),
+    chr(0x4E09),
+    chr(0x56DB),
+    chr(0x4E94),
+    chr(0x516D),
+    chr(0x4E03),
+    chr(0x516B),
+    chr(0x4E5D),
+    chr(0x5341),
+]
 HEBREW_2 = [
     *charset(0x05D0, 0x05D9),
     chr(0x05DB),
@@ -617,6 +630,7 @@ class CharsetName(StrEnum):
     KOREAN_DIGITAL_2 = "koreanDigital2"
     RUSSIAN_LOWER = "russianLower"
     RUSSIAN_UPPER = "russianUpper"
+    TAIWANESE_COUNTING = "taiwaneseCounting"
     HEBREW_2 = "hebrew2"
     ARABIC_ALPHA = "arabicAlpha"
     ARABIC_ABJAD = "arabicAbjad"
@@ -659,6 +673,7 @@ NAME_TO_CHARSET = {
     CharsetName.KOREAN_DIGITAL_2: KOREAN_DIGITAL_2,
     CharsetName.RUSSIAN_LOWER: RUSSIAN_LOWER,
     CharsetName.RUSSIAN_UPPER: RUSSIAN_UPPER,
+    CharsetName.TAIWANESE_COUNTING: TAIWANESE_COUNTING,
     CharsetName.HEBREW_2: HEBREW_2,
     CharsetName.ARABIC_ALPHA: ARABIC_ALPHA,
     CharsetName.ARABIC_ABJAD: ARABIC_ABJAD,

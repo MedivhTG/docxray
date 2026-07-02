@@ -423,7 +423,8 @@ class ListItem:
         if format == SE_NUMBER_FORMAT.BULLET:
             return level.pattern
         if format == SE_NUMBER_FORMAT.CUSTOM:
-            return Numeral.custom(ord, level.numbering_custom_pattern)
+            # TODO: need hard XSLT-implementation
+            return level.pattern
         if level.all_decimal:
             return Numeral.decimal(ord)
         if format in NUMERAL_WITH_LOCALE:
