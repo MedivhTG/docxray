@@ -132,6 +132,7 @@ class Font(ElementProxy[CT_Fonts]):
         raise ValueError(f"No font slot for given char `{char}`")
 
     def _prop_resolved(self, name: str) -> Any:
+        # docxray stuff
         from docxray.oxml.trans.proxy.text.run import Run
 
         if isinstance(self.parent, Run):

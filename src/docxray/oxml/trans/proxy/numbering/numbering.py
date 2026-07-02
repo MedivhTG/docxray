@@ -73,9 +73,7 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def locale(self) -> str | None:
-        locale = safe_get_prop(
-            self._element, PropertyPath.base("val", "rPr.lang"), False
-        )
+        locale = self._prop(PropertyPath.base("val", "rPr.lang"))
         if isinstance(locale, NotFound):
             return None
         return locale

@@ -427,7 +427,10 @@ class ListItem:
         if level.all_decimal:
             return Numeral.decimal(ord)
         if format in NUMERAL_WITH_LOCALE:
-            locale = for_leveled.locale or "en-US"
+            locale = for_leveled.locale
+            if locale is None and self._h2d._styles.document_defaults:
+                locale = self._h2d._styles.document_defaults.locale
+            locale = locale or "en-US"
             return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[format](ord)  # type: ignore[operator]
 
