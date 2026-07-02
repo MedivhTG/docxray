@@ -51,6 +51,8 @@ _LATN_SUP_1_EAST_ASIA_ZH_EXC = (
     | u_set(0x00F9, 0x00FA)
     | {0x00FC}
 )
+_ALPHA_P_FORMS_EAST_ASIA_EXC = u_set(0xFB00, 0xFB1C)
+_ALPHA_P_FORMS_ASCII_EXC = u_set(0xFB1D, 0xFB4F)
 
 
 # TODO: implement ECMA-376 full logic here
@@ -128,7 +130,7 @@ class Font(ElementProxy[CT_Fonts]):
                 return FontSlot.EAST_ASIA
         return FontSlot.HIGH_ANSI
 
-    def _high_ansi_or_east_asia_zh(self, unicode: int) -> FontSlot:
+    def _high_ansi_or_east_asia_zh_chinese(self, unicode: int) -> FontSlot:
         if self._hint == "eastAsia":
             ch = chr(unicode)
             if (
@@ -144,6 +146,19 @@ class Font(ElementProxy[CT_Fonts]):
             return FontSlot.EAST_ASIA
         return FontSlot.HIGH_ANSI
 
+    def _high_ansi_or_east_asia_zh(self, unicode: int) -> FontSlot:
+        if self._hint == "eastAsia" and self._east_asia_lang == "zh":
+            return FontSlot.EAST_ASIA
+        return FontSlot.HIGH_ANSI
+
+    def _alphabetic_presentation_forms(self, unicode: int) -> FontSlot:
+        if self._hint == "eastAsia":
+            if unicode in _ALPHA_P_FORMS_EAST_ASIA_EXC:
+                return FontSlot.EAST_ASIA
+            if unicode in _ALPHA_P_FORMS_ASCII_EXC:
+                return FontSlot.ASCII
+        return FontSlot.HIGH_ANSI
+
 
 combined_set = (
     u_set(0x02B0, 0x02FF)
@@ -152,7 +167,6 @@ combined_set = (
     | u_set(0x0400, 0x04FF)
 )
 
-# TODO: extend
 CLASS_TABLE: list[tuple[set[int], FontSlot | Callable]] = [
     # Basic Latin
     (u_set(0x0000, 0x007F), FontSlot.ASCII),
@@ -161,14 +175,88 @@ CLASS_TABLE: list[tuple[set[int], FontSlot | Callable]] = [
     # Latin Extended-A, Latin Extended-B, IPA Extensions
     (
         u_set(0x0100, 0x017F) | u_set(0x0180, 0x024F) | u_set(0x0250, 0x02AF),
-        Font._high_ansi_or_east_asia_zh,
+        Font._high_ansi_or_east_asia_zh_chinese,
     ),
     # Spacing Modifier Letters, Combining Diacritical Marks, Greek, Cyrillic
+    # General Punctuation, Superscripts and Subscripts, Currency Symbols,
+    # Combining Diacritical Marks for Symbols, Letter-like Symbols, Number Forms
+    # Arrows, Mathematical Operators, Miscellaneous Technical, Control Pictures,
+    # Optical Character Recognition, Enclosed Alphanumerics, Box Drawing, Block Elements,
+    # Geometric Shapes, Miscellaneous Symbols, Dingbats, Private Use Area
     (
         u_set(0x02B0, 0x02FF)
         | u_set(0x0300, 0x036F)
         | u_set(0x0370, 0x03CF)
-        | u_set(0x0400, 0x04FF),
+        | u_set(0x0400, 0x04FF)
+        | u_set(0x2000, 0x206F)
+        | u_set(0x2070, 0x209F)
+        | u_set(0x20A0, 0x20CF)
+        | u_set(0x20D0, 0x20FF)
+        | u_set(0x2100, 0x214F)
+        | u_set(0x2150, 0x218F)
+        | u_set(0x2190, 0x21FF)
+        | u_set(0x2200, 0x22FF)
+        | u_set(0x2300, 0x23FF)
+        | u_set(0x2400, 0x243F)
+        | u_set(0x2440, 0x245F)
+        | u_set(0x2460, 0x24FF)
+        | u_set(0x2500, 0x257F)
+        | u_set(0x2580, 0x259F)
+        | u_set(0x25A0, 0x25FF)
+        | u_set(0x2600, 0x26FF)
+        | u_set(0x2700, 0x27BF)
+        | u_set(0xE000, 0xF8FF),
         Font._high_ansi_or_east_asia,
     ),
+    # Hebrew, Arabic, Syriac, Arabic Supplement, Thaana, Arabic Presentation Forms-A,
+    # Arabic Presentation Forms-B
+    (
+        u_set(0x0590, 0x05FF)
+        | u_set(0x0600, 0x06FF)
+        | u_set(0x0700, 0x074F)
+        | u_set(0x0750, 0x077F)
+        | u_set(0x0780, 0x07BF)
+        | u_set(0xFB50, 0xFDFF)
+        | u_set(0xFE70, 0xFEFE),
+        FontSlot.ASCII,
+    ),
+    # Hangul Jamo, CJK Radicals Supplement, Kangxi Radicals, Ideographic Description Characters,
+    # CJK Symbols and Punctuation, Hiragana, Katakana, Bopomofo, Hangul Compatibility Jamo,
+    # Kanbun, Enclosed CJK Letters and Months, CJK Compatibility, CJK Unified Ideographs Extension A,
+    # CJK Unified Ideographs, Yi Syllables, Yi Radicals, Hangul Syllables, High Surrogates,
+    # High Private Use Surrogates, Low Surrogates, CJK Compatibility Ideographs,
+    # CJK Compatibility Forms, Small Form Variants, Halfwidth and Fullwidth Forms
+    (
+        u_set(0x1100, 0x11FF)
+        | u_set(0x2E80, 0x2EFF)
+        | u_set(0x2F00, 0x2FDF)
+        | u_set(0x2FF0, 0x2FFF)
+        | u_set(0x3000, 0x303F)
+        | u_set(0x3040, 0x309F)
+        | u_set(0x30A0, 0x30FF)
+        | u_set(0x3100, 0x312F)
+        | u_set(0x3130, 0x318F)
+        | u_set(0x3190, 0x319F)
+        | u_set(0x3200, 0x32FF)
+        | u_set(0x3300, 0x33FF)
+        | u_set(0x3400, 0x4DBF)
+        | u_set(0x4E00, 0x9FAF)
+        | u_set(0xA000, 0xA48F)
+        | u_set(0xA490, 0xA4CF)
+        | u_set(0xAC00, 0xD7AF)
+        | u_set(0xD800, 0xDB7F)
+        | u_set(0xDB80, 0xDBFF)
+        | u_set(0xDC00, 0xDFFF)
+        | u_set(0xF900, 0xFAFF)
+        | u_set(0xFE30, 0xFE4F)
+        | u_set(0xFE50, 0xFE6F)
+        | u_set(0xFF00, 0xFFEF),
+        FontSlot.EAST_ASIA,
+    ),
+    # Latin Extended Additional
+    (u_set(0x1E00, 0x1EFF), Font._high_ansi_or_east_asia_zh),
+    # Greek Extended
+    (u_set(0x1F00, 0x1FFF), FontSlot.HIGH_ANSI),
+    # Alphabetic Presentation Forms
+    (u_set(0xFB00, 0xFB4F), Font._alphabetic_presentation_forms),
 ]
