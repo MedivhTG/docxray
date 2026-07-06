@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
+from docxray.colorize import Colorize
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.trans.h2d.exceptions import DisplayError
@@ -16,8 +17,11 @@ from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.numbering.numbering import Level, Numbering
 from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
+from docxray.oxml.trans.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.trans.st.enums import (
+    SE_HEX_COLOR_AUTO,
     SE_NUMBER_FORMAT,
+    SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
@@ -29,8 +33,6 @@ if TYPE_CHECKING:
     # docxray stuff
     from docxray.transform.ruleset import RuleSet
     from docxray.transform.transformer import TransformMethod
-
-type CharsCase = Literal["up", "down"]
 
 _ILVL_ALLOWED = set(DECIMAL[1:])
 
@@ -337,28 +339,70 @@ class ListItem:
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
-        if self._all_uppercase and self._all_downcase:
+        if self._caps and self._small_caps:
             raise DisplayError(
-                "Mentiond 2 cases (up, down) when they are mutually exclusive"
+                "Mentiond 2 cases (caps, small_caps) when they are mutually exclusive"
             )
-        if self._all_uppercase:
-            return "up"
-        if self._all_downcase:
-            return "down"
+        if self._caps:
+            return "caps"
+        if self._small_caps:
+            return "small_caps"
         return None
 
     @cached_property
-    def underline(self) -> None | SE_UNDERLINE:
+    def underline(self) -> UnderlineInfo | None:
         line = self._display_level_text_run_val("u", True)
         if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
             return None
+        u: UnderlineInfo = {"line": line, "color": "#000000"}
         if line is None:
-            return SE_UNDERLINE.SINGLE
-        return line
+            u["line"] = SE_UNDERLINE.SINGLE
+        base = "rPr"
+        theme_color_path = PropertyPath.base("themeColor", f"{base}.u")
+        theme_color: SE_THEME_COLOR | None | NotFound = (
+            self._display_level_text_run(theme_color_path)
+        )
+        if isinstance(theme_color, NotFound):
+            theme_color = None
+        theme_tint_path = PropertyPath.base("themeTint", f"{base}.u")
+        theme_tint: bytes | NotFound | None = self._display_level_text_run(
+            theme_tint_path
+        )
+        if isinstance(theme_tint, NotFound):
+            theme_tint = None
+
+        theme_shade_path = PropertyPath.base("themeShade", f"{base}.u")
+        theme_shade: bytes | NotFound | None = self._display_level_text_run(
+            theme_shade_path
+        )
+        if isinstance(theme_shade, NotFound):
+            theme_shade = None
+
+        color_path = PropertyPath.base("color", f"{base}.u")
+        color: SE_HEX_COLOR_AUTO | bytes = self._display_level_text_run(
+            color_path
+        )
+        u["color"] = Colorize.colorize(
+            color,
+            theme_color,
+            self.paragraph.part.document_part.theme.palette,
+            theme_tint,
+            theme_shade,
+            prefer_theme=True,
+        )
+        return u
 
     @cached_property
-    def strike(self) -> bool:
-        return self._display_level_text_run_val_on_off("strike")
+    def strike_case(self) -> StrikeCase | None:
+        if self._single_strike and self._double_strike:
+            raise DisplayError(
+                "Mentiond 2 cases (single, double) when they are mutually exclusive"
+            )
+        if self._single_strike:
+            return "single"
+        if self._double_strike:
+            return "double"
+        return None
 
     @cached_property
     def vertical_alignment(self) -> None | SE_VerticalAlignRun:
@@ -371,18 +415,35 @@ class ListItem:
         return align
 
     @cached_property
-    def _all_uppercase(self) -> bool:
+    def _caps(self) -> bool:
         return self._display_level_text_run_val_on_off("caps")
 
     @cached_property
-    def _all_downcase(self) -> bool:
+    def _small_caps(self) -> bool:
         return self._display_level_text_run_val_on_off("smallCaps")
+
+    @cached_property
+    def _single_strike(self) -> bool:
+        return self._display_level_text_run_val_on_off("strike")
+
+    @cached_property
+    def _double_strike(self) -> bool:
+        return self._display_level_text_run_val_on_off("dstrike")
+
+    def _display_level_text_run(
+        self, name_or_path: str | PropertyPath, optional: bool = False
+    ) -> Any:
+        if isinstance(name_or_path, PropertyPath):
+            path = name_or_path
+        else:
+            path = PropertyPath.base(name_or_path, "rPr")
+        return self.paragraph.h2d._prop(path, optional, "style")
 
     def _display_level_text_run_val(
         self, name: str, optional: bool = False
     ) -> Any:
         path = PropertyPath.base("val", f"rPr.{name}")
-        return self.paragraph.h2d._prop(path, optional, "style")
+        return self._display_level_text_run(path, optional)
 
     def _display_level_text_run_val_on_off(self, name: str) -> bool:
         return on_off(self._display_level_text_run_val(name, True))

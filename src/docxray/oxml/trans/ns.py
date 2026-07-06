@@ -301,6 +301,20 @@ class W:
     ID = qn("w:id")
     ORIGINAL = qn("w:original")
 
+    CLR_SCHEME_MAPPING = qn("w:clrSchemeMapping")
+    BG1 = qn("w:bg1")
+    T1 = qn("w:t1")
+    BG2 = qn("w:bg2")
+    T2 = qn("w:t2")
+    ACCENT1 = qn("w:accent1")
+    ACCENT2 = qn("w:accent2")
+    ACCENT3 = qn("w:accent3")
+    ACCENT4 = qn("w:accent4")
+    ACCENT5 = qn("w:accent5")
+    ACCENT6 = qn("w:accent6")
+    HYPERLINK = qn("w:hyperlink")
+    FOLLOWED_HYPERLINK = qn("w:followedHyperlink")
+
 
 class WP:
     ANCHOR = qn("wp:anchor")
@@ -317,6 +331,45 @@ class A:
     GRAPHIC_DATA = qn("a:graphicData")
 
     BLIP = qn("a:blip")
+
+    THEME_ELEMENTS = qn("a:themeElements")
+
+    CLR_SCHEME = qn("a:clrScheme")
+    DK1 = qn("a:dk1")
+    LT1 = qn("a:lt1")
+    DK2 = qn("a:dk2")
+    LT2 = qn("a:lt2")
+    ACCENT1 = qn("a:accent1")
+    ACCENT2 = qn("a:accent2")
+    ACCENT3 = qn("a:accent3")
+    ACCENT4 = qn("a:accent4")
+    ACCENT5 = qn("a:accent5")
+    ACCENT6 = qn("a:accent6")
+    HLINK = qn("a:hlink")
+    FOL_HLINK = qn("a:folHlink")
+
+    SCRGB_CLR = qn("a:scrgbClr")
+    SRGB_CLR = qn("a:srgbClr")
+    HSL_CLR = qn("a:hslClr")
+    SYS_CLR = qn("a:sysClr")
+    SCHEME_CLR = qn("a:schemeClr")
+    PRST_CLR = qn("a:prstClr")
+
+    FONT_SCHEME = qn("a:fontScheme")
+    MAJOR_FONT = qn("a:majorFont")
+    MINOR_FONT = qn("a:minorFont")
+
+    LATIN = qn("a:latin")
+    EA = qn("a:ea")
+    CS = qn("a:cs")
+    FONT = qn("a:font")
+
+    FMT_SCHEME = qn("a:fmtScheme")
+
+    OBJECT_DEFAULTS = qn("a:objectDefaults")
+    EXTRA_CLR_SCHEME_LST = qn("a:extraClrSchemeLst")
+    CUST_CLR_LST = qn("a:custClrLst")
+    EXT_LST = qn("a:extLst")
 
 
 class PIC:
@@ -454,6 +507,7 @@ class NoNS:
     DESCR = "descr"
     HIDDEN = "hidden"
     TITLE = "title"
+    VAL = "val"
 
     CX = "cx"
     CY = "cy"
@@ -464,3 +518,20 @@ class NoNS:
     DIST_R = "distR"
 
     URI = "uri"
+
+    R = "r"
+    G = "g"
+    B = "b"
+
+    HUE = "hue"
+    SAT = "sat"
+    LUM = "lum"
+
+    LAST_CLR = "lastClr"
+
+    TYPEFACE = "typeface"
+    PANOSE = "panose"
+    PITCH_FAMILY = "pitchFamily"
+    CHARSET = "charset"
+
+    SCRIPT = "script"

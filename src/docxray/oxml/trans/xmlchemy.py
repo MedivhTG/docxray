@@ -44,8 +44,13 @@ class OxmlElement(BaseOxmlElement):
 
     @cached_property
     def xml_tag_self(self) -> str:
-        """Self tag name with prefix"""
+        """Self tag name with prefix, e.g. `w:p` for CT_P."""
         return self.xml_tag(self.tag)
+
+    @cached_property
+    def tag_name(self) -> str:
+        """Self tag name, e.g. `p` for CT_P."""
+        return self.xml_tag_self.split(":")[1]
 
     def xml_tag(self, qn_tag: Any) -> str:
         """Get tag name with prefix, e.g. `w:p` for `{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p` (clark-notation).

@@ -546,7 +546,117 @@ register_element_cls("w:lvlPicBulletId", CT_DecimalNumber)
 register_element_cls("w:legacy", CT_LvlLegacy)
 register_element_cls("w:lvlJc", CT_Jc)
 
-from .settings import CT_Settings
+from .settings import CT_ColorSchemeMapping, CT_Settings
 
 register_element_cls("w:settings", CT_Settings)
 register_element_cls("w:themeFontLang", CT_Language)
+register_element_cls("w:clrSchemeMapping", CT_ColorSchemeMapping)
+
+from .theme.shared import CT_OfficeArtExtensionList
+
+register_element_cls("a:extLst", CT_OfficeArtExtensionList)
+
+from .theme.theme import (
+    CT_BaseStyles,
+    CT_ColorSchemeList,
+    CT_CustomColorList,
+    CT_ObjectStyleDefaults,
+    CT_OfficeStyleSheet,
+    CT_StyleMatrix,
+)
+
+register_element_cls("a:theme", CT_OfficeStyleSheet)
+register_element_cls("a:themeElements", CT_BaseStyles)
+register_element_cls("a:fmtScheme", CT_StyleMatrix)
+register_element_cls("a:objectDefaults", CT_ObjectStyleDefaults)
+register_element_cls("a:extraClrSchemeLst", CT_ColorSchemeList)
+register_element_cls("a:custClrLst", CT_CustomColorList)
+
+from .theme.color import (
+    CT_Angle,
+    CT_Color_Theme,
+    CT_ColorScheme,
+    CT_ComplementTransform,
+    CT_FixedPercentage,
+    CT_GammaTransform,
+    CT_GrayscaleTransform,
+    CT_HslColor,
+    CT_InverseGammaTransform,
+    CT_InverseTransform,
+    CT_Percentage,
+    CT_PositiveFixedAngle,
+    CT_PositiveFixedPercentage,
+    CT_PositivePercentage,
+    CT_PresetColor,
+    CT_SchemeColor,
+    CT_ScRgbColor,
+    CT_SRgbColor,
+    CT_SystemColor,
+)
+
+register_element_cls("a:clrScheme", CT_ColorScheme)
+register_element_cls("a:dk1", CT_Color_Theme)
+register_element_cls("a:lt1", CT_Color_Theme)
+register_element_cls("a:dk2", CT_Color_Theme)
+register_element_cls("a:lt2", CT_Color_Theme)
+register_element_cls("a:accent1", CT_Color_Theme)
+register_element_cls("a:accent2", CT_Color_Theme)
+register_element_cls("a:accent3", CT_Color_Theme)
+register_element_cls("a:accent4", CT_Color_Theme)
+register_element_cls("a:accent5", CT_Color_Theme)
+register_element_cls("a:accent6", CT_Color_Theme)
+register_element_cls("a:hlink", CT_Color_Theme)
+register_element_cls("a:folHlink", CT_Color_Theme)
+
+register_element_cls("a:scrgbClr", CT_ScRgbColor)
+register_element_cls("a:srgbClr", CT_SRgbColor)
+register_element_cls("a:hslClr", CT_HslColor)
+register_element_cls("a:sysClr", CT_SystemColor)
+register_element_cls("a:schemeClr", CT_SchemeColor)
+register_element_cls("a:prstClr", CT_PresetColor)
+
+
+register_element_cls("a:tint", CT_PositiveFixedPercentage)
+register_element_cls("a:shade", CT_PositiveFixedPercentage)
+register_element_cls("a:comp", CT_ComplementTransform)
+register_element_cls("a:inv", CT_InverseTransform)
+register_element_cls("a:gray", CT_GrayscaleTransform)
+register_element_cls("a:alpha", CT_PositiveFixedPercentage)
+register_element_cls("a:alphaOff", CT_FixedPercentage)
+register_element_cls("a:alphaMod", CT_PositivePercentage)
+register_element_cls("a:hue", CT_PositiveFixedAngle)
+register_element_cls("a:hueOff", CT_Angle)
+register_element_cls("a:hueMod", CT_PositivePercentage)
+register_element_cls("a:sat", CT_Percentage)
+register_element_cls("a:satOff", CT_Percentage)
+register_element_cls("a:satMod", CT_Percentage)
+register_element_cls("a:lum", CT_Percentage)
+register_element_cls("a:lumOff", CT_Percentage)
+register_element_cls("a:lumMod", CT_Percentage)
+register_element_cls("a:red", CT_Percentage)
+register_element_cls("a:redOff", CT_Percentage)
+register_element_cls("a:redMod", CT_Percentage)
+register_element_cls("a:green", CT_Percentage)
+register_element_cls("a:greenOff", CT_Percentage)
+register_element_cls("a:greenMod", CT_Percentage)
+register_element_cls("a:blue", CT_Percentage)
+register_element_cls("a:blueOff", CT_Percentage)
+register_element_cls("a:blueMod", CT_Percentage)
+register_element_cls("a:gamma", CT_GammaTransform)
+register_element_cls("a:invGamma", CT_InverseGammaTransform)
+
+from .theme.font import (
+    CT_FontCollection,
+    CT_FontScheme,
+    CT_SupplementalFont,
+    CT_TextFont,
+)
+
+register_element_cls("a:fontScheme", CT_FontScheme)
+register_element_cls("a:majorFont", CT_FontCollection)
+register_element_cls("a:minorFont", CT_FontCollection)
+
+register_element_cls("a:latin", CT_TextFont)
+register_element_cls("a:ea", CT_TextFont)
+register_element_cls("a:cs", CT_TextFont)
+register_element_cls("a:font", CT_SupplementalFont)

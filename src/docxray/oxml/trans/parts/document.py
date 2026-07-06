@@ -11,10 +11,12 @@ from docxray.oxml.trans.parts.numbering import NumberingPart
 from docxray.oxml.trans.parts.settings import SettingsPart
 from docxray.oxml.trans.parts.story import StoryPart
 from docxray.oxml.trans.parts.styles import StylesPart
+from docxray.oxml.trans.parts.theme import ThemePart
 from docxray.oxml.trans.proxy.document import Document
 from docxray.oxml.trans.proxy.numbering.numbering import Numbering
 from docxray.oxml.trans.proxy.settings import Settings
 from docxray.oxml.trans.proxy.styles.styles import Styles
+from docxray.oxml.trans.proxy.theme import Theme
 from docxray.transform.ruleset import RuleSet
 
 
@@ -60,6 +62,14 @@ class DocumentPart(StoryPart[CT_Document]):
     def settings(self) -> Settings:
         """A |Settings| object providing access to the settings in the settings part of this document."""
         return self.settings_part.settings
+
+    @cached_property
+    def theme_part(self) -> ThemePart:
+        return self.part_related_by(RT.THEME, ThemePart)
+
+    @cached_property
+    def theme(self) -> Theme:
+        return self.theme_part.theme
 
     @cached_property
     def _default_html_ruleset(self) -> RuleSet:

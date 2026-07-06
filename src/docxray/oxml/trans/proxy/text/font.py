@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import unicodedata
 from collections.abc import Callable
 from enum import StrEnum
 from functools import cached_property, lru_cache
 from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
+from docxray.oxml.trans.package import TransitionalPackage
 from docxray.oxml.trans.proxy.shared import ElementProxy, NotFound
 from docxray.oxml.trans.proxy.text.language import Language
+from docxray.oxml.trans.proxy.theme import FontFamily
 from docxray.oxml.trans.shared import CT_Fonts
-from docxray.oxml.trans.st.enums import SE_HINT
+from docxray.oxml.trans.st.enums import SE_HINT, SE_THEME
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -79,39 +82,68 @@ class Font(ElementProxy[CT_Fonts]):
         return self._prop_resolved("ascii")
 
     @cached_property
+    def _asciiTheme(self) -> FontFamily | None:
+        return self._theme_font("asciiTheme")
+
+    @cached_property
     def _hAnsi(self) -> str | None:
         return self._prop_resolved("hAnsi")
+
+    @cached_property
+    def _hAnsiTheme(self) -> FontFamily | None:
+        return self._theme_font("hAnsiTheme")
 
     @cached_property
     def _eastAsia(self) -> str | None:
         return self._prop_resolved("eastAsia")
 
     @cached_property
+    def _eastAsiaTheme(self) -> FontFamily | None:
+        return self._theme_font("eastAsiaTheme")
+
+    @cached_property
     def _cs(self) -> str | None:
         return self._prop_resolved("cs")
 
-    # TODO: look for fonts inside of Theme (if present)
+    @cached_property
+    def _cstheme(self) -> FontFamily | None:
+        return self._theme_font("cstheme")
+
     @lru_cache
-    def guess_font(self, char: str) -> str | None:
+    def guess_font(
+        self, char: str, glyph: bool = False, default: str = "Arial"
+    ) -> str:
         """Guess single character font - which font slot must be used.
 
-        If `None` returned then the text shall be displayed
-        in any default font which supports these characters.
+
+        When `glyph` is on then there is additional check for char.
+        If not in glyph charset, then fallback to `Times New Roman`.
 
         Args:
-            char (str): Character string
+            char (str): Character string.
+            glyph (bool): On glyph mark check. Defaults to False.
+            default (str): Default font if can't guess current. Defaults to Arial.
 
         Returns:
-            str | None: Font-family or `None`.
+            str: Font-family string.
         """
         slot = self._guess_slot(char)
         if slot == "ascii":
-            return self._ascii
-        if slot == "hAnsi":
-            return self._hAnsi
-        if slot == "eastAsia":
-            return self._eastAsia
-        return self._cs
+            font_family = self._asciiTheme or self._ascii
+        elif slot == "hAnsi":
+            font_family = self._hAnsiTheme or self._hAnsi
+        elif slot == "eastAsia":
+            font_family = self._eastAsiaTheme or self._eastAsia
+        else:
+            font_family = self._cstheme or self._cs
+        if isinstance(font_family, FontFamily):
+            font: str | None = font_family.typeface
+        else:
+            font = font_family
+        if glyph and not self._is_glyph(char):
+            # Fallback for bullet markers
+            return "Times New Roman"
+        return font or default
 
     def _guess_slot(self, char: str) -> FontSlot:
         unicode = ord(char)
@@ -130,6 +162,50 @@ class Font(ElementProxy[CT_Fonts]):
                 else:
                     return font_slot
         raise ValueError(f"No font slot for given char `{char}`")
+
+    @lru_cache
+    def _is_glyph(self, char: str) -> bool:
+        code = ord(char)
+        category = unicodedata.category(char)
+        if category in {"So", "Sm", "Sc", "Sk", "Co"}:
+            return True
+        if category in {"Po", "Pd", "Pc", "Ps", "Pe", "Pi", "Pf"}:
+            return True
+        if 0x0370 <= code <= 0x03FF:
+            return True
+        if 0x0100 <= code <= 0x024F:
+            return True
+        if 0x02B0 <= code <= 0x02FF:
+            return True
+        if 0x2100 <= code <= 0x214F:
+            return True
+        if 0x2200 <= code <= 0x22FF:
+            return True
+        if 0x25A0 <= code <= 0x25FF:
+            return True
+        if 0xE000 <= code <= 0xF8FF:
+            return True
+        return False
+
+    # TODO: idk how to implement it right (look deep in spec for supplemental fonts)
+    def _theme_font(self, name: str) -> FontFamily | None:
+        theme: SE_THEME | None = self._prop_resolved(name)
+        if theme is None:
+            return None
+        pkg = cast("TransitionalPackage", self.part.package)
+        theme_proxy = pkg.main_document_part.theme
+        if theme in (SE_THEME.MAJOR_ASCII, SE_THEME.MAJOR_H_ANSI):
+            return theme_proxy.major_latin
+        elif theme == SE_THEME.MAJOR_EAST_ASIA:
+            return theme_proxy.major_east_asia
+        elif theme == SE_THEME.MAJOR_BIDI:
+            return theme_proxy.major_complex_script
+        elif theme in (SE_THEME.MINOR_ASCII, SE_THEME.MINOR_H_ANSI):
+            return theme_proxy.minor_latin
+        elif theme == SE_THEME.MINOR_EAST_ASIA:
+            return theme_proxy.minor_east_asia
+        else:
+            return theme_proxy.minor_complex_script
 
     def _prop_resolved(self, name: str) -> Any:
         # docxray stuff

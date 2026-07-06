@@ -9,6 +9,7 @@ from docxray.oxml.trans.parts.image import ImagePart
 from docxray.oxml.trans.parts.numbering import NumberingPart
 from docxray.oxml.trans.parts.settings import SettingsPart
 from docxray.oxml.trans.parts.styles import StylesPart
+from docxray.oxml.trans.parts.theme import ThemePart
 
 
 class TransitionalPartFactory(PartFactory):
@@ -35,6 +36,7 @@ TransitionalPartFactory.part_type_for[CT.WML_DOCUMENT_MAIN] = DocumentPart
 TransitionalPartFactory.part_type_for[CT.WML_NUMBERING] = NumberingPart
 TransitionalPartFactory.part_type_for[CT.WML_STYLES] = StylesPart
 TransitionalPartFactory.part_type_for[CT.WML_SETTINGS] = SettingsPart
+TransitionalPartFactory.part_type_for[CT.OFC_THEME] = ThemePart
 
 del (
     CT,

@@ -123,6 +123,82 @@ class XsdBoolean(XsdPrimitive):
         )
 
 
+class ByteFacets(TypedDict, total=False):
+    min_inclusive: MinInclusiveFacet
+    max_inclusive: MaxInclusiveFacet
+    enum: EnumerationFacet
+
+
+class XsdByte(XsdPrimitive):
+    MIN_INT8 = -128
+    MAX_INT8 = 127
+
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Unpack[ByteFacets]) -> int:
+        enum = facets.pop("enum", EnumerationFacet())
+        if enum._members:
+            members = enum._members
+            if xml_obj not in members:
+                cls.xsd_err(xml_obj, f"expected members `{members}`")
+
+        min = cls.MIN_INT8
+        max = cls.MAX_INT8
+        min_facet = facets.pop("min_inclusive", MinInclusiveFacet())
+        if min_facet.value is not None:
+            min = min_facet.value
+        max_facet = facets.pop("max_inclusive", MaxInclusiveFacet())
+        if max_facet.value is not None:
+            max = max_facet.value
+
+        try:
+            num = int(xml_obj)
+            if min > num > max:
+                cls.xsd_err(
+                    num,
+                    f"Number must be between {min} and {max}",
+                )
+            return num
+        except ValueError as e:
+            cls.xsd_err(
+                xml_obj, f"internal error while converting str to int [{e}]"
+            )
+
+
+class IntFacets(TypedDict, total=False):
+    min_inclusive: MinInclusiveFacet
+    max_inclusive: MaxInclusiveFacet
+
+
+class XsdInt(XsdPrimitive):
+    MIN_INT32 = -2147483648
+    MAX_INT32 = 2147483647
+
+    @classmethod
+    def validate(cls, xml_obj: str, **facets: Unpack[IntFacets]) -> int:
+        min = cls.MIN_INT32
+        max = cls.MAX_INT32
+
+        min_facet = facets.pop("min_inclusive", MinInclusiveFacet())
+        if min_facet.value is not None:
+            min = min_facet.value
+        max_facet = facets.pop("max_inclusive", MaxInclusiveFacet())
+        if max_facet.value is not None:
+            max = max_facet.value
+
+        try:
+            num = int(xml_obj)
+            if min > num > max:
+                cls.xsd_err(
+                    num,
+                    f"Number must be between {min} and {max}",
+                )
+            return num
+        except ValueError as e:
+            cls.xsd_err(
+                xml_obj, f"internal error while converting str to int [{e}]"
+            )
+
+
 class XsdUnsignedInt(XsdPrimitive):
     MIN_UINT32 = 0
     MAX_UINT32 = 4294967295
@@ -195,11 +271,25 @@ class XsdLong(XsdPrimitive):
             )
 
 
+class TokenFacets(TypedDict, total=False):
+    enum: EnumerationFacet
+
+
 class XsdToken(XsdPrimitive):
     WHITESPACE_RE = r"\s+"
 
     @classmethod
-    def validate(cls, xml_obj: str, **facets: Any) -> str:
+    def validate(
+        cls, xml_obj: str, **facets: Unpack[TokenFacets]
+    ) -> str | StrEnum:
         if xml_obj != re.sub(cls.WHITESPACE_RE, " ", xml_obj.strip()):
             cls.xsd_err(xml_obj, "Extra spaces not allowed")
+        enum = facets.pop("enum", EnumerationFacet())
+        if enum._members:
+            members = enum._members
+            if xml_obj not in members:
+                cls.xsd_err(xml_obj, f"expected members `{members}`")
+        enum_cls = enum.enum_cls
+        if enum_cls:
+            return enum_cls(xml_obj)
         return xml_obj

@@ -24,7 +24,7 @@ from docxray import Document
 doc = Document("path/to/your/document.docx")
 
 # Iterate through all inner content
-for element in doc.iter_inner_content():
+for item in doc.iter_inner_content():
     # Process paragraphs, tables, runs, etc.
     pass
 ```
@@ -37,9 +37,17 @@ for element in doc.iter_inner_content():
 pip install docxray
 ```
 
-*Optional dependencies:*
-- `Pillow` – for standard image formats
-- `Wand` – for extended formats (including WMF/EMF)
+### Additional Dependencies
+
+**ImageMagick** is required for full image processing support when using the **Wand** library. Without ImageMagick, Docxray will fall back to using **Pillow** for image handling.
+
+- **For Wand (recommended for advanced formats like WMF/EMF):**
+  - **macOS:** `brew install imagemagick`
+  - **Ubuntu/Debian:** `sudo apt-get install imagemagick libmagickwand-dev`
+  - **Windows:** Download and install from [ImageMagick official site](https://imagemagick.org/script/download.php) (ensure the development headers are included)
+
+
+> **Note:** If both Wand and ImageMagick are available, Docxray will use them for superior format support. If ImageMagick is missing, the library automatically falls back to Pillow for basic image operations.
 
 ---
 
@@ -57,11 +65,11 @@ Docxray is designed for **read‑only** document analysis. It provides:
 ## 🧪 Example: Inspecting Run Properties
 
 ```python
-for paragraph in doc.paragraphs:
-    for run in paragraph.runs:
-        # Resolves inherited italic/bold/etc. from styles
-        if run.italic:
-            print(f"Italic text: {run.raw_text}")
+for item in doc.iter_inner_content():
+    if isinstance(item, Paragraph):
+        for p_item in item.iter_inner_content():
+            if isinstance(p_item, Run) and p_item.italic:
+                print(f"Italic text: {p_item.raw_text}")
 ```
 
 ---

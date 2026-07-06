@@ -5,6 +5,7 @@ from typing import cast
 from docxray.oxml.trans.shared import CT_OnOff, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_OnOff1, SE_TblWidth
 from docxray.oxml.trans.st.shared_common import (
+    ST_Percentage,
     ST_PositiveUniversalMeasure,
     ST_UniversalMeasure,
 )
@@ -17,6 +18,18 @@ PCT_TO_PERCENT_RATIO = 50
 
 def normalize_pct(pct: float) -> float:
     return pct / PCT_TO_PERCENT_RATIO
+
+
+def percentage(pct: int | str) -> float | None:
+    if isinstance(pct, int):
+        return float(pct)
+    pattern = cast(PatternFacet, ST_Percentage.FACETS["pattern"]).value
+    if pattern is None:
+        return None
+    re_match = re.search(pattern, pct)
+    if re_match:
+        return float(re_match.group(1))
+    return None
 
 
 def width(
@@ -35,19 +48,24 @@ def width(
     Returns:
         Length | float | None: Length in number, percents or auto (`None`).
     """
-    if (
-        width_elm.type in (SE_TblWidth.NULL, SE_TblWidth.AUTO, None)
-        or width_elm.w is None
-    ):
+    w = width_elm.w
+    t = width_elm.type
+    if t in (SE_TblWidth.NULL, SE_TblWidth.AUTO, None) or w is None:
         return None
-    if isinstance(width_elm.w, str):
-        return universal_measure(width_elm.w)
-    width_float = float(width_elm.w)
-    if width_elm.type == SE_TblWidth.TWIPS:
-        return Twips(width_float)
-    if ignore_pct:
-        return None
-    return normalize_pct(width_float)
+    if isinstance(w, int):
+        w_float = float(w)
+        if t == SE_TblWidth.TWIPS:
+            return Twips(w_float)
+        if ignore_pct:
+            return None
+        return normalize_pct(w_float)
+    pct = percentage(w)
+    if pct is not None:
+        if ignore_pct:
+            return None
+        return pct
+    else:
+        return universal_measure(w)
 
 
 def on_off(

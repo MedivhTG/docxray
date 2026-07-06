@@ -75,3 +75,27 @@ class ST_YAlign(XsdSimpleType):
 class ST_XAlign(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(SE_X_ALIGN)}
+
+
+class ST_PositiveFixedPercentage(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_Percentage)
+    FACETS = {
+        "pattern": PatternFacet(r"((100)|([0-9][0-9]?))(\.[0-9][0-9]?)?%")
+    }
+
+
+class ST_FixedPercentage(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_Percentage)
+    FACETS = {
+        "pattern": PatternFacet(r"-?((100)|([0-9][0-9]?))(\.[0-9][0-9]?)?%")
+    }
+
+
+class ST_PositivePercentage(XsdSimpleType):
+    SCHEMA = XsdRestriction(ST_Percentage)
+    FACETS = {"pattern": PatternFacet(r"[0-9]+(\.[0-9]+)?%")}
+
+
+class ST_Panose(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdHexBinary)
+    FACETS = {"length": LengthFacet(value=10)}

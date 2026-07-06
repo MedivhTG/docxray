@@ -188,7 +188,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf57
 
 [[package]]
 name = "docxray"
-version = "0.0.0a15"
+version = "0.0.0a16"
 source = { virtual = "." }
 dependencies = [
     { name = "homoglyphs" },
@@ -200,6 +200,7 @@ dependencies = [
     { name = "python-dateutil" },
     { name = "unicode-rbnf" },
     { name = "wand" },
+    { name = "webcolors" },
 ]
 
 [package.dev-dependencies]
@@ -227,6 +228,7 @@ requires-dist = [
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "unicode-rbnf", specifier = ">=2.4.0" },
     { name = "wand", specifier = ">=0.7.1" },
+    { name = "webcolors", specifier = ">=25.10.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -747,4 +749,13 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/aa/67/7080334ae89d82bdc2eb9b10c207b509a84e209dadf6ebaa827f9c74e4ce/wand-0.7.1.tar.gz", hash = "sha256:2325eae60fb21b88e293d5ec8dcdedf2644a0c00eb75024c9b47975e1e902e80", size = 11889653, upload-time = "2026-05-20T14:57:37.45Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/66/60/ca84d0e7937d0fa62e338e2ea3b69e99bdb01f337b6e88b561e12cc40dca/wand-0.7.1-py3-none-any.whl", hash = "sha256:2c0d611c76b88c8947ad79b8d1ab994388ae6c8b795e54c0e46af431c84b81e4", size = 144976, upload-time = "2026-05-20T14:57:50.475Z" },
+]
+
+[[package]]
+name = "webcolors"
+version = "25.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/7a/eb316761ec35664ea5174709a68bbd3389de60d4a1ebab8808bfc264ed67/webcolors-25.10.0.tar.gz", hash = "sha256:62abae86504f66d0f6364c2a8520de4a0c47b80c03fc3a5f1815fedbef7c19bf", size = 53491, upload-time = "2025-10-31T07:51:03.977Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/cc/e097523dd85c9cf5d354f78310927f1656c422bd7b2613b2db3e3f9a0f2c/webcolors-25.10.0-py3-none-any.whl", hash = "sha256:032c727334856fc0b968f63daa252a1ac93d33db2f5267756623c210e57a4f1d", size = 14905, upload-time = "2025-10-31T07:51:01.778Z" },
 ]

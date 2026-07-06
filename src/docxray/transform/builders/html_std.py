@@ -17,6 +17,7 @@ from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
 from docxray.oxml.trans.proxy.text.run import Break, Run, Tab, TxtFragment
+from docxray.oxml.trans.proxy.types import StrikeCase, UnderlineInfo
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
@@ -70,15 +71,27 @@ def b_elm(value: bool) -> HtmlElement:
     return Element("b")
 
 
-def strike_elm(value: bool) -> HtmlElement:
-    return Element("s")
+def strike_elm(value: StrikeCase) -> HtmlElement:
+    if value == "single":
+        return Element("s")
+    return Element(
+        "span",
+        {
+            "style": "text-decoration: line-through; text-decoration-style: double;"
+        },
+    )
 
 
-def underline_elm(value: SE_UNDERLINE) -> HtmlElement:
-    decor = U_DECOR_MAP.get(value)
+def underline_elm(value: UnderlineInfo) -> HtmlElement:
+    decor = U_DECOR_MAP.get(value["line"])
     if decor is None:
         decor = "underline"
-    return Element("span", {"style": f"text-decoration: {decor};"})
+    decor_color = ""
+    if value["color"] != "#000000":
+        decor_color = f" text-decoration-color: {value["color"]};"
+    return Element(
+        "span", {"style": f"text-decoration: {decor};{decor_color}"}
+    )
 
 
 def vert_align_elm(value: SE_VerticalAlignRun) -> HtmlElement:
@@ -166,13 +179,13 @@ def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
         elm_append_child_or_tail(upper_elm, last_child_elm, content)
 
 
-def txt(run: Run, txt_fgmt: TxtFragment) -> str:
+def txt(run: Run, txt_fgmt: TxtFragment) -> str | HtmlElement:
     if run.chars_case is None:
         return txt_fgmt.raw
-    elif run.chars_case == "up":
-        return txt_fgmt.raw.upper()
+    elif run.chars_case == "caps":
+        return Element("span", {"style": "text-transform: uppercase;"})
     else:
-        return txt_fgmt.raw.lower()
+        return Element("span", {"style": "font-variant: small-caps;"})
 
 
 def break_elm(br: Break) -> HtmlElement | None:

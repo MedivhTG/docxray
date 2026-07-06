@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, TypedDict
+
+# docxray stuff
+from docxray.oxml.trans.st.enums import SE_UNDERLINE
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -31,3 +34,12 @@ class ProvidesXmlPart(Protocol):
 
     @property
     def part(self) -> XmlPart: ...
+
+
+class UnderlineInfo(TypedDict):
+    line: SE_UNDERLINE
+    color: str
+
+
+type CharsCase = Literal["caps", "small_caps"]
+type StrikeCase = Literal["single", "double"]

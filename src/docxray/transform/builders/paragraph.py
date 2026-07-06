@@ -79,7 +79,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "vertical_alignment": vert_align_elm,
         "italic": i_elm,
         "bold": b_elm,
-        "strike": strike_elm,
+        "strike_case": strike_elm,
     }
 
     P_CONTENT_FUNC: Callable[
@@ -126,10 +126,6 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return ""
         li = proxy.list_item
         txt = li.level_text
-        if li.chars_case == "up":
-            txt = txt.upper()
-        elif li.chars_case == "down":
-            txt = txt.lower()
         tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
@@ -138,21 +134,29 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             sep = " "
         else:
             sep = ""
+        span_style = ""
         if proxy.list_item.level.numbering_format == "bullet":
-            span_elm = Element("span")
             font = proxy.list_item.level.font
-            font_family = "Symbol" if font is None else font.guess_font(txt[0])
-            span_elm.set("style", f"font-family: {font_family};")
-        else:
-            span_elm = None
+            font_family = (
+                "Symbol"
+                if font is None
+                else font.guess_font(txt[0], True, "Symbol")
+            )
+            span_style = f"font-family: {font_family};"
+        if li.chars_case == "caps":
+            span_style += "text-transform: uppercase;"
+        elif li.chars_case == "small_caps":
+            span_style += "font-variant: small-caps;"
         if tree is None:
-            if span_elm is not None:
+            if span_style:
+                span_elm = Element("span", {"style": span_style})
                 span_elm.text = txt
                 span_elm.tail = sep
                 return span_elm
             return txt + sep
         top, bottom = tree
-        if span_elm is not None:
+        if span_style:
+            span_elm = Element("span", {"style": span_style})
             bottom.append(span_elm)
             bottom = span_elm
         bottom.text = txt

@@ -9,11 +9,11 @@ from docxray.oxml.trans.drawing import CT_Drawing
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.proxy.drawing import Drawing
 from docxray.oxml.trans.proxy.shared import ElementProxy, StoryChild
+from docxray.oxml.trans.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.trans.shared import CT_Empty
 from docxray.oxml.trans.st.enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
-    SE_UNDERLINE,
     SE_VerticalAlignRun,
 )
 from docxray.oxml.trans.text.run import (
@@ -29,7 +29,7 @@ from .language import Language
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.h2d.run_h2d import CharsCase, RunH2D
+    from docxray.oxml.trans.h2d.run_h2d import RunH2D
 
     from .paragraph import Paragraph
 
@@ -119,11 +119,11 @@ class Run(StoryChild[CT_R]):
         return self.h2d.chars_case
 
     @cached_property
-    def strike(self) -> bool:
-        return self.h2d.single_strike_through
+    def strike_case(self) -> StrikeCase | None:
+        return self.h2d.strike_case
 
     @cached_property
-    def underline(self) -> SE_UNDERLINE | None:
+    def underline(self) -> UnderlineInfo | None:
         return self.h2d.underline
 
     @cached_property

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Literal
+from typing import Literal, cast
 
 # docxray stuff
 from docxray.colorize import Colorize
@@ -9,6 +9,7 @@ from docxray.oxml.trans.enums import (
     _SE_BORDER_TO_ECMA_NUMBER,
     _SE_BORDER_TO_LINES_COUNT,
 )
+from docxray.oxml.trans.package import TransitionalPackage
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
 from docxray.oxml.trans.proxy.table import Cell
 from docxray.oxml.trans.shared import CT_Border
@@ -101,9 +102,14 @@ class Border(ElementProxy[CT_Border]):
 
     @cached_property
     def final_color(self) -> str | None:
+        palette = cast(
+            "TransitionalPackage", self.part.package
+        ).main_document_part.theme.palette
+
         return Colorize.colorize(
             self.element.color,
             self.element.themeColor,
+            palette,
             self.element.themeTint,
             self.element.themeShade,
         )

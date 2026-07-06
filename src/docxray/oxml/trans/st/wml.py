@@ -35,6 +35,7 @@ from .enums import (
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_JC,
+    SE_WML_COLOR_SCHEME_INDEX,
     SE_Merge,
     SE_MultilevelType,
     SE_StyleType,
@@ -226,3 +227,8 @@ class ST_JcTable(XsdSimpleType):
 class ST_TblLayoutType(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_TBL_LAYOUT_TYPE)}
+
+
+class ST_WmlColorSchemeIndex(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_WML_COLOR_SCHEME_INDEX)}

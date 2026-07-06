@@ -496,9 +496,16 @@ class ParagraphH2D(How2Display[Paragraph]):
             self._prop_path(para_path.join_left("pPrDefault")), optional
         )
 
+    def _prop_run(self, name_or_path: str, optional: bool = False) -> Any:
+        if isinstance(name_or_path, PropertyPath):
+            path = name_or_path
+        else:
+            path = self._prop_path(name_or_path, "rPr")
+        return self._from_styles_hierarchy(path, optional, for_run=True)
+
     def _prop_val_run(self, name: str, optional: bool = True) -> Any:
         path = self._prop_path("val", f"rPr.{name}")
-        return self._from_styles_hierarchy(path, optional, for_run=True)
+        return self._prop_run(path, optional)
 
     def _from_styles_hierarchy(
         self, path: PropertyPath, optional: bool = False, **kwargs: Any
