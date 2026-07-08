@@ -168,7 +168,7 @@ class Row(ElementProxy[CT_Row]):
 
     @cached_property
     def table_style(self) -> TableStyle | None:
-        return self.table.h2d._table_style
+        return self.table.table_style
 
     @cached_property
     def _latent_tbl_style_props(self) -> list[CT_TblStylePr]:
@@ -251,12 +251,12 @@ class Row(ElementProxy[CT_Row]):
         mask = self._prop("tblPrEx.tblLook.val")
         if not isinstance(mask, NotFound):
             WD_CNF_TABLE_LOOK.from_bytes(mask)
-        return self.table.h2d._cnf_look
+        return self.table._cnf_look
 
     def _table_prop(self, name: str) -> Any:
         prop = self.prop(f"tblPrEx.{name}")
         if isinstance(prop, NotFound):
-            return self.table.h2d._table_prop(name)
+            return self.table._table_prop(name)
         return prop
 
     def _table_border(self, side: _TblBorder) -> Border | None:

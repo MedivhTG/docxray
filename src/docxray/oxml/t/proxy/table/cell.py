@@ -509,7 +509,6 @@ class Cell(BlockItemContainer[CT_Tc]):
     def _spacing(self) -> Length | float | None:
         name = "tblCellSpacing"
         row = self.row
-        tbl_h2d = row.table.h2d
         # Row-level direct
         spacing_elm = row._prop(name)
         if not isinstance(spacing_elm, NotFound):
@@ -528,7 +527,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
-        path = tbl_h2d._prop_path(name, tbl_h2d._path_base)
+        path = self.path(f"tblPr.{name}")
         spacing_elm, _ = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
         )
@@ -546,13 +545,13 @@ class Cell(BlockItemContainer[CT_Tc]):
     def _row_band_number(self) -> int:
         band_shift = 1 if self.row._shift_horz_bands else 0
         y_shift = self.grid_y + 1 + band_shift
-        return y_shift // self.table.h2d._row_band_size
+        return y_shift // self.table._row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
         band_shift = 1 if self.row._shift_vert_bands else 0
         x_shift = self.idx + 1 + band_shift
-        return x_shift // self.table.h2d._col_band_size
+        return x_shift // self.table._col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:
