@@ -15,7 +15,7 @@ from docxray.oxml.t.proxy.styles.style import (
     StyleFactory,
 )
 from docxray.oxml.t.proxy.types import ProvidesXmlPart
-from docxray.oxml.t.st.enums import SE_StyleType
+from docxray.oxml.t.st.enums import SE_STYLE_TYPE
 from docxray.oxml.t.styles import CT_Styles
 
 STYLE_T = TypeVar("STYLE_T", bound=BaseStyle)
@@ -61,7 +61,7 @@ class Styles(ElementProxy[CT_Styles]):
     def get_by_id(
         self,
         style_id: str,
-        style_type: SE_StyleType,
+        style_type: SE_STYLE_TYPE,
         assert_style: type[STYLE_T],
     ) -> STYLE_T:
         """Return the style of `style_type` matching `style_id`."""
@@ -69,7 +69,9 @@ class Styles(ElementProxy[CT_Styles]):
         assert isinstance(style, assert_style)
         return style
 
-    def _get_by_id(self, style_id: str, style_type: SE_StyleType) -> BaseStyle:
+    def _get_by_id(
+        self, style_id: str, style_type: SE_STYLE_TYPE
+    ) -> BaseStyle:
         """Return the style of `style_type` matching `style_id`."""
         style = self._cached_styles.get(style_id)
         if style is not None:

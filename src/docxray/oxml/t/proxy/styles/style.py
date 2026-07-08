@@ -14,7 +14,7 @@ from docxray.oxml.t.proxy.base import (
     PropertyPath,
     safe_get_prop,
 )
-from docxray.oxml.t.st.enums import SE_StyleType, SE_TblStyleOverrideType
+from docxray.oxml.t.st.enums import SE_STYLE_TYPE, SE_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.t.styles import CT_Style, CT_Styles, CT_TblStylePr
 
 if TYPE_CHECKING:
@@ -74,64 +74,70 @@ class ParagraphStyle(CharacterStyle):
 class TableStyle(ParagraphStyle):
     @cached_property
     def wholeTable(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.ENTIRE_TABLE)
+        return self.tbl_style_prop(SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE)
 
     @cached_property
     def firstRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.HEADER_ROW)
+        return self.tbl_style_prop(SE_TBL_STYLE_OVERRIDE_TYPE.HEADER_ROW)
 
     @cached_property
     def lastRow(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.FOOTER_ROW)
+        return self.tbl_style_prop(SE_TBL_STYLE_OVERRIDE_TYPE.FOOTER_ROW)
 
     @cached_property
     def firstCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.FIRST_COLUMN)
+        return self.tbl_style_prop(SE_TBL_STYLE_OVERRIDE_TYPE.FIRST_COLUMN)
 
     @cached_property
     def lastCol(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.LAST_COLUMN)
+        return self.tbl_style_prop(SE_TBL_STYLE_OVERRIDE_TYPE.LAST_COLUMN)
 
     @cached_property
     def band1Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.VERTICAL_BAND_ODD)
+        return self.tbl_style_prop(
+            SE_TBL_STYLE_OVERRIDE_TYPE.VERTICAL_BAND_ODD
+        )
 
     @cached_property
     def band2Vert(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.VERTICAL_BAND_EVEN)
+        return self.tbl_style_prop(
+            SE_TBL_STYLE_OVERRIDE_TYPE.VERTICAL_BAND_EVEN
+        )
 
     @cached_property
     def band1Horz(self) -> CT_TblStylePr | None:
-        return self.tbl_style_prop(SE_TblStyleOverrideType.HORIZONTAL_BAND_ODD)
+        return self.tbl_style_prop(
+            SE_TBL_STYLE_OVERRIDE_TYPE.HORIZONTAL_BAND_ODD
+        )
 
     @cached_property
     def band2Horz(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(
-            SE_TblStyleOverrideType.HORIZONTAL_BAND_EVEN
+            SE_TBL_STYLE_OVERRIDE_TYPE.HORIZONTAL_BAND_EVEN
         )
 
     @cached_property
     def nwCell(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(
-            SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL
+            SE_TBL_STYLE_OVERRIDE_TYPE.TOP_LEFT_CORNER_CELL
         )
 
     @cached_property
     def neCell(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(
-            SE_TblStyleOverrideType.TOP_RIGHT_CORNER_CELL
+            SE_TBL_STYLE_OVERRIDE_TYPE.TOP_RIGHT_CORNER_CELL
         )
 
     @cached_property
     def swCell(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(
-            SE_TblStyleOverrideType.BOTTOM_LEFT_CORNER_CELL
+            SE_TBL_STYLE_OVERRIDE_TYPE.BOTTOM_LEFT_CORNER_CELL
         )
 
     @cached_property
     def seCell(self) -> CT_TblStylePr | None:
         return self.tbl_style_prop(
-            SE_TblStyleOverrideType.BOTTOM_RIGHT_CORNER_CELL
+            SE_TBL_STYLE_OVERRIDE_TYPE.BOTTOM_RIGHT_CORNER_CELL
         )
 
     def bitwise_tbl_style_prop(
@@ -140,7 +146,7 @@ class TableStyle(ParagraphStyle):
         return getattr(self, flag.format_name(), None)
 
     def tbl_style_prop(
-        self, type: SE_TblStyleOverrideType
+        self, type: SE_TBL_STYLE_OVERRIDE_TYPE
     ) -> CT_TblStylePr | None:
         return self.element.tblStylePr_for(type)
 
@@ -178,10 +184,10 @@ class NumberingStyle(BaseStyle):
         return self.numbering.get_num(num_id)
 
 
-S_TYPE_TO_STYLE_CLS: dict[SE_StyleType | None, Any] = {
-    SE_StyleType.PARAGRAPH: ParagraphStyle,
-    SE_StyleType.CHARACTER: CharacterStyle,
-    SE_StyleType.TABLE: TableStyle,
-    SE_StyleType.NUMBERING: NumberingStyle,
+S_TYPE_TO_STYLE_CLS: dict[SE_STYLE_TYPE | None, Any] = {
+    SE_STYLE_TYPE.PARAGRAPH: ParagraphStyle,
+    SE_STYLE_TYPE.CHARACTER: CharacterStyle,
+    SE_STYLE_TYPE.TABLE: TableStyle,
+    SE_STYLE_TYPE.NUMBERING: NumberingStyle,
     None: BaseStyle,
 }

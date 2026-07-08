@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Protocol, TypedDict
-
-# docxray stuff
-from docxray.oxml.t.st.enums import SE_UNDERLINE
+from functools import cached_property
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -20,7 +18,7 @@ class ProvidesStoryPart(Protocol):
     root part.
     """
 
-    @property
+    @cached_property
     def part(self) -> StoryPart: ...
 
 
@@ -32,14 +30,5 @@ class ProvidesXmlPart(Protocol):
     or related parts.
     """
 
-    @property
+    @cached_property
     def part(self) -> XmlPart: ...
-
-
-class UnderlineInfo(TypedDict):
-    line: SE_UNDERLINE
-    color: str
-
-
-type CharsCase = Literal["caps", "small_caps"]
-type StrikeCase = Literal["single", "double"]

@@ -4,7 +4,7 @@ from typing import cast
 # docxray stuff
 from docxray.length import Cm, Inches, Length, Mm, Pica, Pt, Twips
 from docxray.oxml.t.shared import CT_OnOff, CT_TblWidth
-from docxray.oxml.t.st.enums import SE_OnOff1, SE_TblWidth
+from docxray.oxml.t.st.enums import SE_ON_OFF_1, SE_TblWidth
 from docxray.oxml.t.st.shared_common import (
     ST_Percentage,
     ST_PositiveUniversalMeasure,
@@ -70,16 +70,16 @@ def width(
 
 
 def on_off(
-    on_off: NotFound | None | bool | SE_OnOff1 | CT_OnOff,
+    on_off: NotFound | None | bool | SE_ON_OFF_1 | CT_OnOff,
     not_found_is_true: bool = False,
 ) -> bool:
-    def _val(val: None | bool | SE_OnOff1) -> bool:
+    def _val(val: None | bool | SE_ON_OFF_1) -> bool:
         if val is None:
             return True
         if isinstance(val, bool):
             return val
-        if isinstance(val, SE_OnOff1):
-            if val == SE_OnOff1.ON:
+        if isinstance(val, SE_ON_OFF_1):
+            if val == SE_ON_OFF_1.ON:
                 return True
             return False
 

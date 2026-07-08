@@ -24,7 +24,7 @@ from docxray.oxml.t.shared import CT_TblWidth
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
-    SE_TblStyleOverrideType,
+    SE_TBL_STYLE_OVERRIDE_TYPE,
 )
 from docxray.oxml.t.styles import CT_TblStylePr
 from docxray.oxml.t.table.cell_props import CT_TcBorders, CT_TcMar
@@ -54,7 +54,7 @@ TBL_POSITIONING: dict[POS, dict[_TableChild, tuple[_Border, _Border]]] = {
         "cell": ("insideV", "right"),
     },
 }
-_G = SE_TblStyleOverrideType
+_G = SE_TBL_STYLE_OVERRIDE_TYPE
 HORZ_GROUP = {
     _G.HEADER_ROW,
     _G.FOOTER_ROW,
@@ -102,7 +102,7 @@ class CellOnBorderGrid:
         self,
         cell: Cell,
         tcBorders_elm: CT_TcBorders,
-        grid_group: SE_TblStyleOverrideType,
+        grid_group: SE_TBL_STYLE_OVERRIDE_TYPE,
     ) -> None:
         self._cell = cell
         self._tcBorders_elm = tcBorders_elm
@@ -135,7 +135,7 @@ class CellOnBorderGrid:
             # Fallback
             if (
                 top is None
-                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
             ):
                 top_elm = getattr(self._tcBorders_elm, "top", None)
                 if top_elm is not None:
@@ -151,7 +151,7 @@ class CellOnBorderGrid:
             # Fallback
             if (
                 bottom is None
-                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
             ):
                 bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
                 if bottom_elm is not None:
@@ -170,7 +170,7 @@ class CellOnBorderGrid:
             # Fallback
             if (
                 left is None
-                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
             ):
                 left_elm = getattr(self._tcBorders_elm, "left", None)
                 if left_elm is not None:
@@ -185,7 +185,7 @@ class CellOnBorderGrid:
             # Fallback
             if (
                 right is None
-                and self._group == SE_TblStyleOverrideType.ENTIRE_TABLE
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
             ):
                 right_elm = getattr(self._tcBorders_elm, "right", None)
                 if right_elm is not None:
@@ -490,7 +490,7 @@ class CellH2D(How2Display[Cell]):
             return cell_on_grids
         for tcBorders_elm, ctx in borders_ctx:
             if ctx is None or isinstance(ctx, TableStyle):
-                grid_group = SE_TblStyleOverrideType.ENTIRE_TABLE
+                grid_group = SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
             else:
                 grid_group = ctx.type
             cell_on_grids.append(

@@ -11,7 +11,7 @@ from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_THEME,
     SE_THEME_COLOR,
-    SE_OnOff1,
+    SE_ON_OFF_1,
     SE_TblWidth,
 )
 from docxray.oxml.t.st.shared_common import (
@@ -50,7 +50,7 @@ class CT_String(OxmlElement):
 
 class CT_OnOff(OxmlElement):
     @cached_property
-    def val(self) -> bool | None | SE_OnOff1:
+    def val(self) -> bool | None | SE_ON_OFF_1:
         return self.attr_optional(W.VAL, ST_OnOff)
 
 

@@ -27,7 +27,7 @@ from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_THEME_COLOR,
     SE_UNDERLINE,
-    SE_VerticalAlignRun,
+    SE_VERTICAL_ALIGN_RUN,
 )
 from docxray.oxml.t.st.shared_common import (
     ST_VerticalAlignRun,
@@ -43,7 +43,7 @@ from docxray.oxml.t.xmlchemy import OxmlElement
 
 class CT_VerticalAlignRun(OxmlElement):
     @cached_property
-    def val(self) -> SE_VerticalAlignRun:
+    def val(self) -> SE_VERTICAL_ALIGN_RUN:
         return self.attr_required(W.VAL, ST_VerticalAlignRun)
 
 

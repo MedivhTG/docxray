@@ -16,7 +16,7 @@ from docxray.oxml.t.proxy.table.table import Table
 from docxray.oxml.t.st.enums import (
     SE_JC_TABLE,
     SE_TBL_LAYOUT_TYPE,
-    SE_StyleType,
+    SE_STYLE_TYPE,
 )
 
 from .how2display import How2Display
@@ -59,8 +59,8 @@ class TableH2D(How2Display[Table]):
             return None
         return self._styles.get_by_id(
             style_id,
-            SE_StyleType.TABLE,
-            S_TYPE_TO_STYLE_CLS[SE_StyleType.TABLE],
+            SE_STYLE_TYPE.TABLE,
+            S_TYPE_TO_STYLE_CLS[SE_STYLE_TYPE.TABLE],
         )
 
     @cached_property

@@ -13,7 +13,7 @@ from docxray.oxml.t.st.enums import (
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_MultilevelType,
-    SE_OnOff1,
+    SE_ON_OFF_1,
 )
 from docxray.oxml.t.st.shared_common import ST_OnOff, ST_String
 from docxray.oxml.t.st.wml import (
@@ -54,7 +54,7 @@ class CT_LevelText(OxmlElement):
         return self.attr_optional(W.VAL, ST_String)
 
     @cached_property
-    def null(self) -> bool | SE_OnOff1 | None:
+    def null(self) -> bool | SE_ON_OFF_1 | None:
         return self.attr_optional(W.NULL, ST_OnOff)
 
 

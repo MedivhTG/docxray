@@ -1,19 +1,19 @@
 from enum import StrEnum
 
 
-class SE_OnOff1(StrEnum):
+class SE_ON_OFF_1(StrEnum):
     ON = "on"
     OFF = "off"
 
 
-class SE_StyleType(StrEnum):
+class SE_STYLE_TYPE(StrEnum):
     PARAGRAPH = "paragraph"
     CHARACTER = "character"
     TABLE = "table"
     NUMBERING = "numbering"
 
 
-class SE_TblStyleOverrideType(StrEnum):
+class SE_TBL_STYLE_OVERRIDE_TYPE(StrEnum):
     ENTIRE_TABLE = "wholeTable"
     HEADER_ROW = "firstRow"
     FOOTER_ROW = "lastRow"
@@ -29,12 +29,12 @@ class SE_TblStyleOverrideType(StrEnum):
     BOTTOM_LEFT_CORNER_CELL = "swCell"
 
 
-class SE_Merge(StrEnum):
+class SE_MERGE(StrEnum):
     CONTINUE = "continue"
     RESTART = "restart"
 
 
-class SE_VerticalAlignRun(StrEnum):
+class SE_VERTICAL_ALIGN_RUN(StrEnum):
     BASELINE = "baseline"
     SUPERSCRIPT = "superscript"
     SUBSCRIPT = "subscript"

@@ -12,16 +12,16 @@ from officemath2latex import (
 
 # docxray stuff
 from docxray.length import Length
+from docxray.oxml.t.h2d.run_h2d import StrikeCase, UnderlineInfo
 from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
 from docxray.oxml.t.proxy.text.run import Break, Run, Tab, TxtFragment
-from docxray.oxml.t.proxy.types import StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
-    SE_VerticalAlignRun,
+    SE_VERTICAL_ALIGN_RUN,
 )
 
 if TYPE_CHECKING:
@@ -94,8 +94,8 @@ def underline_elm(value: UnderlineInfo) -> HtmlElement:
     )
 
 
-def vert_align_elm(value: SE_VerticalAlignRun) -> HtmlElement:
-    if value == SE_VerticalAlignRun.SUPERSCRIPT:
+def vert_align_elm(value: SE_VERTICAL_ALIGN_RUN) -> HtmlElement:
+    if value == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
         return Element("sup")
     return Element("sub")
 

@@ -9,12 +9,11 @@ from docxray.oxml.t.drawing import CT_Drawing
 from docxray.oxml.t.ns import W
 from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.base import ElementProxy, StoryChild
-from docxray.oxml.t.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.shared import CT_Empty
 from docxray.oxml.t.st.enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
-    SE_VerticalAlignRun,
+    SE_VERTICAL_ALIGN_RUN,
 )
 from docxray.oxml.t.text.run import (
     CT_R,
@@ -29,7 +28,12 @@ from .language import Language
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.h2d.run_h2d import RunH2D
+    from docxray.oxml.t.h2d.run_h2d import (
+        RunH2D,
+        CharsCase,
+        StrikeCase,
+        UnderlineInfo,
+    )
 
     from .paragraph import Paragraph
 
@@ -127,7 +131,7 @@ class Run(StoryChild[CT_R]):
         return self.h2d.underline
 
     @cached_property
-    def vertical_alignment(self) -> SE_VerticalAlignRun | None:
+    def vertical_alignment(self) -> SE_VERTICAL_ALIGN_RUN | None:
         return self.h2d.vertical_alignment
 
     @cached_property

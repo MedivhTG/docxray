@@ -4,7 +4,7 @@ from functools import cached_property
 
 from .ns import W
 from .shared import CT_DecimalNumber, CT_LongHexNumber, CT_OnOff, CT_String
-from .st.enums import SE_StyleType, SE_TblStyleOverrideType
+from .st.enums import SE_STYLE_TYPE, SE_TBL_STYLE_OVERRIDE_TYPE
 from .st.shared_common import ST_OnOff, ST_String
 from .st.wml import ST_StyleType, ST_TblStyleOverrideType
 from .table.cell_props import CT_TcPr
@@ -43,7 +43,7 @@ class CT_LatentStyles(OxmlElement):
 
 class CT_TblStylePr(OxmlElement):
     @cached_property
-    def type(self) -> SE_TblStyleOverrideType:
+    def type(self) -> SE_TBL_STYLE_OVERRIDE_TYPE:
         return self.attr_required(W.TYPE, ST_TblStyleOverrideType)
 
     @cached_property
@@ -69,7 +69,7 @@ class CT_TblStylePr(OxmlElement):
 
 class CT_Style(OxmlElement):
     @cached_property
-    def type(self) -> SE_StyleType | None:
+    def type(self) -> SE_STYLE_TYPE | None:
         return self.attr_optional(W.TYPE, ST_StyleType)
 
     @cached_property
@@ -173,7 +173,7 @@ class CT_Style(OxmlElement):
         return self.child_zero_or_more(W.TBL_STYLE_PR, CT_TblStylePr)
 
     def tblStylePr_for(
-        self, type: SE_TblStyleOverrideType
+        self, type: SE_TBL_STYLE_OVERRIDE_TYPE
     ) -> CT_TblStylePr | None:
         tblStylPr_elm = self.find(
             f"./{W.TBL_STYLE_PR}[@{W.TYPE}='{type}']", CT_TblStylePr

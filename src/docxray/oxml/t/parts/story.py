@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
 from docxray.oxml.t.part import TransitionalPart
-from docxray.oxml.t.st.enums import SE_StyleType
+from docxray.oxml.t.st.enums import SE_STYLE_TYPE
 from docxray.oxml.t.types import ELM_T
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ class StoryPart(TransitionalPart[ELM_T]):
     def get_style(
         self,
         style_id: str,
-        style_type: SE_StyleType,
+        style_type: SE_STYLE_TYPE,
         assert_style: type[STYLE_T],
     ) -> BaseStyle:
         """Return the style in this document matching `style_id`."""

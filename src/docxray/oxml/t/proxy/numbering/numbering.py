@@ -31,7 +31,7 @@ from docxray.oxml.t.st.enums import (
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
-    SE_StyleType,
+    SE_STYLE_TYPE,
 )
 
 if TYPE_CHECKING:
@@ -55,7 +55,7 @@ class Level(ElementProxy[CT_Lvl]):
         if pStyle_elm is None:
             return None
         style = self.parent.numbering.styles.get_by_id(
-            pStyle_elm.val, SE_StyleType.PARAGRAPH, ParagraphStyle
+            pStyle_elm.val, SE_STYLE_TYPE.PARAGRAPH, ParagraphStyle
         )
         pPr_elm = style.element.pPr
         if pPr_elm is not None:
@@ -207,7 +207,7 @@ class AbstractNum(ElementProxy[CT_AbstractNum]):
         if style_id is None:
             return None
         return self.numbering.styles.get_by_id(
-            style_id.val, SE_StyleType.NUMBERING, NumberingStyle
+            style_id.val, SE_STYLE_TYPE.NUMBERING, NumberingStyle
         )
 
     def lvl_by_ilvl(self, ilvl: int) -> Level:

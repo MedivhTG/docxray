@@ -12,7 +12,7 @@ from docxray.oxml.t.proxy.base import NotFound
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
-    SE_Merge,
+    SE_MERGE,
 )
 from docxray.oxml.t.table.table import CT_Tc
 
@@ -109,7 +109,7 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def vert_merged(self) -> bool:
         """Flag if cell is vertically merged."""
-        if self._vmerge in (None, SE_Merge.CONTINUE):
+        if self._vmerge in (None, SE_MERGE.CONTINUE):
             return True
         return False
 
@@ -226,7 +226,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         """
         if self.vert_merged:
             return None
-        if not self._vmerge == SE_Merge.RESTART:
+        if not self._vmerge == SE_MERGE.RESTART:
             return 1
         span = 1
         merged_below = self.table.get_cell_on_grid(
@@ -242,5 +242,5 @@ class Cell(BlockItemContainer[CT_Tc]):
         return span
 
     @cached_property
-    def _vmerge(self) -> NotFound | None | SE_Merge:
+    def _vmerge(self) -> NotFound | None | SE_MERGE:
         return self.h2d._prop_val("vMerge", optional=True)

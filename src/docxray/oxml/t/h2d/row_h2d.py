@@ -18,7 +18,7 @@ from docxray.oxml.t.proxy.styles.style import TableStyle
 from docxray.oxml.t.proxy.table.table import Table
 from docxray.oxml.t.proxy.table.row import Row
 from docxray.oxml.t.shared import CT_Shd, CT_TblWidth
-from docxray.oxml.t.st.enums import SE_TblStyleOverrideType
+from docxray.oxml.t.st.enums import SE_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.t.styles import CT_TblStylePr
 from docxray.oxml.t.table.table_props import (
     CT_JcTable,
@@ -33,14 +33,14 @@ type _TblBorder = Literal[
 
 
 SHIFT_HORZ_BANDS = {
-    SE_TblStyleOverrideType.HEADER_ROW,
-    SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL,
-    SE_TblStyleOverrideType.TOP_RIGHT_CORNER_CELL,
+    SE_TBL_STYLE_OVERRIDE_TYPE.HEADER_ROW,
+    SE_TBL_STYLE_OVERRIDE_TYPE.TOP_LEFT_CORNER_CELL,
+    SE_TBL_STYLE_OVERRIDE_TYPE.TOP_RIGHT_CORNER_CELL,
 }
 SHIFT_VERT_BANDS = {
-    SE_TblStyleOverrideType.FIRST_COLUMN,
-    SE_TblStyleOverrideType.TOP_LEFT_CORNER_CELL,
-    SE_TblStyleOverrideType.BOTTOM_LEFT_CORNER_CELL,
+    SE_TBL_STYLE_OVERRIDE_TYPE.FIRST_COLUMN,
+    SE_TBL_STYLE_OVERRIDE_TYPE.TOP_LEFT_CORNER_CELL,
+    SE_TBL_STYLE_OVERRIDE_TYPE.BOTTOM_LEFT_CORNER_CELL,
 }
 
 

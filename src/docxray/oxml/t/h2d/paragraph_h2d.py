@@ -33,7 +33,7 @@ from docxray.oxml.t.st.enums import (
     SE_LINE_SPACING_RULE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
-    SE_StyleType,
+    SE_STYLE_TYPE,
 )
 from docxray.oxml.t.text.num_props import CT_NumPr
 
@@ -460,8 +460,8 @@ class ParagraphH2D(How2Display[Paragraph]):
             return None
         return self._styles.get_by_id(
             style_id,
-            SE_StyleType.PARAGRAPH,
-            S_TYPE_TO_STYLE_CLS[SE_StyleType.PARAGRAPH],
+            SE_STYLE_TYPE.PARAGRAPH,
+            S_TYPE_TO_STYLE_CLS[SE_STYLE_TYPE.PARAGRAPH],
         )
 
     def _display_spacing_prop(self, name: str, optional: bool = False) -> Any:

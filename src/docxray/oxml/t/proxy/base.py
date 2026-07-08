@@ -6,6 +6,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Generic, Self, cast
 
 # docxray stuff
+from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.parts.story import StoryPart
 from docxray.oxml.t.proxy.types import (
     ProvidesStoryPart,
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
     from docxray.opc.part import XmlPart
     from docxray.transform.ruleset import RuleProxy, RuleSet
     from docxray.transform.transformer import TransformMethod
+    from docxray.oxml.t.parts.document import DocumentPart
 
 
 class ElementProxy(Generic[ELM_T]):
@@ -25,14 +27,18 @@ class ElementProxy(Generic[ELM_T]):
         self._element = element
         self._parent = parent
 
-    @property
+    @cached_property
     def element(self) -> ELM_T:
         """The lxml element proxied by this object."""
         return self._element
 
-    @property
+    @cached_property
     def part(self) -> XmlPart:
         return self._parent.part
+
+    @cached_property
+    def document_part(self) -> DocumentPart:
+        return document_part(self)
 
     def transform(
         self,
@@ -40,20 +46,7 @@ class ElementProxy(Generic[ELM_T]):
         stringify: bool = True,
         method: TransformMethod = "html",
     ) -> Any:
-        # docxray stuff
-        from docxray.oxml.t.parts.document import DocumentPart
-        from docxray.transform.transformer import Transformer
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return Transformer.transform(
-            self,
-            ruleset,
-            cast("RuleProxy", self.__class__.__name__),
-            stringify,
-            method,
-        )
+        return transform(self, ruleset, stringify, method)
 
 
 class StoryChild(Generic[ELM_T]):
@@ -61,14 +54,18 @@ class StoryChild(Generic[ELM_T]):
         self._element = element
         self._parent = parent
 
-    @property
+    @cached_property
     def element(self) -> ELM_T:
         return self._element
 
-    @property
+    @cached_property
     def part(self) -> StoryPart:
         """The package part containing this object."""
         return self._parent.part
+
+    @cached_property
+    def document_part(self) -> DocumentPart:
+        return document_part(self)
 
     @cached_property
     def prev_sibling(self) -> Self | None:
@@ -94,20 +91,7 @@ class StoryChild(Generic[ELM_T]):
         stringify: bool = True,
         method: TransformMethod = "html",
     ) -> Any:
-        # docxray stuff
-        from docxray.oxml.t.parts.document import DocumentPart
-        from docxray.transform.transformer import Transformer
-
-        ruleset = (
-            ruleset or cast("DocumentPart", self.part)._default_html_ruleset
-        )
-        return Transformer.transform(
-            self,
-            ruleset,
-            cast("RuleProxy", self.__class__.__name__),
-            stringify,
-            method,
-        )
+        return transform(self, ruleset, stringify, method)
 
 
 class PropertyPath(str):
@@ -163,3 +147,26 @@ def safe_get_prop(obj: Any, path: PropertyPath, optional: bool = True) -> Any:
             return None
         return NotFound(obj, path)
     return current
+
+
+def document_part(proxy: ElementProxy | StoryChild) -> DocumentPart:
+    return cast("TransitionalPackage", proxy.part.package).main_document_part
+
+
+def transform(
+    proxy: ElementProxy | StoryChild,
+    ruleset: RuleSet | None = None,
+    stringify: bool = True,
+    method: TransformMethod = "html",
+) -> Any:
+    # docxray stuff
+    from docxray.transform.transformer import Transformer
+
+    ruleset = ruleset or proxy.document_part._default_html_ruleset
+    return Transformer.transform(
+        proxy,
+        ruleset,
+        cast("RuleProxy", proxy.__class__.__name__),
+        stringify,
+        method,
+    )

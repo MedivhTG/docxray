@@ -12,7 +12,7 @@ from docxray.xsd.xsd import (
     XsdUnion,
 )
 
-from .enums import SE_X_ALIGN, SE_Y_ALIGN, SE_OnOff1, SE_VerticalAlignRun
+from .enums import SE_X_ALIGN, SE_Y_ALIGN, SE_ON_OFF_1, SE_VERTICAL_ALIGN_RUN
 
 
 class ST_String(XsdSimpleType):
@@ -21,7 +21,7 @@ class ST_String(XsdSimpleType):
 
 class ST_OnOff1(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(SE_OnOff1)}
+    FACETS = {"enum": EnumerationFacet(SE_ON_OFF_1)}
 
 
 class ST_OnOff(XsdSimpleType):
@@ -30,7 +30,7 @@ class ST_OnOff(XsdSimpleType):
 
 class ST_VerticalAlignRun(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(SE_VerticalAlignRun)}
+    FACETS = {"enum": EnumerationFacet(SE_VERTICAL_ALIGN_RUN)}
 
 
 class ST_UniversalMeasure(XsdSimpleType):

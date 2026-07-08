@@ -17,7 +17,7 @@ from docxray.oxml.t.shared import (
 from docxray.oxml.t.st.enums import (
     SE_LINE_SPACING_RULE,
     SE_TEXT_ALIGNMENT,
-    SE_OnOff1,
+    SE_ON_OFF_1,
 )
 from docxray.oxml.t.st.shared_common import ST_OnOff, ST_TwipsMeasure
 from docxray.oxml.t.st.wml import (
@@ -50,7 +50,7 @@ class CT_Spacing(OxmlElement):
         return self.attr_optional(W.BEFORE_LINES, ST_DecimalNumber)
 
     @cached_property
-    def beforeAutospacing(self) -> bool | SE_OnOff1 | None:
+    def beforeAutospacing(self) -> bool | SE_ON_OFF_1 | None:
         return self.attr_optional(W.BEFORE_AUTOSPACING, ST_OnOff)
 
     @cached_property
@@ -62,7 +62,7 @@ class CT_Spacing(OxmlElement):
         return self.attr_optional(W.AFTER_LINES)
 
     @cached_property
-    def afterAutospacing(self) -> bool | SE_OnOff1 | None:
+    def afterAutospacing(self) -> bool | SE_ON_OFF_1 | None:
         return self.attr_optional(W.AFTER_AUTOSPACING, ST_OnOff)
 
     @cached_property

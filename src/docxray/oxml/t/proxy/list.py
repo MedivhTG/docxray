@@ -13,17 +13,17 @@ from docxray.oxml.t.h2d.numeral_rules import (
     NUMERAL_SPECIFIC,
     NUMERAL_WITH_LOCALE,
 )
+from docxray.oxml.t.h2d.run_h2d import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
 from docxray.oxml.t.proxy.base import NotFound, PropertyPath
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
-from docxray.oxml.t.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_NUMBER_FORMAT,
     SE_THEME_COLOR,
     SE_UNDERLINE,
-    SE_VerticalAlignRun,
+    SE_VERTICAL_ALIGN_RUN,
 )
 from docxray.oxml.t.text.num_props import CT_NumPr
 from docxray.shared import os_locale
@@ -405,11 +405,11 @@ class ListItem:
         return None
 
     @cached_property
-    def vertical_alignment(self) -> None | SE_VerticalAlignRun:
+    def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
         align = self._display_level_text_run_val("vertAlign")
         if (
             isinstance(align, NotFound)
-            or align == SE_VerticalAlignRun.BASELINE
+            or align == SE_VERTICAL_ALIGN_RUN.BASELINE
         ):
             return None
         return align

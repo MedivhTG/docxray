@@ -36,10 +36,10 @@ from .enums import (
     SE_UNDERLINE,
     SE_VERTICAL_JC,
     SE_WML_COLOR_SCHEME_INDEX,
-    SE_Merge,
+    SE_MERGE,
     SE_MultilevelType,
-    SE_StyleType,
-    SE_TblStyleOverrideType,
+    SE_STYLE_TYPE,
+    SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TblWidth,
 )
 from .shared_common import (
@@ -74,17 +74,17 @@ class ST_Cnf(XsdSimpleType):
 
 class ST_StyleType(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_StyleType)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_STYLE_TYPE)}
 
 
 class ST_TblStyleOverrideType(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TblStyleOverrideType)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TBL_STYLE_OVERRIDE_TYPE)}
 
 
 class ST_Merge(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
-    FACETS = {"enum": EnumerationFacet(enum_cls=SE_Merge)}
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_MERGE)}
 
 
 class ST_Underline(XsdSimpleType):

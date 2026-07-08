@@ -11,7 +11,7 @@ from docxray.oxml.t.shared import (
     CT_TblWidth,
     CT_TextDirection,
 )
-from docxray.oxml.t.st.enums import SE_VERTICAL_JC, SE_Merge
+from docxray.oxml.t.st.enums import SE_VERTICAL_JC, SE_MERGE
 from docxray.oxml.t.st.wml import ST_Merge, ST_VerticalJc
 from docxray.oxml.t.xmlchemy import OxmlElement
 
@@ -22,7 +22,7 @@ class CT_HMerge(OxmlElement):
 
 class CT_VMerge(OxmlElement):
     @cached_property
-    def val(self) -> SE_Merge | None:
+    def val(self) -> SE_MERGE | None:
         return self.attr_optional(W.VAL, ST_Merge)
 
 

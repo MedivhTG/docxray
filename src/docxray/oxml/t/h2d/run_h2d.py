@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 # docxray stuff
 from docxray.colorize import Colorize
@@ -14,19 +14,26 @@ from docxray.oxml.t.proxy.table.cell import Cell
 from docxray.oxml.t.proxy.text.font import Font
 from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.proxy.text.run import Run
-from docxray.oxml.t.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_THEME_COLOR,
     SE_UNDERLINE,
-    SE_OnOff1,
-    SE_StyleType,
-    SE_VerticalAlignRun,
+    SE_ON_OFF_1,
+    SE_STYLE_TYPE,
+    SE_VERTICAL_ALIGN_RUN,
 )
 
 from .how2display import How2Display
 
-type _OnOff = NotFound | bool | SE_OnOff1 | None
+type _OnOff = NotFound | bool | SE_ON_OFF_1 | None
+
+type CharsCase = Literal["caps", "small_caps"]
+type StrikeCase = Literal["single", "double"]
+
+
+class UnderlineInfo(TypedDict):
+    line: SE_UNDERLINE
+    color: str
 
 
 class RunH2D(How2Display[Run]):
@@ -102,11 +109,11 @@ class RunH2D(How2Display[Run]):
         return u
 
     @cached_property
-    def vertical_alignment(self) -> None | SE_VerticalAlignRun:
+    def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
         align = self._display_val("vertAlign", False)
         if (
             isinstance(align, NotFound)
-            or align == SE_VerticalAlignRun.BASELINE
+            or align == SE_VERTICAL_ALIGN_RUN.BASELINE
         ):
             return None
         return align
@@ -160,8 +167,8 @@ class RunH2D(How2Display[Run]):
             return None
         return self._styles.get_by_id(
             style_id,
-            SE_StyleType.CHARACTER,
-            S_TYPE_TO_STYLE_CLS[SE_StyleType.CHARACTER],
+            SE_STYLE_TYPE.CHARACTER,
+            S_TYPE_TO_STYLE_CLS[SE_STYLE_TYPE.CHARACTER],
         )
 
     def _display(
