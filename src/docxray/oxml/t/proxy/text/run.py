@@ -190,11 +190,11 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def is_complex_script(self) -> bool:
-        return on_off(self._display("rPr.cs.val"))
+        return on_off(self._display("rPr.cs.val", True))
 
     @cached_property
     def right_to_left(self) -> bool:
-        return on_off(self._display("rPr.rtl.val"))
+        return on_off(self._display("rPr.rtl.val", True))
 
     @cached_property
     def raw_text(self) -> str:

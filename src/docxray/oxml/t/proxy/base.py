@@ -112,25 +112,16 @@ class StoryChild(Generic[ELM_T]):
 
 class PropertyPath(str):
     @property
-    def prop(self) -> str:
+    def end_name(self) -> str:
         return self.rsplit(".", 1)[-1]
 
     @property
-    def path_to_prop(self) -> str:
+    def base_path(self) -> str:
         return self.rsplit(".", 1)[0]
 
     @property
     def links(self) -> list[str]:
         return self.split(".")
-
-    def join_left(self, left: str) -> PropertyPath:
-        return PropertyPath.base(self.prop, f"{left}.{self.path_to_prop}")
-
-    @classmethod
-    def base(cls, prop: str, path_to_prop: str = "") -> Self:
-        if not path_to_prop:
-            return cls(prop)
-        return cls(f"{path_to_prop}.{prop}")
 
 
 class NotFound:

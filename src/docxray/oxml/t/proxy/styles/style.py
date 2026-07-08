@@ -8,12 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
 from docxray.oxml.t.enums import WD_CNF_FORMAT
-from docxray.oxml.t.proxy.base import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound
 from docxray.oxml.t.st.enums import SE_STYLE_TYPE, SE_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.t.styles import CT_Style, CT_Styles, CT_TblStylePr
 
@@ -198,8 +193,7 @@ class NumberingStyle(BaseStyle):
         err = InvalidXmlError("No associated Num instance for NumberingStyle")
         if self.numbering is None:
             raise err
-        path = PropertyPath.base("val", "pPr.numPr.numId")
-        num_id = safe_get_prop(self.element, path, False)
+        num_id = self.prop("pPr.numPr.numId.val")
         if isinstance(num_id, NotFound):
             raise err
         return self.numbering.get_num(num_id)

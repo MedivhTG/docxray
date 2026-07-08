@@ -7,12 +7,7 @@ from typing import Any, cast
 from docxray.length import Emu, Length
 from docxray.oxml.t.drawing import CT_Drawing, CT_PositiveSize2D
 from docxray.oxml.t.parts.image import ImagePart
-from docxray.oxml.t.proxy.base import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound, safe_get_prop
 
 # from docxray.oxml.trans.image.image import Image
 from docxray.oxml.t.proxy.image.picture import Picture
@@ -43,17 +38,17 @@ class Drawing(ElementProxy[CT_Drawing]):
     @cached_property
     def identifier(self) -> int:
         """Unique identifier for Word."""
-        return self._doc_pr_prop("id")
+        return self._prop_inline("docPr.id")
 
     @cached_property
     def name(self) -> str:
         """Hidden name of an drawing object."""
-        return self._doc_pr_prop("name")
+        return self._prop_inline("docPr.name")
 
     @cached_property
     def description(self) -> str:
         """Hidden description of an drawing object."""
-        return self._doc_pr_prop("descr")
+        return self._prop_inline("docPr.descr")
 
     @cached_property
     def width(self) -> Length:
@@ -68,9 +63,7 @@ class Drawing(ElementProxy[CT_Drawing]):
     @cached_property
     def size(self) -> tuple[Length, Length]:
         """Size (width, height) of picture in WORD measured in Emu`s."""
-        extent_elm: CT_PositiveSize2D = self._get_inside_prop(
-            PropertyPath.base("extent")
-        )
+        extent_elm: CT_PositiveSize2D = self._prop_inline("extent")
         return Emu(extent_elm.cx), Emu(extent_elm.cy)
 
     @cached_property
@@ -79,15 +72,11 @@ class Drawing(ElementProxy[CT_Drawing]):
         width, height = self.size
         return width.px(), height.px()
 
-    def _doc_pr_prop(self, name: str) -> Any:
-        return self._get_inside_prop(PropertyPath.base(name, "docPr"))
-
-    def _get_inside_prop(
-        self, path: PropertyPath, optional: bool = False
-    ) -> Any:
+    def _prop_inline(self, path: str, optional: bool = False) -> Any:
+        path_p = self.path(path)
         drawing: Any = self.element.inline
         if drawing is None:
             drawing = self.element.anchor
         if drawing is None:
             return NotFound(drawing, path)
-        return safe_get_prop(drawing, path, optional)
+        return safe_get_prop(drawing, path_p, optional)

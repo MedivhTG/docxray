@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.oxml.t.exceptions import InvalidXmlError
@@ -12,12 +12,7 @@ from docxray.oxml.t.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.t.proxy.base import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound
 from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.styles.style import (
     NumberingStyle,
@@ -73,7 +68,7 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def locale(self) -> str | None:
-        locale = self._prop(PropertyPath.base("val", "rPr.lang"))
+        locale = self.prop("rPr.lang.val")
         if isinstance(locale, NotFound):
             return None
         return locale
@@ -137,28 +132,25 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def font(self) -> Font | None:
-        rFonts_elm = self._prop(PropertyPath.base("rFonts", "rPr"))
+        rFonts_elm = self.prop("rPr.rFonts")
         if isinstance(rFonts_elm, NotFound):
             return None
         return Font(rFonts_elm, self)
 
     @cached_property
     def language(self) -> Language | None:
-        lang_elm = self._prop(PropertyPath.base("lang", "rPr"))
+        lang_elm = self.prop("rPr.lang")
         if isinstance(lang_elm, NotFound):
             return None
         return Language(lang_elm, self)
 
     @cached_property
     def is_complex_script(self) -> bool:
-        return on_off(self._prop(PropertyPath.base("val", "rPr.cs"), True))
+        return on_off(self.prop("rPr.cs.val", True))
 
     @cached_property
     def right_to_left(self) -> bool:
-        return on_off(self._prop(PropertyPath.base("val", "rPr.rtl"), True))
-
-    def _prop(self, path: PropertyPath, optional: bool = False) -> Any:
-        return safe_get_prop(self.element, path, optional)
+        return on_off(self.prop("rPr.rtl.val", True))
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
@@ -265,7 +257,7 @@ class Numbering(ElementProxy[CT_Numbering]):
         self._cached_nums: dict[int, Num] = {}
         self._cached_abstract_nums: dict[int, AbstractNum] = {}
 
-    @property
+    @cached_property
     def part(self) -> NumberingPart:
         return cast("NumberingPart", self._parent)
 

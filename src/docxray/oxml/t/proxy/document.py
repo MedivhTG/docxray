@@ -27,7 +27,7 @@ class Document(ElementProxy[CT_Document]):
     a document.
     """
 
-    @property
+    @cached_property
     def part(self) -> DocumentPart:
         return cast("DocumentPart", self._parent)
 

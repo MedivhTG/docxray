@@ -120,7 +120,7 @@ class Border(ElementProxy[CT_Border]):
             return False
         return self.element.shadow
 
-    @property
+    @cached_property
     def _which_parent(self) -> _WhichParent:
         from .table.cell import Cell
 

@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Generic, Self
 
 # docxray stuff
@@ -24,7 +25,7 @@ class TransitionalPart(XmlPart[TransitionalPackage], Generic[ELM_T]):
         super().__init__(partname, content_type, blob, package)
         self._element = element
 
-    @property
+    @cached_property
     def element(self) -> ELM_T:
         return self._element
 

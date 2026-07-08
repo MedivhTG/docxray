@@ -2,16 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import Any, TypeVar
+from typing import TypeVar
 
 # docxray stuff
-from docxray.oxml.t.proxy.base import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    StoryChild,
-    safe_get_prop,
-)
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound, StoryChild
 from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.text.run import RunContentProxy, run_content
 from docxray.oxml.t.st.enums import SE_JC_OMATH, SE_TOP_BOT
@@ -49,8 +43,7 @@ def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathElementsProxy]:
 
 
 class OMathElement(ElementProxy[OMATH_ELM]):
-    def _prop(self, path: PropertyPath, optional: bool = False) -> Any:
-        return safe_get_prop(self.element, path, optional)
+    pass
 
 
 class Arg(ElementProxy[CT_OMathArg]):
@@ -61,7 +54,7 @@ class Arg(ElementProxy[CT_OMathArg]):
 class Accent(OMathElement[CT_Acc]):
     @cached_property
     def char(self) -> str:
-        chr = self._prop(PropertyPath.base("val", "accPr.chr"))
+        chr = self.prop("accPr.chr.val")
         if isinstance(chr, NotFound):
             return "\u0302"
         return chr
@@ -77,7 +70,7 @@ class Accent(OMathElement[CT_Acc]):
 class Bar(OMathElement[CT_Bar]):
     @cached_property
     def position(self) -> SE_TOP_BOT:
-        pos = self._prop(PropertyPath.base("val", "barPr.pos"))
+        pos = self.prop("barPr.pos.val")
         if isinstance(pos, NotFound):
             return SE_TOP_BOT.TOP
         return pos
@@ -91,28 +84,21 @@ class Bar(OMathElement[CT_Bar]):
 
 
 class BoxObject(OMathElement[CT_Box]):
-    def _prop_on_off(self, prop: str) -> bool:
-        return on_off(
-            self._prop(PropertyPath.base("val", f"boxPr.{prop}")), True
-        )
-
     @cached_property
     def emulate_operator(self) -> bool:
-        return self._prop_on_off("opEmu")
+        return on_off(self.prop("boxPr.opEmu.val"), True)
 
     @cached_property
     def no_wrap(self) -> bool:
-        return self._prop_on_off("noBreak")
+        return on_off(self.prop("boxPr.noBreak.val"), True)
 
     @cached_property
     def as_differential(self) -> bool:
-        return self._prop_on_off("diff")
+        return on_off(self.prop("boxPr.diff.val"), True)
 
     @cached_property
     def align_break_at(self) -> int | None:
-        brk_elm: CT_ManualBreak | NotFound = self._prop(
-            PropertyPath.base("brk", "boxPr")
-        )
+        brk_elm: CT_ManualBreak | NotFound = self.prop("boxPr.brk")
         if isinstance(brk_elm, NotFound):
             return None
         aln = brk_elm.alnAt
@@ -122,7 +108,7 @@ class BoxObject(OMathElement[CT_Box]):
 
     @cached_property
     def as_inline_block(self) -> bool:
-        return self._prop_on_off("aln")
+        return on_off(self.prop("boxPr.aln.val"), True)
 
     @cached_property
     def argument(self) -> Arg | None:
@@ -173,9 +159,7 @@ class OMath(StoryChild[CT_OMath]):
 class OMathParagraph(StoryChild[CT_OMathPara]):
     @cached_property
     def alignment(self) -> SE_JC_OMATH:
-        algn = safe_get_prop(
-            self.element, PropertyPath.base("val", "oMathParaPr.jc"), False
-        )
+        algn = self.prop("oMathParaPr.jc.val")
         if isinstance(algn, NotFound):
             return SE_JC_OMATH.CENTER_GROUP
         return algn

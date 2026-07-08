@@ -195,6 +195,6 @@ class XmlPart(Part[PACKAGE_T]):
     ) -> Self:
         return super().load(partname, content_type, blob, package)
 
-    @property
+    @cached_property
     def part(self) -> Self:
         return self

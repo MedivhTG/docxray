@@ -4,12 +4,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray.oxml.t.proxy.base import (
-    ElementProxy,
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound
 from docxray.oxml.t.styles import CT_DocDefaults
 
 if TYPE_CHECKING:
@@ -24,11 +19,7 @@ class DocumentDefaults(ElementProxy[CT_DocDefaults]):
 
     @cached_property
     def locale(self) -> str | None:
-        locale = safe_get_prop(
-            self.element,
-            PropertyPath.base("val", "rPrDefault.rPr.lang"),
-            False,
-        )
+        locale = self.prop("rPrDefault.rPr.lang.val")
         if isinstance(locale, NotFound):
             return None
         return locale

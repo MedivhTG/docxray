@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from docxray.colorize import Colorize
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
-from docxray.oxml.t.proxy.base import NotFound, PropertyPath
+from docxray.oxml.t.proxy.base import NotFound
 from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
@@ -90,7 +90,7 @@ class ListView:
             next_li = next_li.next_li
         self._items = items
 
-    @property
+    @cached_property
     def items(self) -> list[ListItem]:
         return self._items
 
@@ -320,11 +320,11 @@ class ListItem:
 
     @cached_property
     def italic(self) -> bool:
-        return self._display_level_text_run_val_on_off("i")
+        return on_off(self._display("rPr.i.val", True))
 
     @cached_property
     def bold(self) -> bool:
-        return self._display_level_text_run_val_on_off("b")
+        return on_off(self._display("rPr.b.val", True))
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
@@ -340,46 +340,19 @@ class ListItem:
 
     @cached_property
     def underline_info(self) -> UnderlineInfo | None:
-        line = self._display_level_text_run_val("u", True)
-        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
+        if self._u_line is None:
             return None
-        u: UnderlineInfo = {"line": line, "color": "#000000"}
-        if line is None:
-            u["line"] = SE_UNDERLINE.SINGLE
-        base = "rPr"
-        theme_color_path = PropertyPath.base("themeColor", f"{base}.u")
-        theme_color: SE_THEME_COLOR | None | NotFound = (
-            self._display_level_text_run(theme_color_path)
-        )
-        if isinstance(theme_color, NotFound):
-            theme_color = None
-        theme_tint_path = PropertyPath.base("themeTint", f"{base}.u")
-        theme_tint: bytes | NotFound | None = self._display_level_text_run(
-            theme_tint_path
-        )
-        if isinstance(theme_tint, NotFound):
-            theme_tint = None
-
-        theme_shade_path = PropertyPath.base("themeShade", f"{base}.u")
-        theme_shade: bytes | NotFound | None = self._display_level_text_run(
-            theme_shade_path
-        )
-        if isinstance(theme_shade, NotFound):
-            theme_shade = None
-
-        color_path = PropertyPath.base("color", f"{base}.u")
-        color: SE_HEX_COLOR_AUTO | bytes = self._display_level_text_run(
-            color_path
-        )
-        u["color"] = Colorize.colorize(
-            color,
-            theme_color,
-            self.paragraph.part.document_part.theme.palette,
-            theme_tint,
-            theme_shade,
-            prefer_theme=True,
-        )
-        return u
+        return {
+            "line": self._u_line,
+            "color": Colorize.colorize(
+                self._u_color or SE_HEX_COLOR_AUTO.AUTO,
+                self._u_theme_color,
+                self._level.document_part.theme.palette,
+                self._u_theme_tint,
+                self._u_theme_shade,
+                prefer_theme=True,
+            ),
+        }
 
     @cached_property
     def strike_case(self) -> StrikeCase | None:
@@ -395,47 +368,69 @@ class ListItem:
 
     @cached_property
     def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
-        align = self._display_level_text_run_val("vertAlign")
+        valign = self._display("rPr.vertAlign.val")
         if (
-            isinstance(align, NotFound)
-            or align == SE_VERTICAL_ALIGN_RUN.BASELINE
+            isinstance(valign, NotFound)
+            or valign == SE_VERTICAL_ALIGN_RUN.BASELINE
         ):
             return None
-        return align
+        return valign
+
+    @cached_property
+    def _u_line(self) -> SE_UNDERLINE | None:
+        line = self._display("rPr.u.val", True)
+        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
+            return None
+        if line is None:
+            return SE_UNDERLINE.SINGLE
+        return line
+
+    @cached_property
+    def _u_color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
+        color = self._display("rPr.u.color")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _u_theme_color(self) -> SE_THEME_COLOR | None:
+        color = self._display("rPr.u.themeColor")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _u_theme_tint(self) -> bytes | None:
+        tint = self._display("rPr.u.themeTint")
+        if isinstance(tint, NotFound):
+            return None
+        return tint
+
+    @cached_property
+    def _u_theme_shade(self) -> bytes | None:
+        shade = self._display("rPr.u.themeShade")
+        if isinstance(shade, NotFound):
+            return None
+        return shade
 
     @cached_property
     def _caps(self) -> bool:
-        return self._display_level_text_run_val_on_off("caps")
+        return on_off(self._display("rPr.caps.val", True))
 
     @cached_property
     def _small_caps(self) -> bool:
-        return self._display_level_text_run_val_on_off("smallCaps")
+        return on_off(self._display("rPr.smallCaps.val", True))
 
     @cached_property
     def _single_strike(self) -> bool:
-        return self._display_level_text_run_val_on_off("strike")
+        return on_off(self._display("rPr.strike.val", True))
 
     @cached_property
     def _double_strike(self) -> bool:
-        return self._display_level_text_run_val_on_off("dstrike")
+        return on_off(self._display("rPr.dstrike.val", True))
 
-    def _display_level_text_run(
-        self, name_or_path: str | PropertyPath, optional: bool = False
-    ) -> Any:
-        if isinstance(name_or_path, PropertyPath):
-            path = name_or_path
-        else:
-            path = PropertyPath.base(name_or_path, "rPr")
+    def _display(self, path: str, optional: bool = False) -> Any:
         return self.paragraph._prop(path, optional, "level")
-
-    def _display_level_text_run_val(
-        self, name: str, optional: bool = False
-    ) -> Any:
-        path = PropertyPath.base("val", f"rPr.{name}")
-        return self._display_level_text_run(path, optional)
-
-    def _display_level_text_run_val_on_off(self, name: str) -> bool:
-        return on_off(self._display_level_text_run_val(name, True))
 
     def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
         for_lvl = self._numbering.associated_level(current_li.num_id, for_ilvl)

@@ -32,7 +32,7 @@ class Styles(ElementProxy[CT_Styles]):
         super().__init__(element, parent)
         self._cached_styles: dict[str, BaseStyle] = {}
 
-    @property
+    @cached_property
     def part(self) -> StylesPart:
         return cast("StylesPart", self._parent)
 
