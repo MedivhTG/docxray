@@ -1,8 +1,6 @@
-from importlib.metadata import version
-
 from .api import Document
 
-__version__ = version("docxray")
+__version__ = "0.0.0.alpha19"
 VERSION = __version__
 
 
