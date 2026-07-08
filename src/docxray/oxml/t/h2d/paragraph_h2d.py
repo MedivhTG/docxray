@@ -6,6 +6,11 @@ from typing import Any, Literal
 # docxray stuff
 from docxray.length import Length
 from docxray.oxml.t.enums import WD_HEADER_LEVEL
+from docxray.oxml.t.proxy.base import (
+    NotFound,
+    PropertyPath,
+    safe_get_prop,
+)
 from docxray.oxml.t.proxy.compute import (
     on_off,
     signed_twips_measure,
@@ -17,11 +22,6 @@ from docxray.oxml.t.proxy.list import (
     ListViewInterrupted,
 )
 from docxray.oxml.t.proxy.numbering.numbering import Level
-from docxray.oxml.t.proxy.base import (
-    NotFound,
-    PropertyPath,
-    safe_get_prop,
-)
 from docxray.oxml.t.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     ParagraphStyle,
@@ -31,9 +31,9 @@ from docxray.oxml.t.proxy.text.paragraph import Paragraph
 from docxray.oxml.t.st.enums import (
     SE_JC,
     SE_LINE_SPACING_RULE,
+    SE_STYLE_TYPE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
-    SE_STYLE_TYPE,
 )
 from docxray.oxml.t.text.num_props import CT_NumPr
 

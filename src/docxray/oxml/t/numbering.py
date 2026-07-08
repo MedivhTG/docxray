@@ -12,8 +12,8 @@ from docxray.oxml.t.shared import (
 from docxray.oxml.t.st.enums import (
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
-    SE_MultilevelType,
     SE_ON_OFF_1,
+    SE_MultilevelType,
 )
 from docxray.oxml.t.st.shared_common import ST_OnOff, ST_String
 from docxray.oxml.t.st.wml import (

@@ -7,15 +7,15 @@ from typing import Any, cast
 from docxray.length import Emu, Length
 from docxray.oxml.t.drawing import CT_Drawing, CT_PositiveSize2D
 from docxray.oxml.t.parts.image import ImagePart
-
-# from docxray.oxml.trans.image.image import Image
-from docxray.oxml.t.proxy.image.picture import Picture
 from docxray.oxml.t.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,
     safe_get_prop,
 )
+
+# from docxray.oxml.trans.image.image import Image
+from docxray.oxml.t.proxy.image.picture import Picture
 
 
 # TODO: if need to get hard, then go for another properties like:

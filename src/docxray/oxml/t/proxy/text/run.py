@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.oxml.t.drawing import CT_Drawing
 from docxray.oxml.t.ns import W
-from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.base import ElementProxy, StoryChild
+from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.shared import CT_Empty
 from docxray.oxml.t.st.enums import (
     SE_BR_CLEAR,
@@ -29,8 +29,8 @@ from .language import Language
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.h2d.run_h2d import (
-        RunH2D,
         CharsCase,
+        RunH2D,
         StrikeCase,
         UnderlineInfo,
     )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Literal, cast
+from typing import Literal, cast
 
 # docxray stuff
 from docxray.colorize import Colorize
@@ -14,9 +14,6 @@ from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.shared import CT_Border
 from docxray.oxml.t.st.enums import SE_BORDER
-
-if TYPE_CHECKING:
-    from .table.cell import Cell
 
 type _WhichParent = Literal["cell", "table"]
 

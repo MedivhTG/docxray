@@ -27,8 +27,11 @@ from .enums import (
     SE_JC_TABLE,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
+    SE_MERGE,
     SE_NUMBER_FORMAT,
+    SE_STYLE_TYPE,
     SE_TBL_LAYOUT_TYPE,
+    SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
     SE_THEME,
@@ -36,10 +39,7 @@ from .enums import (
     SE_UNDERLINE,
     SE_VERTICAL_JC,
     SE_WML_COLOR_SCHEME_INDEX,
-    SE_MERGE,
     SE_MultilevelType,
-    SE_STYLE_TYPE,
-    SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TblWidth,
 )
 from .shared_common import (

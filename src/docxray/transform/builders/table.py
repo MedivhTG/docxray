@@ -19,9 +19,9 @@ from .html_std import TEXT_FLOW_TO_WRITING_MODE, pt
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.proxy.table.table import Table
-    from docxray.oxml.t.proxy.table.row import Row
     from docxray.oxml.t.proxy.table.cell import Cell
+    from docxray.oxml.t.proxy.table.row import Row
+    from docxray.oxml.t.proxy.table.table import Table
     from docxray.transform.ruleset import RuleSet
 
 

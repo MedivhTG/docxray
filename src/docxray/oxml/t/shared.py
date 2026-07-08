@@ -8,10 +8,10 @@ from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_HINT,
     SE_JC,
+    SE_ON_OFF_1,
     SE_TEXT_DIRECTION,
     SE_THEME,
     SE_THEME_COLOR,
-    SE_ON_OFF_1,
     SE_TblWidth,
 )
 from docxray.oxml.t.st.shared_common import (

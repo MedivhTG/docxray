@@ -29,11 +29,11 @@ def StyleFactory(style_elm: CT_Style, part: StylesPart) -> BaseStyle:
 
 
 class BaseStyle(ElementProxy[CT_Style]):
-    @property
+    @cached_property
     def part(self) -> StylesPart:
         return cast("StylesPart", self._parent)
 
-    @property
+    @cached_property
     def numbering(self) -> Numbering | None:
         return self.part.numbering
 
@@ -149,6 +149,27 @@ class TableStyle(ParagraphStyle):
         self, type: SE_TBL_STYLE_OVERRIDE_TYPE
     ) -> CT_TblStylePr | None:
         return self.element.tblStylePr_for(type)
+
+    def table_style_props(self, cnf: WD_CNF_FORMAT) -> list[CT_TblStylePr]:
+        """Get desired table style properties from given tables using an cnf bit mask.
+
+        Args:
+            table_style (TableStyle): Given table style
+            cnf (WD_CNF_FORMAT): Fiven conditional formatting for table (CNF) bit mask.
+
+        Returns:
+            list[CT_TblStylePr]: List of table style properties.
+        """
+        props = []
+        for flag in WD_CNF_FORMAT.ordered_flags():
+            format = cnf & flag
+            if format:
+                tblStylePr_elm = self.bitwise_tbl_style_prop(flag)
+                if tblStylePr_elm is not None:
+                    props.append(tblStylePr_elm)
+        if self.wholeTable:
+            props.append(self.wholeTable)
+        return props
 
 
 class NumberingStyle(BaseStyle):

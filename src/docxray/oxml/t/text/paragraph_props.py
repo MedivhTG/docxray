@@ -16,8 +16,8 @@ from docxray.oxml.t.shared import (
 )
 from docxray.oxml.t.st.enums import (
     SE_LINE_SPACING_RULE,
-    SE_TEXT_ALIGNMENT,
     SE_ON_OFF_1,
+    SE_TEXT_ALIGNMENT,
 )
 from docxray.oxml.t.st.shared_common import ST_OnOff, ST_TwipsMeasure
 from docxray.oxml.t.st.wml import (

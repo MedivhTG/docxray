@@ -12,13 +12,13 @@ from docxray.oxml.t.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,
     safe_get_prop,
 )
+from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.styles.style import (
     NumberingStyle,
     ParagraphStyle,

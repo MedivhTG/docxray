@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, cast
 from docxray.oxml.t.document import CT_Body, CT_Document
 from docxray.oxml.t.proxy.list import ListViewInterrupted
 
-from .blkcntnr import BlockItemContainer
 from .base import ElementProxy
+from .blkcntnr import BlockItemContainer
 from .table.table import Table
 from .text.paragraph import Paragraph
 

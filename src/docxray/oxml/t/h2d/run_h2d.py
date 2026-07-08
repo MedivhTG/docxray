@@ -4,8 +4,8 @@ from typing import Any, Literal, TypedDict
 # docxray stuff
 from docxray.colorize import Colorize
 from docxray.oxml.t.h2d.exceptions import DisplayError
-from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.base import NotFound, PropertyPath
+from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     CharacterStyle,
@@ -16,10 +16,10 @@ from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.proxy.text.run import Run
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
-    SE_THEME_COLOR,
-    SE_UNDERLINE,
     SE_ON_OFF_1,
     SE_STYLE_TYPE,
+    SE_THEME_COLOR,
+    SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
 )
 

@@ -5,7 +5,6 @@ from functools import cached_property
 from typing import Any, TypeVar
 
 # docxray stuff
-from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.base import (
     ElementProxy,
     NotFound,
@@ -13,6 +12,7 @@ from docxray.oxml.t.proxy.base import (
     StoryChild,
     safe_get_prop,
 )
+from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.text.run import RunContentProxy, run_content
 from docxray.oxml.t.st.enums import SE_JC_OMATH, SE_TOP_BOT
 from docxray.oxml.t.text.omath import CT_OMath, CT_OMathPara

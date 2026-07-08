@@ -7,29 +7,28 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 from docxray.enum.lxml import POS
 from docxray.length import Length
 from docxray.oxml.t.enums import WD_CNF_FORMAT
-from docxray.oxml.t.proxy.blkcntnr import BlockItemContainer
-from docxray.oxml.t.proxy.border import Border
-from docxray.oxml.t.proxy.compute import width
 from docxray.oxml.t.proxy.base import (
     NotFound,
     PropertyPath,
     from_style_inheritance,
     safe_get_prop,
 )
+from docxray.oxml.t.proxy.blkcntnr import BlockItemContainer
+from docxray.oxml.t.proxy.border import Border
+from docxray.oxml.t.proxy.compute import width
 from docxray.oxml.t.proxy.styles.style import TableStyle
 from docxray.oxml.t.shared import CT_TblWidth
 from docxray.oxml.t.st.enums import (
+    SE_MERGE,
     SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
-    SE_MERGE,
 )
 from docxray.oxml.t.styles import CT_TblStylePr
 from docxray.oxml.t.table.cell_props import CT_TcBorders, CT_TcMar
 from docxray.oxml.t.table.table import CT_Tc
 
 if TYPE_CHECKING:
-    # docxray stuff
     from .row import Row
     from .table import Table
 
@@ -265,7 +264,7 @@ class Cell(BlockItemContainer[CT_Tc]):
             "right": None,
         }
         cell_mar = self._cell_mar_ctx[0]
-        tbl_cell_mar = self.row.h2d._tblCellMar
+        tbl_cell_mar = self.row._tblCellMar
         if cell_mar is None and tbl_cell_mar is None:
             pass
         elif cell_mar is None and tbl_cell_mar is not None:
@@ -498,7 +497,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def table_style(self) -> TableStyle | None:
-        return self.row.h2d._table_style
+        return self.row.table_style
 
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
@@ -509,19 +508,19 @@ class Cell(BlockItemContainer[CT_Tc]):
     @cached_property
     def _spacing(self) -> Length | float | None:
         name = "tblCellSpacing"
-        row_h2d = self.row.h2d
-        tbl_h2d = row_h2d.table.h2d
+        row = self.row
+        tbl_h2d = row.table.h2d
         # Row-level direct
-        spacing_elm = row_h2d._prop(name)
+        spacing_elm = row._prop(name)
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Row-level exception or Table-level direct
-        spacing_elm = row_h2d._tblCellSpacing
+        spacing_elm = row._tblCellSpacing
         if spacing_elm is not None:
             return width(spacing_elm, True)
 
         # From table style (defined common or exception)
-        path = row_h2d._prop_path(name, row_h2d._path_base)
+        path = self.path(f"trPr.{name}")
         # Table style Row-level (in grid group or direct) firstly
         spacing_elm, _ = self._from_tbl_style_hierarchy(
             self._tbl_style_props_deep, path
@@ -545,20 +544,19 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def _row_band_number(self) -> int:
-        band_shift = 1 if self.row.h2d._shift_horz_bands else 0
+        band_shift = 1 if self.row._shift_horz_bands else 0
         y_shift = self.grid_y + 1 + band_shift
         return y_shift // self.table.h2d._row_band_size
 
     @cached_property
     def _col_band_number(self) -> int:
-        band_shift = 1 if self.row.h2d._shift_vert_bands else 0
+        band_shift = 1 if self.row._shift_vert_bands else 0
         x_shift = self.idx + 1 + band_shift
         return x_shift // self.table.h2d._col_band_size
 
     @cached_property
     def _cnf_latent(self) -> WD_CNF_FORMAT:
         _CNF = WD_CNF_FORMAT
-        row_h2d = self.row.h2d
         cnf = _CNF(0)
         # Special rows/columns
         if self.grid_y == 0:
@@ -587,7 +585,7 @@ class Cell(BlockItemContainer[CT_Tc]):
             or _CNF.FIRST_ROW_LAST_COLUMN & cnf
             or _CNF.LAST_ROW_LAST_COLUMN & cnf
         )
-        if not (row_h2d._shift_vert_bands and has_vert_band_shift_group):
+        if not (self.row._shift_vert_bands and has_vert_band_shift_group):
             if self._col_band_number % 2 == 0:
                 cnf |= _CNF.EVEN_VERTICAL_BAND
             else:
@@ -600,7 +598,7 @@ class Cell(BlockItemContainer[CT_Tc]):
             or _CNF.LAST_ROW_FIRST_COLUMN & cnf
             or _CNF.LAST_ROW_LAST_COLUMN & cnf
         )
-        if not (row_h2d._shift_vert_bands and has_horz_band_shift_group):
+        if not (self.row._shift_vert_bands and has_horz_band_shift_group):
             if self._row_band_number % 2 == 0:
                 cnf |= _CNF.EVEN_HORIZONTAL_BAND
             else:
@@ -609,28 +607,27 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def _cnf_looked(self) -> WD_CNF_FORMAT:
-        row_h2d = self.row.h2d
         cnf = self._cnf_latent
-        if not row_h2d.first_row_show:
+        if not self.row.first_row_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
-        if not row_h2d.last_row_show:
+        if not self.row.last_row_show:
             cnf &= ~WD_CNF_FORMAT.LAST_ROW
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if not row_h2d.first_col_show:
+        if not self.row.first_col_show:
             cnf &= ~WD_CNF_FORMAT.FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_FIRST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_FIRST_COLUMN
-        if not row_h2d.last_col_show:
+        if not self.row.last_col_show:
             cnf &= ~WD_CNF_FORMAT.LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.FIRST_ROW_LAST_COLUMN
             cnf &= ~WD_CNF_FORMAT.LAST_ROW_LAST_COLUMN
-        if row_h2d.no_horizontal_lines:
+        if self.row.no_horizontal_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_HORIZONTAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_HORIZONTAL_BAND
-        if row_h2d.no_vertical_lines:
+        if self.row.no_vertical_lines:
             cnf &= ~WD_CNF_FORMAT.ODD_VERTICAL_BAND
             cnf &= ~WD_CNF_FORMAT.EVEN_VERTICAL_BAND
         return cnf
@@ -735,10 +732,9 @@ class Cell(BlockItemContainer[CT_Tc]):
         return inf
 
     def _vert_borders_conflict(self, inf: BordersInfo) -> None:
-        row_h2d = self.row.h2d
-        tbl_left = row_h2d._table_left
-        tbl_right = row_h2d._table_right
-        tbl_vert = row_h2d._table_insideV
+        tbl_left = self.row._table_left
+        tbl_right = self.row._table_right
+        tbl_vert = self.row._table_insideV
         cell_prev = self.cell_prev
         cell_next = self.cell_next
         left_n, right_n = _TBL_POSITIONING[self.pos]["cell"]
@@ -758,10 +754,9 @@ class Cell(BlockItemContainer[CT_Tc]):
             )
 
     def _horz_borders_conflict(self, inf: BordersInfo) -> None:
-        row_h2d = self.row.h2d
-        tbl_top = row_h2d._table_top
-        tbl_bottom = row_h2d._table_bottom
-        tbl_horz = row_h2d._table_insideH
+        tbl_top = self.row._table_top
+        tbl_bottom = self.row._table_bottom
+        tbl_horz = self.row._table_insideH
         cell_above = self.cell_above
         cell_below = self.cell_below
         top_n, bottom_n = _TBL_POSITIONING[self.row.pos]["row"]
@@ -782,11 +777,10 @@ class Cell(BlockItemContainer[CT_Tc]):
             )
 
     def _choose_side(self, inf: BordersInfo, side_n: _Side) -> None:
-        row_h2d = self.row.h2d
         if side_n in ("top", "bottom"):
-            table_inside = row_h2d._table_insideH
+            table_inside = self.row._table_insideH
         else:
-            table_inside = row_h2d._table_insideV
+            table_inside = self.row._table_insideV
         side: Border | None = getattr(self, f"_self_{side_n}")
         if side is None and table_inside is not None:
             # Small hack to make the border comparator think that this side is more important

@@ -6,8 +6,8 @@ from typing import Any
 # docxray stuff
 from docxray.length import Length
 from docxray.oxml.t.enums import WD_CNF_TABLE_LOOK
-from docxray.oxml.t.proxy.compute import width
 from docxray.oxml.t.proxy.base import NotFound, PropertyPath
+from docxray.oxml.t.proxy.compute import width
 from docxray.oxml.t.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     TableStyle,
@@ -15,8 +15,8 @@ from docxray.oxml.t.proxy.styles.style import (
 from docxray.oxml.t.proxy.table.table import Table
 from docxray.oxml.t.st.enums import (
     SE_JC_TABLE,
-    SE_TBL_LAYOUT_TYPE,
     SE_STYLE_TYPE,
+    SE_TBL_LAYOUT_TYPE,
 )
 
 from .how2display import How2Display

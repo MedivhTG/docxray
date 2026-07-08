@@ -11,7 +11,7 @@ from docxray.oxml.t.shared import (
     CT_TblWidth,
     CT_TextDirection,
 )
-from docxray.oxml.t.st.enums import SE_VERTICAL_JC, SE_MERGE
+from docxray.oxml.t.st.enums import SE_MERGE, SE_VERTICAL_JC
 from docxray.oxml.t.st.wml import ST_Merge, ST_VerticalJc
 from docxray.oxml.t.xmlchemy import OxmlElement
 

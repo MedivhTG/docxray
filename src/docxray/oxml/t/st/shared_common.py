@@ -12,7 +12,7 @@ from docxray.xsd.xsd import (
     XsdUnion,
 )
 
-from .enums import SE_X_ALIGN, SE_Y_ALIGN, SE_ON_OFF_1, SE_VERTICAL_ALIGN_RUN
+from .enums import SE_ON_OFF_1, SE_VERTICAL_ALIGN_RUN, SE_X_ALIGN, SE_Y_ALIGN
 
 
 class ST_String(XsdSimpleType):

@@ -17,13 +17,13 @@ from docxray.oxml.t.types import ELM_T
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.opc.part import XmlPart
-    from docxray.transform.ruleset import RuleProxy, RuleSet
-    from docxray.transform.transformer import TransformMethod
     from docxray.oxml.t.parts.document import DocumentPart
     from docxray.oxml.t.proxy.styles.style import (
         CharacterStyle,
         NumberingStyle,
     )
+    from docxray.transform.ruleset import RuleProxy, RuleSet
+    from docxray.transform.transformer import TransformMethod
 
 
 class ElementProxy(Generic[ELM_T]):
