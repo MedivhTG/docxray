@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
-from docxray.oxml.trans.proxy.drawing import Drawing
+from docxray.oxml.t.proxy.drawing import Drawing
 
 from .base import HtmlBuilder
 

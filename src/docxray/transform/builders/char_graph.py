@@ -4,8 +4,8 @@ from collections.abc import Iterator
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.trans.proxy.text.run import Run
+from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
+from docxray.oxml.t.proxy.text.run import Run
 
 
 class RunChainsMap:

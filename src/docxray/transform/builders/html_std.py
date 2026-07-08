@@ -12,13 +12,13 @@ from officemath2latex import (
 
 # docxray stuff
 from docxray.length import Length
-from docxray.oxml.trans.proxy.drawing import Drawing
-from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
-from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
-from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.trans.proxy.text.run import Break, Run, Tab, TxtFragment
-from docxray.oxml.trans.proxy.types import StrikeCase, UnderlineInfo
-from docxray.oxml.trans.st.enums import (
+from docxray.oxml.t.proxy.drawing import Drawing
+from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
+from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
+from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
+from docxray.oxml.t.proxy.text.run import Break, Run, Tab, TxtFragment
+from docxray.oxml.t.proxy.types import StrikeCase, UnderlineInfo
+from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
     SE_VerticalAlignRun,
@@ -223,7 +223,7 @@ def omath_to_latex(
     include_run_content: bool = True,
 ) -> str:
     # docxray stuff
-    from docxray.oxml.trans.parts.document import DocumentPart
+    from docxray.oxml.t.parts.document import DocumentPart
 
     ruleset = ruleset or cast("DocumentPart", omath.part)._default_html_ruleset
 

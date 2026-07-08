@@ -7,9 +7,9 @@ from lxml.html import Element, HtmlElement
 
 # docxray stuff
 from docxray.length import Length
-from docxray.oxml.trans.enums import WD_HEADER_LEVEL
-from docxray.oxml.trans.proxy.table.cell import Cell
-from docxray.oxml.trans.st.enums import (
+from docxray.oxml.t.enums import WD_HEADER_LEVEL
+from docxray.oxml.t.proxy.table.cell import Cell
+from docxray.oxml.t.st.enums import (
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_LINE_SPACING_RULE,
@@ -21,8 +21,8 @@ from .run import HtmlRun
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.proxy.table.cell import Cell
-    from docxray.oxml.trans.proxy.text.paragraph import (
+    from docxray.oxml.t.proxy.table.cell import Cell
+    from docxray.oxml.t.proxy.text.paragraph import (
         Paragraph,
         ParaContentProxy,
     )

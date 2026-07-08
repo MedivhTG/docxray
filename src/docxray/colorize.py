@@ -1,8 +1,8 @@
 import colorsys
 
 # docxray stuff
-from docxray.oxml.trans.proxy.theme import ThemeColor
-from docxray.oxml.trans.st.enums import SE_HEX_COLOR_AUTO, SE_THEME_COLOR
+from docxray.oxml.t.proxy.theme import ThemeColor
+from docxray.oxml.t.st.enums import SE_HEX_COLOR_AUTO, SE_THEME_COLOR
 
 
 class Colorize:
