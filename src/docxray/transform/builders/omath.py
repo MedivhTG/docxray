@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
-from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
-from docxray.oxml.trans.st.enums import SE_JC_OMATH
+from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
+from docxray.oxml.t.st.enums import SE_JC_OMATH
 
 from .base import HtmlBuilder
 from .html_std import omath_to_latex

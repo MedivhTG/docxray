@@ -2,8 +2,8 @@
 
 from .opc.constants import CONTENT_TYPE as CT
 from .oxml import TransitionalPartFactory
-from .oxml.trans.package import TransitionalPackage
-from .oxml.trans.proxy.document import Document as DocumentObject
+from .oxml.t.package import TransitionalPackage
+from .oxml.t.proxy.document import Document as DocumentObject
 from .types import PkgFile
 
 

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
-from docxray.oxml.trans.proxy.border import Border
-from docxray.oxml.trans.proxy.table import Cell
-from docxray.oxml.trans.st.enums import (
+from docxray.oxml.t.proxy.border import Border
+from docxray.oxml.t.proxy.table.cell import Cell
+from docxray.oxml.t.st.enums import (
     SE_BORDER,
     SE_JC_TABLE,
     SE_TBL_LAYOUT_TYPE,
@@ -19,7 +19,9 @@ from .html_std import TEXT_FLOW_TO_WRITING_MODE, pt
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.trans.proxy.table import Cell, Row, Table
+    from docxray.oxml.t.proxy.table.cell import Cell
+    from docxray.oxml.t.proxy.table.row import Row
+    from docxray.oxml.t.proxy.table.table import Table
     from docxray.transform.ruleset import RuleSet
 
 

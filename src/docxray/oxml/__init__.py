@@ -4,12 +4,12 @@
 from docxray.opc.constants import CONTENT_TYPE as CT
 from docxray.opc.constants import RELATIONSHIP_TYPE as RT
 from docxray.opc.part import Part, PartFactory
-from docxray.oxml.trans.parts.document import DocumentPart
-from docxray.oxml.trans.parts.image import ImagePart
-from docxray.oxml.trans.parts.numbering import NumberingPart
-from docxray.oxml.trans.parts.settings import SettingsPart
-from docxray.oxml.trans.parts.styles import StylesPart
-from docxray.oxml.trans.parts.theme import ThemePart
+from docxray.oxml.t.parts.document import DocumentPart
+from docxray.oxml.t.parts.image import ImagePart
+from docxray.oxml.t.parts.numbering import NumberingPart
+from docxray.oxml.t.parts.settings import SettingsPart
+from docxray.oxml.t.parts.styles import StylesPart
+from docxray.oxml.t.parts.theme import ThemePart
 
 
 class TransitionalPartFactory(PartFactory):
