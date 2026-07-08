@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
+from docxray.length import Length
 from docxray.oxml.trans.proxy.blkcntnr import BlockItemContainer
 from docxray.oxml.trans.proxy.compute import width
-from docxray.oxml.trans.proxy.shared import NotFound, Twips
+from docxray.oxml.trans.proxy.base import NotFound
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,
     SE_VERTICAL_JC,
@@ -67,7 +68,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self.h2d.content_flow
 
     @cached_property
-    def width(self) -> Twips | float | None:
+    def width(self) -> Length | float | None:
         """Cell width in twips or percents, `None` if auto."""
         tcW_elm = self.h2d._prop("tcW")
         if isinstance(tcW_elm, NotFound) or tcW_elm is None:

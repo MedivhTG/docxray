@@ -4,9 +4,10 @@ from functools import cached_property
 from typing import Any
 
 # docxray stuff
+from docxray.length import Length
 from docxray.oxml.trans.enums import WD_CNF_TABLE_LOOK
 from docxray.oxml.trans.proxy.compute import width
-from docxray.oxml.trans.proxy.shared import Length, NotFound, PropertyPath
+from docxray.oxml.trans.proxy.base import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     TableStyle,

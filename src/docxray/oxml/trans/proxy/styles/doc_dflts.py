@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,

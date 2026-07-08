@@ -9,7 +9,7 @@ from docxray.oxml.trans.enums import (
 )
 from docxray.oxml.trans.h2d.how2display import How2Display
 from docxray.oxml.trans.proxy.border import Border
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     NotFound,
     PropertyPath,
     safe_get_prop,

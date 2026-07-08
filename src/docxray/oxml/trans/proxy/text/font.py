@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.trans.package import TransitionalPackage
-from docxray.oxml.trans.proxy.shared import ElementProxy, NotFound
+from docxray.oxml.trans.proxy.base import ElementProxy, NotFound
 from docxray.oxml.trans.proxy.text.language import Language
 from docxray.oxml.trans.proxy.theme import FontFamily
 from docxray.oxml.trans.shared import CT_Fonts

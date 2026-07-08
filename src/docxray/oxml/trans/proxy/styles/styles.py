@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, TypeVar, cast
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.base import ElementProxy
 from docxray.oxml.trans.proxy.styles.doc_dflts import DocumentDefaults
 from docxray.oxml.trans.proxy.styles.style import (
     BaseStyle,

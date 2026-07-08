@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 
 # docxray stuff
 from docxray.oxml.trans.proxy.compute import on_off
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,

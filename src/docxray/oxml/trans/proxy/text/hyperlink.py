@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import StoryChild
+from docxray.oxml.trans.proxy.base import StoryChild
 from docxray.oxml.trans.proxy.text.run import Run
 from docxray.oxml.trans.text.hyperlink import CT_Hyperlink
 from docxray.oxml.trans.text.run import CT_R

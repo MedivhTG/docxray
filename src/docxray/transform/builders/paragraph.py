@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 # docxray stuff
+from docxray.length import Length
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
-from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.table.cell import Cell
 from docxray.oxml.trans.st.enums import (
     SE_JC,

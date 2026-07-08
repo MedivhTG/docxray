@@ -11,7 +11,7 @@ from docxray.oxml.trans.document import CT_Body, CT_Document
 from docxray.oxml.trans.proxy.list import ListViewInterrupted
 
 from .blkcntnr import BlockItemContainer
-from .shared import ElementProxy
+from .base import ElementProxy
 from .table.table import Table
 from .text.paragraph import Paragraph
 

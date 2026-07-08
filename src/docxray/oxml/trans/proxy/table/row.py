@@ -6,13 +6,9 @@ from typing import TYPE_CHECKING, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
+from docxray.length import Length, Twips
 from docxray.oxml.trans.proxy.compute import twips_measure
-from docxray.oxml.trans.proxy.shared import (
-    ElementProxy,
-    Length,
-    NotFound,
-    Twips,
-)
+from docxray.oxml.trans.proxy.base import ElementProxy, NotFound
 from docxray.oxml.trans.st.enums import SE_HEIGHT_RULE
 from docxray.oxml.trans.table.row_props import CT_Height
 from docxray.oxml.trans.table.table import CT_Row

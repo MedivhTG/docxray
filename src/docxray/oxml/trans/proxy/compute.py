@@ -2,6 +2,7 @@ import re
 from typing import cast
 
 # docxray stuff
+from docxray.length import Cm, Inches, Length, Mm, Pica, Pt, Twips
 from docxray.oxml.trans.shared import CT_OnOff, CT_TblWidth
 from docxray.oxml.trans.st.enums import SE_OnOff1, SE_TblWidth
 from docxray.oxml.trans.st.shared_common import (
@@ -11,7 +12,7 @@ from docxray.oxml.trans.st.shared_common import (
 )
 from docxray.xsd.facets import PatternFacet
 
-from .shared import Cm, Inches, Length, Mm, NotFound, Pica, Pt, Twips
+from .base import NotFound
 
 PCT_TO_PERCENT_RATIO = 50
 

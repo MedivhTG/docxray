@@ -15,7 +15,7 @@ from docxray.oxml.trans.h2d.numeral_rules import (
 )
 from docxray.oxml.trans.proxy.compute import on_off
 from docxray.oxml.trans.proxy.numbering.numbering import Level, Numbering
-from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
+from docxray.oxml.trans.proxy.base import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.trans.st.enums import (

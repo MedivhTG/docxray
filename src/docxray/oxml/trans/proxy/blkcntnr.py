@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 # docxray stuff
 from docxray.oxml.trans.document import CT_Body
-from docxray.oxml.trans.proxy.shared import StoryChild
+from docxray.oxml.trans.proxy.base import StoryChild
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.table.table import CT_Tc
 from docxray.oxml.trans.text.paragraph import CT_P

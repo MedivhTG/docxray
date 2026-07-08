@@ -5,7 +5,8 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import Length, StoryChild
+from docxray.length import Length
+from docxray.oxml.trans.proxy.base import StoryChild
 from docxray.oxml.trans.st.enums import SE_JC_TABLE, SE_TBL_LAYOUT_TYPE
 from docxray.oxml.trans.table.table import CT_Tbl
 

@@ -5,7 +5,7 @@ from typing import Any
 from docxray.colorize import Colorize
 from docxray.oxml.trans.h2d.exceptions import DisplayError
 from docxray.oxml.trans.proxy.compute import on_off
-from docxray.oxml.trans.proxy.shared import NotFound, PropertyPath
+from docxray.oxml.trans.proxy.base import NotFound, PropertyPath
 from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     CharacterStyle,

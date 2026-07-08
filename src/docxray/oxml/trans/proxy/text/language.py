@@ -1,7 +1,7 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.base import ElementProxy
 from docxray.oxml.trans.shared import CT_Language
 
 

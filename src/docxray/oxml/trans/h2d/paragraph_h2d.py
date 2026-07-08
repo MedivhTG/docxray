@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Any, Literal
 
 # docxray stuff
+from docxray.length import Length
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
 from docxray.oxml.trans.proxy.compute import (
     on_off,
@@ -16,8 +17,7 @@ from docxray.oxml.trans.proxy.list import (
     ListViewInterrupted,
 )
 from docxray.oxml.trans.proxy.numbering.numbering import Level
-from docxray.oxml.trans.proxy.shared import (
-    Length,
+from docxray.oxml.trans.proxy.base import (
     NotFound,
     PropertyPath,
     safe_get_prop,

@@ -14,7 +14,7 @@ from docxray.oxml.trans.enums import WIN32_COLOR
 from docxray.oxml.trans.package import TransitionalPackage
 from docxray.oxml.trans.proxy.compute import percentage
 from docxray.oxml.trans.proxy.settings import SemanticColor
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.base import ElementProxy
 from docxray.oxml.trans.st.enums import (
     SE_SCHEME_COLOR_VAL,
     SE_SYSTEM_COLOR_VAL,

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 from docxray.oxml.trans.drawing import CT_Drawing
 from docxray.oxml.trans.ns import W
 from docxray.oxml.trans.proxy.drawing import Drawing
-from docxray.oxml.trans.proxy.shared import ElementProxy, StoryChild
+from docxray.oxml.trans.proxy.base import ElementProxy, StoryChild
 from docxray.oxml.trans.proxy.types import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.trans.shared import CT_Empty
 from docxray.oxml.trans.st.enums import (

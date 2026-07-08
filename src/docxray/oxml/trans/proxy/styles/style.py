@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,

@@ -5,8 +5,9 @@ from functools import cached_property
 from typing import TYPE_CHECKING, cast
 
 # docxray stuff
+from docxray.length import Length
 from docxray.oxml.trans.enums import WD_HEADER_LEVEL
-from docxray.oxml.trans.proxy.shared import Length, StoryChild
+from docxray.oxml.trans.proxy.base import StoryChild
 from docxray.oxml.trans.st.enums import (
     SE_JC,
     SE_LINE_SPACING_RULE,

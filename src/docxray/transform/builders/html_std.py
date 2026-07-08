@@ -11,8 +11,8 @@ from officemath2latex import (
 )
 
 # docxray stuff
+from docxray.length import Length
 from docxray.oxml.trans.proxy.drawing import Drawing
-from docxray.oxml.trans.proxy.shared import Length
 from docxray.oxml.trans.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.trans.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.trans.proxy.text.paragraph import ParaContentProxy

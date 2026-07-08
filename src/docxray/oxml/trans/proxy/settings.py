@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import Literal
 
 # docxray stuff
-from docxray.oxml.trans.proxy.shared import ElementProxy
+from docxray.oxml.trans.proxy.base import ElementProxy
 from docxray.oxml.trans.settings import CT_Settings
 from docxray.oxml.trans.st.enums import SE_WML_COLOR_SCHEME_INDEX as C
 

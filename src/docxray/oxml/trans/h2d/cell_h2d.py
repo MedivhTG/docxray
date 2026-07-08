@@ -5,13 +5,13 @@ from typing import Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.enum.lxml import POS
+from docxray.length import Length
 from docxray.oxml.trans.enums import (
     WD_CNF_FORMAT,
 )
 from docxray.oxml.trans.proxy.border import Border
 from docxray.oxml.trans.proxy.compute import width
-from docxray.oxml.trans.proxy.shared import (
-    Length,
+from docxray.oxml.trans.proxy.base import (
     NotFound,
     PropertyPath,
     safe_get_prop,

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, cast
 
 # docxray stuff
 from docxray.oxml.trans.enums import WD_CNF_FORMAT
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     NotFound,
     PropertyPath,
     safe_get_prop,

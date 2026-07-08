@@ -13,7 +13,7 @@ from docxray.oxml.trans.numbering import (
     CT_NumLvl,
 )
 from docxray.oxml.trans.proxy.compute import on_off
-from docxray.oxml.trans.proxy.shared import (
+from docxray.oxml.trans.proxy.base import (
     ElementProxy,
     NotFound,
     PropertyPath,
