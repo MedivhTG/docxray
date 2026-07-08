@@ -496,8 +496,6 @@ class Cell(BlockItemContainer[CT_Tc]):
     def _vmerge(self) -> NotFound | None | SE_MERGE:
         return self._prop("tcPr.vMerge.val", True)
 
-    # TODO: here H2D
-
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
         inf = self._spacing_non_zero()
