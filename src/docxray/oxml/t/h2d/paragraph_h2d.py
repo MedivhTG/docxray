@@ -487,9 +487,7 @@ class ParagraphH2D(How2Display[Paragraph]):
             else self._prop_path("val", f"{self._path_base}.{name_or_path}")
         )
         if cell:
-            tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell._tbl_style_props_deep, para_path, optional
-            )
+            tbl_val, _ = cell._prop(para_path, optional, "style-ctx")
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
         return self._from_doc_dflts(
@@ -545,9 +543,7 @@ class ParagraphH2D(How2Display[Paragraph]):
 
         def _from_table_style() -> Any | NotFound:
             if not for_run and self.cell:
-                tbl_val, _ = self._from_tbl_style_hierarchy(
-                    self.cell._tbl_style_props_deep, path, optional
-                )
+                tbl_val, _ = self.cell._prop(path, optional, "style-ctx")
                 if not isinstance(tbl_val, NotFound):
                     return tbl_val
             return not_found

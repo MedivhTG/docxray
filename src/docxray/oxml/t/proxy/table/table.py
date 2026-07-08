@@ -104,6 +104,36 @@ class Table(StoryChild[CT_Tbl]):
                     return spacing
         return None
 
+    @cached_property
+    def table_style(self) -> TableStyle | None:
+        style_id = self._prop("tblPr.tblStyle.val")
+        if isinstance(style_id, NotFound):
+            return None
+        return self.document_part.styles.get_by_id(
+            style_id, SE_STYLE_TYPE.TABLE, TableStyle
+        )
+
+    @cached_property
+    def _row_band_size(self) -> int:
+        size = self._prop("tblPr.tblStyleRowBandSize.val", where="style")
+        if isinstance(size, NotFound):
+            return 1
+        return size
+
+    @cached_property
+    def _col_band_size(self) -> int:
+        size = self._prop("tblPr.tblStyleColBandSize.val", where="style")
+        if isinstance(size, NotFound):
+            return 1
+        return size
+
+    @cached_property
+    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
+        mask: bytes | None = self._prop("tblPr.tblLook.val", True)
+        if mask is None:
+            return WD_CNF_TABLE_LOOK.from_bytes(b"")
+        return WD_CNF_TABLE_LOOK.from_bytes(mask)
+
     def get_row(self, idx: int) -> Row | None:
         if idx < 0:
             return None
@@ -135,39 +165,7 @@ class Table(StoryChild[CT_Tbl]):
         for row in self.rows:
             yield row
 
-    # TODO: here H2D
-
-    @cached_property
-    def table_style(self) -> TableStyle | None:
-        style_id = self._prop("tblPr.tblStyle.val")
-        if isinstance(style_id, NotFound):
-            return None
-        return self.document_part.styles.get_by_id(
-            style_id, SE_STYLE_TYPE.TABLE, TableStyle
-        )
-
-    @cached_property
-    def _row_band_size(self) -> int:
-        size = self._prop("tblPr.tblStyleRowBandSize.val", where="style")
-        if isinstance(size, NotFound):
-            return 1
-        return size
-
-    @cached_property
-    def _col_band_size(self) -> int:
-        size = self._prop("tblPr.tblStyleColBandSize.val", where="style")
-        if isinstance(size, NotFound):
-            return 1
-        return size
-
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        mask: bytes | None = self._prop("tblPr.tblLook.val", True)
-        if mask is None:
-            return WD_CNF_TABLE_LOOK.from_bytes(b"")
-        return WD_CNF_TABLE_LOOK.from_bytes(mask)
-
-    def _table_prop(self, name: str) -> Any:
+    def _table_prop(self, name: str) -> Any | None:
         elm = self._prop(f"tblPr.{name}", where="both")
         if isinstance(elm, NotFound):
             return None
@@ -197,5 +195,3 @@ class Table(StoryChild[CT_Tbl]):
         if isinstance(direct_val, NotFound):
             return self._prop_style(path, optional)
         return direct_val
-
-    # TODO: here H2D (end)

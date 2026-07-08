@@ -99,6 +99,120 @@ class Row(ElementProxy[CT_Row]):
             return Twips(0)
         return twips_measure(val)
 
+    @cached_property
+    def first_row_show(self) -> bool:
+        return self._format_from_cnf_look("firstRow")
+
+    @cached_property
+    def last_row_show(self) -> bool:
+        return self._format_from_cnf_look("lastRow")
+
+    @cached_property
+    def first_col_show(self) -> bool:
+        return self._format_from_cnf_look("firstColumn")
+
+    @cached_property
+    def last_col_show(self) -> bool:
+        return self._format_from_cnf_look("lastColumn")
+
+    @cached_property
+    def no_horizontal_lines(self) -> bool:
+        return self._format_from_cnf_look("noHBand")
+
+    @cached_property
+    def no_vertical_lines(self) -> bool:
+        return self._format_from_cnf_look("noVBand")
+
+    @cached_property
+    def table_style(self) -> TableStyle | None:
+        return self.table.table_style
+
+    @cached_property
+    def _latent_tbl_style_props(self) -> list[CT_TblStylePr]:
+        if self.table_style is None:
+            return []
+        return self.table_style.table_style_props(WD_CNF_FORMAT(0xFFF))
+
+    @cached_property
+    def _shift_horz_bands(self) -> bool:
+        for prop in self._latent_tbl_style_props:
+            if prop.type in _SHIFT_HORZ_BANDS:
+                return True
+        return False
+
+    @cached_property
+    def _shift_vert_bands(self) -> bool:
+        for prop in self._latent_tbl_style_props:
+            if prop.type in _SHIFT_VERT_BANDS:
+                return True
+        return False
+
+    @cached_property
+    def _table_top(self) -> Border | None:
+        return self._table_border("top")
+
+    @cached_property
+    def _table_bottom(self) -> Border | None:
+        return self._table_border("bottom")
+
+    @cached_property
+    def _table_left(self) -> Border | None:
+        return self._table_border("left")
+
+    @cached_property
+    def _table_right(self) -> Border | None:
+        return self._table_border("right")
+
+    @cached_property
+    def _table_insideH(self) -> Border | None:
+        return self._table_border("insideH")
+
+    @cached_property
+    def _table_insideV(self) -> Border | None:
+        return self._table_border("insideV")
+
+    @cached_property
+    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
+        mask = self._prop("tblPrEx.tblLook.val")
+        if not isinstance(mask, NotFound):
+            WD_CNF_TABLE_LOOK.from_bytes(mask)
+        return self.table._cnf_look
+
+    @cached_property
+    def _tblW(self) -> CT_TblWidth | None:
+        return self._ex_or_table_prop("tblW")
+
+    @cached_property
+    def _jc(self) -> CT_JcTable | None:
+        return self._ex_or_table_prop("jc")
+
+    @cached_property
+    def _tblCellSpacing(self) -> CT_TblWidth | None:
+        prop = self._prop("trPr.tblCellSpacing")
+        if isinstance(prop, NotFound):
+            return self._ex_or_table_prop("tblCellSpacing")
+        return prop
+
+    @cached_property
+    def _tblInd(self) -> CT_TblWidth | None:
+        return self._ex_or_table_prop("tblInd")
+
+    @cached_property
+    def _tblBorders(self) -> CT_TblBorders | None:
+        return self._ex_or_table_prop("tblBorders")
+
+    @cached_property
+    def _shd(self) -> CT_Shd | None:
+        return self._ex_or_table_prop("shd")
+
+    @cached_property
+    def _tblLayout(self) -> CT_TblLayoutType | None:
+        return self._ex_or_table_prop("tblLayout")
+
+    @cached_property
+    def _tblCellMar(self) -> CT_TblCellMar | None:
+        return self._ex_or_table_prop("tblCellMar")
+
     def iter_cells(self, skip_merged: bool = True) -> Iterator[Cell]:
         """Iterate over xml-cell proxies in a row.
 
@@ -137,133 +251,20 @@ class Row(ElementProxy[CT_Row]):
         """
         return self.cells_grid_x.get(grid_x)
 
-    # TODO: here H2D
-
-    @cached_property
-    def first_row_show(self) -> bool:
-        return self._format_from_cnf_look("firstRow")
-
-    @cached_property
-    def last_row_show(self) -> bool:
-        return self._format_from_cnf_look("lastRow")
-
-    @cached_property
-    def first_col_show(self) -> bool:
-        return self._format_from_cnf_look("firstColumn")
-
-    @cached_property
-    def last_col_show(self) -> bool:
-        return self._format_from_cnf_look("lastColumn")
-
-    @cached_property
-    def no_horizontal_lines(self) -> bool:
-        return self._format_from_cnf_look("noHBand")
-
-    @cached_property
-    def no_vertical_lines(self) -> bool:
-        return self._format_from_cnf_look("noVBand")
-
-    def _format_from_cnf_look(self, format_name: CnfLookName) -> bool:
-        return self._cnf_look.has_format(format_name)
-
-    @cached_property
-    def table_style(self) -> TableStyle | None:
-        return self.table.table_style
-
-    @cached_property
-    def _latent_tbl_style_props(self) -> list[CT_TblStylePr]:
-        if self.table_style is None:
-            return []
-        return self.table_style.table_style_props(WD_CNF_FORMAT(0xFFF))
-
-    @cached_property
-    def _shift_horz_bands(self) -> bool:
-        for prop in self._latent_tbl_style_props:
-            if prop.type in _SHIFT_HORZ_BANDS:
-                return True
-        return False
-
-    @cached_property
-    def _shift_vert_bands(self) -> bool:
-        for prop in self._latent_tbl_style_props:
-            if prop.type in _SHIFT_VERT_BANDS:
-                return True
-        return False
-
-    @cached_property
-    def _tblW(self) -> CT_TblWidth | None:
-        return self._table_prop("tblW")
-
-    @cached_property
-    def _jc(self) -> CT_JcTable | None:
-        return self._table_prop("jc")
-
-    @cached_property
-    def _tblCellSpacing(self) -> CT_TblWidth | None:
-        return self._table_prop("tblCellSpacing")
-
-    @cached_property
-    def _tblInd(self) -> CT_TblWidth | None:
-        return self._table_prop("tblInd")
-
-    @cached_property
-    def _tblBorders(self) -> CT_TblBorders | None:
-        return self._table_prop("tblBorders")
-
-    @cached_property
-    def _table_top(self) -> Border | None:
-        return self._table_border("top")
-
-    @cached_property
-    def _table_bottom(self) -> Border | None:
-        return self._table_border("bottom")
-
-    @cached_property
-    def _table_left(self) -> Border | None:
-        return self._table_border("left")
-
-    @cached_property
-    def _table_right(self) -> Border | None:
-        return self._table_border("right")
-
-    @cached_property
-    def _table_insideH(self) -> Border | None:
-        return self._table_border("insideH")
-
-    @cached_property
-    def _table_insideV(self) -> Border | None:
-        return self._table_border("insideV")
-
-    @cached_property
-    def _shd(self) -> CT_Shd | None:
-        return self._table_prop("shd")
-
-    @cached_property
-    def _tblLayout(self) -> CT_TblLayoutType | None:
-        return self._table_prop("tblLayout")
-
-    @cached_property
-    def _tblCellMar(self) -> CT_TblCellMar | None:
-        return self._table_prop("tblCellMar")
-
-    @cached_property
-    def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        mask = self._prop("tblPrEx.tblLook.val")
-        if not isinstance(mask, NotFound):
-            WD_CNF_TABLE_LOOK.from_bytes(mask)
-        return self.table._cnf_look
-
-    def _table_prop(self, name: str) -> Any:
-        prop = self.prop(f"tblPrEx.{name}")
-        if isinstance(prop, NotFound):
-            return self.table._table_prop(name)
-        return prop
-
     def _table_border(self, side: _TblBorder) -> Border | None:
         side_elm = safe_get_prop(self._tblBorders, self.path(side), False)
         if not isinstance(side_elm, NotFound):
             return Border(side_elm, self)
         return None
+
+    def _format_from_cnf_look(self, format_name: CnfLookName) -> bool:
+        return self._cnf_look.has_format(format_name)
+
+    def _ex_or_table_prop(self, name: str) -> Any | None:
+        prop = self.prop(f"tblPrEx.{name}")
+        if isinstance(prop, NotFound):
+            return self.table._table_prop(name)
+        return prop
 
     def _prop_direct(self, path: str, optional: bool = False) -> Any:
         return self.prop(path, optional)
@@ -289,5 +290,3 @@ class Row(ElementProxy[CT_Row]):
         if isinstance(direct_val, NotFound):
             return self._prop_style(path, optional)
         return direct_val
-
-    # TODO: here H2D (end)

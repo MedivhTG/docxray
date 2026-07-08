@@ -9,7 +9,6 @@ from docxray.length import Length
 from docxray.oxml.t.enums import WD_CNF_FORMAT
 from docxray.oxml.t.proxy.base import (
     NotFound,
-    PropertyPath,
     from_style_inheritance,
     safe_get_prop,
 )
@@ -302,7 +301,7 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def vertical_alignment(self) -> SE_VERTICAL_JC:
-        align = self._prop("tcPr.vAlign.val", where="both")
+        align = self._prop("tcPr.vAlign.val", where="direct-style")
         if isinstance(align, NotFound):
             return SE_VERTICAL_JC.TOP
         return align
@@ -310,7 +309,7 @@ class Cell(BlockItemContainer[CT_Tc]):
     # TODO: inherit from parent Section if omitted
     @cached_property
     def content_flow(self) -> SE_TEXT_DIRECTION | None:
-        flow = self._prop("tcPr.textDirection.val", where="both")
+        flow = self._prop("tcPr.textDirection.val", where="direct-style")
         if isinstance(flow, NotFound):
             return None
         return flow
@@ -490,14 +489,14 @@ class Cell(BlockItemContainer[CT_Tc]):
         return span
 
     @cached_property
+    def table_style(self) -> TableStyle | None:
+        return self.row.table_style
+
+    @cached_property
     def _vmerge(self) -> NotFound | None | SE_MERGE:
         return self._prop("tcPr.vMerge.val", True)
 
     # TODO: here H2D
-
-    @cached_property
-    def table_style(self) -> TableStyle | None:
-        return self.row.table_style
 
     @cached_property
     def _borders_non_zero_spacing_info(self) -> BordersInfo:
@@ -507,30 +506,17 @@ class Cell(BlockItemContainer[CT_Tc]):
 
     @cached_property
     def _spacing(self) -> Length | float | None:
-        name = "tblCellSpacing"
-        row = self.row
-        # Row-level direct
-        spacing_elm = row._prop(name)
-        if not isinstance(spacing_elm, NotFound):
-            return width(spacing_elm, True)
-        # Row-level exception or Table-level direct
-        spacing_elm = row._tblCellSpacing
+        # Row-level direct or exception or Table-level direct
+        spacing_elm = self.row._tblCellSpacing
         if spacing_elm is not None:
             return width(spacing_elm, True)
-
         # From table style (defined common or exception)
-        path = self.path(f"trPr.{name}")
         # Table style Row-level (in grid group or direct) firstly
-        spacing_elm, _ = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
+        spacing_elm, _ = self._prop("trPr.tblCellSpacing", where="style-ctx")
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         # Table style Table-level (in grid group or direct) lastly
-        path = self.path(f"tblPr.{name}")
-        spacing_elm, _ = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
+        spacing_elm, _ = self._prop("tblPr.tblCellSpacing", where="style-ctx")
         if not isinstance(spacing_elm, NotFound):
             return width(spacing_elm, True)
         return None
@@ -539,7 +525,13 @@ class Cell(BlockItemContainer[CT_Tc]):
     def _cell_mar_ctx(
         self,
     ) -> tuple[CT_TcMar | None, TableStyle | CT_TblStylePr | None]:
-        return self._prop_with_ctx("tcMar")
+        elm = self._prop("tcPr.tcMar")
+        if not isinstance(elm, NotFound):
+            return elm, None
+        tc_ctx = self._prop("tcPr.tcMar", where="style-ctx")
+        if not isinstance(tc_ctx[0], NotFound):
+            return tc_ctx
+        return None, None
 
     @cached_property
     def _row_band_number(self) -> int:
@@ -632,14 +624,14 @@ class Cell(BlockItemContainer[CT_Tc]):
         return cnf
 
     @cached_property
-    def _tbl_style_props_deep(
+    def _style_ctx(
         self,
     ) -> list[tuple[TableStyle, list[CT_TblStylePr]]]:
         tbl_style = self.table_style
         props_leveled = []
         cnf = self._cnf_looked
         while isinstance(tbl_style, TableStyle):
-            tbl_style_props = self._table_style_props(tbl_style, cnf)
+            tbl_style_props = tbl_style.table_style_props(cnf)
             props_leveled.append((tbl_style, tbl_style_props))
             tbl_style = self.document_part.styles.base_style(tbl_style)  # type: ignore[assignment]
         return props_leveled
@@ -688,7 +680,7 @@ class Cell(BlockItemContainer[CT_Tc]):
             tuple[CT_TcBorders, None | TableStyle | CT_TblStylePr]
         ] = []
         override_type_seen = set()
-        for tbl_style, tbl_style_props in self._tbl_style_props_deep:
+        for tbl_style, tbl_style_props in self._style_ctx:
             if not tbl_style_props:
                 tcBorders_elm = safe_get_prop(tbl_style.element, path, False)
                 if not isinstance(tcBorders_elm, NotFound):
@@ -787,48 +779,8 @@ class Cell(BlockItemContainer[CT_Tc]):
             side = table_inside
         inf[side_n] = side
 
-    def _prop_with_ctx(
-        self, name: str
-    ) -> tuple[Any | None, TableStyle | CT_TblStylePr | None]:
-        elm = self._prop(name)
-        if not isinstance(elm, NotFound):
-            return elm, None
-        path = self.path(f"tcPr.{name}")
-        tc_ctx = self._from_tbl_style_hierarchy(
-            self._tbl_style_props_deep, path
-        )
-        if not isinstance(tc_ctx[0], NotFound):
-            return tc_ctx
-        return None, None
-
-    def _table_style_props(
-        self, table_style: TableStyle, cnf: WD_CNF_FORMAT
-    ) -> list[CT_TblStylePr]:
-        """Get desired table style properties from given tables using an cnf bit mask.
-
-        Args:
-            table_style (TableStyle): Given table style
-            cnf (WD_CNF_FORMAT): Fiven conditional formatting for table (CNF) bit mask.
-
-        Returns:
-            list[CT_TblStylePr]: List of table style properties.
-        """
-        props = []
-        for flag in WD_CNF_FORMAT.ordered_flags():
-            format = cnf & flag
-            if format:
-                tblStylePr_elm = table_style.bitwise_tbl_style_prop(flag)
-                if tblStylePr_elm is not None:
-                    props.append(tblStylePr_elm)
-        if table_style.wholeTable:
-            props.append(table_style.wholeTable)
-        return props
-
-    def _from_tbl_style_hierarchy(
-        self,
-        tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
-        path: PropertyPath,
-        optional: bool = False,
+    def _prop_style_ctx(
+        self, path: str, optional: bool = False
     ) -> tuple[Any, TableStyle | CT_TblStylePr | None]:
         """Get property value from complex table style hierarchy.
 
@@ -838,9 +790,7 @@ class Cell(BlockItemContainer[CT_Tc]):
         3) For `TableStyle` you've got an value from table style (can be an fallback or not).
 
         Args:
-            tbl_style_props_deep (list[tuple[TableStyle, list[CT_TblStylePr]]]): Full list of an applied
-                pairs `TableStyle` and table style properties inside from style hierarchy.
-            path (PropertyPath): Path to an element in element tree.
+            path (str): Path to an element in element tree.
             optional (bool, optional): If endname property can be `None` and you
                 won't get `NotFound` instance instead. Defaults to False.
 
@@ -851,43 +801,19 @@ class Cell(BlockItemContainer[CT_Tc]):
         """
         style_direct_val = NotFound(self, path)
         found_in_style = None
-        for tbl_style, tbl_style_props in tbl_style_props_deep:
+        path_p = self.path(path)
+        for tbl_style, tbl_style_props in self._style_ctx:
             if isinstance(style_direct_val, NotFound):
                 style_direct_val = safe_get_prop(
-                    tbl_style.element, path, optional
+                    tbl_style.element, path_p, optional
                 )
+                tbl_style.prop(path, optional)
                 found_in_style = tbl_style
-            tbl_val, tbl_style_prop = self._from_tbl_style_props(
-                tbl_style_props, path, optional
-            )
-            if not isinstance(tbl_val, NotFound):
-                return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
+            for tbl_style_prop in tbl_style_props:
+                table_val = safe_get_prop(tbl_style_prop, path_p, optional)
+                if not isinstance(table_val, NotFound):
+                    return table_val, tbl_style_prop
         return style_direct_val, found_in_style
-
-    def _from_tbl_style_props(
-        self,
-        table_style_props: list[CT_TblStylePr],
-        path: PropertyPath,
-        optional: bool = False,
-    ) -> tuple[Any, CT_TblStylePr | None]:
-        """Get property value from table style properties (grid group).
-
-        Args:
-            table_style_props (list[CT_TblStylePr]): Provided table style properties on an given table style level.
-            path (PropertyPath): Path to an element in element tree.
-            optional (bool, optional): If endname property can be `None` and you
-                won't get `NotFound` instance instead. Defaults to False.
-
-        Returns:
-            tuple[Any, CT_TblStylePr | None]: Tuple of found (`NotFound` instance or Any value) and in which
-                table style property was found chosen property.
-        """
-        for tbl_style_prop in table_style_props:
-            table_val = safe_get_prop(tbl_style_prop, path, optional)
-            if isinstance(table_val, NotFound):
-                continue
-            return table_val, tbl_style_prop
-        return NotFound(table_style_props, path), None
 
     def _prop_direct(self, path: str, optional: bool = False) -> Any:
         return self.prop(path, optional)
@@ -903,15 +829,17 @@ class Cell(BlockItemContainer[CT_Tc]):
         self,
         path: str,
         optional: bool = False,
-        where: Literal["direct", "style", "both"] = "direct",
+        where: Literal[
+            "direct", "style", "direct-style", "style-ctx"
+        ] = "direct",
     ) -> Any:
         if where == "direct":
             return self._prop_direct(path, optional)
         elif where == "style":
             return self._prop_style(path, optional)
-        direct_val = self._prop_direct(path, optional)
-        if isinstance(direct_val, NotFound):
-            return self._prop_style(path, optional)
-        return direct_val
-
-    # TODO: here H2D (end)
+        elif where == "direct-style":
+            direct_val = self._prop_direct(path, optional)
+            if isinstance(direct_val, NotFound):
+                return self._prop_style(path, optional)
+            return direct_val
+        return self._prop_style_ctx(path, optional)

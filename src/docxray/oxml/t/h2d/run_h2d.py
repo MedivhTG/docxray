@@ -186,9 +186,7 @@ class RunH2D(How2Display[Run]):
             char_path = self._prop_path(name_or_path, self._path_base)
         cell = self.cell
         if cell:
-            tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell._tbl_style_props_deep, char_path, optional
-            )
+            tbl_val, _ = cell._prop(char_path, optional, "style-ctx")
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
         return self._from_doc_dflts(
@@ -205,9 +203,7 @@ class RunH2D(How2Display[Run]):
         char_path = self._prop_path("val", f"{self._path_base}.{name}")
         cell = self.cell
         if cell:
-            tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell._tbl_style_props_deep, char_path, optional
-            )
+            tbl_val, _ = cell._prop(char_path, optional, "style-ctx")
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
         return self._from_doc_dflts(
@@ -224,9 +220,7 @@ class RunH2D(How2Display[Run]):
         tbl_val = NotFound(self, char_path)
         cell = self.cell
         if cell:
-            tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell._tbl_style_props_deep, char_path, True
-            )
+            tbl_val, _ = cell._prop(char_path, True, "style-ctx")
         found_count = sum(
             1
             for i in [char_val, para_val, tbl_val]

@@ -6,7 +6,7 @@ Common use is for HTML-transform.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 # docxray stuff
 from docxray.oxml.t.enums import WD_CNF_FORMAT
@@ -200,71 +200,6 @@ class How2Display(Generic[PROXY_T]):
         if table_style.wholeTable:
             props.append(table_style.wholeTable)
         return props
-
-    def _from_tbl_style_hierarchy(
-        self,
-        tbl_style_props_deep: list[tuple[TableStyle, list[CT_TblStylePr]]],
-        path: PropertyPath,
-        optional: bool = False,
-    ) -> tuple[Any, TableStyle | CT_TblStylePr | None]:
-        """Get property value from complex table style hierarchy.
-
-        Here is 4 cases for 2nd value in tuple:
-        1) For `None` there is no value from style hierarchy (can be found directly).
-        2) For `CT_TblStylePr` you've got value from an grid group of and table style property.
-        3) For `TableStyle` you've got an value from table style (can be an fallback or not).
-
-        Args:
-            tbl_style_props_deep (list[tuple[TableStyle, list[CT_TblStylePr]]]): Full list of an applied
-                pairs `TableStyle` and table style properties inside from style hierarchy.
-            path (PropertyPath): Path to an element in element tree.
-            optional (bool, optional): If endname property can be `None` and you
-                won't get `NotFound` instance instead. Defaults to False.
-
-        Returns:
-            tuple[Any, TableStyle | CT_TblStylePr | None]: Context as pair of
-                an got property value an applied table style or table style property (grid group)
-                or `None`.
-        """
-        style_direct_val = NotFound(self, path)
-        found_in_style = None
-        for tbl_style, tbl_style_props in tbl_style_props_deep:
-            if isinstance(style_direct_val, NotFound):
-                style_direct_val = safe_get_prop(
-                    tbl_style.element, path, optional
-                )
-                found_in_style = tbl_style
-            tbl_val, tbl_style_prop = self._from_tbl_style_props(
-                tbl_style_props, path, optional
-            )
-            if not isinstance(tbl_val, NotFound):
-                return tbl_val, cast("CT_TblStylePr", tbl_style_prop)
-        return style_direct_val, found_in_style
-
-    def _from_tbl_style_props(
-        self,
-        table_style_props: list[CT_TblStylePr],
-        path: PropertyPath,
-        optional: bool = False,
-    ) -> tuple[Any, CT_TblStylePr | None]:
-        """Get property value from table style properties (grid group).
-
-        Args:
-            table_style_props (list[CT_TblStylePr]): Provided table style properties on an given table style level.
-            path (PropertyPath): Path to an element in element tree.
-            optional (bool, optional): If endname property can be `None` and you
-                won't get `NotFound` instance instead. Defaults to False.
-
-        Returns:
-            tuple[Any, CT_TblStylePr | None]: Tuple of found (`NotFound` instance or Any value) and in which
-                table style property was found chosen property.
-        """
-        for tbl_style_prop in table_style_props:
-            table_val = safe_get_prop(tbl_style_prop, path, optional)
-            if isinstance(table_val, NotFound):
-                continue
-            return table_val, tbl_style_prop
-        return NotFound(table_style_props, path), None
 
     def _from_doc_dflts(
         self, path: PropertyPath, optional: bool = False
