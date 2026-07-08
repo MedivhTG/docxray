@@ -12,12 +12,18 @@ from officemath2latex import (
 
 # docxray stuff
 from docxray.length import Length
-from docxray.oxml.t.h2d.run_h2d import StrikeCase, UnderlineInfo
 from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.t.proxy.text.run import Break, Run, Tab, TxtFragment
+from docxray.oxml.t.proxy.text.run import (
+    Break,
+    Run,
+    StrikeCase,
+    Tab,
+    TxtFragment,
+    UnderlineInfo,
+)
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,

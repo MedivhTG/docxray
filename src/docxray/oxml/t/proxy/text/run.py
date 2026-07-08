@@ -2,17 +2,31 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 # docxray stuff
+from docxray.colorize import Colorize
 from docxray.oxml.t.drawing import CT_Drawing
 from docxray.oxml.t.ns import W
-from docxray.oxml.t.proxy.base import ElementProxy, StoryChild
+from docxray.oxml.t.proxy.base import (
+    ElementProxy,
+    NotFound,
+    StoryChild,
+    from_doc_dflts,
+    from_style_inheritance,
+)
+from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.drawing import Drawing
+from docxray.oxml.t.proxy.exceptions import DisplayError
+from docxray.oxml.t.proxy.styles.style import CharacterStyle
 from docxray.oxml.t.shared import CT_Empty
 from docxray.oxml.t.st.enums import (
     SE_BR_CLEAR,
     SE_BR_TYPE,
+    SE_HEX_COLOR_AUTO,
+    SE_STYLE_TYPE,
+    SE_THEME_COLOR,
+    SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
 )
 from docxray.oxml.t.text.run import (
@@ -27,17 +41,11 @@ from .font import Font
 from .language import Language
 
 if TYPE_CHECKING:
-    # docxray stuff
-    from docxray.oxml.t.h2d.run_h2d import (
-        CharsCase,
-        RunH2D,
-        StrikeCase,
-        UnderlineInfo,
-    )
-
     from .paragraph import Paragraph
 
 type RunContentProxy = TxtFragment | Drawing | Break | Tab
+type CharsCase = Literal["caps", "small_caps"]
+type StrikeCase = Literal["single", "double"]
 
 
 def run_content(
@@ -57,6 +65,11 @@ def run_content(
         if item.tag == W.TAB:
             return Tab(item, instance)
     return None
+
+
+class UnderlineInfo(TypedDict):
+    line: SE_UNDERLINE
+    color: str
 
 
 class Tab(ElementProxy[CT_Empty]):
@@ -93,13 +106,6 @@ class TxtFragment(ElementProxy[CT_Text]):
 
 class Run(StoryChild[CT_R]):
     @cached_property
-    def h2d(self) -> RunH2D:
-        # docxray stuff
-        from docxray.oxml.t.h2d.run_h2d import RunH2D
-
-        return RunH2D(self, self.part.document_part, "rPr")
-
-    @cached_property
     def paragraph(self) -> Paragraph:
         from .hyperlink import Hyperlink
         from .paragraph import Paragraph
@@ -112,43 +118,83 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def italic(self) -> bool:
-        return self.h2d.italic
+        return self._display_toggled("rPr.i.val")
 
     @cached_property
     def bold(self) -> bool:
-        return self.h2d.bold
+        return self._display_toggled("rPr.b.val")
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
-        return self.h2d.chars_case
+        if self._caps and self._small_caps:
+            raise DisplayError(
+                "Mentiond 2 cases (caps, small_caps) when they are mutually exclusive"
+            )
+        if self._caps:
+            return "caps"
+        if self._small_caps:
+            return "small_caps"
+        return None
 
     @cached_property
     def strike_case(self) -> StrikeCase | None:
-        return self.h2d.strike_case
+        if self._single_strike and self._double_strike:
+            raise DisplayError(
+                "Mentiond 2 cases (single, double) when they are mutually exclusive"
+            )
+        if self._single_strike:
+            return "single"
+        if self._double_strike:
+            return "double"
+        return None
 
     @cached_property
-    def underline(self) -> UnderlineInfo | None:
-        return self.h2d.underline
+    def underline_info(self) -> UnderlineInfo | None:
+        if self._u_line is None:
+            return None
+        return {
+            "line": self._u_line,
+            "color": Colorize.colorize(
+                self._u_color or SE_HEX_COLOR_AUTO.AUTO,
+                self._u_theme_color,
+                self.document_part.theme.palette,
+                self._u_theme_tint,
+                self._u_theme_shade,
+                prefer_theme=True,
+            ),
+        }
 
     @cached_property
     def vertical_alignment(self) -> SE_VERTICAL_ALIGN_RUN | None:
-        return self.h2d.vertical_alignment
+        align = self._display("rPr.vertAlign.val", False)
+        if (
+            isinstance(align, NotFound)
+            or align == SE_VERTICAL_ALIGN_RUN.BASELINE
+        ):
+            return None
+        return align
 
     @cached_property
     def font(self) -> Font | None:
-        return self.h2d.font
+        rFonts_elm = self._display("rPr.rFonts")
+        if isinstance(rFonts_elm, NotFound):
+            return None
+        return Font(rFonts_elm, self)
 
     @cached_property
     def language(self) -> Language | None:
-        return self.h2d.language
+        lang_elm = self._display("rPr.lang")
+        if isinstance(lang_elm, NotFound):
+            return None
+        return Language(lang_elm, self)
 
     @cached_property
     def is_complex_script(self) -> bool:
-        return self.h2d.is_complex_script
+        return on_off(self._display("rPr.cs.val"))
 
     @cached_property
     def right_to_left(self) -> bool:
-        return self.h2d.right_to_left
+        return on_off(self._display("rPr.rtl.val"))
 
     @cached_property
     def raw_text(self) -> str:
@@ -157,6 +203,130 @@ class Run(StoryChild[CT_R]):
             if isinstance(item, TxtFragment):
                 txt += item.raw
         return txt
+
+    @cached_property
+    def character_style(self) -> CharacterStyle | None:
+        style_id = self._prop("rPr.rStyle.val")
+        if isinstance(style_id, NotFound):
+            return None
+        return self.document_part.styles.get_by_id(
+            style_id, SE_STYLE_TYPE.CHARACTER, CharacterStyle
+        )
+
+    @cached_property
+    def _caps(self) -> bool:
+        return self._display_toggled("rPr.caps.val")
+
+    @cached_property
+    def _small_caps(self) -> bool:
+        return self._display_toggled("rPr.smallCaps.val")
+
+    @cached_property
+    def _single_strike(self) -> bool:
+        return self._display_toggled("rPr.strike.val")
+
+    @cached_property
+    def _double_strike(self) -> bool:
+        return on_off(self._display("rPr.dstrike.val", True))
+
+    @cached_property
+    def _u_line(self) -> SE_UNDERLINE | None:
+        line = self._display("rPr.u.val", True)
+        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
+            return None
+        if line is None:
+            return SE_UNDERLINE.SINGLE
+        return line
+
+    @cached_property
+    def _u_color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
+        color = self._display("rPr.u.color")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _u_theme_color(self) -> SE_THEME_COLOR | None:
+        color = self._display("rPr.u.themeColor")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _u_theme_tint(self) -> bytes | None:
+        tint = self._display("rPr.u.themeTint")
+        if isinstance(tint, NotFound):
+            return None
+        return tint
+
+    @cached_property
+    def _u_theme_shade(self) -> bytes | None:
+        shade = self._display("rPr.u.themeShade")
+        if isinstance(shade, NotFound):
+            return None
+        return shade
+
+    def _display(self, path: str, optional: bool = False) -> Any:
+        char_val = self._prop(path, optional, "both")
+        if not isinstance(char_val, NotFound):
+            return char_val
+        para_val = self.paragraph._prop(path, optional, "paragraph-style")
+        if not isinstance(para_val, NotFound):
+            return para_val
+        tbl_val = self.paragraph._prop(path, optional, "table-style")
+        if not isinstance(tbl_val, NotFound):
+            return tbl_val
+        return from_doc_dflts(self, f"rPrDefault.{path}", optional)
+
+    def _display_toggled(self, path: str) -> bool:
+        direct_val = self._prop(path, True)
+        if not isinstance(direct_val, NotFound):
+            return on_off(direct_val)
+        char_val = self._prop(path, True, "style")
+        para_val = self.paragraph._prop(path, True, "paragraph-style")
+        tbl_val = self.paragraph._prop(path, True, "table-style")
+        found_count = sum(
+            1
+            for i in [char_val, para_val, tbl_val]
+            if not isinstance(i, NotFound)
+        )
+        if found_count > 1:
+            doc_val = on_off(from_doc_dflts(self, f"rPrDefault.{path}", True))
+            if doc_val is True:
+                return doc_val
+            return on_off(tbl_val) ^ on_off(para_val) ^ on_off(char_val)
+        if not isinstance(char_val, NotFound):
+            return on_off(char_val)
+        if not isinstance(para_val, NotFound):
+            return on_off(para_val)
+        if not isinstance(tbl_val, NotFound):
+            return on_off(tbl_val)
+        return False
+
+    def _prop_direct(self, path: str, optional: bool = False) -> Any:
+        return self.prop(path, optional)
+
+    def _prop_style(self, path: str, optional: bool = False) -> Any:
+        if self.character_style:
+            return from_style_inheritance(
+                self, self.character_style, path, optional
+            )
+        return NotFound(self, path)
+
+    def _prop(
+        self,
+        path: str,
+        optional: bool = False,
+        where: Literal["direct", "style", "both"] = "direct",
+    ) -> Any:
+        if where == "direct":
+            return self._prop_direct(path, optional)
+        elif where == "style":
+            return self._prop_style(path, optional)
+        direct_val = self._prop_direct(path, optional)
+        if isinstance(direct_val, NotFound):
+            return self._prop_style(path, optional)
+        return direct_val
 
     def iter_inner_content(
         self,

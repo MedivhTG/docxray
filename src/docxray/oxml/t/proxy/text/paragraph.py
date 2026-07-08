@@ -12,7 +12,6 @@ from docxray.oxml.t.proxy.base import (
     StoryChild,
     from_doc_dflts,
     from_style_inheritance,
-    safe_get_prop,
 )
 from docxray.oxml.t.proxy.compute import (
     on_off,
@@ -98,6 +97,9 @@ class Paragraph(StoryChild[CT_P]):
 
     @cached_property
     def list_item(self) -> ListItem | None:
+        # docxray stuff
+        from docxray.oxml.t.proxy.list import ListItem
+
         if self.document_part.numbering is None:
             return None
         if self._assoc_numPr is None:
@@ -113,12 +115,18 @@ class Paragraph(StoryChild[CT_P]):
 
     @cached_property
     def list_view(self) -> ListView | None:
+        # docxray stuff
+        from docxray.oxml.t.proxy.list import ListView
+
         if self.list_item is None:
             return None
         return ListView(self.list_item)
 
     @cached_property
     def list_view_interrupted(self) -> ListViewInterrupted | None:
+        # docxray stuff
+        from docxray.oxml.t.proxy.list import ListViewInterrupted
+
         if self.list_item is None:
             return None
         return ListViewInterrupted(self.list_item)
@@ -540,7 +548,10 @@ class Paragraph(StoryChild[CT_P]):
             return None
         return numPr_elm
 
-    def _display(self, path: str, optional: bool = False):
+    def _display(self, path: str, optional: bool = False) -> Any:
+        # docxray stuff
+        from docxray.oxml.t.proxy.table.cell import Cell
+
         if self.list_item:
             return self._prop(path, optional, "direct-style-hierarchy")
         para_val = self._prop(path, optional, "direct-style-hierarchy")
@@ -580,6 +591,9 @@ class Paragraph(StoryChild[CT_P]):
         return NotFound(self, path)
 
     def _prop_table_style(self, path: str, optional: bool = False) -> Any:
+        # docxray stuff
+        from docxray.oxml.t.proxy.table.cell import Cell
+
         if isinstance(self.container, Cell):
             tbl_val, _ = self.container._prop(path, optional, "style-ctx")
             if not isinstance(tbl_val, NotFound):

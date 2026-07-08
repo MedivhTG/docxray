@@ -75,7 +75,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
     }
 
     ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
-        "underline": underline_elm,
+        "underline_info": underline_elm,
         "vertical_alignment": vert_align_elm,
         "italic": i_elm,
         "bold": b_elm,
@@ -188,20 +188,19 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             style += (
                 f"writing-mode: {TEXT_FLOW_TO_WRITING_MODE[proxy.text_flow]}; "
             )
-        h2d = proxy.h2d
-        if h2d.keep_next:
+        if proxy.keep_next:
             style += "page-break-after: avoid; "
-        if h2d.keep_lines:
+        if proxy.keep_lines:
             style += "page-break-inside: avoid; "
-        if h2d.page_break_before:
+        if proxy.page_break_before:
             style += "page-break-before: always;"
-        if h2d.no_hanging and not h2d.keep_lines:
+        if proxy.no_hanging and not proxy.keep_lines:
             style += "page-break-inside: avoid; orphans: 2; widows: 2; "
         else:
             style += "orphans: 2; widows: 2; "
-        if h2d.word_wrap:
+        if proxy.word_wrap:
             style += "word-break: break-all; "
-        if h2d.supress_auto_hyphens:
+        if proxy.supress_auto_hyphens:
             style += "hyphens: manual; "
         spacing = cls._spacing(proxy)
         if spacing:

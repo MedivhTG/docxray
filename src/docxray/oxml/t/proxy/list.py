@@ -1,23 +1,18 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 # docxray stuff
 from docxray.colorize import Colorize
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
-from docxray.oxml.t.h2d.exceptions import DisplayError
-from docxray.oxml.t.h2d.numeral_rules import (
-    NUMERAL_RULES,
-    NUMERAL_SPECIFIC,
-    NUMERAL_WITH_LOCALE,
-)
-from docxray.oxml.t.h2d.run_h2d import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.proxy.base import NotFound, PropertyPath
 from docxray.oxml.t.proxy.compute import on_off
+from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
+from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_NUMBER_FORMAT,
@@ -28,6 +23,12 @@ from docxray.oxml.t.st.enums import (
 from docxray.oxml.t.text.num_props import CT_NumPr
 from docxray.shared import os_locale
 from docxray.transform.transformer import Transformer
+
+from .numeral_rules import (
+    NUMERAL_RULES,
+    NUMERAL_SPECIFIC,
+    NUMERAL_WITH_LOCALE,
+)
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -338,7 +339,7 @@ class ListItem:
         return None
 
     @cached_property
-    def underline(self) -> UnderlineInfo | None:
+    def underline_info(self) -> UnderlineInfo | None:
         line = self._display_level_text_run_val("u", True)
         if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
             return None

@@ -212,7 +212,7 @@ class Font(ElementProxy[CT_Fonts]):
         from docxray.oxml.t.proxy.text.run import Run
 
         if isinstance(self.parent, Run):
-            prop = self.parent.h2d._display_val(name, False)
+            prop = self.parent._display(f"rPr.{name}")
             if isinstance(prop, NotFound):
                 return None
         return getattr(self.element, name, None)
