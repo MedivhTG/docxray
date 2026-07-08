@@ -214,3 +214,25 @@ def from_style_inheritance(
             return val
         style = base_style
     return val
+
+
+def from_doc_dflts(
+    proxy: ElementProxy | StoryChild,
+    path: str,
+    optional: bool = False,
+) -> Any:
+    """Get property value directly from document deafults in styles.
+
+    Args:
+        proxy (ElementProxy | StoryChild): Proxy to get styles.
+        path (PropertyPath): Path to an element in element tree.
+        optional (bool, optional): If endname property can be `None` and you
+            won't get `NotFound` instance instead. Defaults to False.
+
+    Returns:
+        Any: `NotFound` instance or Any value.
+    """
+    doc_dflts = proxy.document_part.styles.document_defaults
+    if doc_dflts is None:
+        return NotFound(proxy, path)
+    return doc_dflts.prop(path, optional)

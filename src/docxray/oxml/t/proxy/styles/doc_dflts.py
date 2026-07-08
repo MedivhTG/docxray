@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class DocumentDefaults(ElementProxy[CT_DocDefaults]):
-    @property
+    @cached_property
     def part(self) -> StylesPart:
         return self.part
 

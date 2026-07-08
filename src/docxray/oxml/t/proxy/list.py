@@ -161,14 +161,8 @@ class ListViewInterrupted(ListView):
         stringify: bool = True,
         method: TransformMethod = "html",
     ) -> Any:
-        # docxray stuff
-        from docxray.oxml.t.parts.document import DocumentPart
-
         ruleset = (
-            ruleset
-            or cast(
-                "DocumentPart", self._li.paragraph.part
-            )._default_html_ruleset
+            ruleset or self._li.paragraph.document_part._default_html_ruleset
         )
         return Transformer.transform(
             self, ruleset, "ListViewInterrupted", stringify, method
@@ -186,15 +180,14 @@ class ListItem:
         level: Level,
     ) -> None:
         self._numbering = numbering
+        self._styles = paragraph.document_part.styles
         self._paragraph = paragraph
-        self._h2d = paragraph.h2d
         if numPr_elm.numId is None:
             raise ListItemError(
                 "Cannot instantiate list item with `None` numId"
             )
         self._num_id = numPr_elm.numId.val
         self._level = level
-        self._start = level.start_from
         self._ilvl = (
             numPr_elm.ilvl.val
             if numPr_elm.ilvl is not None
@@ -224,11 +217,6 @@ class ListItem:
     def num_key(self) -> tuple[int, int]:
         """Tuple of `num_id` and `ilvl`"""
         return self.num_id, self.ilvl
-
-    @cached_property
-    def start(self) -> int:
-        """Which number of ordinal (or 0) must be the start of list for `char_ord`."""
-        return self._start
 
     @cached_property
     def ord(self) -> int:
@@ -310,8 +298,8 @@ class ListItem:
         """
         if self.level.locale is not None:
             return self.level.locale
-        if self._h2d._styles.document_defaults is not None:
-            locale = self._h2d._styles.document_defaults.locale
+        if self._styles.document_defaults is not None:
+            locale = self._styles.document_defaults.locale
             if locale is not None:
                 return locale
         return os_locale()
@@ -437,7 +425,7 @@ class ListItem:
             path = name_or_path
         else:
             path = PropertyPath.base(name_or_path, "rPr")
-        return self.paragraph.h2d._prop(path, optional, "style")
+        return self.paragraph._prop(path, optional, "level")
 
     def _display_level_text_run_val(
         self, name: str, optional: bool = False
@@ -490,8 +478,8 @@ class ListItem:
             return Numeral.decimal(ord)
         if format in NUMERAL_WITH_LOCALE:
             locale = for_leveled.locale
-            if locale is None and self._h2d._styles.document_defaults:
-                locale = self._h2d._styles.document_defaults.locale
+            if locale is None and self._styles.document_defaults:
+                locale = self._styles.document_defaults.locale
             locale = locale or "en-US"
             return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[format](ord)  # type: ignore[operator]

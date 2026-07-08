@@ -142,7 +142,10 @@ class RunH2D(How2Display[Run]):
 
     @cached_property
     def cell(self) -> Cell | None:
-        return self._proxy.paragraph.h2d.cell
+        container = self._proxy.paragraph.container
+        if isinstance(container, Cell):
+            return container
+        return None
 
     @cached_property
     def _caps(self) -> bool:
