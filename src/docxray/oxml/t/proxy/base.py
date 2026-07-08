@@ -20,6 +20,10 @@ if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleProxy, RuleSet
     from docxray.transform.transformer import TransformMethod
     from docxray.oxml.t.parts.document import DocumentPart
+    from docxray.oxml.t.proxy.styles.style import (
+        CharacterStyle,
+        NumberingStyle,
+    )
 
 
 class ElementProxy(Generic[ELM_T]):
@@ -39,6 +43,12 @@ class ElementProxy(Generic[ELM_T]):
     @cached_property
     def document_part(self) -> DocumentPart:
         return document_part(self)
+
+    def path(self, path_str: str) -> PropertyPath:
+        return PropertyPath(path_str)
+
+    def prop(self, path: str, optional: bool = False) -> Any:
+        return safe_get_prop(self.element, self.path(path), optional)
 
     def transform(
         self,
@@ -66,6 +76,12 @@ class StoryChild(Generic[ELM_T]):
     @cached_property
     def document_part(self) -> DocumentPart:
         return document_part(self)
+
+    def path(self, path_str: str) -> PropertyPath:
+        return PropertyPath(path_str)
+
+    def prop(self, path: str, optional: bool = False) -> Any:
+        return safe_get_prop(self.element, self.path(path), optional)
 
     @cached_property
     def prev_sibling(self) -> Self | None:
@@ -118,7 +134,7 @@ class PropertyPath(str):
 
 
 class NotFound:
-    def __init__(self, obj: Any, path: PropertyPath) -> None:
+    def __init__(self, obj: Any, path: PropertyPath | str) -> None:
         self.obj = obj
         self.path = path
 
@@ -170,3 +186,31 @@ def transform(
         stringify,
         method,
     )
+
+
+def from_style_inheritance(
+    proxy: ElementProxy | StoryChild,
+    style: CharacterStyle | NumberingStyle,
+    path: str,
+    optional: bool = False,
+) -> Any:
+    """Iterate over style hierarchy with same style from given to get property value.
+
+    Args:
+        proxy (ElementProxy | StoryChild): Proxy to get styles.
+        style (CharacterStyle | NumberingStyle): Given style.
+        path (str): Path to an element in element tree.
+        optional (bool, optional): If endname property can be `None` and you
+            won't get `NotFound` instance instead. Defaults to False.
+
+    Returns:
+        Any: `NotFound` instance or Any value.
+    """
+    val = NotFound(style, path)
+    while isinstance(val, NotFound):
+        val = safe_get_prop(style.element, proxy.path(path), optional)
+        base_style = proxy.document_part.styles.base_style(style)
+        if not isinstance(base_style, style.__class__):
+            return val
+        style = base_style
+    return val

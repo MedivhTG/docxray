@@ -488,7 +488,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         )
         if cell:
             tbl_val, _ = self._from_tbl_style_hierarchy(
-                cell.h2d._tbl_style_props_deep, para_path, optional
+                cell._tbl_style_props_deep, para_path, optional
             )
             if not isinstance(tbl_val, NotFound):
                 return tbl_val
@@ -546,7 +546,7 @@ class ParagraphH2D(How2Display[Paragraph]):
         def _from_table_style() -> Any | NotFound:
             if not for_run and self.cell:
                 tbl_val, _ = self._from_tbl_style_hierarchy(
-                    self.cell.h2d._tbl_style_props_deep, path, optional
+                    self.cell._tbl_style_props_deep, path, optional
                 )
                 if not isinstance(tbl_val, NotFound):
                     return tbl_val
