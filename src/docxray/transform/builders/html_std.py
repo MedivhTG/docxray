@@ -189,9 +189,11 @@ def txt(run: Run, txt_fgmt: TxtFragment) -> str | HtmlElement:
     if run.chars_case is None:
         return txt_fgmt.raw
     elif run.chars_case == "caps":
-        return Element("span", {"style": "text-transform: uppercase;"})
+        elm = Element("span", {"style": "text-transform: uppercase;"})
     else:
-        return Element("span", {"style": "font-variant: small-caps;"})
+        elm = Element("span", {"style": "font-variant: small-caps;"})
+    elm.text = txt_fgmt.raw
+    return elm
 
 
 def break_elm(br: Break) -> HtmlElement | None:
