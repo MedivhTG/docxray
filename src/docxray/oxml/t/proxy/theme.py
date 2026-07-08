@@ -14,7 +14,7 @@ from docxray.oxml.t.enums import WIN32_COLOR
 from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.proxy.compute import percentage
-from docxray.oxml.t.proxy.settings import SemanticColor
+from docxray.oxml.t.proxy.settings import _SemanticColor
 from docxray.oxml.t.st.enums import (
     SE_SCHEME_COLOR_VAL,
     SE_SYSTEM_COLOR_VAL,
@@ -34,7 +34,7 @@ from docxray.oxml.t.theme.font import CT_SupplementalFont, CT_TextFont
 from docxray.oxml.t.theme.theme import CT_OfficeStyleSheet
 from docxray.shared import win32_color_hex
 
-SCHEME_GET_COLOR_MAPPING = {
+_SCHEME_GET_COLOR_MAPPING = {
     SE_WML_COLOR_SCHEME_INDEX.LIGHT1: "lt1",
     SE_WML_COLOR_SCHEME_INDEX.DARK1: "dk1",
     SE_WML_COLOR_SCHEME_INDEX.LIGHT2: "lt2",
@@ -49,7 +49,7 @@ SCHEME_GET_COLOR_MAPPING = {
     SE_WML_COLOR_SCHEME_INDEX.FOLLOWED_HYPERLINK: "folHlink",
 }
 
-SCHEME_TO_THEME_COLOR = {
+_SCHEME_TO_THEME_COLOR = {
     SE_SCHEME_COLOR_VAL.BG1: SE_THEME_COLOR.BACKGROUND1,
     SE_SCHEME_COLOR_VAL.TX1: SE_THEME_COLOR.TEXT1,
     SE_SCHEME_COLOR_VAL.BG2: SE_THEME_COLOR.BACKGROUND2,
@@ -68,8 +68,7 @@ SCHEME_TO_THEME_COLOR = {
     SE_SCHEME_COLOR_VAL.LT2: SE_THEME_COLOR.LIGHT2,
 }
 
-
-SYSTEM_COLOR_MAP_WIN32 = {
+_SYSTEM_COLOR_MAP_WIN32 = {
     SE_SYSTEM_COLOR_VAL.SCROLL_BAR: WIN32_COLOR.SCROLLBAR,
     SE_SYSTEM_COLOR_VAL.BACKGROUND: WIN32_COLOR.BACKGROUND,
     SE_SYSTEM_COLOR_VAL.ACTIVE_CAPTION: WIN32_COLOR.ACTIVECAPTION,
@@ -102,7 +101,7 @@ SYSTEM_COLOR_MAP_WIN32 = {
     SE_SYSTEM_COLOR_VAL.MENU_BAR: WIN32_COLOR.MENUBAR,
 }
 
-SYSTEM_COLOR_DEFAULTS = {
+_SYSTEM_COLOR_DEFAULTS = {
     SE_SYSTEM_COLOR_VAL.SCROLL_BAR: "#C8C8C8",
     SE_SYSTEM_COLOR_VAL.BACKGROUND: "#6A6A6A",
     SE_SYSTEM_COLOR_VAL.ACTIVE_CAPTION: "#0054E3",
@@ -201,14 +200,14 @@ class ThemeColor(ElementProxy[CT_Color_Theme]):
         if sysClr_elm.lastClr:
             return f"#{sysClr_elm.lastClr.hex()}"
         if sys.platform == "win32":
-            idx = SYSTEM_COLOR_MAP_WIN32[sysClr_elm.val]
+            idx = _SYSTEM_COLOR_MAP_WIN32[sysClr_elm.val]
             return win32_color_hex(idx)
-        return SYSTEM_COLOR_DEFAULTS[sysClr_elm.val]
+        return _SYSTEM_COLOR_DEFAULTS[sysClr_elm.val]
 
     def _scheme(self, schemeClr_elm: CT_SchemeColor) -> str | None:
         if schemeClr_elm.val == "phClr":
             return None
-        clr = SCHEME_TO_THEME_COLOR[schemeClr_elm.val]
+        clr = _SCHEME_TO_THEME_COLOR[schemeClr_elm.val]
         return self.parent.palette[clr].color
 
     def _preset(self, prstClr: CT_PresetColor) -> str:
@@ -268,9 +267,9 @@ class Theme(ElementProxy[CT_OfficeStyleSheet]):
 
     @cached_property
     def palette(self) -> dict[SE_THEME_COLOR, ThemeColor]:
-        def _color(name: SemanticColor) -> ThemeColor:
+        def _color(name: _SemanticColor) -> ThemeColor:
             idx = mapping[name]
-            attr_name = SCHEME_GET_COLOR_MAPPING[idx]
+            attr_name = _SCHEME_GET_COLOR_MAPPING[idx]
             return ThemeColor(getattr(clrScheme_elm, attr_name), self)
 
         C = SE_THEME_COLOR

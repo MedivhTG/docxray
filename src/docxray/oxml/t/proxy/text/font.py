@@ -147,7 +147,7 @@ class Font(ElementProxy[CT_Fonts]):
 
     def _guess_slot(self, char: str) -> FontSlot:
         unicode = ord(char)
-        for u_set, classificator in CLASS_TABLE:
+        for u_set, classificator in _CLASS_TABLE:
             if unicode in u_set:
                 if isinstance(classificator, FontSlot):
                     font_slot = classificator
@@ -258,7 +258,7 @@ class Font(ElementProxy[CT_Fonts]):
         return FontSlot.HIGH_ANSI
 
 
-CLASS_TABLE: list[
+_CLASS_TABLE: list[
     tuple[set[int], FontSlot | Callable[[Font, int], FontSlot]]
 ] = [
     # Basic Latin, Hebrew, Arabic, Syriac, Arabic Supplement, Thaana,

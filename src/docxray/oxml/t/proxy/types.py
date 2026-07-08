@@ -1,4 +1,4 @@
-"""Abstract types used by `python-docx`."""
+"""Abstract types used by `docxray`."""
 
 from __future__ import annotations
 

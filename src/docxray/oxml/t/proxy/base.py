@@ -48,6 +48,7 @@ class ElementProxy(Generic[ELM_T]):
         return PropertyPath(path_str)
 
     def prop(self, path: str, optional: bool = False) -> Any:
+        """Get property from current element of an proxy."""
         return safe_get_prop(self.element, self.path(path), optional)
 
     def transform(
@@ -81,6 +82,7 @@ class StoryChild(Generic[ELM_T]):
         return PropertyPath(path_str)
 
     def prop(self, path: str, optional: bool = False) -> Any:
+        """Get property from current element of an proxy."""
         return safe_get_prop(self.element, self.path(path), optional)
 
     @cached_property
@@ -131,12 +133,13 @@ class NotFound:
 
 
 def safe_get_prop(obj: Any, path: PropertyPath, optional: bool = True) -> Any:
-    """_summary_
+    """Get property from object with dot-notation, e.g. `rPr.i.val`.
 
     Args:
-        obj (Any): _description_
-        path (PropertyPath): _description_
-        optional (bool, optional): _description_. Defaults to True.
+        obj (Any): Given object for getting property.
+        path (PropertyPath): Path to property.
+        optional (bool, optional): If end-name property not found return
+            `None` instead of `NotFound`. Defaults to True.
 
     Returns:
         Any: Python value or `NotFound` if property not found; or

@@ -22,6 +22,7 @@ def normalize_pct(pct: float) -> float:
 
 
 def percentage(pct: int | str) -> float | None:
+    """Parse percent int or string to float."""
     if isinstance(pct, int):
         return float(pct)
     pattern = cast(PatternFacet, ST_Percentage.FACETS["pattern"]).value
@@ -73,6 +74,17 @@ def on_off(
     on_off: NotFound | None | bool | SE_ON_OFF_1 | CT_OnOff,
     not_found_is_true: bool = False,
 ) -> bool:
+    """Reurn boolean equivalent of an passed param `on_off`.
+
+    Args:
+        on_off (NotFound | None | bool | SE_ON_OFF_1 | CT_OnOff): Passed OnOff value.
+        not_found_is_true (bool, optional): If value is instance of `NotFound` count as True.
+            Defaults to False.
+
+    Returns:
+        bool: OnOff boolean.
+    """
+
     def _val(val: None | bool | SE_ON_OFF_1) -> bool:
         if val is None:
             return True
@@ -91,12 +103,14 @@ def on_off(
 
 
 def signed_twips_measure(twips: int | str) -> Length:
+    """Convert to `Length` instance from twips."""
     if isinstance(twips, int):
         return Twips(twips)
     return universal_measure(twips)
 
 
 def twips_measure(twips: int | str) -> Length:
+    """Convert to positive `Length` instance from twips."""
     if isinstance(twips, int):
         return Twips(twips)
     return universal_measure(

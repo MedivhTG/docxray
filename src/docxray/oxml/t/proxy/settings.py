@@ -6,7 +6,7 @@ from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.settings import CT_Settings
 from docxray.oxml.t.st.enums import SE_WML_COLOR_SCHEME_INDEX as C
 
-type SemanticColor = Literal[
+type _SemanticColor = Literal[
     "bg1",
     "t1",
     "bg2",
@@ -20,7 +20,7 @@ type SemanticColor = Literal[
     "hyperlink",
     "followedHyperlink",
 ]
-THEME_COLOR_MAPPING_DEFAULTS: dict[SemanticColor, C] = {
+_THEME_COLOR_MAPPING_DEFAULTS: dict[_SemanticColor, C] = {
     "bg1": C.LIGHT1,
     "t1": C.DARK1,
     "bg2": C.LIGHT2,
@@ -38,15 +38,15 @@ THEME_COLOR_MAPPING_DEFAULTS: dict[SemanticColor, C] = {
 
 class Settings(ElementProxy[CT_Settings]):
     @cached_property
-    def theme_color_mapping(self) -> dict[SemanticColor, C]:
-        def _color(name: SemanticColor, idx: C | None) -> C:
+    def theme_color_mapping(self) -> dict[_SemanticColor, C]:
+        def _color(name: _SemanticColor, idx: C | None) -> C:
             if idx is None:
-                return THEME_COLOR_MAPPING_DEFAULTS[name]
+                return _THEME_COLOR_MAPPING_DEFAULTS[name]
             return idx
 
         clrSchemeMapping_elm = self.element.clrSchemeMapping
         if clrSchemeMapping_elm is None:
-            return THEME_COLOR_MAPPING_DEFAULTS
+            return _THEME_COLOR_MAPPING_DEFAULTS
         return {
             "bg1": _color("bg1", clrSchemeMapping_elm.bg1),
             "t1": _color("t1", clrSchemeMapping_elm.t1),

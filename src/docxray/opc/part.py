@@ -134,7 +134,6 @@ class Part(Generic[PACKAGE_T]):
     @cached_property
     def rels(self) -> Relationships:
         """|Relationships| instance holding the relationships for this part."""
-        # -- prevent breakage in `python-docx-template` by retaining legacy `._rels` attribute --
         self._rels = Relationships(self._partname.baseURI)
         return self._rels
 

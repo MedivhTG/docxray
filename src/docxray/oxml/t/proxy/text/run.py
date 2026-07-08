@@ -107,6 +107,7 @@ class TxtFragment(ElementProxy[CT_Text]):
 class Run(StoryChild[CT_R]):
     @cached_property
     def paragraph(self) -> Paragraph:
+        """Current paragraph where is run contained"""
         from .hyperlink import Hyperlink
         from .paragraph import Paragraph
 
@@ -118,14 +119,17 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def italic(self) -> bool:
+        """Used italic bold-decoration."""
         return self._display_toggled("rPr.i.val")
 
     @cached_property
     def bold(self) -> bool:
+        """Used text bold-decoration."""
         return self._display_toggled("rPr.b.val")
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
+        """Used text transformation such as caps or font-variant as small-caps."""
         if self._caps and self._small_caps:
             raise DisplayError(
                 "Mentiond 2 cases (caps, small_caps) when they are mutually exclusive"
@@ -138,6 +142,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def strike_case(self) -> StrikeCase | None:
+        """Used single or double strike for text, not both."""
         if self._single_strike and self._double_strike:
             raise DisplayError(
                 "Mentiond 2 cases (single, double) when they are mutually exclusive"
@@ -150,6 +155,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def underline_info(self) -> UnderlineInfo | None:
+        """Underline with info about line type and used color."""
         if self._u_line is None:
             return None
         return {
@@ -166,6 +172,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def vertical_alignment(self) -> SE_VERTICAL_ALIGN_RUN | None:
+        """Vertical alignment for text - superscript, subscript."""
         align = self._display("rPr.vertAlign.val", False)
         if (
             isinstance(align, NotFound)
@@ -176,6 +183,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def font(self) -> Font | None:
+        """Used font for text."""
         rFonts_elm = self._display("rPr.rFonts")
         if isinstance(rFonts_elm, NotFound):
             return None
@@ -183,6 +191,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def language(self) -> Language | None:
+        """Used langugage for text."""
         lang_elm = self._display("rPr.lang")
         if isinstance(lang_elm, NotFound):
             return None
@@ -190,14 +199,17 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def is_complex_script(self) -> bool:
+        """Spelling for text is complex (has arabic, chinese, etc. chars)."""
         return on_off(self._display("rPr.cs.val", True))
 
     @cached_property
     def right_to_left(self) -> bool:
+        """Spelling for text is right-to-left."""
         return on_off(self._display("rPr.rtl.val", True))
 
     @cached_property
     def raw_text(self) -> str:
+        """Accumulated text from tags `<w:t>`."""
         txt = ""
         for item in self.iter_inner_content():
             if isinstance(item, TxtFragment):
@@ -206,6 +218,7 @@ class Run(StoryChild[CT_R]):
 
     @cached_property
     def character_style(self) -> CharacterStyle | None:
+        """Direct style applied for run."""
         style_id = self._prop("rPr.rStyle.val")
         if isinstance(style_id, NotFound):
             return None

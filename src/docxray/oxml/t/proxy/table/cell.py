@@ -79,7 +79,7 @@ class TblPosError(Exception):
     pass
 
 
-class BordersDropped(TypedDict):
+class _BordersDropped(TypedDict):
     top: bool
     bottom: bool
     left: bool
@@ -99,136 +99,6 @@ class PaddingInfo(TypedDict):
     bottom: Length | float | None
     left: Length | float | None
     right: Length | float | None
-
-
-class CellOnBorderGrid:
-    def __init__(
-        self,
-        cell: Cell,
-        tcBorders_elm: CT_TcBorders,
-        grid_group: SE_TBL_STYLE_OVERRIDE_TYPE,
-    ) -> None:
-        self._cell = cell
-        self._tcBorders_elm = tcBorders_elm
-        self._group = grid_group
-
-    @cached_property
-    def sides(
-        self,
-    ) -> tuple[Border | None, Border | None, Border | None, Border | None]:
-        row_pos = self._cell.row.pos
-        cell_pos = self._cell.pos
-        if self._group in _HORZ_GROUP:
-            row_pos = POS.ONE_ITEM
-        elif self._group in _VERT_GROUP:
-            cell_pos = POS.ONE_ITEM
-        elif self._group in _CORNER_GROUP:
-            row_pos = POS.ONE_ITEM
-            cell_pos = POS.ONE_ITEM
-        # Top, Bottom
-        top_n, bottom_n = _TBL_POSITIONING[row_pos]["row"]
-        top = None
-        bottom = None
-        # Top
-        if top_n == "top":
-            top_elm = getattr(self._tcBorders_elm, "top", None)
-            if top_elm is not None:
-                top = Border(top_elm, self._cell)
-        else:
-            top = self._self_insideH
-            # Fallback
-            if (
-                top is None
-                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
-            ):
-                top_elm = getattr(self._tcBorders_elm, "top", None)
-                if top_elm is not None:
-                    top = Border(top_elm, self._cell)
-
-        # Bottom
-        if bottom_n == "bottom":
-            bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
-            if bottom_elm is not None:
-                bottom = Border(bottom_elm, self._cell)
-        else:
-            bottom = self._self_insideH
-            # Fallback
-            if (
-                bottom is None
-                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
-            ):
-                bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
-                if bottom_elm is not None:
-                    bottom = Border(bottom_elm, self._cell)
-        # Left, Right
-        left_n, right_n = _TBL_POSITIONING[cell_pos]["cell"]
-        left = None
-        right = None
-        # Left
-        if left_n == "left":
-            left_elm = getattr(self._tcBorders_elm, "left", None)
-            if left_elm is not None:
-                left = Border(left_elm, self._cell)
-        else:
-            left = self._self_insideV
-            # Fallback
-            if (
-                left is None
-                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
-            ):
-                left_elm = getattr(self._tcBorders_elm, "left", None)
-                if left_elm is not None:
-                    left = Border(left_elm, self._cell)
-        # Right
-        if right_n == "right":
-            right_elm = getattr(self._tcBorders_elm, "right", None)
-            if right_elm is not None:
-                right = Border(right_elm, self._cell)
-        else:
-            right = self._self_insideV
-            # Fallback
-            if (
-                right is None
-                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
-            ):
-                right_elm = getattr(self._tcBorders_elm, "right", None)
-                if right_elm is not None:
-                    right = Border(right_elm, self._cell)
-        return top, bottom, left, right
-
-    @cached_property
-    def top(self) -> Border | None:
-        return self.sides[0]
-
-    @cached_property
-    def bottom(self) -> Border | None:
-        return self.sides[1]
-
-    @cached_property
-    def left(self) -> Border | None:
-        return self.sides[2]
-
-    @cached_property
-    def right(self) -> Border | None:
-        return self.sides[3]
-
-    @cached_property
-    def _self_insideH(self) -> Border | None:
-        if self._group in _HORZ_GROUP | _CORNER_GROUP:
-            return None
-        insideH_elm = getattr(self._tcBorders_elm, "insideH", None)
-        if insideH_elm is None:
-            return None
-        return Border(insideH_elm, self._cell)
-
-    @cached_property
-    def _self_insideV(self) -> Border | None:
-        if self._group in _VERT_GROUP | _CORNER_GROUP:
-            return None
-        insideV_elm = getattr(self._tcBorders_elm, "insideV", None)
-        if insideV_elm is None:
-            return None
-        return Border(insideV_elm, self._cell)
 
 
 class Cell(BlockItemContainer[CT_Tc]):
@@ -651,8 +521,8 @@ class Cell(BlockItemContainer[CT_Tc]):
         return self._self_border("right")
 
     @cached_property
-    def _border_grid_cells(self) -> list[CellOnBorderGrid]:
-        cell_on_grids: list[CellOnBorderGrid] = []
+    def _border_grid_cells(self) -> list[_CellOnBorderGrid]:
+        cell_on_grids: list[_CellOnBorderGrid] = []
         borders_ctx = self._tcBordersCtx
         if borders_ctx is None:
             return cell_on_grids
@@ -662,7 +532,7 @@ class Cell(BlockItemContainer[CT_Tc]):
             else:
                 grid_group = ctx.type
             cell_on_grids.append(
-                CellOnBorderGrid(self, tcBorders_elm, grid_group)
+                _CellOnBorderGrid(self, tcBorders_elm, grid_group)
             )
         return cell_on_grids
 
@@ -841,3 +711,133 @@ class Cell(BlockItemContainer[CT_Tc]):
                 return self._prop_style(path, optional)
             return direct_val
         return self._prop_style_ctx(path, optional)
+
+
+class _CellOnBorderGrid:
+    def __init__(
+        self,
+        cell: Cell,
+        tcBorders_elm: CT_TcBorders,
+        grid_group: SE_TBL_STYLE_OVERRIDE_TYPE,
+    ) -> None:
+        self._cell = cell
+        self._tcBorders_elm = tcBorders_elm
+        self._group = grid_group
+
+    @cached_property
+    def sides(
+        self,
+    ) -> tuple[Border | None, Border | None, Border | None, Border | None]:
+        row_pos = self._cell.row.pos
+        cell_pos = self._cell.pos
+        if self._group in _HORZ_GROUP:
+            row_pos = POS.ONE_ITEM
+        elif self._group in _VERT_GROUP:
+            cell_pos = POS.ONE_ITEM
+        elif self._group in _CORNER_GROUP:
+            row_pos = POS.ONE_ITEM
+            cell_pos = POS.ONE_ITEM
+        # Top, Bottom
+        top_n, bottom_n = _TBL_POSITIONING[row_pos]["row"]
+        top = None
+        bottom = None
+        # Top
+        if top_n == "top":
+            top_elm = getattr(self._tcBorders_elm, "top", None)
+            if top_elm is not None:
+                top = Border(top_elm, self._cell)
+        else:
+            top = self._self_insideH
+            # Fallback
+            if (
+                top is None
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
+            ):
+                top_elm = getattr(self._tcBorders_elm, "top", None)
+                if top_elm is not None:
+                    top = Border(top_elm, self._cell)
+
+        # Bottom
+        if bottom_n == "bottom":
+            bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
+            if bottom_elm is not None:
+                bottom = Border(bottom_elm, self._cell)
+        else:
+            bottom = self._self_insideH
+            # Fallback
+            if (
+                bottom is None
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
+            ):
+                bottom_elm = getattr(self._tcBorders_elm, "bottom", None)
+                if bottom_elm is not None:
+                    bottom = Border(bottom_elm, self._cell)
+        # Left, Right
+        left_n, right_n = _TBL_POSITIONING[cell_pos]["cell"]
+        left = None
+        right = None
+        # Left
+        if left_n == "left":
+            left_elm = getattr(self._tcBorders_elm, "left", None)
+            if left_elm is not None:
+                left = Border(left_elm, self._cell)
+        else:
+            left = self._self_insideV
+            # Fallback
+            if (
+                left is None
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
+            ):
+                left_elm = getattr(self._tcBorders_elm, "left", None)
+                if left_elm is not None:
+                    left = Border(left_elm, self._cell)
+        # Right
+        if right_n == "right":
+            right_elm = getattr(self._tcBorders_elm, "right", None)
+            if right_elm is not None:
+                right = Border(right_elm, self._cell)
+        else:
+            right = self._self_insideV
+            # Fallback
+            if (
+                right is None
+                and self._group == SE_TBL_STYLE_OVERRIDE_TYPE.ENTIRE_TABLE
+            ):
+                right_elm = getattr(self._tcBorders_elm, "right", None)
+                if right_elm is not None:
+                    right = Border(right_elm, self._cell)
+        return top, bottom, left, right
+
+    @cached_property
+    def top(self) -> Border | None:
+        return self.sides[0]
+
+    @cached_property
+    def bottom(self) -> Border | None:
+        return self.sides[1]
+
+    @cached_property
+    def left(self) -> Border | None:
+        return self.sides[2]
+
+    @cached_property
+    def right(self) -> Border | None:
+        return self.sides[3]
+
+    @cached_property
+    def _self_insideH(self) -> Border | None:
+        if self._group in _HORZ_GROUP | _CORNER_GROUP:
+            return None
+        insideH_elm = getattr(self._tcBorders_elm, "insideH", None)
+        if insideH_elm is None:
+            return None
+        return Border(insideH_elm, self._cell)
+
+    @cached_property
+    def _self_insideV(self) -> Border | None:
+        if self._group in _VERT_GROUP | _CORNER_GROUP:
+            return None
+        insideV_elm = getattr(self._tcBorders_elm, "insideV", None)
+        if insideV_elm is None:
+            return None
+        return Border(insideV_elm, self._cell)
