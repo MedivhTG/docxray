@@ -20,7 +20,7 @@ from docxray.oxml.trans.text.paragraph import CT_P
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.trans.proxy.list import ListViewInterrupted
-    from docxray.oxml.trans.proxy.table import Table
+    from docxray.oxml.trans.proxy.table.table import Table
 
 type _BlockItemElement = CT_Body | CT_Tc
 
@@ -31,7 +31,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
     @cached_property
     def inner_content(self) -> list[Paragraph | Table]:
         # docxray stuff
-        from docxray.oxml.trans.proxy.table import Table
+        from docxray.oxml.trans.proxy.table.table import Table
 
         content: list[Paragraph | Table] = []
         for element in self._element.inner_content_elements:
@@ -49,7 +49,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
         self,
     ) -> Iterator[Paragraph | Table | ListViewInterrupted]:
         # docxray stuff
-        from docxray.oxml.trans.proxy.table import Table
+        from docxray.oxml.trans.proxy.table.table import Table
 
         skip_list_until = None
         for item in self.inner_content:

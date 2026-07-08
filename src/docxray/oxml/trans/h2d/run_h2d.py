@@ -10,7 +10,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     CharacterStyle,
 )
-from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.table.cell import Cell
 from docxray.oxml.trans.proxy.text.font import Font
 from docxray.oxml.trans.proxy.text.language import Language
 from docxray.oxml.trans.proxy.text.run import Run

@@ -30,7 +30,8 @@ if TYPE_CHECKING:
         ListView,
         ListViewInterrupted,
     )
-    from docxray.oxml.trans.proxy.table import Cell, Table
+    from docxray.oxml.trans.proxy.table.cell import Cell
+    from docxray.oxml.trans.proxy.table.table import Table
 
 type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath
 

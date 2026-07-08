@@ -11,7 +11,7 @@ from docxray.oxml.trans.enums import (
 )
 from docxray.oxml.trans.package import TransitionalPackage
 from docxray.oxml.trans.proxy.shared import ElementProxy, Length, Pt
-from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.table.cell import Cell
 from docxray.oxml.trans.shared import CT_Border
 from docxray.oxml.trans.st.enums import SE_BORDER
 

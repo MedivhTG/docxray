@@ -17,7 +17,9 @@ from docxray.oxml.trans.proxy.shared import (
     safe_get_prop,
 )
 from docxray.oxml.trans.proxy.styles.style import TableStyle
-from docxray.oxml.trans.proxy.table import Cell, Row, Table
+from docxray.oxml.trans.proxy.table.table import Table
+from docxray.oxml.trans.proxy.table.row import Row
+from docxray.oxml.trans.proxy.table.cell import Cell
 from docxray.oxml.trans.shared import CT_TblWidth
 from docxray.oxml.trans.st.enums import (
     SE_TEXT_DIRECTION,

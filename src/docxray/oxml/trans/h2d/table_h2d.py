@@ -11,7 +11,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     TableStyle,
 )
-from docxray.oxml.trans.proxy.table import Table
+from docxray.oxml.trans.proxy.table.table import Table
 from docxray.oxml.trans.st.enums import (
     SE_JC_TABLE,
     SE_TBL_LAYOUT_TYPE,

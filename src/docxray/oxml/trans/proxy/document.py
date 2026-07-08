@@ -12,7 +12,7 @@ from docxray.oxml.trans.proxy.list import ListViewInterrupted
 
 from .blkcntnr import BlockItemContainer
 from .shared import ElementProxy
-from .table import Table
+from .table.table import Table
 from .text.paragraph import Paragraph
 
 if TYPE_CHECKING:

@@ -26,7 +26,7 @@ from docxray.oxml.trans.proxy.styles.style import (
     S_TYPE_TO_STYLE_CLS,
     ParagraphStyle,
 )
-from docxray.oxml.trans.proxy.table import Cell
+from docxray.oxml.trans.proxy.table.cell import Cell
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.oxml.trans.st.enums import (
     SE_JC,

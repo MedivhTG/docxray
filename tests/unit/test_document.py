@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from docxray import Document, VERSION
-from docxray.oxml.trans.proxy.table import Table
+from docxray.oxml.trans.proxy.table.table import Table
 from docxray.oxml.trans.proxy.text.paragraph import Paragraph
 from docxray.transform.builders.table import HtmlTable
 from docxray.transform.ruleset import Rule, RuleSet
@@ -27,8 +27,8 @@ class TestDocument:
                 html += p_html
                 w = 1
         w = 1
-        # with open("check.html", "wt", encoding="utf-8") as f:
-        #     f.write(html)
+        with open("check.html", "wt", encoding="utf-8") as f:
+            f.write(html)
         html = ""
         ruleset_table_lists_transform = RuleSet.html_default()
         ruleset_table_lists_transform.set_html_rule(
