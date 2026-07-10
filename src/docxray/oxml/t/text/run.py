@@ -37,6 +37,14 @@ class CT_SdtRun(OxmlElement):
     pass
 
 
+class CT_DirContentRun(OxmlElement):
+    pass
+
+
+class CT_BdoContentRun(OxmlElement):
+    pass
+
+
 class CT_SmartTagRun(OxmlElement):
     pass
 

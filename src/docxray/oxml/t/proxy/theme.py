@@ -274,10 +274,7 @@ class Theme(ElementProxy[CT_OfficeStyleSheet]):
 
         C = SE_THEME_COLOR
         clrScheme_elm = self.element.themeElements.clrScheme
-        settings = cast(
-            "TransitionalPackage", self.part.package
-        ).main_document_part.settings
-        mapping = settings.theme_color_mapping
+        mapping = self.document_part.settings.theme_color_mapping
 
         return {
             C.DARK1: ThemeColor(clrScheme_elm.dk1, self),

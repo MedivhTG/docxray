@@ -4,13 +4,45 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.t.ns import W
+from docxray.oxml.t.shared import CT_Markup, CT_TrackChange
 from docxray.oxml.t.st.wml import ST_LongHexNumber
 from docxray.oxml.t.xmlchemy import OxmlElement
 
 from .hyperlink import CT_Hyperlink
 from .omath import CT_OMath, CT_OMathPara
 from .paragraph_props import CT_PPr
-from .run import CT_R
+from .range import CT_Bookmark, CT_MarkupRange, CT_MoveBookmark
+from .run import (
+    CT_R,
+    CT_BdoContentRun,
+    CT_CustomXmlRun,
+    CT_DirContentRun,
+    CT_Perm,
+    CT_PermStart,
+    CT_ProofErr,
+    CT_RunTrackChange,
+    CT_SdtRun,
+    CT_SmartTagRun,
+)
+
+type EG_MathContent = CT_OMathPara | CT_OMath
+type EG_RangeMarkupElements = CT_Bookmark | CT_MarkupRange | CT_MoveBookmark | CT_TrackChange | CT_Markup
+type EG_RunLevelElts = CT_ProofErr | CT_PermStart | CT_Perm | EG_RangeMarkupElements | CT_RunTrackChange | EG_MathContent
+type EG_ContentRunContent = CT_CustomXmlRun | CT_SmartTagRun | CT_SdtRun | CT_DirContentRun | CT_BdoContentRun | CT_R
+type EG_PContent = EG_ContentRunContent | CT_SimpleField | CT_Hyperlink | CT_Rel
+
+XPATH_P_CONTENT = (
+    "w:customXml | w:smartTag | w:sdt | w:dir | w:bdo | w:r | "
+    "w:proofErr | w:permStart | w:permEnd | w:bookmarkStart | "
+    "w:bookmarkEnd | w:moveFromRangeStart | w:moveFromRangeEnd | "
+    "w:moveToRangeStart | w:commentRangeEnd | w:customXmlInsRangeStart | "
+    "w:customXmlInsRangeEnd | w:customXmlDelRangeStart | "
+    "w:customXmlDelRangeEnd | w:customXmlMoveFromRangeStart | "
+    "w:customXmlMoveFromRangeEnd | w:customXmlMoveToRangeStart | "
+    "w:customXmlMoveToRangeEnd | w:ins | w:del | w:moveFrom | "
+    "w:moveTo | m:oMathPara | m:oMath | w:fldSimple | w:hyperlink | "
+    "w:subDoc"
+)
 
 
 class CT_Rel(OxmlElement):
@@ -47,7 +79,5 @@ class CT_P(OxmlElement):
         return self.child_zero_or_one(W.P_PR, CT_PPr)
 
     @cached_property
-    def inner_content_elements(
-        self,
-    ) -> list[CT_R | CT_Hyperlink | CT_OMathPara | CT_OMath]:
-        return self.xpath("w:r | w:hyperlink | m:oMathPara | m:oMath")
+    def inner_content_elements(self) -> list[EG_PContent]:
+        return self.xpath(XPATH_P_CONTENT)

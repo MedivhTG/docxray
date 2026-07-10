@@ -18,6 +18,7 @@ from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
 from docxray.oxml.t.proxy.text.run import (
     Break,
+    CharsCase,
     Run,
     StrikeCase,
     Tab,
@@ -52,7 +53,7 @@ U_DECOR_MAP = {
     SE_UNDERLINE.DOT_DOT_DASH: "underline dotted",
     SE_UNDERLINE.DASH_DOT_DOT_HEAVY: "underline dashed",
     SE_UNDERLINE.WAVY_HEAVY: "underline wavy",
-    SE_UNDERLINE.WAVY_DOUBLE: "underline waby",
+    SE_UNDERLINE.WAVY_DOUBLE: "underline wavy",
 }
 TEXT_FLOW_TO_WRITING_MODE = {
     SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
@@ -86,6 +87,12 @@ def strike_elm(value: StrikeCase) -> HtmlElement:
             "style": "text-decoration: line-through; text-decoration-style: double;"
         },
     )
+
+
+def char_elm(value: CharsCase) -> HtmlElement:
+    if value == "caps":
+        return Element("span", {"style": "text-transform: uppercase;"})
+    return Element("span", {"style": "font-variant: small-caps;"})
 
 
 def underline_elm(value: UnderlineInfo) -> HtmlElement:
@@ -185,15 +192,13 @@ def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
         elm_append_child_or_tail(upper_elm, last_child_elm, content)
 
 
-def txt(run: Run, txt_fgmt: TxtFragment) -> str | HtmlElement:
-    if run.chars_case is None:
-        return txt_fgmt.raw
-    elif run.chars_case == "caps":
-        elm = Element("span", {"style": "text-transform: uppercase;"})
-    else:
-        elm = Element("span", {"style": "font-variant: small-caps;"})
-    elm.text = txt_fgmt.raw
-    return elm
+def txt(txt_fgmt: TxtFragment) -> str | HtmlElement:
+    txt = txt_fgmt.raw
+    if txt_fgmt.preserve:
+        elm = Element("span", {"style": "white-space: pre-wrap;"})
+        elm.text = txt
+        return elm
+    return txt
 
 
 def break_elm(br: Break) -> HtmlElement | None:
@@ -210,7 +215,7 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, TxtFragment):
-            content = txt(run, item)
+            content = txt(item)
         elif isinstance(item, Drawing):
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):

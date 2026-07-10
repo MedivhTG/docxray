@@ -102,14 +102,10 @@ class Border(ElementProxy[CT_Border]):
 
     @cached_property
     def final_color(self) -> str | None:
-        palette = cast(
-            "TransitionalPackage", self.part.package
-        ).main_document_part.theme.palette
-
         return Colorize.colorize(
             self.element.color,
             self.element.themeColor,
-            palette,
+            self.document_part.theme.palette,
             self.element.themeTint,
             self.element.themeShade,
         )

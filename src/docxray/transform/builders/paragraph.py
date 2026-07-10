@@ -33,6 +33,7 @@ from .html_std import (
     TAB_MNEMONIC,
     TEXT_FLOW_TO_WRITING_MODE,
     b_elm,
+    char_elm,
     i_elm,
     paragraph_content,
     strike_elm,
@@ -80,6 +81,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "italic": i_elm,
         "bold": b_elm,
         "strike_case": strike_elm,
+        "chars_case": char_elm,
     }
 
     P_CONTENT_FUNC: Callable[
