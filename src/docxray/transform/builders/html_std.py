@@ -377,8 +377,7 @@ def omath_to_latex(
 def hyperlink(
     upper_elm: HtmlElement, hyperlink: Hyperlink, ruleset: RuleSet
 ) -> None:
-    for item in hyperlink.iter_inner_content():
-        paragraph_content(upper_elm, item, ruleset)
+    content_append(upper_elm, hyperlink.transform(ruleset, False))
 
 
 def drawing(drawing: Drawing, ruleset: RuleSet) -> HtmlElement:
