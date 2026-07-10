@@ -155,6 +155,7 @@ class W:
     O_MATH = qn("w:oMath")
 
     TBL_PR = qn("w:tblPr")
+    TBL_GRID = qn("w:tblGrid")
     TBL_STYLE_ROW_BAND_SIZE = qn("w:tblStyleRowBandSize")
     TBL_STYLE_COL_BAND_SIZE = qn("w:tblStyleColBandSize")
     TBL_PR_EX = qn("w:tblPrEx")
@@ -286,6 +287,7 @@ class W:
     RSID_DEL = qn("w:rsidDel")
     RSID_P = qn("w:rsidP")
     RSID_R_DEFAULT = qn("w:rsidRDefault")
+    RSID_TR = qn("w:rsidTr")
 
     THEME_FONT_LANG = qn("w:themeFontLang")
     EAST_ASIA = qn("w:eastAsia")

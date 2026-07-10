@@ -21,7 +21,7 @@ from docxray.oxml.t.shared import CT_Shd, CT_TblWidth
 from docxray.oxml.t.st.enums import SE_HEIGHT_RULE, SE_TBL_STYLE_OVERRIDE_TYPE
 from docxray.oxml.t.styles import CT_TblStylePr
 from docxray.oxml.t.table.row_props import CT_Height
-from docxray.oxml.t.table.table import CT_Row
+from docxray.oxml.t.table.table import CT_Row, CT_Tc
 from docxray.oxml.t.table.table_props import (
     CT_JcTable,
     CT_TblBorders,
@@ -60,7 +60,11 @@ class Row(ElementProxy[CT_Row]):
 
     @cached_property
     def cells(self) -> list[Cell]:
-        return [Cell(tc_elm, self) for tc_elm in self.element.tc_lst]  # type: ignore[arg-type]
+        cells = []
+        for item in self.element.inner_content_elements:
+            if isinstance(item, CT_Tc):
+                cells.append(Cell(item, self))  # type: ignore[arg-type]
+        return cells
 
     @cached_property
     def cells_grid_x(self) -> dict[int, Cell]:

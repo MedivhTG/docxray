@@ -19,7 +19,7 @@ from docxray.oxml.t.st.enums import (
     SE_STYLE_TYPE,
     SE_TBL_LAYOUT_TYPE,
 )
-from docxray.oxml.t.table.table import CT_Tbl
+from docxray.oxml.t.table.table import CT_Row, CT_Tbl
 
 from .cell import Cell
 from .row import Row
@@ -83,7 +83,11 @@ class Table(StoryChild[CT_Tbl]):
 
     @cached_property
     def rows(self) -> list[Row]:
-        return [Row(tr_elm, self) for tr_elm in self.element.tr_lst]
+        rows = []
+        for item in self.element.inner_content_items:
+            if isinstance(item, CT_Row):
+                rows.append(Row(item, self))
+        return rows
 
     @cached_property
     def spacing_first(self) -> Length | float | None:

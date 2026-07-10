@@ -31,17 +31,23 @@ type EG_RunLevelElts = CT_ProofErr | CT_PermStart | CT_Perm | EG_RangeMarkupElem
 type EG_ContentRunContent = CT_CustomXmlRun | CT_SmartTagRun | CT_SdtRun | CT_DirContentRun | CT_BdoContentRun | CT_R | EG_RunLevelElts
 type EG_PContent = EG_ContentRunContent | CT_SimpleField | CT_Hyperlink | CT_Rel
 
-XPATH_P_CONTENT = (
-    "w:customXml | w:smartTag | w:sdt | w:dir | w:bdo | w:r | "
-    "w:proofErr | w:permStart | w:permEnd | w:bookmarkStart | "
+_XPATH_OMATH = "m:oMathPara | m:oMath"
+_XPATH_RANGE_MARKUP = (
+    "w:bookmarkStart | "
     "w:bookmarkEnd | w:moveFromRangeStart | w:moveFromRangeEnd | "
     "w:moveToRangeStart | w:commentRangeEnd | w:customXmlInsRangeStart | "
     "w:customXmlInsRangeEnd | w:customXmlDelRangeStart | "
     "w:customXmlDelRangeEnd | w:customXmlMoveFromRangeStart | "
     "w:customXmlMoveFromRangeEnd | w:customXmlMoveToRangeStart | "
-    "w:customXmlMoveToRangeEnd | w:ins | w:del | w:moveFrom | "
-    "w:moveTo | m:oMathPara | m:oMath | w:fldSimple | w:hyperlink | "
-    "w:subDoc"
+    "w:customXmlMoveToRangeEnd "
+)
+_XPATH_RUN_LEVEL_ELTS = (
+    f"w:proofErr | w:permStart | w:permEnd | w:bookmarkStart | {_XPATH_RANGE_MARKUP} | "
+    f"w:ins | w:del | w:moveFrom | w:moveTo | {_XPATH_OMATH}"
+)
+_XPATH_RUN_CONTENT = f"w:customXml | w:smartTag | w:sdt | w:dir | w:bdo | w:r | {_XPATH_RUN_LEVEL_ELTS}"
+XPATH_P_CONTENT = (
+    f"{_XPATH_RUN_CONTENT} | w:fldSimple | w:hyperlink | w:subDoc"
 )
 
 

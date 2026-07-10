@@ -414,11 +414,12 @@ register_element_cls("w:customXmlMoveToRangeStart", CT_TrackChange)
 register_element_cls("w:customXmlMoveToRangeEnd", CT_Markup)
 
 
-from .table.table import CT_Row, CT_Tbl, CT_Tc
+from .table.table import CT_Row, CT_Tbl, CT_TblGrid, CT_Tc
 
 register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
+register_element_cls("w:tblGrid", CT_TblGrid)
 
 from .table.table_props import (
     CT_TblBorders,
