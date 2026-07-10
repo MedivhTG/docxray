@@ -9,6 +9,7 @@ from lxml.html import Element, HtmlElement
 from docxray.length import Length
 from docxray.oxml.t.enums import WD_HEADER_LEVEL
 from docxray.oxml.t.proxy.table.cell import Cell
+from docxray.oxml.t.proxy.text.paragraph import PContent
 from docxray.oxml.t.st.enums import (
     SE_JC,
     SE_LEVEL_SUFFIX,
@@ -22,10 +23,7 @@ from .run import HtmlRun
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.proxy.table.cell import Cell
-    from docxray.oxml.t.proxy.text.paragraph import (
-        Paragraph,
-        ParaContentProxy,
-    )
+    from docxray.oxml.t.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
 
 from .html_std import (
@@ -84,9 +82,9 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "chars_case": char_elm,
     }
 
-    P_CONTENT_FUNC: Callable[
-        [HtmlElement, ParaContentProxy, RuleSet], None
-    ] = paragraph_content
+    P_CONTENT_FUNC: Callable[[HtmlElement, PContent, RuleSet], None] = (
+        paragraph_content
+    )
     R_BUILDER = HtmlRun
     EMPTY_TEXT_FILLER = SPACEBREAK_MNEMONIC
 

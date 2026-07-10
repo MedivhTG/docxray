@@ -15,7 +15,7 @@ from docxray.length import Length
 from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
-from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
+from docxray.oxml.t.proxy.text.paragraph import PContent
 from docxray.oxml.t.proxy.text.run import (
     Break,
     CharsCase,
@@ -377,8 +377,8 @@ def omath_to_latex(
 def hyperlink(
     upper_elm: HtmlElement, hyperlink: Hyperlink, ruleset: RuleSet
 ) -> None:
-    for run_proxy in hyperlink.iter_inner_content():
-        run(upper_elm, run_proxy, ruleset)
+    for item in hyperlink.iter_inner_content():
+        paragraph_content(upper_elm, item, ruleset)
 
 
 def drawing(drawing: Drawing, ruleset: RuleSet) -> HtmlElement:
@@ -396,7 +396,7 @@ def omath(upper_elm: HtmlElement, omath: OMath, ruleset: RuleSet) -> None:
 
 
 def paragraph_content(
-    upper_elm: HtmlElement, p_content: ParaContentProxy, ruleset: RuleSet
+    upper_elm: HtmlElement, p_content: PContent, ruleset: RuleSet
 ) -> None:
     if isinstance(p_content, Run):
         run(upper_elm, p_content, ruleset)

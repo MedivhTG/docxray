@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from typing import Any
 
 # docxray stuff
-from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
+from docxray.oxml.t.proxy.text.paragraph import PContent
 from docxray.oxml.t.proxy.text.run import Run
 
 
@@ -24,14 +24,14 @@ class RunChainsMap:
     def __init__(self, attrs_for_map: list[str]) -> None:
         self._tags_for_map = attrs_for_map
         self._idx_chains: dict[int, dict[str, RunChain]] = {}
-        self._unchained: dict[int, ParaContentProxy] = {}
+        self._unchained: dict[int, PContent] = {}
         self._last_idx = -1
 
     def __len__(self) -> int:
         """Length of run formatting index-axis."""
         return self._last_idx + 1
 
-    def chain(self, content: ParaContentProxy) -> None:
+    def chain(self, content: PContent) -> None:
         """Add format chains for this content.
 
         We try ty continue one char format (e.g. italic) as chain.
@@ -81,7 +81,7 @@ class RunChainsMap:
             self._index_unchained(new_idx, content)
         self._last_idx = new_idx
 
-    def chains_ordered(self) -> Iterator[ParaContentProxy | RunChain]:
+    def chains_ordered(self) -> Iterator[PContent | RunChain]:
         """Iterate over the longest run chains or run wrappers by index.
 
         For every index we get unchained format or main chain - chain with
@@ -118,7 +118,7 @@ class RunChainsMap:
             return None
         return idx_chains.get(name)
 
-    def get_unchained(self, idx: int) -> ParaContentProxy | None:
+    def get_unchained(self, idx: int) -> PContent | None:
         """Get unchained content by index."""
         return self._unchained.get(idx)
 
@@ -126,7 +126,7 @@ class RunChainsMap:
         """Create space for new index in interval."""
         self._idx_chains[idx] = {}
 
-    def _index_unchained(self, idx: int, content: ParaContentProxy) -> None:
+    def _index_unchained(self, idx: int, content: PContent) -> None:
         """Index unchained content in interval."""
         self._unchained[idx] = content
 

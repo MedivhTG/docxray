@@ -48,10 +48,29 @@ if TYPE_CHECKING:
     from docxray.oxml.t.proxy.table.cell import Cell
     from docxray.oxml.t.proxy.table.table import Table
 
-type ParaContentProxy = Run | Hyperlink | OMathParagraph | OMath
+type PContent = Run | Hyperlink | OMathParagraph | OMath
 type _RslvOrder = Literal[
     "numbering_first", "paragraph_first", "up_to_hierarchy"
 ]
+
+
+def p_content_iter(proxy: Paragraph | Hyperlink) -> Iterator[PContent]:
+    for item in proxy.element.inner_content_elements:
+        if isinstance(item, CT_R):
+            yield Run(item, proxy)
+        elif isinstance(item, CT_Hyperlink):
+            yield Hyperlink(item, proxy)
+        elif isinstance(item, CT_OMathPara):
+            yield OMathParagraph(item, proxy)
+        elif isinstance(item, CT_OMath):
+            yield OMath(item, proxy)
+
+
+def p_raw_text(proxy: Paragraph | Hyperlink) -> str:
+    txt = ""
+    for item in proxy.iter_inner_content():
+        txt += item.raw_text
+    return txt
 
 
 class Paragraph(StoryChild[CT_P]):
@@ -417,10 +436,7 @@ class Paragraph(StoryChild[CT_P]):
 
     @cached_property
     def raw_text(self) -> str:
-        txt = ""
-        for item in self.iter_inner_content():
-            txt += item.raw_text
-        return txt
+        return p_raw_text(self)
 
     @cached_property
     def paragraph_style(self) -> ParagraphStyle | None:
@@ -431,18 +447,8 @@ class Paragraph(StoryChild[CT_P]):
             style_id, SE_STYLE_TYPE.PARAGRAPH, ParagraphStyle
         )
 
-    def iter_inner_content(
-        self,
-    ) -> Iterator[ParaContentProxy]:
-        for item in self.element.inner_content_elements:
-            if isinstance(item, CT_R):
-                yield Run(item, self)
-            elif isinstance(item, CT_Hyperlink):
-                yield Hyperlink(item, self)
-            elif isinstance(item, CT_OMathPara):
-                yield OMathParagraph(item, self)
-            elif isinstance(item, CT_OMath):
-                yield OMath(item, self)
+    def iter_inner_content(self) -> Iterator[PContent]:
+        return p_content_iter(self)
 
     @cached_property
     def _context_spacing(self) -> bool:

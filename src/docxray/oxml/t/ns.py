@@ -312,7 +312,14 @@ class W:
     ACCENT4 = qn("w:accent4")
     ACCENT5 = qn("w:accent5")
     ACCENT6 = qn("w:accent6")
+
     HYPERLINK = qn("w:hyperlink")
+    TGT_FRAME = qn("w:tgtFrame")
+    TOOLTIP = qn("w:tooltip")
+    DOC_LOCATION = qn("w:docLocation")
+    HISTORY = qn("w:history")
+    ANCHOR = qn("w:anchor")
+
     FOLLOWED_HYPERLINK = qn("w:followedHyperlink")
 
 
@@ -384,6 +391,7 @@ class PIC:
 
 
 class R:
+    ID = qn("r:id")
     EMBED = qn("r:embed")
 
 

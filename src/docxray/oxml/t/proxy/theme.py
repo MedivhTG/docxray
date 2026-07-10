@@ -11,7 +11,6 @@ import webcolors
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
 from docxray.oxml.t.enums import WIN32_COLOR
-from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.proxy.compute import percentage
 from docxray.oxml.t.proxy.settings import _SemanticColor

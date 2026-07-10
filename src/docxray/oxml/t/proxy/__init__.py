@@ -53,7 +53,7 @@ from .text.omath import (
     RunOMathContent,
     TxtFragmentOMath,
 )
-from .text.paragraph import ParaContentProxy, Paragraph
+from .text.paragraph import Paragraph, PContent
 from .text.run import (
     Break,
     CharsCase,
@@ -106,7 +106,7 @@ __all__ = [
     "OMathElementsProxy",
     "OMathParagraph",
     "PaddingInfo",
-    "ParaContentProxy",
+    "PContent",
     "Paragraph",
     "ParagraphStyle",
     "Picture",

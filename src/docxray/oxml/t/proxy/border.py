@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Literal, cast
+from typing import Literal
 
 # docxray stuff
 from docxray.colorize import Colorize
@@ -10,7 +10,6 @@ from docxray.oxml.t.enums import (
     _SE_BORDER_TO_ECMA_NUMBER,
     _SE_BORDER_TO_LINES_COUNT,
 )
-from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.shared import CT_Border
 from docxray.oxml.t.st.enums import SE_BORDER
