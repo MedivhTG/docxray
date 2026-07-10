@@ -33,6 +33,8 @@ class HtmlHyperlink(HtmlBuilder["Hyperlink"]):
             attrs["href"] = proxy.linked_to
         if proxy.tooltip:
             attrs["title"] = proxy.tooltip
+        if proxy.target_frame:
+            attrs["target"] = proxy.target_frame
         return attrs
 
     @classmethod

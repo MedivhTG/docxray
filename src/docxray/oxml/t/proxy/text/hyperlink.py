@@ -24,14 +24,15 @@ class Hyperlink(StoryChild[CT_Hyperlink]):
     # TODO: look for bookmarks and docs
     @cached_property
     def linked_to(self) -> str | None:
-        """Get linked object such as page link or object in Document (not implemented).
+        """Get URI or object in Document (not implemented).
 
         Examples:
             1. MAIL -> `mailto:robots@gmail.com?subject=NO_SUBJECT`
             2. URL -> `https://www.google.com`
+            3. PATH (relative) -> `abc.docx`
 
         Returns:
-            str | None: URL for `str` or `None` if no valid reference.
+            str | None: URI for `str` or `None` if no valid reference.
         """
 
         rel_id = self.element.id
@@ -53,6 +54,17 @@ class Hyperlink(StoryChild[CT_Hyperlink]):
     # TODO: frameset logic?
     @cached_property
     def target_frame(self) -> str | None:
+        """Tells hot to open link for the current frame.
+
+        Here can be values:
+            1. `_top` - Open hyperlink target in the full region of the current window
+            2. `_self` - Open hyperlink target in the same frame as the hyperlink appears
+            3. `_parent` - Open hyperlink target in the parent of the current frame,
+            or the current frame if this frame has no parent
+            4. `_blank` - Open hyperlink target in a new web browser window
+            5. all other values - Open hyperlink target in the frame with the specified
+            name. If no frame exists with this name, open in the current frame
+        """
         tgt = self.element.tgtFrame
         if not tgt:
             return None
@@ -64,10 +76,12 @@ class Hyperlink(StoryChild[CT_Hyperlink]):
 
     @cached_property
     def tooltip(self) -> str | None:
+        """Shown hyperlink title."""
         return self.element.tooltip
 
     @cached_property
     def clicked(self) -> bool:
+        """Tells if hyperlink is followed."""
         if self.element.history is None:
             return False
         return on_off(self.element.history)
