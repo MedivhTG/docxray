@@ -28,7 +28,7 @@ from .run import (
 type EG_MathContent = CT_OMathPara | CT_OMath
 type EG_RangeMarkupElements = CT_Bookmark | CT_MarkupRange | CT_MoveBookmark | CT_TrackChange | CT_Markup
 type EG_RunLevelElts = CT_ProofErr | CT_PermStart | CT_Perm | EG_RangeMarkupElements | CT_RunTrackChange | EG_MathContent
-type EG_ContentRunContent = CT_CustomXmlRun | CT_SmartTagRun | CT_SdtRun | CT_DirContentRun | CT_BdoContentRun | CT_R
+type EG_ContentRunContent = CT_CustomXmlRun | CT_SmartTagRun | CT_SdtRun | CT_DirContentRun | CT_BdoContentRun | CT_R | EG_RunLevelElts
 type EG_PContent = EG_ContentRunContent | CT_SimpleField | CT_Hyperlink | CT_Rel
 
 XPATH_P_CONTENT = (
