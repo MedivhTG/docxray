@@ -2,7 +2,7 @@
 
 # ruff: noqa: E402
 
-from .document import CT_Body, CT_Document
+
 from .parser import register_element_cls
 from .shared import (
     CT_Border,
@@ -35,8 +35,12 @@ from .shared import (
 register_element_cls("w:rsid", CT_LongHexNumber)
 register_element_cls("w:name", CT_String)
 
+from .document import CT_Body, CT_CustomXmlBlock, CT_Document, CT_SdtBlock
+
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
+register_element_cls("w:customXml", CT_CustomXmlBlock)
+register_element_cls("w:sdt", CT_SdtBlock)
 
 
 from .text.paragraph import CT_P, CT_Rel, CT_SimpleField

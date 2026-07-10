@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.oxml.t.ns import W
-from docxray.oxml.t.shared import CT_AltChunk
 from docxray.oxml.t.xmlchemy import OxmlElement
 
 from .cell_props import CT_TcPr
@@ -14,21 +13,20 @@ from .table_props import CT_TblPr
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.text.paragraph import CT_P
+    from docxray.oxml.t.document import EG_BlockLevelElts
 
 
 class CT_Tc(OxmlElement):
     @cached_property
-    def inner_content_elements(self) -> list[CT_P | CT_Tbl]:
-        return self.xpath("w:p | w:tbl")
-
-    @cached_property
-    def altChunk_lst(self) -> list[CT_AltChunk]:
-        return self.child_zero_or_more(W.ALT_CHUNK, CT_AltChunk)
-
-    @cached_property
     def tcPr(self) -> CT_TcPr | None:
         return self.child_zero_or_one(W.TC_PR, CT_TcPr)
+
+    @cached_property
+    def inner_content_elements(self) -> list[EG_BlockLevelElts]:
+        # docxray stuff
+        from docxray.oxml.t.document import XPATH_BLOCK_LEVEL_ELTS
+
+        return self.xpath(XPATH_BLOCK_LEVEL_ELTS)
 
 
 class CT_Row(OxmlElement):
