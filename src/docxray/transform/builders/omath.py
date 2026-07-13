@@ -9,7 +9,7 @@ from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.st.enums import SE_JC_OMATH
 
 from .base import HtmlBuilder
-from .html_std import omath_to_latex
+from .html_std import omath_to_mathjax
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -55,13 +55,13 @@ class HtmlOMath(HtmlBuilder["OMath"]):
     # TODO: without run style
     @classmethod
     def element(cls, proxy: OMath, ruleset: RuleSet) -> HtmlElement:
-        latex = omath_to_latex(proxy)
-        if latex:
+        mathjax = omath_to_mathjax(proxy)
+        if mathjax:
             div_elm = Element("div", cls._attrs(proxy))
             div_elm.append(cls._script())
             p_elm = Element("p")
             # MathJax must understand LaTeX
-            p_elm.text = f"\\[{latex}\\]"
+            p_elm.text = mathjax
             div_elm.append(p_elm)
             return div_elm
         else:

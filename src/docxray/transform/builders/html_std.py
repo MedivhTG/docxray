@@ -274,8 +274,7 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
 __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC = OfficeMathRun.process
 
 
-# TODO: look for other content process (look for run method analogue)
-def omath_to_latex(
+def omath_to_mathjax(
     omath: OMath,
     ruleset: RuleSet | None = None,
     include_run_content: bool = True,
@@ -285,7 +284,7 @@ def omath_to_latex(
 
     ruleset = ruleset or cast("DocumentPart", omath.part)._default_html_ruleset
 
-    def _drawing_latex(drawing: Drawing) -> str:
+    def _drawing(drawing: Drawing) -> str:
         img_elm: HtmlElement = drawing.transform(ruleset, False)
         src = img_elm.get("src")
         if src:
@@ -299,6 +298,12 @@ def omath_to_latex(
     def _sym(sym: Symbol) -> str:
         font = sym.font or ""
         return f"\\unicode[{font}]{{{ord(sym.character)}}}"
+
+    def _nb_hyphen() -> str:
+        return f"\\text{{{NON_BREAK_HYPHEN}}}"
+
+    def _soft_hyphen() -> str:
+        return f"\\text{{{SOFT_HYPHEN}}}"
 
     def _process_run(self: OfficeMathRun, chr_: str = "") -> str:
         replacements = [
@@ -409,13 +414,17 @@ def omath_to_latex(
                     # Spaces in Word
                     math_string += pre.replace(" ", r"\,")
             elif el.tag == qname("w", "drawing"):
-                math_string += _drawing_latex(
+                math_string += _drawing(
                     Drawing(el, omath)  # pyright: ignore[reportArgumentType]
                 )
             elif el.tag == qname("w", "sym"):
                 math_string += _sym(
                     Symbol(el, omath)  # pyright: ignore[reportArgumentType]
                 )
+            elif el.tag == qname("w", "noBreakHyphen"):
+                math_string += _nb_hyphen()
+            elif el.tag == qname("w", "softHyphen"):
+                math_string += _soft_hyphen()
 
         for pre, post in replacements:
             math_string = math_string.replace(pre, post)
@@ -429,7 +438,7 @@ def omath_to_latex(
         OfficeMathRun.process = _process_run
     else:
         OfficeMathRun.process = __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC
-    return process_math_node(omath.element)
+    return f"\\[{process_math_node(omath.element)}\\]"
 
 
 def hyperlink(
