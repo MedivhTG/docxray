@@ -6,103 +6,38 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.colorize import Colorize
-from docxray.oxml.t.drawing import CT_Drawing
-from docxray.oxml.t.ns import W
 from docxray.oxml.t.proxy.base import (
-    ElementProxy,
     NotFound,
     StoryChild,
     from_doc_dflts,
     from_style_inheritance,
 )
 from docxray.oxml.t.proxy.compute import on_off
-from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.styles.style import CharacterStyle
-from docxray.oxml.t.shared import CT_Empty
 from docxray.oxml.t.st.enums import (
-    SE_BR_CLEAR,
-    SE_BR_TYPE,
     SE_HEX_COLOR_AUTO,
     SE_STYLE_TYPE,
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
 )
-from docxray.oxml.t.text.run import (
-    CT_R,
-    CT_Br,
-    CT_PTab,
-    CT_Text,
-    EG_RunInnerContent,
-)
+from docxray.oxml.t.text.run import CT_R
 
 from .font import Font
 from .language import Language
+from .run_content import RunInnerContent, TxtFragment, run_inner_content
 
 if TYPE_CHECKING:
     from .paragraph import Paragraph
 
-type RunInnerContent = TxtFragment | Drawing | Break | Tab
 type CharsCase = Literal["caps", "small_caps"]
 type StrikeCase = Literal["single", "double"]
-
-
-def run_inner_content(
-    item: EG_RunInnerContent, instance: Any
-) -> RunInnerContent | None:
-    if isinstance(item, CT_Text):
-        if item.tag_name == "t":
-            return TxtFragment(item, instance)
-    elif isinstance(item, CT_Drawing):
-        return Drawing(item, instance)
-    elif isinstance(item, CT_Br):
-        return Break(item, instance)
-    # TODO: extend
-    elif isinstance(item, CT_PTab):
-        return None
-    # TODO: extend
-    elif isinstance(item, CT_Empty):
-        if item.tag == W.TAB:
-            return Tab(item, instance)
-    return None
 
 
 class UnderlineInfo(TypedDict):
     line: SE_UNDERLINE
     color: str
-
-
-class Tab(ElementProxy[CT_Empty]):
-    pass
-
-
-class Break(ElementProxy[CT_Br]):
-    @cached_property
-    def break_type(self) -> SE_BR_TYPE:
-        if self.element.type is None:
-            return SE_BR_TYPE.TEXT_WRAPPING
-        return self.element.type
-
-    @cached_property
-    def how_wrap(self) -> SE_BR_CLEAR:
-        if self.break_type != SE_BR_TYPE.TEXT_WRAPPING:
-            return SE_BR_CLEAR.NONE
-        if self.element.clear_attr is None:
-            return SE_BR_CLEAR.NONE
-        return self.element.clear_attr
-
-
-class TxtFragment(ElementProxy[CT_Text]):
-    @cached_property
-    def raw(self) -> str:
-        """Text inside of txt tag `as-is`."""
-        return self._element.txt
-
-    @cached_property
-    def preserve(self) -> bool:
-        """Preserve space chars inside of txt tag or not."""
-        return self.element.space == "preserve"
 
 
 class Run(StoryChild[CT_R]):

@@ -17,14 +17,12 @@ from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.proxy.text.paragraph import PContent
 from docxray.oxml.t.proxy.text.run import (
-    Break,
     CharsCase,
     Run,
     StrikeCase,
-    Tab,
-    TxtFragment,
     UnderlineInfo,
 )
+from docxray.oxml.t.proxy.text.run_content import Break, Tab, TxtFragment
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
@@ -229,7 +227,7 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
 __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC = OfficeMathRun.process
 
 
-# TODO: look for other content process
+# TODO: look for other content process (look for run method analogue)
 def omath_to_latex(
     omath: OMath,
     ruleset: RuleSet | None = None,

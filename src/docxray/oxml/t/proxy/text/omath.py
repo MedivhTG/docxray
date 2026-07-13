@@ -7,7 +7,10 @@ from typing import TypeVar
 # docxray stuff
 from docxray.oxml.t.proxy.base import ElementProxy, NotFound, StoryChild
 from docxray.oxml.t.proxy.compute import on_off
-from docxray.oxml.t.proxy.text.run import RunInnerContent, run_inner_content
+from docxray.oxml.t.proxy.text.run_content import (
+    RunInnerContent,
+    run_inner_content,
+)
 from docxray.oxml.t.st.enums import SE_JC_OMATH, SE_TOP_BOT
 from docxray.oxml.t.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.t.text.omath_elm import (

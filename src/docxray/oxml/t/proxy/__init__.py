@@ -54,16 +54,8 @@ from .text.omath import (
     TxtFragmentOMath,
 )
 from .text.paragraph import Paragraph, PContent
-from .text.run import (
-    Break,
-    CharsCase,
-    Run,
-    RunInnerContent,
-    StrikeCase,
-    Tab,
-    TxtFragment,
-    UnderlineInfo,
-)
+from .text.run import CharsCase, Run, StrikeCase, UnderlineInfo
+from .text.run_content import Break, RunInnerContent, Tab, TxtFragment
 from .theme import FontFamily, FontFamilySupplemental, Theme, ThemeColor
 from .types import ProvidesStoryPart, ProvidesXmlPart
 
