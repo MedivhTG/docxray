@@ -28,6 +28,7 @@ from docxray.oxml.t.proxy.text.run_content import (
     NonBreakHyphen,
     OptionalHyphen,
     Separator,
+    Symbol,
     Tab,
     TxtFragment,
 )
@@ -237,6 +238,14 @@ def separator(sep: Separator) -> HtmlElement:
     return Element("hr")
 
 
+def symbol(sym: Symbol) -> HtmlElement | str:
+    if sym.font is None:
+        return sym.character
+    elm = Element("span", {"style": f"font-family: {sym.font};"})
+    elm.text = sym.character
+    return elm
+
+
 def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
@@ -248,6 +257,8 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
             content = tab(item)
         elif isinstance(item, Break):
             content = break_elm(item)
+        elif isinstance(item, Symbol):
+            content = symbol(item)
         elif isinstance(item, NonBreakHyphen):
             content = non_br_hyphen(item)
         elif isinstance(item, OptionalHyphen):
