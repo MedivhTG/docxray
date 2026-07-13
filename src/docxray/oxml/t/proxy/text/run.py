@@ -144,6 +144,18 @@ class Run(StoryChild[CT_R]):
         return on_off(self._display("rPr.rtl.val", True))
 
     @cached_property
+    def color(self) -> str:
+        """Hexaadecimal color-presentation of an run text, e.g. `#000000` for black."""
+        return Colorize.colorize(
+            self._color or SE_HEX_COLOR_AUTO.AUTO,
+            self._theme_color,
+            self.document_part.theme.palette,
+            self._theme_tint,
+            self._theme_shade,
+            prefer_theme=True,
+        )
+
+    @cached_property
     def raw_text(self) -> str:
         """Accumulated text from tags `<w:t>`."""
         txt = ""
@@ -211,6 +223,34 @@ class Run(StoryChild[CT_R]):
     @cached_property
     def _u_theme_shade(self) -> bytes | None:
         shade = self._display("rPr.u.themeShade")
+        if isinstance(shade, NotFound):
+            return None
+        return shade
+
+    @cached_property
+    def _color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
+        color = self._display("rPr.color.val")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _theme_color(self) -> SE_THEME_COLOR | None:
+        color = self._display("rPr.color.themeColor")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _theme_tint(self) -> bytes | None:
+        tint = self._display("rPr.color.themeTint")
+        if isinstance(tint, NotFound):
+            return None
+        return tint
+
+    @cached_property
+    def _theme_shade(self) -> bytes | None:
+        shade = self._display("rPr.color.themeShade")
         if isinstance(shade, NotFound):
             return None
         return shade

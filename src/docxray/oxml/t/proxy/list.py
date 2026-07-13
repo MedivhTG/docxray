@@ -347,7 +347,7 @@ class ListItem:
             "color": Colorize.colorize(
                 self._u_color or SE_HEX_COLOR_AUTO.AUTO,
                 self._u_theme_color,
-                self._level.document_part.theme.palette,
+                self._paragraph.document_part.theme.palette,
                 self._u_theme_tint,
                 self._u_theme_shade,
                 prefer_theme=True,
@@ -375,6 +375,18 @@ class ListItem:
         ):
             return None
         return valign
+
+    @cached_property
+    def color(self) -> str:
+        """Hexaadecimal color-presentation of an run text, e.g. `#000000` for black."""
+        return Colorize.colorize(
+            self._color or SE_HEX_COLOR_AUTO.AUTO,
+            self._theme_color,
+            self._paragraph.document_part.theme.palette,
+            self._theme_tint,
+            self._theme_shade,
+            prefer_theme=True,
+        )
 
     @cached_property
     def _u_line(self) -> SE_UNDERLINE | None:
@@ -409,6 +421,34 @@ class ListItem:
     @cached_property
     def _u_theme_shade(self) -> bytes | None:
         shade = self._display("rPr.u.themeShade")
+        if isinstance(shade, NotFound):
+            return None
+        return shade
+
+    @cached_property
+    def _color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
+        color = self._display("rPr.color.val")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _theme_color(self) -> SE_THEME_COLOR | None:
+        color = self._display("rPr.color.themeColor")
+        if isinstance(color, NotFound):
+            return None
+        return color
+
+    @cached_property
+    def _theme_tint(self) -> bytes | None:
+        tint = self._display("rPr.color.themeTint")
+        if isinstance(tint, NotFound):
+            return None
+        return tint
+
+    @cached_property
+    def _theme_shade(self) -> bytes | None:
+        shade = self._display("rPr.color.themeShade")
         if isinstance(shade, NotFound):
             return None
         return shade

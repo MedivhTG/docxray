@@ -104,6 +104,10 @@ def char_elm(value: CharsCase) -> HtmlElement:
     return Element("span", {"style": "font-variant: small-caps;"})
 
 
+def color_elm(value: str) -> HtmlElement:
+    return Element("span", {"style": f"color: {value};"})
+
+
 def underline_elm(value: UnderlineInfo) -> HtmlElement:
     decor = U_DECOR_MAP.get(value["line"])
     if decor is None:

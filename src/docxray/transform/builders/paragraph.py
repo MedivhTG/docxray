@@ -32,6 +32,7 @@ from .html_std import (
     TEXT_FLOW_TO_WRITING_MODE,
     b_elm,
     char_elm,
+    color_elm,
     i_elm,
     paragraph_content,
     strike_elm,
@@ -80,6 +81,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         "bold": b_elm,
         "strike_case": strike_elm,
         "chars_case": char_elm,
+        "color": color_elm,
     }
 
     P_CONTENT_FUNC: Callable[[HtmlElement, PContent, RuleSet], None] = (

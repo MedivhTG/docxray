@@ -95,7 +95,7 @@ class CT_Fonts(OxmlElement):
 class CT_Color(OxmlElement):
     @cached_property
     def val(self) -> SE_HEX_COLOR_AUTO | bytes:
-        return self.attr_optional(W.COLOR, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
+        return self.attr_optional(W.VAL, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
 
     @cached_property
     def themeColor(self) -> SE_THEME_COLOR | None:
