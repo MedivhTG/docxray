@@ -4,7 +4,14 @@ from functools import cached_property
 
 # docxray stuff
 from docxray.oxml.t.ns import W
-from docxray.oxml.t.shared import CT_Markup, CT_TrackChange
+from docxray.oxml.t.shared import (
+    CT_Markup,
+    CT_Perm,
+    CT_PermStart,
+    CT_ProofErr,
+    CT_Rel,
+    CT_TrackChange,
+)
 from docxray.oxml.t.st.wml import ST_LongHexNumber
 from docxray.oxml.t.xmlchemy import OxmlElement
 
@@ -17,9 +24,6 @@ from .run import (
     CT_BdoContentRun,
     CT_CustomXmlRun,
     CT_DirContentRun,
-    CT_Perm,
-    CT_PermStart,
-    CT_ProofErr,
     CT_RunTrackChange,
     CT_SdtRun,
     CT_SmartTagRun,
@@ -49,10 +53,6 @@ _XPATH_RUN_CONTENT = f"w:customXml | w:smartTag | w:sdt | w:dir | w:bdo | w:r | 
 XPATH_P_CONTENT = (
     f"{_XPATH_RUN_CONTENT} | w:fldSimple | w:hyperlink | w:subDoc"
 )
-
-
-class CT_Rel(OxmlElement):
-    pass
 
 
 class CT_SimpleField(OxmlElement):

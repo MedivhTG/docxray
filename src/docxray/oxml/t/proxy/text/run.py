@@ -34,7 +34,7 @@ from docxray.oxml.t.text.run import (
     CT_Br,
     CT_PTab,
     CT_Text,
-    RunInnerContent,
+    EG_RunInnerContent,
 )
 
 from .font import Font
@@ -43,16 +43,17 @@ from .language import Language
 if TYPE_CHECKING:
     from .paragraph import Paragraph
 
-type RunContentProxy = TxtFragment | Drawing | Break | Tab
+type RunInnerContent = TxtFragment | Drawing | Break | Tab
 type CharsCase = Literal["caps", "small_caps"]
 type StrikeCase = Literal["single", "double"]
 
 
-def run_content(
-    item: RunInnerContent, instance: Any
-) -> RunContentProxy | None:
+def run_inner_content(
+    item: EG_RunInnerContent, instance: Any
+) -> RunInnerContent | None:
     if isinstance(item, CT_Text):
-        return TxtFragment(item, instance)
+        if item.tag_name == "t":
+            return TxtFragment(item, instance)
     elif isinstance(item, CT_Drawing):
         return Drawing(item, instance)
     elif isinstance(item, CT_Br):
@@ -343,8 +344,8 @@ class Run(StoryChild[CT_R]):
 
     def iter_inner_content(
         self,
-    ) -> Iterator[RunContentProxy]:
+    ) -> Iterator[RunInnerContent]:
         for item in self.element.inner_content_items:
-            proxy = run_content(item, self)
+            proxy = run_inner_content(item, self)
             if proxy:
                 yield proxy

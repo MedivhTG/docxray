@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray.oxml.t.ns import XML, M, W
@@ -29,11 +32,46 @@ from docxray.oxml.t.st.shared_math import (
 )
 from docxray.oxml.t.xmlchemy import OxmlElement
 
-from .run import RUN_INNER_CONTENT_XPATH, RunInnerContent
+from .hyperlink import CT_Hyperlink
+from .run import (
+    XPATH_RUN_INNER_CONTENT,
+    CT_CustomXmlRun,
+    CT_SdtRun,
+    CT_SmartTagRun,
+    EG_RunInnerContent,
+)
 from .run_props import CT_RPr
 
-type OMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad | CT_SPre | CT_SSub | CT_SSubSup | CT_SSup | CT_R_OMath
-OMATH_ELEMENTS_XPATH = "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | m:limLow | m:limUpp | m:m | m:nary | m:phant | m:rad | m:sPre | m:sSub | m:sSubSup | m:sSup | m:r"
+type EG_OMathMathElements = CT_Acc | CT_Bar | CT_Box | CT_BorderBox | CT_D | CT_EqArr | CT_F | CT_Func | CT_GroupChr | CT_LimLow | CT_LimUpp | CT_M | CT_Nary | CT_Phant | CT_Rad | CT_SPre | CT_SSub | CT_SSubSup | CT_SSup | CT_R_OMath
+type EG_PContentBase = CT_CustomXmlRun | CT_SimpleField | CT_Hyperlink
+type EG_ContentRunContentBase = CT_SmartTagRun | CT_SdtRun | EG_RunLevelElts
+type EG_PContentMath = EG_PContentBase | EG_ContentRunContentBase
+type EG_OMathElements = EG_OMathMathElements | EG_PContentMath
+
+if TYPE_CHECKING:
+    from .paragraph import CT_SimpleField, EG_RunLevelElts
+
+_XPATH_OMATH_MATH_ELEMENTS = (
+    "m:acc | m:bar | m:box | m:borderBox | m:d | m:eqArr | m:f | m:func | m:groupChr | "
+    "m:limLow | m:limUpp | m:m | m:nary | m:phant | m:rad | m:sPre | m:sSub | m:sSubSup | m:sSup | m:r"
+)
+_XPATH_RUN_LEVEL_ELTS = (
+    "w:proofErr | w:permStart | w:permEnd | w:bookmarkStart | "
+    "w:bookmarkStart | w:bookmarkEnd | w:moveFromRangeStart | w:moveFromRangeEnd | "
+    "w:moveToRangeStart | w:commentRangeEnd | w:customXmlInsRangeStart | "
+    "w:customXmlInsRangeEnd | w:customXmlDelRangeStart | "
+    "w:customXmlDelRangeEnd | w:customXmlMoveFromRangeStart | "
+    "w:customXmlMoveFromRangeEnd | w:customXmlMoveToRangeStart | "
+    "w:customXmlMoveToRangeEnd | "
+    "w:ins | w:del | w:moveFrom | w:moveTo | "
+    "m:oMathPara | m:oMath"
+)
+_XPATH_CONTENT_RUN_BASE = f"w:smartTag | w:sdt | {_XPATH_RUN_LEVEL_ELTS}"
+_XPATH_P_CONTENT_BASE = "w:customXml | w:fldSimple | w:hyperlink"
+_XPATH_P_CONTENT_MATH = f"{_XPATH_P_CONTENT_BASE} | {_XPATH_CONTENT_RUN_BASE}"
+XPATH_OMATH_MATH_ELEMENTS = (
+    f"{_XPATH_OMATH_MATH_ELEMENTS} | {_XPATH_P_CONTENT_MATH}"
+)
 
 
 class CT_Integer2(OxmlElement):
@@ -65,10 +103,9 @@ class CT_OMathArg(OxmlElement):
     def argPr(self) -> CT_OMathArgPr | None:
         return self.child_zero_or_one(M.ARG_PR, CT_OMathArgPr)
 
-    # TODO: look for paragraph content too
     @cached_property
-    def inner_content_items(self) -> list[OMathElements]:
-        return self.xpath(OMATH_ELEMENTS_XPATH)
+    def inner_content_items(self) -> list[EG_OMathElements]:
+        return self.xpath(XPATH_OMATH_MATH_ELEMENTS)
 
     @cached_property
     def ctrlPr(self) -> CT_CtrlPr | None:
@@ -765,5 +802,5 @@ class CT_R_OMath(OxmlElement):
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
     @cached_property
-    def inner_content_items(self) -> list[RunInnerContent | CT_Text_OMath]:
-        return self.xpath(f"{RUN_INNER_CONTENT_XPATH} | m:t")
+    def inner_content_items(self) -> list[EG_RunInnerContent | CT_Text_OMath]:
+        return self.xpath(f"{XPATH_RUN_INNER_CONTENT} | m:t")

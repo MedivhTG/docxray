@@ -5,31 +5,28 @@ from functools import cached_property
 # docxray stuff
 from docxray.oxml.t.drawing import CT_Drawing
 from docxray.oxml.t.ns import XML, W
-from docxray.oxml.t.shared import CT_Empty
+from docxray.oxml.t.shared import CT_Empty, CT_Markup, CT_Rel
 from docxray.oxml.t.st.enums import SE_BR_CLEAR, SE_BR_TYPE
 from docxray.oxml.t.st.shared_common import ST_String
-from docxray.oxml.t.st.wml import ST_BrClear, ST_BrType, ST_ShortHexNumber
+from docxray.oxml.t.st.wml import (
+    ST_BrClear,
+    ST_BrType,
+    ST_LongHexNumber,
+    ST_ShortHexNumber,
+)
 from docxray.oxml.t.xmlchemy import OxmlElement
 
 from .run_props import CT_RPr
 
-type RunInnerContent = CT_Br | CT_Text | CT_Empty | CT_Drawing | CT_PTab
-RUN_INNER_CONTENT_XPATH = "w:br | w:t | w:noBreakHyphen | w:softHyphen | w:sym | w:cr | w:tab | w:drawing | w:ptab"
+type EG_RunInnerContent = CT_Br | CT_Text | CT_Rel | CT_Empty | CT_Sym | CT_Object | CT_Picture_RUN | CT_FldChar | CT_Ruby | CT_FtnEdnRef | CT_Markup | CT_Drawing | CT_PTab
+XPATH_RUN_INNER_CONTENT = "w:br | w:t | w:noBreakHyphen | w:softHyphen | w:sym | w:cr | w:tab | w:drawing | w:ptab"
+
+
+class CT_Object(OxmlElement):
+    pass
 
 
 class CT_RunTrackChange(OxmlElement):
-    pass
-
-
-class CT_Perm(OxmlElement):
-    pass
-
-
-class CT_PermStart(OxmlElement):
-    pass
-
-
-class CT_ProofErr(OxmlElement):
     pass
 
 
@@ -50,6 +47,22 @@ class CT_SmartTagRun(OxmlElement):
 
 
 class CT_CustomXmlRun(OxmlElement):
+    pass
+
+
+class CT_Picture_RUN(OxmlElement):
+    pass
+
+
+class CT_FldChar(OxmlElement):
+    pass
+
+
+class CT_Ruby(OxmlElement):
+    pass
+
+
+class CT_FtnEdnRef(OxmlElement):
     pass
 
 
@@ -89,13 +102,21 @@ class CT_PTab(OxmlElement):
 
 class CT_R(OxmlElement):
     @cached_property
-    def t(self) -> CT_Text | None:
-        return self.child_zero_or_one(W.T, CT_Text)
-
-    @cached_property
     def rPr(self) -> CT_RPr | None:
         return self.child_zero_or_one(W.R_PR, CT_RPr)
 
     @cached_property
-    def inner_content_items(self) -> list[RunInnerContent]:
-        return self.xpath(RUN_INNER_CONTENT_XPATH)
+    def inner_content_items(self) -> list[EG_RunInnerContent]:
+        return self.xpath(XPATH_RUN_INNER_CONTENT)
+
+    @cached_property
+    def rsidRPr(self) -> bytes | None:
+        return self.attr_optional(W.RSID_R_PR, ST_LongHexNumber)
+
+    @cached_property
+    def rsidDel(self) -> bytes | None:
+        return self.attr_optional(W.RSID_DEL, ST_LongHexNumber)
+
+    @cached_property
+    def rsidR(self) -> bytes | None:
+        return self.attr_optional(W.RSID_R, ST_LongHexNumber)

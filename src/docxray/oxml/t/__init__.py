@@ -22,6 +22,10 @@ from .shared import (
     CT_LongHexNumber,
     CT_Markup,
     CT_OnOff,
+    CT_Perm,
+    CT_PermStart,
+    CT_ProofErr,
+    CT_Rel,
     CT_Shd,
     CT_SignedHpsMeasure,
     CT_String,
@@ -35,6 +39,11 @@ from .shared import (
 register_element_cls("w:rsid", CT_LongHexNumber)
 register_element_cls("w:name", CT_String)
 
+
+register_element_cls("w:proofErr", CT_ProofErr)
+register_element_cls("w:permStart", CT_PermStart)
+register_element_cls("w:permEnd", CT_Perm)
+
 from .document import CT_Body, CT_CustomXmlBlock, CT_Document, CT_SdtBlock
 
 register_element_cls("w:document", CT_Document)
@@ -43,7 +52,7 @@ register_element_cls("w:customXml", CT_CustomXmlBlock)
 register_element_cls("w:sdt", CT_SdtBlock)
 
 
-from .text.paragraph import CT_P, CT_Rel, CT_SimpleField
+from .text.paragraph import CT_P, CT_SimpleField
 
 register_element_cls("w:p", CT_P)
 register_element_cls("w:fldSimple", CT_SimpleField)
@@ -310,10 +319,12 @@ from .text.run import (
     CT_Br,
     CT_CustomXmlRun,
     CT_DirContentRun,
-    CT_Perm,
-    CT_PermStart,
-    CT_ProofErr,
+    CT_FldChar,
+    CT_FtnEdnRef,
+    CT_Object,
+    CT_Picture_RUN,
     CT_PTab,
+    CT_Ruby,
     CT_RunTrackChange,
     CT_SdtRun,
     CT_SmartTagRun,
@@ -327,9 +338,6 @@ register_element_cls("w:sdt", CT_SdtRun)
 register_element_cls("w:dir", CT_DirContentRun)
 register_element_cls("w:bdo", CT_BdoContentRun)
 
-register_element_cls("w:proofErr", CT_ProofErr)
-register_element_cls("w:permStart", CT_PermStart)
-register_element_cls("w:permEnd", CT_Perm)
 
 register_element_cls("w:ins", CT_RunTrackChange)
 register_element_cls("w:del", CT_RunTrackChange)
@@ -338,13 +346,37 @@ register_element_cls("w:moveTo", CT_RunTrackChange)
 
 register_element_cls("w:r", CT_R)
 register_element_cls("w:br", CT_Br)
+register_element_cls("w:t", CT_Text)
+register_element_cls("w:contentPart", CT_Rel)
+register_element_cls("w:delText", CT_Text)
+register_element_cls("w:instrText", CT_Text)
+register_element_cls("w:delInstrText", CT_Text)
 register_element_cls("w:noBreakHyphen", CT_Empty)
 register_element_cls("w:softHyphen", CT_Empty)
+register_element_cls("w:dayShort", CT_Empty)
+register_element_cls("w:monthShort", CT_Empty)
+register_element_cls("w:yearShort", CT_Empty)
+register_element_cls("w:dayLong", CT_Empty)
+register_element_cls("w:monthLong", CT_Empty)
+register_element_cls("w:yearLong", CT_Empty)
+register_element_cls("w:annotationRef", CT_Empty)
+register_element_cls("w:footnoteRef", CT_Empty)
+register_element_cls("w:endnoteRef", CT_Empty)
+register_element_cls("w:separator", CT_Empty)
+register_element_cls("w:continuationSeparator", CT_Empty)
 register_element_cls("w:sym", CT_Sym)
+register_element_cls("w:pgNum", CT_Empty)
 register_element_cls("w:cr", CT_Empty)
 register_element_cls("w:tab", CT_Empty)
+register_element_cls("w:object", CT_Object)
+register_element_cls("w:pict", CT_Picture_RUN)
+register_element_cls("w:fldChar", CT_FldChar)
+register_element_cls("w:ruby", CT_Ruby)
+register_element_cls("w:footnoteReference", CT_FtnEdnRef)
+register_element_cls("w:endnoteReference", CT_FtnEdnRef)
+register_element_cls("w:commentReference", CT_Markup)
 register_element_cls("w:ptab", CT_PTab)
-register_element_cls("w:t", CT_Text)
+register_element_cls("w:lastRenderedPageBreak", CT_Empty)
 
 from .text.run_props import (
     CT_RPr,

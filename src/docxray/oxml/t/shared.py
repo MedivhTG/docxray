@@ -276,3 +276,19 @@ class CT_TrackChange(CT_Markup):
 
 class CT_Empty(OxmlElement):
     pass
+
+
+class CT_Rel(OxmlElement):
+    pass
+
+
+class CT_Perm(OxmlElement):
+    pass
+
+
+class CT_PermStart(OxmlElement):
+    pass
+
+
+class CT_ProofErr(OxmlElement):
+    pass

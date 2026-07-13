@@ -7,7 +7,7 @@ from typing import TypeVar
 # docxray stuff
 from docxray.oxml.t.proxy.base import ElementProxy, NotFound, StoryChild
 from docxray.oxml.t.proxy.compute import on_off
-from docxray.oxml.t.proxy.text.run import RunContentProxy, run_content
+from docxray.oxml.t.proxy.text.run import RunInnerContent, run_inner_content
 from docxray.oxml.t.st.enums import SE_JC_OMATH, SE_TOP_BOT
 from docxray.oxml.t.text.omath import CT_OMath, CT_OMathPara
 from docxray.oxml.t.text.omath_elm import (
@@ -18,19 +18,19 @@ from docxray.oxml.t.text.omath_elm import (
     CT_OMathArg,
     CT_R_OMath,
     CT_Text_OMath,
-    OMathElements,
+    EG_OMathMathElements,
 )
 from docxray.oxml.t.text.run import CT_Text
 
-OMATH_ELM = TypeVar("OMATH_ELM", bound=OMathElements)
+OMATH_ELM = TypeVar("OMATH_ELM", bound=EG_OMathMathElements)
 
 # TODO: Add other proxy for iteration etc.
 
-type OMathElementsProxy = Accent | Bar | BoxObject | RunOMath
-type RunOMathContent = TxtFragmentOMath | RunContentProxy
+type OMathMathElements = Accent | Bar | BoxObject | RunOMath
+type RunOMathInnerContent = TxtFragmentOMath | RunInnerContent
 
 
-def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathElementsProxy]:
+def iter_omath_content(parent: OMath | Arg) -> Iterator[OMathMathElements]:
     for elm in parent.element.inner_content_items:
         if isinstance(elm, CT_Acc):
             yield Accent(elm, parent)
@@ -47,7 +47,7 @@ class OMathElement(ElementProxy[OMATH_ELM]):
 
 
 class Arg(ElementProxy[CT_OMathArg]):
-    def iter_inner_content(self) -> Iterator[OMathElementsProxy]:
+    def iter_inner_content(self) -> Iterator[OMathMathElements]:
         return iter_omath_content(self)
 
 
@@ -131,12 +131,12 @@ class TxtFragmentOMath(ElementProxy[CT_Text_OMath]):
 
 
 class RunOMath(OMathElement[CT_R_OMath]):
-    def iter_inner_content(self) -> Iterator[RunOMathContent]:
+    def iter_inner_content(self) -> Iterator[RunOMathInnerContent]:
         for item in self.element.inner_content_items:
             if isinstance(item, CT_Text_OMath):
                 yield TxtFragmentOMath(item, self)
             else:
-                proxy = run_content(item, self)
+                proxy = run_inner_content(item, self)
                 if proxy:
                     yield proxy
 
@@ -152,7 +152,7 @@ class OMath(StoryChild[CT_OMath]):
             txt += txt_elm.txt
         return txt
 
-    def iter_inner_content(self) -> Iterator[OMathElementsProxy]:
+    def iter_inner_content(self) -> Iterator[OMathMathElements]:
         return iter_omath_content(self)
 
 
