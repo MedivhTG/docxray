@@ -45,6 +45,24 @@ class W:
     ALT_CHUNK = qn("w:altChunk")
 
     R = qn("w:r")
+    NO_BREAK_HYPHEN = qn("w:noBreakHyphen")
+    SOFT_HYPHEN = qn("w:softHyphen")
+    CR = qn("w:cr")
+    PG_NUM = qn("w:pgNum")
+    DAY_SHORT = qn("w:dayShort")
+    MONTH_SHORT = qn("w:monthShort")
+    YEAR_SHORT = qn("w:yearShort")
+    DAY_LONG = qn("w:dayLong")
+    MONTH_LONG = qn("w:monthLong")
+    YEAR_LONG = qn("w:yearLong")
+    FOOTNOTE_REF = qn("w:footnoteRef")
+    ENDNOTE_REF = qn("w:endnoteRef")
+    ANNOTATION_REF = qn("w:annotationRef")
+    FOOTNOTE_REFERENCE = qn("w:footnoteReference")
+    ENDNOTE_REFERENCE = qn("w:endnoteReference")
+    SEPARATOR = qn("w:separator")
+    CONTINUATION_SEPARATOR = qn("w:continuationSeparator")
+    LAST_RENDERED_PAGE_BREAK = qn("w:lastRenderedPageBreak")
 
     TR = qn("w:tr")
     TC = qn("w:tc")
@@ -323,6 +341,9 @@ class W:
     ANCHOR = qn("w:anchor")
 
     FOLLOWED_HYPERLINK = qn("w:followedHyperlink")
+
+    CUSTOM_XML = qn("w:customXml")
+    SDT = qn("w:sdt")
 
 
 class WP:

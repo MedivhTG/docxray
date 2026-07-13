@@ -139,9 +139,7 @@ class RunOMath(OMathElement[CT_R_OMath]):
             if isinstance(item, CT_Text_OMath):
                 yield TxtFragmentOMath(item, self)
             else:
-                proxy = run_inner_content(item, self)
-                if proxy:
-                    yield proxy
+                yield run_inner_content(item, self)
 
 
 class OMath(StoryChild[CT_OMath]):

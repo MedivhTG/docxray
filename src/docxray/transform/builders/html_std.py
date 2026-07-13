@@ -22,7 +22,15 @@ from docxray.oxml.t.proxy.text.run import (
     StrikeCase,
     UnderlineInfo,
 )
-from docxray.oxml.t.proxy.text.run_content import Break, Tab, TxtFragment
+from docxray.oxml.t.proxy.text.run_content import (
+    Break,
+    CarriageReturn,
+    NonBreakHyphen,
+    OptionalHyphen,
+    Separator,
+    Tab,
+    TxtFragment,
+)
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
     SE_UNDERLINE,
@@ -34,8 +42,10 @@ if TYPE_CHECKING:
 
 from .types import ElmMaker
 
-TAB_MNEMONIC = "&emsp;"
-SPACEBREAK_MNEMONIC = "&nbsp;"
+TAB = "&emsp;"
+SPACEBREAK = "&nbsp;"
+NON_BREAK_HYPHEN = "&#8209;"
+SOFT_HYPHEN = "&shy;"
 U_DECOR_MAP = {
     SE_UNDERLINE.SINGLE: "underline",
     SE_UNDERLINE.DOUBLE: "underline double",
@@ -191,6 +201,8 @@ def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
 
 
 def txt(txt_fgmt: TxtFragment) -> str | HtmlElement:
+    if txt_fgmt.txt_type != "t":
+        return ""
     txt = txt_fgmt.raw
     if txt_fgmt.preserve:
         elm = Element("span", {"style": "white-space: pre-wrap;"})
@@ -206,7 +218,23 @@ def break_elm(br: Break) -> HtmlElement | None:
 
 
 def tab(tab: Tab) -> str:
-    return TAB_MNEMONIC
+    return TAB
+
+
+def non_br_hyphen(hyphen: NonBreakHyphen) -> str:
+    return NON_BREAK_HYPHEN
+
+
+def soft_hyphen(hyphen: OptionalHyphen) -> str:
+    return SOFT_HYPHEN
+
+
+def carriage_return(cr: CarriageReturn) -> HtmlElement:
+    return Element("br")
+
+
+def separator(sep: Separator) -> HtmlElement:
+    return Element("hr")
 
 
 def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
@@ -218,8 +246,16 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):
             content = tab(item)
-        else:
+        elif isinstance(item, Break):
             content = break_elm(item)
+        elif isinstance(item, NonBreakHyphen):
+            content = non_br_hyphen(item)
+        elif isinstance(item, OptionalHyphen):
+            content = soft_hyphen(item)
+        elif isinstance(item, CarriageReturn):
+            content = carriage_return(item)
+        elif isinstance(item, Separator):
+            content = separator(item)
         if content is not None:
             content_append(upper_elm, content)
 

@@ -281,6 +281,4 @@ class Run(StoryChild[CT_R]):
         self,
     ) -> Iterator[RunInnerContent]:
         for item in self.element.inner_content_items:
-            proxy = run_inner_content(item, self)
-            if proxy:
-                yield proxy
+            yield run_inner_content(item, self)

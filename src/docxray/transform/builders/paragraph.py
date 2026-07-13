@@ -27,8 +27,8 @@ if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
 
 from .html_std import (
-    SPACEBREAK_MNEMONIC,
-    TAB_MNEMONIC,
+    SPACEBREAK,
+    TAB,
     TEXT_FLOW_TO_WRITING_MODE,
     b_elm,
     char_elm,
@@ -86,7 +86,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         paragraph_content
     )
     R_BUILDER = HtmlRun
-    EMPTY_TEXT_FILLER = SPACEBREAK_MNEMONIC
+    EMPTY_TEXT_FILLER = SPACEBREAK
 
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
@@ -129,7 +129,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
-            sep = TAB_MNEMONIC
+            sep = TAB
         elif suff == SE_LEVEL_SUFFIX.SPACE:
             sep = " "
         else:

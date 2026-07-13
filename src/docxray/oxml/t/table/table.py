@@ -74,9 +74,9 @@ class CT_Row(OxmlElement):
         elms: list[EG_ContentCellContent] = self.xpath(XPATH_CELL_CONTENT)
         elms_recr: list[EG_ContentCellContent] = []
         for elm in elms:
-            if elm.tag_name == "customXml":
+            if elm.tag == W.CUSTOM_XML:
                 elms_recr.append(elm.recreate(CT_CustomXmlCell))
-            elif elm.tag_name == "sdt":
+            elif elm.tag == W.SDT:
                 elms_recr.append(elm.recreate(CT_SdtCell))
             else:
                 elms_recr.append(elm)
@@ -121,9 +121,9 @@ class CT_Tbl(OxmlElement):
         elms: list[EG_ContentRowContent] = self.xpath(XPATH_ROW_CONTENT)
         elms_recr: list[EG_ContentRowContent] = []
         for elm in elms:
-            if elm.tag_name == "customXml":
+            if elm.tag == W.CUSTOM_XML:
                 elms_recr.append(elm.recreate(CT_CustomXmlRow))
-            elif elm.tag_name == "sdt":
+            elif elm.tag == W.SDT:
                 elms_recr.append(elm.recreate(CT_SdtRow))
             else:
                 elms_recr.append(elm)
