@@ -296,6 +296,10 @@ def omath_to_latex(
         height_px = drawing.height.px()
         return f"\\style{{display: inline-block; width: {width_px}px; height: {height_px}px; {background}}}{{}}"
 
+    def _sym(sym: Symbol) -> str:
+        font = sym.font or ""
+        return f"\\unicode[{font}]{{{ord(sym.character)}}}"
+
     def _process_run(self: OfficeMathRun, chr_: str = "") -> str:
         replacements = [
             (r"π", r"\pi "),
@@ -383,25 +387,34 @@ def omath_to_latex(
                     ):
                         flag_bold = True
             elif el.tag == qname("m", "t"):
-                text_content = (el.text or "").strip()
+                text_content = el.text or ""
                 if el.get(qname("xml", "space")) == "preserve":
-                    math_string += (
+                    pre = (
                         "\\ \\ "
                         if text_content == ""
                         else OfficeMathFieldCodeText(text_content).process(
                             chr_
                         )
                     )
+                    # Spaces in Word
+                    math_string += pre.replace(" ", r"\,")
                 else:
-                    math_string += (
-                        text_content.replace("_", "\\_")
+                    pre = (
+                        text_content.strip()
+                        .replace("_", "\\_")
                         .replace("^", "\\^")
                         .replace("{", "\\{")
                         .replace("}", "\\}")
                     )
+                    # Spaces in Word
+                    math_string += pre.replace(" ", r"\,")
             elif el.tag == qname("w", "drawing"):
                 math_string += _drawing_latex(
                     Drawing(el, omath)  # pyright: ignore[reportArgumentType]
+                )
+            elif el.tag == qname("w", "sym"):
+                math_string += _sym(
+                    Symbol(el, omath)  # pyright: ignore[reportArgumentType]
                 )
 
         for pre, post in replacements:
