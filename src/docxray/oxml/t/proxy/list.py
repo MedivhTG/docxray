@@ -8,6 +8,7 @@ from docxray.length import Length
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
+from docxray.oxml.t.proxy.text.font import Font
 from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
 from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
@@ -176,7 +177,6 @@ class ListItem:
         level: Level,
     ) -> None:
         self._numbering = numbering
-        self._styles = paragraph.document_part.styles
         self._paragraph = paragraph
         if numPr_elm.numId is None:
             raise ListItemError(
@@ -287,12 +287,12 @@ class ListItem:
         return None
 
     @cached_property
+    def font(self) -> Font | None:
+        return self.level.font
+
+    @cached_property
     def language(self) -> Language | None:
-        if self.level.language:
-            return self.level.language
-        if self._styles.document_defaults is None:
-            return None
-        return self._styles.document_defaults.language
+        return self.level.language
 
     @cached_property
     def level_text(self) -> str:

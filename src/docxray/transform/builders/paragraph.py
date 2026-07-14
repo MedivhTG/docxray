@@ -98,7 +98,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return ""
         li = proxy.list_item
         txt = li.level_text
-        tree = tag_tree(li.level, cls.RUN_MAKERS)
+        tree = tag_tree(li, cls.RUN_MAKERS)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
             sep = TAB
@@ -107,14 +107,12 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         else:
             sep = ""
         span_style = ""
-        if proxy.list_item.level.numbering_format == "bullet":
-            font = proxy.list_item.level.font
-            font_family = (
-                "Symbol"
-                if font is None
-                else font.guess_font(txt[0], True, "Symbol")
-            )
-            span_style = f"font-family: {font_family};"
+        font = proxy.list_item.level.font
+        if font:
+            default_font = "Symbol" if li.is_bullet_format else ""
+            font_family = font.guess_font(txt[0], default_font)
+            if font_family:
+                span_style = f"font-family: {font_family}; "
         if tree is None:
             if span_style:
                 span_elm = Element("span", {"style": span_style})

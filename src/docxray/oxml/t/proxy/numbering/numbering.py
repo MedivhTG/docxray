@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.colorize import Colorize
@@ -14,7 +14,7 @@ from docxray.oxml.t.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.t.proxy.base import ElementProxy, NotFound
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound, from_doc_dflts
 from docxray.oxml.t.proxy.compute import hps_measure, on_off
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.styles.style import (
@@ -134,33 +134,33 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def font(self) -> Font | None:
-        rFonts_elm = self.prop("rPr.rFonts")
+        rFonts_elm = self._display("rPr.rFonts")
         if isinstance(rFonts_elm, NotFound):
             return None
         return Font(rFonts_elm, self)
 
     @cached_property
     def language(self) -> Language | None:
-        lang_elm = self.prop("rPr.lang")
+        lang_elm = self._display("rPr.lang")
         if isinstance(lang_elm, NotFound):
             return None
         return Language(lang_elm, self)
 
     @cached_property
     def is_complex_script(self) -> bool:
-        return on_off(self.prop("rPr.cs.val", True))
+        return on_off(self._display("rPr.cs.val", True))
 
     @cached_property
     def right_to_left(self) -> bool:
-        return on_off(self.prop("rPr.rtl.val", True))
+        return on_off(self._display("rPr.rtl.val", True))
 
     @cached_property
     def italic(self) -> bool:
-        return on_off(self.prop("rPr.i.val", True))
+        return on_off(self._display("rPr.i.val", True))
 
     @cached_property
     def bold(self) -> bool:
-        return on_off(self.prop("rPr.b.val", True))
+        return on_off(self._display("rPr.b.val", True))
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
@@ -204,7 +204,7 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
-        valign = self.prop("rPr.vertAlign.val")
+        valign = self._display("rPr.vertAlign.val")
         if (
             isinstance(valign, NotFound)
             or valign == SE_VERTICAL_ALIGN_RUN.BASELINE
@@ -226,21 +226,21 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def font_size(self) -> Length | None:
-        size = self.prop("rPr.sz.val")
+        size = self._display("rPr.sz.val")
         if isinstance(size, NotFound):
             return None
         return hps_measure(size)
 
     @cached_property
     def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
-        highlight = self.prop("rPr.highlight.val")
+        highlight = self._display("rPr.highlight.val")
         if isinstance(highlight, NotFound) or highlight == "none":
             return None
         return highlight
 
     @cached_property
     def _u_line(self) -> SE_UNDERLINE | None:
-        line = self.prop("rPr.u.val", True)
+        line = self._display("rPr.u.val", True)
         if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
             return None
         if line is None:
@@ -249,75 +249,81 @@ class Level(ElementProxy[CT_Lvl]):
 
     @cached_property
     def _u_color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self.prop("rPr.u.color")
+        color = self._display("rPr.u.color")
         if isinstance(color, NotFound):
             return None
         return color
 
     @cached_property
     def _u_theme_color(self) -> SE_THEME_COLOR | None:
-        color = self.prop("rPr.u.themeColor")
+        color = self._display("rPr.u.themeColor")
         if isinstance(color, NotFound):
             return None
         return color
 
     @cached_property
     def _u_theme_tint(self) -> bytes | None:
-        tint = self.prop("rPr.u.themeTint")
+        tint = self._display("rPr.u.themeTint")
         if isinstance(tint, NotFound):
             return None
         return tint
 
     @cached_property
     def _u_theme_shade(self) -> bytes | None:
-        shade = self.prop("rPr.u.themeShade")
+        shade = self._display("rPr.u.themeShade")
         if isinstance(shade, NotFound):
             return None
         return shade
 
     @cached_property
     def _color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self.prop("rPr.color.val")
+        color = self._display("rPr.color.val")
         if isinstance(color, NotFound):
             return None
         return color
 
     @cached_property
     def _theme_color(self) -> SE_THEME_COLOR | None:
-        color = self.prop("rPr.color.themeColor")
+        color = self._display("rPr.color.themeColor")
         if isinstance(color, NotFound):
             return None
         return color
 
     @cached_property
     def _theme_tint(self) -> bytes | None:
-        tint = self.prop("rPr.color.themeTint")
+        tint = self._display("rPr.color.themeTint")
         if isinstance(tint, NotFound):
             return None
         return tint
 
     @cached_property
     def _theme_shade(self) -> bytes | None:
-        shade = self.prop("rPr.color.themeShade")
+        shade = self._display("rPr.color.themeShade")
         if isinstance(shade, NotFound):
             return None
         return shade
 
     @cached_property
     def _caps(self) -> bool:
-        return on_off(self.prop("rPr.caps.val", True))
+        return on_off(self._display("rPr.caps.val", True))
 
     @cached_property
     def _small_caps(self) -> bool:
-        return on_off(self.prop("rPr.smallCaps.val", True))
+        return on_off(self._display("rPr.smallCaps.val", True))
 
     @cached_property
     def _single_strike(self) -> bool:
-        return on_off(self.prop("rPr.strike.val", True))
+        return on_off(self._display("rPr.strike.val", True))
 
     @cached_property
     def _double_strike(self) -> bool:
-        return on_off(self.prop("rPr.dstrike.val", True))
+        return on_off(self._display("rPr.dstrike.val", True))
+
+    def _display(self, path: str, optional: bool = False) -> Any:
+        prop = self.prop(path, optional)
+        if isinstance(prop, NotFound):
+            return from_doc_dflts(self, path, optional)
+        return prop
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
@@ -465,10 +471,15 @@ class Numbering(ElementProxy[CT_Numbering]):
             num_style = abstract_num.numbering_style
         return num
 
+    # TODO: if no lvl but override exists - need to get props from it
     def associated_level(
         self, num_id: int, ilvl_or_style_id: int | str
     ) -> Level:
         num = self.find_effective_num(num_id)
         if isinstance(ilvl_or_style_id, int):
+            num_init = self.get_num(num_id)
+            override = num_init.associated_lvl_override(ilvl_or_style_id)
+            if override and override.lvl:
+                return override.lvl
             return num.abstract_num.lvl_by_ilvl(ilvl_or_style_id)
         return num.abstract_num.lvl_by_para_style(ilvl_or_style_id)

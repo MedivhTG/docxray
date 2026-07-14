@@ -35,6 +35,7 @@ from docxray.oxml.t.st.enums import (
 
 if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
+    from docxray.oxml.t.proxy.list import ListItem
 
 from .types import RunMaker
 
@@ -74,19 +75,19 @@ TEXT_FLOW_TO_WRITING_MODE = {
 }
 
 
-def i_elm(proxy: Run) -> HtmlElement | None:
+def i_elm(proxy: Run | ListItem) -> HtmlElement | None:
     if proxy.italic:
         return Element("i")
     return None
 
 
-def b_elm(proxy: Run) -> HtmlElement | None:
+def b_elm(proxy: Run | ListItem) -> HtmlElement | None:
     if proxy.bold:
         return Element("b")
     return None
 
 
-def vert_align_elm(proxy: Run) -> HtmlElement | None:
+def vert_align_elm(proxy: Run | ListItem) -> HtmlElement | None:
     if proxy.vertical_alignment is None:
         return None
     valign = proxy.vertical_alignment
@@ -95,7 +96,7 @@ def vert_align_elm(proxy: Run) -> HtmlElement | None:
     return Element("sub")
 
 
-def underline_elm(proxy: Run) -> HtmlElement | None:
+def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
     if proxy.underline_info is None:
         return None
     u_inf = proxy.underline_info
@@ -110,7 +111,7 @@ def underline_elm(proxy: Run) -> HtmlElement | None:
     )
 
 
-def format_run_elm(proxy: Run) -> HtmlElement | None:
+def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     span_elm: HtmlElement | None = None
     style = ""
     if proxy.strike_case:
@@ -120,18 +121,24 @@ def format_run_elm(proxy: Run) -> HtmlElement | None:
             style += line
         else:
             style += f"{line}text-decoration-style: double; "
+    if proxy.font and isinstance(proxy, Run):
+        txt = proxy.raw_text.strip()
+        if txt:
+            font = proxy.font.guess_font(txt[0], default="")
+            if font:
+                style += f"font-family: {font}; "
     if proxy.chars_case:
         ch = proxy.chars_case
         if ch == "caps":
             style += "text-transform: uppercase; "
         else:
             style += "font-variant: small-caps; "
+    if proxy.font_size is not None:
+        style += f"font-size: {proxy.font_size.pt}pt; "
     if proxy.color != "#000000":
         style += f"color: {proxy.color}; "
     if proxy.highlight:
         style += f"background-color: {proxy.highlight}; "
-    if proxy.font_size is not None:
-        style += f"font-size: {proxy.font_size.pt}pt;"
     if style:
         span_elm = Element("span", {"style": style})
     return span_elm
