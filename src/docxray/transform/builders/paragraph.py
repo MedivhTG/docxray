@@ -98,7 +98,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return ""
         li = proxy.list_item
         txt = li.level_text
-        tree = tag_tree(li, cls.RUN_MAKERS)
+        tree = tag_tree(li.level, cls.RUN_MAKERS)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
             sep = TAB

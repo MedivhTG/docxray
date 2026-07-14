@@ -4,26 +4,19 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 # docxray stuff
-from docxray.colorize import Colorize
 from docxray.length import Length
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
-from docxray.oxml.t.proxy.base import NotFound
-from docxray.oxml.t.proxy.compute import hps_measure, on_off
-from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
+from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
 from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
-    SE_HEX_COLOR_AUTO,
     SE_HIGHLIGHT_COLOR,
     SE_NUMBER_FORMAT,
-    SE_THEME_COLOR,
-    SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
 )
 from docxray.oxml.t.text.num_props import CT_NumPr
-from docxray.shared import os_locale
 from docxray.transform.transformer import Transformer
 
 from .numeral_rules import (
@@ -294,18 +287,12 @@ class ListItem:
         return None
 
     @cached_property
-    def locale(self) -> str:
-        """Locale set for `Numeral` module.
-
-        Can determine which alphabet/spellout letters/numbering will be used in `level_text`.
-        """
-        if self.level.locale is not None:
-            return self.level.locale
-        if self._styles.document_defaults is not None:
-            locale = self._styles.document_defaults.locale
-            if locale is not None:
-                return locale
-        return os_locale()
+    def language(self) -> Language | None:
+        if self.level.language:
+            return self.level.language
+        if self._styles.document_defaults is None:
+            return None
+        return self._styles.document_defaults.language
 
     @cached_property
     def level_text(self) -> str:
@@ -322,171 +309,39 @@ class ListItem:
 
     @cached_property
     def italic(self) -> bool:
-        return on_off(self._display("rPr.i.val", True))
+        return self.level.italic
 
     @cached_property
     def bold(self) -> bool:
-        return on_off(self._display("rPr.b.val", True))
+        return self.level.bold
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
-        if self._caps and self._small_caps:
-            raise DisplayError(
-                "Mentiond 2 cases (caps, small_caps) when they are mutually exclusive"
-            )
-        if self._caps:
-            return "caps"
-        if self._small_caps:
-            return "small_caps"
-        return None
+        return self.level.chars_case
 
     @cached_property
     def underline_info(self) -> UnderlineInfo | None:
-        if self._u_line is None:
-            return None
-        return {
-            "line": self._u_line,
-            "color": Colorize.colorize(
-                self._u_color or SE_HEX_COLOR_AUTO.AUTO,
-                self._u_theme_color,
-                self._paragraph.document_part.theme.palette,
-                self._u_theme_tint,
-                self._u_theme_shade,
-                prefer_theme=True,
-            ),
-        }
+        return self.level.underline_info
 
     @cached_property
     def strike_case(self) -> StrikeCase | None:
-        if self._single_strike and self._double_strike:
-            raise DisplayError(
-                "Mentiond 2 cases (single, double) when they are mutually exclusive"
-            )
-        if self._single_strike:
-            return "single"
-        if self._double_strike:
-            return "double"
-        return None
+        return self.level.strike_case
 
     @cached_property
     def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
-        valign = self._display("rPr.vertAlign.val")
-        if (
-            isinstance(valign, NotFound)
-            or valign == SE_VERTICAL_ALIGN_RUN.BASELINE
-        ):
-            return None
-        return valign
+        return self.level.vertical_alignment
 
     @cached_property
     def color(self) -> str:
-        """Hexaadecimal color-presentation of an run text, e.g. `#000000` for black."""
-        return Colorize.colorize(
-            self._color or SE_HEX_COLOR_AUTO.AUTO,
-            self._theme_color,
-            self._paragraph.document_part.theme.palette,
-            self._theme_tint,
-            self._theme_shade,
-            prefer_theme=True,
-        )
+        return self.level.color
 
     @cached_property
     def font_size(self) -> Length | None:
-        size = self._display("rPr.sz.val")
-        if isinstance(size, NotFound):
-            return None
-        return hps_measure(size)
+        return self.level.font_size
 
     @cached_property
     def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
-        highlight = self._display("rPr.highlight.val")
-        if isinstance(highlight, NotFound) or highlight == "none":
-            return None
-        return highlight
-
-    @cached_property
-    def _u_line(self) -> SE_UNDERLINE | None:
-        line = self._display("rPr.u.val", True)
-        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
-            return None
-        if line is None:
-            return SE_UNDERLINE.SINGLE
-        return line
-
-    @cached_property
-    def _u_color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self._display("rPr.u.color")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _u_theme_color(self) -> SE_THEME_COLOR | None:
-        color = self._display("rPr.u.themeColor")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _u_theme_tint(self) -> bytes | None:
-        tint = self._display("rPr.u.themeTint")
-        if isinstance(tint, NotFound):
-            return None
-        return tint
-
-    @cached_property
-    def _u_theme_shade(self) -> bytes | None:
-        shade = self._display("rPr.u.themeShade")
-        if isinstance(shade, NotFound):
-            return None
-        return shade
-
-    @cached_property
-    def _color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self._display("rPr.color.val")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _theme_color(self) -> SE_THEME_COLOR | None:
-        color = self._display("rPr.color.themeColor")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _theme_tint(self) -> bytes | None:
-        tint = self._display("rPr.color.themeTint")
-        if isinstance(tint, NotFound):
-            return None
-        return tint
-
-    @cached_property
-    def _theme_shade(self) -> bytes | None:
-        shade = self._display("rPr.color.themeShade")
-        if isinstance(shade, NotFound):
-            return None
-        return shade
-
-    @cached_property
-    def _caps(self) -> bool:
-        return on_off(self._display("rPr.caps.val", True))
-
-    @cached_property
-    def _small_caps(self) -> bool:
-        return on_off(self._display("rPr.smallCaps.val", True))
-
-    @cached_property
-    def _single_strike(self) -> bool:
-        return on_off(self._display("rPr.strike.val", True))
-
-    @cached_property
-    def _double_strike(self) -> bool:
-        return on_off(self._display("rPr.dstrike.val", True))
-
-    def _display(self, path: str, optional: bool = False) -> Any:
-        return self.paragraph._prop(path, optional, "level")
+        return self.level.highlight
 
     def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
         for_lvl = self._numbering.associated_level(current_li.num_id, for_ilvl)
@@ -529,10 +384,9 @@ class ListItem:
         if level.all_decimal:
             return Numeral.decimal(ord)
         if format in NUMERAL_WITH_LOCALE:
-            locale = for_leveled.locale
-            if locale is None and self._styles.document_defaults:
-                locale = self._styles.document_defaults.locale
-            locale = locale or "en-US"
+            locale = "en-US"
+            if for_leveled.language:
+                locale = for_leveled.language.latin_slot or "en-US"
             return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[format](ord)  # type: ignore[operator]
 
