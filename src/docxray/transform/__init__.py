@@ -6,7 +6,7 @@ from .builders.list import HtmlListViewInterrupted
 from .builders.omath import HtmlOMath, HtmlOMathPara
 from .builders.paragraph import HtmlParagraph, HtmlParagraphInList
 from .builders.table import HtmlTable
-from .builders.types import ElmMaker
+from .builders.types import RunMaker
 from .ruleset import Rule, RuleSet
 
 __all__ = [
@@ -22,5 +22,5 @@ __all__ = [
     "HtmlParagraph",
     "HtmlParagraphInList",
     "HtmlTable",
-    "ElmMaker",
+    "RunMaker",
 ]

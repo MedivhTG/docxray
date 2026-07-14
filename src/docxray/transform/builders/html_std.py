@@ -16,12 +16,7 @@ from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
 from docxray.oxml.t.proxy.text.paragraph import PContent
-from docxray.oxml.t.proxy.text.run import (
-    CharsCase,
-    Run,
-    StrikeCase,
-    UnderlineInfo,
-)
+from docxray.oxml.t.proxy.text.run import Run
 from docxray.oxml.t.proxy.text.run_content import (
     Break,
     CarriageReturn,
@@ -41,7 +36,7 @@ from docxray.oxml.t.st.enums import (
 if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
 
-from .types import ElmMaker
+from .types import RunMaker
 
 TAB = "&emsp;"
 SPACEBREAK = "&nbsp;"
@@ -79,51 +74,74 @@ TEXT_FLOW_TO_WRITING_MODE = {
 }
 
 
-def i_elm(value: bool) -> HtmlElement:
-    return Element("i")
+def i_elm(proxy: Run) -> HtmlElement | None:
+    if proxy.italic:
+        return Element("i")
+    return None
 
 
-def b_elm(value: bool) -> HtmlElement:
-    return Element("b")
+def b_elm(proxy: Run) -> HtmlElement | None:
+    if proxy.bold:
+        return Element("b")
+    return None
 
 
-def strike_elm(value: StrikeCase) -> HtmlElement:
-    if value == "single":
-        return Element("s")
-    return Element(
-        "span",
-        {
-            "style": "text-decoration: line-through; text-decoration-style: double;"
-        },
-    )
+def vert_align_elm(proxy: Run) -> HtmlElement | None:
+    if proxy.vertical_alignment is None:
+        return None
+    valign = proxy.vertical_alignment
+    if valign == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
+        return Element("sup")
+    return Element("sub")
 
 
-def char_elm(value: CharsCase) -> HtmlElement:
-    if value == "caps":
-        return Element("span", {"style": "text-transform: uppercase;"})
-    return Element("span", {"style": "font-variant: small-caps;"})
-
-
-def color_elm(value: str) -> HtmlElement:
-    return Element("span", {"style": f"color: {value};"})
-
-
-def underline_elm(value: UnderlineInfo) -> HtmlElement:
-    decor = U_DECOR_MAP.get(value["line"])
+def underline_elm(proxy: Run) -> HtmlElement | None:
+    if proxy.underline_info is None:
+        return None
+    u_inf = proxy.underline_info
+    decor = U_DECOR_MAP.get(u_inf["line"])
     if decor is None:
         decor = "underline"
     decor_color = ""
-    if value["color"] != "#000000":
-        decor_color = f" text-decoration-color: {value["color"]};"
+    if u_inf["color"] != "#000000":
+        decor_color = f" text-decoration-color: {u_inf["color"]};"
     return Element(
         "span", {"style": f"text-decoration: {decor};{decor_color}"}
     )
 
 
-def vert_align_elm(value: SE_VERTICAL_ALIGN_RUN) -> HtmlElement:
-    if value == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
-        return Element("sup")
-    return Element("sub")
+def format_run_elm(proxy: Run) -> HtmlElement | None:
+    span_elm: HtmlElement | None = None
+    style = ""
+    if proxy.strike_case:
+        strike = proxy.strike_case
+        line = "text-decoration: line-through; "
+        if strike == "single":
+            style += line
+        else:
+            style += f"{line}text-decoration-style: double; "
+    if proxy.chars_case:
+        ch = proxy.chars_case
+        if ch == "caps":
+            style += "text-transform: uppercase; "
+        else:
+            style += "font-variant: small-caps; "
+    if proxy.color != "#000000":
+        style += f"color: {proxy.color}; "
+    if proxy.font_size is not None:
+        style += f"font-size: {proxy.font_size.pt}pt;"
+    if style:
+        span_elm = Element("span", {"style": style})
+    return span_elm
+
+
+RUN_MAKERS_DEFAULT: list[RunMaker] = [
+    i_elm,
+    b_elm,
+    vert_align_elm,
+    underline_elm,
+    format_run_elm,
+]
 
 
 def pt(length: Length | float) -> str:
@@ -134,15 +152,14 @@ def pt(length: Length | float) -> str:
 
 
 def tag_tree(
-    run_proxy: Any, run_makers: dict[str, ElmMaker]
+    run_proxy: Any, run_makers: list[RunMaker]
 ) -> tuple[HtmlElement, HtmlElement] | None:
     top = None
     bottom = None
-    for attr, maker in run_makers.items():
-        val = getattr(run_proxy, attr, None)
-        if not val:
+    for maker in run_makers:
+        elm = maker(run_proxy)
+        if elm is None:
             continue
-        elm = maker(val)
         if top is None and bottom is None:
             top = elm
             bottom = elm
@@ -252,7 +269,7 @@ def symbol(sym: Symbol) -> HtmlElement | str:
 def run(
     upper_elm: HtmlElement,
     run: Run,
-    run_makers: dict[str, ElmMaker],
+    run_makers: list[RunMaker],
     ruleset: RuleSet,
 ) -> None:
     tree = tag_tree(run, run_makers)
@@ -477,7 +494,7 @@ def omath(upper_elm: HtmlElement, omath: OMath, ruleset: RuleSet) -> None:
 def paragraph_content(
     upper_elm: HtmlElement,
     p_content: PContent,
-    run_makers: dict[str, ElmMaker],
+    run_makers: list[RunMaker],
     ruleset: RuleSet,
 ) -> None:
     if isinstance(p_content, Run):

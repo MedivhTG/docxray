@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 # docxray stuff
 from docxray.colorize import Colorize
+from docxray.length import Length
 from docxray.oxml.t.proxy.base import (
     NotFound,
     StoryChild,
     from_doc_dflts,
     from_style_inheritance,
 )
-from docxray.oxml.t.proxy.compute import on_off
+from docxray.oxml.t.proxy.compute import hps_measure, on_off
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.styles.style import CharacterStyle
 from docxray.oxml.t.st.enums import (
@@ -154,6 +155,13 @@ class Run(StoryChild[CT_R]):
             self._theme_shade,
             prefer_theme=True,
         )
+
+    @cached_property
+    def font_size(self) -> Length | None:
+        size = self._display("rPr.sz.val")
+        if isinstance(size, NotFound):
+            return None
+        return hps_measure(size)
 
     @cached_property
     def raw_text(self) -> str:

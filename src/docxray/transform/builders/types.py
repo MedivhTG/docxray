@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     # docxray stuff
     from docxray.transform.ruleset import RuleSet
 
-type ElmMaker = Callable[[Any], HtmlElement]
+type RunMaker = Callable[[Any], HtmlElement | None]
 type PContentFunc = Callable[
-    [HtmlElement, PContent, dict[str, ElmMaker], RuleSet], None
+    [HtmlElement, PContent, list[RunMaker], RuleSet], None
 ]

@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING, Any
 
 # docxray stuff
 from docxray.colorize import Colorize
+from docxray.length import Length
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.t.proxy.base import NotFound
-from docxray.oxml.t.proxy.compute import on_off
+from docxray.oxml.t.proxy.compute import hps_measure, on_off
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
@@ -387,6 +388,13 @@ class ListItem:
             self._theme_shade,
             prefer_theme=True,
         )
+
+    @cached_property
+    def font_size(self) -> Length | None:
+        size = self._display("rPr.sz.val")
+        if isinstance(size, NotFound):
+            return None
+        return hps_measure(size)
 
     @cached_property
     def _u_line(self) -> SE_UNDERLINE | None:

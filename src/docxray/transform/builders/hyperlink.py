@@ -5,17 +5,8 @@ from typing import TYPE_CHECKING
 from lxml.html import Element, HtmlElement
 
 from .base import HtmlBuilder
-from .html_std import (
-    b_elm,
-    char_elm,
-    color_elm,
-    i_elm,
-    paragraph_content,
-    strike_elm,
-    underline_elm,
-    vert_align_elm,
-)
-from .types import ElmMaker, PContentFunc
+from .html_std import RUN_MAKERS_DEFAULT, paragraph_content
+from .types import PContentFunc, RunMaker
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -24,15 +15,7 @@ if TYPE_CHECKING:
 
 
 class HtmlHyperlink(HtmlBuilder["Hyperlink"]):
-    RUN_MAKERS: dict[str, ElmMaker] = {
-        "vertical_alignment": vert_align_elm,
-        "underline_info": underline_elm,
-        "strike_case": strike_elm,
-        "italic": i_elm,
-        "bold": b_elm,
-        "chars_case": char_elm,
-        "color": color_elm,
-    }
+    RUN_MAKERS: list[RunMaker] = RUN_MAKERS_DEFAULT
     P_CONTENT_FUNC: PContentFunc = paragraph_content
 
     @classmethod

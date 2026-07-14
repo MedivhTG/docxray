@@ -23,20 +23,14 @@ if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
 
 from .html_std import (
+    RUN_MAKERS_DEFAULT,
     SPACEBREAK,
     TAB,
     TEXT_FLOW_TO_WRITING_MODE,
-    b_elm,
-    char_elm,
-    color_elm,
-    i_elm,
     paragraph_content,
-    strike_elm,
     tag_tree,
-    underline_elm,
-    vert_align_elm,
 )
-from .types import ElmMaker, PContentFunc
+from .types import PContentFunc, RunMaker
 
 
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
@@ -69,17 +63,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
-
-    RUN_MAKERS: dict[str, ElmMaker] = {
-        "vertical_alignment": vert_align_elm,
-        "underline_info": underline_elm,
-        "strike_case": strike_elm,
-        "italic": i_elm,
-        "bold": b_elm,
-        "chars_case": char_elm,
-        "color": color_elm,
-    }
-
+    RUN_MAKERS: list[RunMaker] = RUN_MAKERS_DEFAULT
     P_CONTENT_FUNC: PContentFunc = paragraph_content
     EMPTY_TEXT_FILLER = SPACEBREAK
 

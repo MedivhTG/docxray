@@ -166,3 +166,23 @@ def universal_measure(val: str, override_pattern: str | None = None) -> Length:
             return Pica(value)
         case _:
             raise err
+
+
+def hps_measure(val: int | str) -> Length:
+    """Parse value of an half-points measure to `Length` instance.
+
+    Args:
+        val (int | str): Integer if half-points, else old measure-string.
+
+    Returns:
+        Length: Numeric instance.
+    """
+    if isinstance(val, int):
+        # Half-points
+        return Pt(val / 2)
+    return universal_measure(
+        val,
+        cast(
+            "PatternFacet", ST_PositiveUniversalMeasure.FACETS["pattern"]
+        ).value,
+    )
