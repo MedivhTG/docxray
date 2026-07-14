@@ -114,6 +114,8 @@ def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
 def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     span_elm: HtmlElement | None = None
     style = ""
+    if proxy.hide_text:
+        style += "display: none; "
     if proxy.strike_case:
         strike = proxy.strike_case
         line = "text-decoration: line-through; "

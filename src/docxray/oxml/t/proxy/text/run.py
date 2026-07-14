@@ -190,6 +190,11 @@ class Run(StoryChild[CT_R]):
         )
 
     @cached_property
+    def hide_text(self):
+        """Render text as hidden and free display space."""
+        return self._display_toggled("rPr.vanish.val")
+
+    @cached_property
     def _sz(self) -> Length | None:
         size = self._display("rPr.sz.val")
         if isinstance(size, NotFound):

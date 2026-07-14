@@ -241,6 +241,11 @@ class Level(ElementProxy[CT_Lvl]):
         return highlight
 
     @cached_property
+    def hide_text(self) -> bool:
+        """Render text as hidden and free display space."""
+        return on_off(self._display("rPr.vanish.val", True))
+
+    @cached_property
     def _complex_script(self) -> bool:
         return on_off(self._display("rPr.cs.val", True))
 

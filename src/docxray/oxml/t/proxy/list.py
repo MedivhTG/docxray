@@ -343,6 +343,10 @@ class ListItem:
     def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
         return self.level.highlight
 
+    @cached_property
+    def hide_text(self) -> bool:
+        return self.level.hide_text
+
     def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
         for_lvl = self._numbering.associated_level(current_li.num_id, for_ilvl)
         restart_from = for_lvl.restart_from
