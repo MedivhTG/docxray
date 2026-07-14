@@ -128,6 +128,8 @@ def format_run_elm(proxy: Run) -> HtmlElement | None:
             style += "font-variant: small-caps; "
     if proxy.color != "#000000":
         style += f"color: {proxy.color}; "
+    if proxy.highlight:
+        style += f"background-color: {proxy.highlight}; "
     if proxy.font_size is not None:
         style += f"font-size: {proxy.font_size.pt}pt;"
     if style:

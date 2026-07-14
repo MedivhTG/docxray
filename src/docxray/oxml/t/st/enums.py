@@ -806,3 +806,23 @@ class SE_WML_COLOR_SCHEME_INDEX(StrEnum):
     ACCENT6 = "accent6"
     HYPERLINK = "hyperlink"
     FOLLOWED_HYPERLINK = "followedHyperlink"
+
+
+class SE_HIGHLIGHT_COLOR(StrEnum):
+    BLACK = "black"
+    BLUE = "blue"
+    CYAN = "cyan"
+    GREEN = "green"
+    MAGENTA = "magenta"
+    RED = "red"
+    YELLOW = "yellow"
+    WHITE = "white"
+    DARK_BLUE = "darkBlue"
+    DARK_CYAN = "darkCyan"
+    DARK_GREEN = "darkGreen"
+    DARK_MAGENTA = "darkMagenta"
+    DARK_RED = "darkRed"
+    DARK_YELLOW = "darkYellow"
+    DARK_GRAY = "darkGray"
+    LIGHT_GRAY = "lightGray"
+    NONE = "none"

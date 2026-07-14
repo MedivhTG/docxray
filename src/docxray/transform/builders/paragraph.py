@@ -115,10 +115,6 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
                 else font.guess_font(txt[0], True, "Symbol")
             )
             span_style = f"font-family: {font_family};"
-        if li.chars_case == "caps":
-            span_style += "text-transform: uppercase;"
-        elif li.chars_case == "small_caps":
-            span_style += "font-variant: small-caps;"
         if tree is None:
             if span_style:
                 span_elm = Element("span", {"style": span_style})

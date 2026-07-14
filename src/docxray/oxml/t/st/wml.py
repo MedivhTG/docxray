@@ -22,6 +22,7 @@ from .enums import (
     SE_BR_TYPE,
     SE_HEIGHT_RULE,
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
     SE_HINT,
     SE_JC,
     SE_JC_TABLE,
@@ -232,3 +233,8 @@ class ST_TblLayoutType(XsdSimpleType):
 class ST_WmlColorSchemeIndex(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_WML_COLOR_SCHEME_INDEX)}
+
+
+class ST_HighlightColor(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HIGHLIGHT_COLOR)}

@@ -18,6 +18,7 @@ from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.styles.style import CharacterStyle
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
     SE_STYLE_TYPE,
     SE_THEME_COLOR,
     SE_UNDERLINE,
@@ -162,6 +163,13 @@ class Run(StoryChild[CT_R]):
         if isinstance(size, NotFound):
             return None
         return hps_measure(size)
+
+    @cached_property
+    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
+        highlight = self._display("rPr.highlight.val")
+        if isinstance(highlight, NotFound) or highlight == "none":
+            return None
+        return highlight
 
     @cached_property
     def raw_text(self) -> str:

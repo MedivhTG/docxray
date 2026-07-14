@@ -16,6 +16,7 @@ from docxray.oxml.t.proxy.text.paragraph import Paragraph
 from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
     SE_NUMBER_FORMAT,
     SE_THEME_COLOR,
     SE_UNDERLINE,
@@ -395,6 +396,13 @@ class ListItem:
         if isinstance(size, NotFound):
             return None
         return hps_measure(size)
+
+    @cached_property
+    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
+        highlight = self._display("rPr.highlight.val")
+        if isinstance(highlight, NotFound) or highlight == "none":
+            return None
+        return highlight
 
     @cached_property
     def _u_line(self) -> SE_UNDERLINE | None:
