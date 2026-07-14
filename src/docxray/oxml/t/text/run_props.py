@@ -120,18 +120,22 @@ class CT_RPr(OxmlElement):
     def dstrike(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.DSTRIKE, CT_OnOff)
 
+    # Old
     @cached_property
     def outline(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.OUTLINE, CT_OnOff)
 
+    # Old
     @cached_property
     def shadow(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SHADOW, CT_OnOff)
 
+    # Old
     @cached_property
     def emboss(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.EMBOSS, CT_OnOff)
 
+    # Old
     @cached_property
     def imprint(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.IMPRINT, CT_OnOff)
@@ -140,6 +144,7 @@ class CT_RPr(OxmlElement):
     def noProof(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.NO_PROOF, CT_OnOff)
 
+    # Future
     @cached_property
     def snapToGrid(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SNAP_TO_GRID, CT_OnOff)
@@ -156,6 +161,7 @@ class CT_RPr(OxmlElement):
     def color(self) -> CT_Color | None:
         return self.child_zero_or_one(W.COLOR, CT_Color)
 
+    # TODO: use
     @cached_property
     def spacing(self) -> CT_SignedTwipsMeasure | None:
         spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
@@ -163,14 +169,17 @@ class CT_RPr(OxmlElement):
             return None
         return spacing_elm.recreate(CT_SignedTwipsMeasure)
 
+    # TODO: use
     @cached_property
     def w(self) -> CT_TextScale | None:
         return self.child_zero_or_one(W.W, CT_TextScale)
 
+    # TODO: use
     @cached_property
     def kern(self) -> CT_HpsMeasure | None:
         return self.child_zero_or_one(W.KERN, CT_HpsMeasure)
 
+    # TODO: use
     @cached_property
     def position(self) -> CT_SignedHpsMeasure | None:
         return self.child_zero_or_one(W.POSITION, CT_SignedHpsMeasure)
@@ -191,18 +200,22 @@ class CT_RPr(OxmlElement):
     def u(self) -> CT_Underline | None:
         return self.child_zero_or_one(W.U, CT_Underline)
 
+    # Old
     @cached_property
     def effect(self) -> CT_TextEffect | None:
         return self.child_zero_or_one(W.EFFECT, CT_TextEffect)
 
+    # TODO: use
     @cached_property
     def bdr(self) -> CT_Border | None:
         return self.child_zero_or_one(W.BDR, CT_Border)
 
+    # Future
     @cached_property
     def shd(self) -> CT_Shd | None:
         return self.child_zero_or_one(W.SHD, CT_Shd)
 
+    # Too complex
     @cached_property
     def fitText(self) -> CT_FitText | None:
         return self.child_zero_or_one(W.FIT_TEXT, CT_FitText)
@@ -219,6 +232,7 @@ class CT_RPr(OxmlElement):
     def cs(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.CS, CT_OnOff)
 
+    # Future
     @cached_property
     def em(self) -> CT_Em | None:
         return self.child_zero_or_one(W.EM, CT_Em)
@@ -227,6 +241,7 @@ class CT_RPr(OxmlElement):
     def lang(self) -> CT_Language | None:
         return self.child_zero_or_one(W.LANG, CT_Language)
 
+    # Future
     @cached_property
     def eastAsianLayout(self) -> CT_EastAsianLayout | None:
         return self.child_zero_or_one(W.EAST_ASIAN_LAYOUT, CT_EastAsianLayout)
@@ -235,6 +250,7 @@ class CT_RPr(OxmlElement):
     def specVanish(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SPEC_VANISH, CT_OnOff)
 
+    # IDK
     @cached_property
     def oMath(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.O_MATH, CT_OnOff)
