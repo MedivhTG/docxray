@@ -144,9 +144,7 @@ class Font(ElementProxy[CT_Fonts]):
                     font_slot = classificator(self, unicode)
                 if font_slot == "eastAsia" and self._hint == "eastAsia":
                     return FontSlot.EAST_ASIA
-                elif (
-                    self.parent.is_complex_script or self.parent.right_to_left
-                ):
+                elif self.parent._complex_script or self.parent.right_to_left:
                     return FontSlot.COMPLEX_SCRIPT
                 else:
                     return font_slot

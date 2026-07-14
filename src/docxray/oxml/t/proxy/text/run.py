@@ -58,12 +58,23 @@ class Run(StoryChild[CT_R]):
     @cached_property
     def italic(self) -> bool:
         """Used italic bold-decoration."""
-        return self._display_toggled("rPr.i.val")
+        if self._complex_script:
+            return self._iCs
+        return self._i
 
     @cached_property
     def bold(self) -> bool:
         """Used text bold-decoration."""
-        return self._display_toggled("rPr.b.val")
+        if self._complex_script:
+            return self._bCs
+        return self._b
+
+    @cached_property
+    def font_size(self) -> Length | None:
+        """Size of characters font."""
+        if self._complex_script:
+            return self._szCs
+        return self._sz
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
@@ -136,11 +147,6 @@ class Run(StoryChild[CT_R]):
         return Language(lang_elm, self)
 
     @cached_property
-    def is_complex_script(self) -> bool:
-        """Spelling for text is complex (has arabic, chinese, etc. chars)."""
-        return on_off(self._display("rPr.cs.val", True))
-
-    @cached_property
     def right_to_left(self) -> bool:
         """Spelling for text is right-to-left."""
         return on_off(self._display("rPr.rtl.val", True))
@@ -156,13 +162,6 @@ class Run(StoryChild[CT_R]):
             self._theme_shade,
             prefer_theme=True,
         )
-
-    @cached_property
-    def font_size(self) -> Length | None:
-        size = self._display("rPr.sz.val")
-        if isinstance(size, NotFound):
-            return None
-        return hps_measure(size)
 
     @cached_property
     def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
@@ -189,6 +188,41 @@ class Run(StoryChild[CT_R]):
         return self.document_part.styles.get_by_id(
             style_id, SE_STYLE_TYPE.CHARACTER, CharacterStyle
         )
+
+    @cached_property
+    def _sz(self) -> Length | None:
+        size = self._display("rPr.sz.val")
+        if isinstance(size, NotFound):
+            return None
+        return hps_measure(size)
+
+    @cached_property
+    def _szCs(self) -> Length | None:
+        size = self._display("rPr.szCs.val")
+        if isinstance(size, NotFound):
+            return None
+        return hps_measure(size)
+
+    @cached_property
+    def _i(self) -> bool:
+        return self._display_toggled("rPr.i.val")
+
+    @cached_property
+    def _iCs(self) -> bool:
+        return self._display_toggled("rPr.iCs.val")
+
+    @cached_property
+    def _b(self) -> bool:
+        return self._display_toggled("rPr.b.val")
+
+    @cached_property
+    def _bCs(self) -> bool:
+        return self._display_toggled("rPr.bCs.val")
+
+    @cached_property
+    def _complex_script(self) -> bool:
+        """Spelling for text is complex (has arabic, chinese, etc. chars)."""
+        return on_off(self._display("rPr.cs.val", True))
 
     @cached_property
     def _caps(self) -> bool:

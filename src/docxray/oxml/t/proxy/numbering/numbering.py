@@ -147,20 +147,29 @@ class Level(ElementProxy[CT_Lvl]):
         return Language(lang_elm, self)
 
     @cached_property
-    def is_complex_script(self) -> bool:
-        return on_off(self._display("rPr.cs.val", True))
-
-    @cached_property
     def right_to_left(self) -> bool:
         return on_off(self._display("rPr.rtl.val", True))
 
     @cached_property
     def italic(self) -> bool:
-        return on_off(self._display("rPr.i.val", True))
+        """Used italic bold-decoration."""
+        if self._complex_script:
+            return self._iCs
+        return self._i
 
     @cached_property
     def bold(self) -> bool:
-        return on_off(self._display("rPr.b.val", True))
+        """Used text bold-decoration."""
+        if self._complex_script:
+            return self._bCs
+        return self._b
+
+    @cached_property
+    def font_size(self) -> Length | None:
+        """Size of characters font."""
+        if self._complex_script:
+            return self._szCs
+        return self._sz
 
     @cached_property
     def chars_case(self) -> CharsCase | None:
@@ -225,18 +234,45 @@ class Level(ElementProxy[CT_Lvl]):
         )
 
     @cached_property
-    def font_size(self) -> Length | None:
+    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
+        highlight = self._display("rPr.highlight.val")
+        if isinstance(highlight, NotFound) or highlight == "none":
+            return None
+        return highlight
+
+    @cached_property
+    def _complex_script(self) -> bool:
+        return on_off(self._display("rPr.cs.val", True))
+
+    @cached_property
+    def _sz(self) -> Length | None:
         size = self._display("rPr.sz.val")
         if isinstance(size, NotFound):
             return None
         return hps_measure(size)
 
     @cached_property
-    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
-        highlight = self._display("rPr.highlight.val")
-        if isinstance(highlight, NotFound) or highlight == "none":
+    def _szCs(self) -> Length | None:
+        size = self._display("rPr.szCs.val")
+        if isinstance(size, NotFound):
             return None
-        return highlight
+        return hps_measure(size)
+
+    @cached_property
+    def _i(self) -> bool:
+        return on_off(self._display("rPr.i.val", True))
+
+    @cached_property
+    def _iCs(self) -> bool:
+        return on_off(self._display("rPr.iCs.val", True))
+
+    @cached_property
+    def _b(self) -> bool:
+        return on_off(self._display("rPr.b.val", True))
+
+    @cached_property
+    def _bCs(self) -> bool:
+        return on_off(self._display("rPr.bCs.val", True))
 
     @cached_property
     def _u_line(self) -> SE_UNDERLINE | None:
