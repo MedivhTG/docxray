@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from lxml.html import Element, HtmlElement
@@ -9,7 +8,6 @@ from lxml.html import Element, HtmlElement
 from docxray.length import Length
 from docxray.oxml.t.enums import WD_HEADER_LEVEL
 from docxray.oxml.t.proxy.table.cell import Cell
-from docxray.oxml.t.proxy.text.paragraph import PContent
 from docxray.oxml.t.st.enums import (
     SE_JC,
     SE_LEVEL_SUFFIX,
@@ -17,8 +15,6 @@ from docxray.oxml.t.st.enums import (
 )
 
 from .base import HtmlBuilder
-from .char_graph import RunChain, RunChainsMap
-from .run import HtmlRun
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -40,7 +36,7 @@ from .html_std import (
     underline_elm,
     vert_align_elm,
 )
-from .types import ElmMaker
+from .types import ElmMaker, PContentFunc
 
 
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
@@ -74,20 +70,17 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
 
-    ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
-        "underline_info": underline_elm,
+    RUN_MAKERS: dict[str, ElmMaker] = {
         "vertical_alignment": vert_align_elm,
+        "underline_info": underline_elm,
+        "strike_case": strike_elm,
         "italic": i_elm,
         "bold": b_elm,
-        "strike_case": strike_elm,
         "chars_case": char_elm,
         "color": color_elm,
     }
 
-    P_CONTENT_FUNC: Callable[[HtmlElement, PContent, RuleSet], None] = (
-        paragraph_content
-    )
-    R_BUILDER = HtmlRun
+    P_CONTENT_FUNC: PContentFunc = paragraph_content
     EMPTY_TEXT_FILLER = SPACEBREAK
 
     @classmethod
@@ -112,15 +105,8 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         ):
             elm.text = cls.EMPTY_TEXT_FILLER
             return
-        chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
         for item in proxy.iter_inner_content():
-            chain_map.chain(item)
-        runs_builder = cls.R_BUILDER(elm, cls, ruleset)
-        for unchained_or_chain in chain_map.chains_ordered():
-            if isinstance(unchained_or_chain, RunChain):
-                runs_builder.run_chain(unchained_or_chain)
-            else:
-                cls.P_CONTENT_FUNC(elm, unchained_or_chain, ruleset)
+            cls.P_CONTENT_FUNC(elm, item, cls.RUN_MAKERS, ruleset)
 
     @classmethod
     def _list_item_content(cls, proxy: Paragraph) -> str | HtmlElement:
@@ -128,7 +114,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return ""
         li = proxy.list_item
         txt = li.level_text
-        tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
+        tree = tag_tree(li, cls.RUN_MAKERS)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
             sep = TAB

@@ -134,12 +134,11 @@ def pt(length: Length | float) -> str:
 
 
 def tag_tree(
-    run_proxy: Any,
-    attr_to_elmmaker: dict[str, ElmMaker],
+    run_proxy: Any, run_makers: dict[str, ElmMaker]
 ) -> tuple[HtmlElement, HtmlElement] | None:
     top = None
     bottom = None
-    for attr, maker in attr_to_elmmaker.items():
+    for attr, maker in run_makers.items():
         val = getattr(run_proxy, attr, None)
         if not val:
             continue
@@ -250,7 +249,17 @@ def symbol(sym: Symbol) -> HtmlElement | str:
     return elm
 
 
-def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
+def run(
+    upper_elm: HtmlElement,
+    run: Run,
+    run_makers: dict[str, ElmMaker],
+    ruleset: RuleSet,
+) -> None:
+    tree = tag_tree(run, run_makers)
+    if tree is not None:
+        top, bottom = tree
+        upper_elm.append(top)
+        upper_elm = bottom
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, TxtFragment):
@@ -466,10 +475,13 @@ def omath(upper_elm: HtmlElement, omath: OMath, ruleset: RuleSet) -> None:
 
 
 def paragraph_content(
-    upper_elm: HtmlElement, p_content: PContent, ruleset: RuleSet
+    upper_elm: HtmlElement,
+    p_content: PContent,
+    run_makers: dict[str, ElmMaker],
+    ruleset: RuleSet,
 ) -> None:
     if isinstance(p_content, Run):
-        run(upper_elm, p_content, ruleset)
+        run(upper_elm, p_content, run_makers, ruleset)
     elif isinstance(p_content, Hyperlink):
         hyperlink(upper_elm, p_content, ruleset)
     elif isinstance(p_content, OMathParagraph):
