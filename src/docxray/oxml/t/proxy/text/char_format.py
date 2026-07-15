@@ -48,6 +48,28 @@ class UnderlineInfo(TypedDict):
 
 
 class CharacterFormat:
+    """Provides access to character formatting properties for a text run or numbering level.
+
+    This class represents the run properties (rPr) element in WordprocessingML, which specifies
+    the formatting applied to the contents of a run. It handles the complex resolution of
+    formatting properties through the style hierarchy, including document defaults, table styles,
+    numbering styles, paragraph styles, character styles, and direct formatting.
+
+    The class automatically distinguishes between complex script and non-complex script characters,
+    applying the appropriate formatting properties (e.g., b vs bCs for bold, i vs iCs for italics,
+    sz vs szCs for font size). This distinction is important for documents containing mixed scripts
+    such as Arabic, Hebrew, or East Asian languages alongside Latin text.
+
+    All properties in this class follow the toggle property semantics defined in the ECMA-376
+    specification, where the absence of an element means "leave formatting as applied at the
+    previous level in the style hierarchy." The class properly resolves inheritance from styles
+    and document defaults to determine the effective formatting value.
+
+    The class also provides access to deprecated properties (shadow, animated_effect, relief_effect)
+    that are not used in modern versions of Word (since Word 2013) but are maintained for
+    backward compatibility with older documents.
+    """
+
     def __init__(self, char_proxy: Run | Level) -> None:
         from .run import Run
 
@@ -65,8 +87,7 @@ class CharacterFormat:
 
     @cached_property
     def italic(self) -> bool:
-        """
-        Specifies whether the italic property should be applied to all characters in the contents of this run when displayed.
+        """Specifies whether the italic property should be applied to all characters in the contents of this run when displayed.
 
         This property is a toggle property. For complex script characters (Arabic, Hebrew, etc.), the iCs property is used instead.
         The distinction between complex and non-complex script is determined by the Unicode character values and the cs property.
@@ -83,8 +104,7 @@ class CharacterFormat:
 
     @cached_property
     def bold(self) -> bool:
-        """
-        Specifies whether the bold property shall be applied to all characters in the contents of this run when displayed.
+        """Specifies whether the bold property shall be applied to all characters in the contents of this run when displayed.
 
         This property is a toggle property. For complex script characters (Arabic, Hebrew, etc.), the bCs property is used instead.
         The distinction between complex and non-complex script is determined by the Unicode character values and the cs property.
@@ -101,8 +121,7 @@ class CharacterFormat:
 
     @cached_property
     def font_size(self) -> Length | None:
-        """
-        Specifies the font size which shall be applied to all characters in the contents of this run when displayed.
+        """Specifies the font size which shall be applied to all characters in the contents of this run when displayed.
 
         For complex script characters (Arabic, Hebrew, etc.), the szCs property is used instead. The distinction between
         complex and non-complex script is determined by the Unicode character values and the cs property.
@@ -121,8 +140,7 @@ class CharacterFormat:
 
     @cached_property
     def font_variant(self) -> FontVariant | None:
-        """
-        Specifies text transformation formatting applied to the run content.
+        """Specifies text transformation formatting applied to the run content.
 
         This property controls how letter case is displayed without changing the underlying Unicode characters.
         Two variants are available:
@@ -158,8 +176,7 @@ class CharacterFormat:
 
     @cached_property
     def strike_line(self) -> StrikeLine | None:
-        """
-        Specifies strikethrough formatting applied to the run content.
+        """Specifies strikethrough formatting applied to the run content.
 
         This property draws one or two horizontal lines through the text characters. Two styles are available:
         - single: A single horizontal line through the center of each character.
@@ -189,8 +206,7 @@ class CharacterFormat:
 
     @cached_property
     def underline_info(self) -> UnderlineInfo | None:
-        """
-        Specifies underline formatting applied to the run content.
+        """Specifies underline formatting applied to the run content.
 
         The underline appears directly below the character height (less all spacing above and below the characters on the line).
         The color can be specified directly as a hex value, set to 'auto' for automatic selection, or inherited from theme colors
@@ -221,8 +237,7 @@ class CharacterFormat:
 
     @cached_property
     def vertical_alignment(self) -> SE_VERTICAL_ALIGN_RUN | None:
-        """
-        Specifies the vertical alignment applied to the contents of this run.
+        """Specifies the vertical alignment applied to the contents of this run.
 
         This allows text to be repositioned as subscript or superscript without altering the font size.
         The text is rendered in a smaller size and positioned above (superscript) or below (subscript) the baseline.
@@ -247,8 +262,7 @@ class CharacterFormat:
 
     @cached_property
     def font(self) -> Font | None:
-        """
-        Specifies the fonts which shall be used to display the text contents of this run.
+        """Specifies the fonts which shall be used to display the text contents of this run.
 
         A single run can use up to four different font slots based on Unicode character classification:
         - ASCII (U+0000–U+007F): Basic Latin characters.
@@ -273,8 +287,7 @@ class CharacterFormat:
 
     @cached_property
     def language(self) -> Language | None:
-        """
-        Specifies the languages which shall be used to check spelling and grammar for the contents of this run.
+        """Specifies the languages which shall be used to check spelling and grammar for the contents of this run.
 
         Different languages can be specified for three character types:
         - Latin characters (val): For Western scripts.
@@ -297,8 +310,7 @@ class CharacterFormat:
 
     @cached_property
     def right_to_left(self) -> bool:
-        """
-        Specifies whether the contents of this run shall have right-to-left characteristics.
+        """Specifies whether the contents of this run shall have right-to-left characteristics.
 
         When this property is applied:
         - All characters are treated as complex script for formatting purposes (uses bCs, iCs, szCs, etc.).
