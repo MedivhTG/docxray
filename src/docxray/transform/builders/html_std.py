@@ -115,7 +115,7 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     span_elm: HtmlElement | None = None
     style = ""
     ch_fmt = proxy.character_format
-    if ch_fmt.hide_text:
+    if ch_fmt.hide:
         style += "display: none; "
     if ch_fmt.strike_line:
         strike = ch_fmt.strike_line
@@ -148,12 +148,12 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
         style += f"color: {ch_fmt.color}; "
     if ch_fmt.highlight is not None and ch_fmt.highlight != "none":
         style += f"background-color: {ch_fmt.highlight}; "
-    if ch_fmt.text_scale != 100:
-        if ch_fmt.text_scale > 100:
+    if ch_fmt.horizontal_scale != 100:
+        if ch_fmt.horizontal_scale > 100:
             mode = "grow"
         else:
             mode = "shrink"
-        style += f"text-fit: {mode} {ch_fmt.text_scale}%; "
+        style += f"text-fit: {mode} {ch_fmt.horizontal_scale}%; "
     if ch_fmt.letter_spacing is not None:
         style += f"letter-spacing: {ch_fmt.letter_spacing.pt}pt; "
     if ch_fmt.vertical_offset:
