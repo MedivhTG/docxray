@@ -6,7 +6,11 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 # docxray stuff
 from docxray.colorize import Colorize
 from docxray.length import Length
-from docxray.oxml.t.proxy.base import NotFound, from_doc_dflts
+from docxray.oxml.t.proxy.base import (
+    NotFound,
+    from_doc_dflts,
+    from_style_inheritance,
+)
 from docxray.oxml.t.proxy.compute import hps_measure, on_off
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.text.font import Font
@@ -297,7 +301,7 @@ class CharacterFormat:
 
     def _display_run(self, path: str, optional: bool = False) -> Any:
         run = cast("Run", self._proxy)
-        char_val = run._prop(path, optional, "both")
+        char_val = self._prop_run(path, optional, "both")
         if not isinstance(char_val, NotFound):
             return char_val
         para_val = run.paragraph._prop(path, optional, "paragraph-style")
@@ -310,10 +314,10 @@ class CharacterFormat:
 
     def _display_run_toggled(self, path: str) -> bool:
         run = cast("Run", self._proxy)
-        direct_val = run._prop(path, True)
+        direct_val = self._prop_run(path, True)
         if not isinstance(direct_val, NotFound):
             return on_off(direct_val)
-        char_val = run._prop(path, True, "style")
+        char_val = self._prop_run(path, True, "style")
         para_val = run.paragraph._prop(path, True, "paragraph-style")
         tbl_val = run.paragraph._prop(path, True, "table-style")
         found_count = sum(
@@ -335,3 +339,29 @@ class CharacterFormat:
         if not isinstance(tbl_val, NotFound):
             return on_off(tbl_val)
         return False
+
+    def _prop_run_direct(self, path: str, optional: bool = False) -> Any:
+        return self._proxy.prop(path, optional)
+
+    def _prop_run_style(self, path: str, optional: bool = False) -> Any:
+        run = cast("Run", self._proxy)
+        if run.character_style:
+            return from_style_inheritance(
+                run, run.character_style, path, optional
+            )
+        return NotFound(self, path)
+
+    def _prop_run(
+        self,
+        path: str,
+        optional: bool = False,
+        where: Literal["direct", "style", "both"] = "direct",
+    ) -> Any:
+        if where == "direct":
+            return self._prop_run_direct(path, optional)
+        elif where == "style":
+            return self._prop_run_style(path, optional)
+        direct_val = self._prop_run_direct(path, optional)
+        if isinstance(direct_val, NotFound):
+            return self._prop_run_style(path, optional)
+        return direct_val
