@@ -170,7 +170,7 @@ def universal_measure(val: str, override_pattern: str | None = None) -> Length:
 
 
 def hps_measure(val: int | str) -> Length:
-    """Parse value of an half-points measure to `Length` instance.
+    """Parse value of an positive half-points measure to `Length` instance.
 
     Args:
         val (int | str): Integer if half-points, else old measure-string.
@@ -190,6 +190,14 @@ def hps_measure(val: int | str) -> Length:
 
 
 def signed_hps_measure(val: int | str) -> Length:
+    """Parse value of an half-points measure to `Length` instance.
+
+    Args:
+        val (int | str): Integer if half-points, else old measure-string.
+
+    Returns:
+        Length: Numeric instance.
+    """
     return hps_measure(val)
 
 
