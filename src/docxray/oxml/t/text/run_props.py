@@ -180,7 +180,6 @@ class CT_RPr(OxmlElement):
     def color(self) -> CT_Color | None:
         return self.child_zero_or_one(W.COLOR, CT_Color)
 
-    # TODO: use
     @cached_property
     def spacing(self) -> CT_SignedTwipsMeasure | None:
         spacing_elm = self.child_zero_or_one(W.SPACING, OxmlElement)
@@ -192,12 +191,10 @@ class CT_RPr(OxmlElement):
     def w(self) -> CT_TextScale | None:
         return self.child_zero_or_one(W.W, CT_TextScale)
 
-    # TODO: use
     @cached_property
     def kern(self) -> CT_HpsMeasure | None:
         return self.child_zero_or_one(W.KERN, CT_HpsMeasure)
 
-    # TODO: use
     @cached_property
     def position(self) -> CT_SignedHpsMeasure | None:
         return self.child_zero_or_one(W.POSITION, CT_SignedHpsMeasure)

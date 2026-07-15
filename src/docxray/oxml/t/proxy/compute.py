@@ -189,6 +189,10 @@ def hps_measure(val: int | str) -> Length:
     )
 
 
+def signed_hps_measure(val: int | str) -> Length:
+    return hps_measure(val)
+
+
 def text_scale(val: str | int) -> int:
     """Parse text scale in percents (integer).
 

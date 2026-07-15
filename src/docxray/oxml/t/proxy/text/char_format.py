@@ -11,7 +11,13 @@ from docxray.oxml.t.proxy.base import (
     from_doc_dflts,
     from_style_inheritance,
 )
-from docxray.oxml.t.proxy.compute import hps_measure, on_off, text_scale
+from docxray.oxml.t.proxy.compute import (
+    hps_measure,
+    on_off,
+    signed_hps_measure,
+    signed_twips_measure,
+    text_scale,
+)
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.text.font import Font
 from docxray.oxml.t.proxy.text.language import Language
@@ -180,6 +186,27 @@ class CharacterFormat:
         if isinstance(scale, NotFound):
             return 100
         return text_scale(scale)
+
+    @cached_property
+    def letter_spacing(self) -> Length | None:
+        spacing = self._display("rPr.spacing.val")
+        if isinstance(spacing, NotFound):
+            return None
+        return signed_twips_measure(spacing)
+
+    @cached_property
+    def vertical_offset(self) -> Length | None:
+        pos = self._display("rPr.position.val")
+        if isinstance(pos, NotFound):
+            return None
+        return signed_hps_measure(pos)
+
+    @cached_property
+    def font_kerning(self) -> Length | None:
+        kern = self._display("rPr.kern.val")
+        if isinstance(kern, NotFound):
+            return None
+        return hps_measure(kern)
 
     @cached_property
     def _sz(self) -> Length | None:

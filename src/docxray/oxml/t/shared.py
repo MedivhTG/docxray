@@ -32,6 +32,7 @@ from docxray.oxml.t.st.wml import (
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
     ST_PointMeasure,
+    ST_SignedHpsMeasure,
     ST_SignedTwipsMeasure,
     ST_TblWidth,
     ST_TextDirection,
@@ -123,7 +124,9 @@ class CT_HpsMeasure(OxmlElement):
 
 
 class CT_SignedHpsMeasure(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> int | str:
+        return self.attr_required(W.VAL, ST_SignedHpsMeasure)
 
 
 class CT_Border(OxmlElement):

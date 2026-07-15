@@ -138,6 +138,12 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
             style += "font-variant: small-caps; "
     if ch_fmt.font_size is not None:
         style += f"font-size: {ch_fmt.font_size.pt}pt; "
+    if ch_fmt.font_kerning is not None:
+        if (
+            ch_fmt.font_size is not None
+            and ch_fmt.font_size >= ch_fmt.font_kerning
+        ):
+            style += "font-kerning: normal; "
     if ch_fmt.color != "#000000":
         style += f"color: {ch_fmt.color}; "
     if ch_fmt.highlight:
@@ -148,6 +154,10 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
         else:
             mode = "shrink"
         style += f"text-fit: {mode} {ch_fmt.text_scale}%; "
+    if ch_fmt.letter_spacing is not None:
+        style += f"letter-spacing: {ch_fmt.letter_spacing.pt}pt; "
+    if ch_fmt.vertical_offset:
+        style += f"position: relative; top: {-ch_fmt.vertical_offset.pt}pt; "
     if style:
         span_elm = Element("span", {"style": style})
     return span_elm

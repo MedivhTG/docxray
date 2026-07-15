@@ -257,3 +257,7 @@ class ST_TextScaleDecimal(XsdSimpleType):
 
 class ST_TextScale(XsdSimpleType):
     SCHEMA = XsdUnion(ST_TextScalePercent, ST_TextScaleDecimal)
+
+
+class ST_SignedHpsMeasure(XsdSimpleType):
+    SCHEMA = XsdUnion(XsdInteger, ST_UniversalMeasure)
