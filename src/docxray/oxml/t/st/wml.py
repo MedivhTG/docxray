@@ -37,6 +37,7 @@ from .enums import (
     SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
+    SE_TEXT_EFFECT,
     SE_THEME,
     SE_THEME_COLOR,
     SE_UNDERLINE,
@@ -261,3 +262,8 @@ class ST_TextScale(XsdSimpleType):
 
 class ST_SignedHpsMeasure(XsdSimpleType):
     SCHEMA = XsdUnion(XsdInteger, ST_UniversalMeasure)
+
+
+class ST_TextEffect(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_EFFECT)}

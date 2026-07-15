@@ -826,3 +826,13 @@ class SE_HIGHLIGHT_COLOR(StrEnum):
     DARK_GRAY = "darkGray"
     LIGHT_GRAY = "lightGray"
     NONE = "none"
+
+
+class SE_TEXT_EFFECT(StrEnum):
+    BLINK_BACKGROUND = "blinkBackground"
+    LIGHTS = "lights"
+    ANTS_BLACK = "antsBlack"
+    ANTS_RED = "antsRed"
+    SHIMMER = "shimmer"
+    SPARKLE = "sparkle"
+    NONE = "none"

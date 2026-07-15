@@ -38,8 +38,8 @@ from .table.row import Row
 from .table.table import Table
 from .text.char_format import (
     CharacterFormat,
-    CharsCase,
-    StrikeCase,
+    FontVariant,
+    StrikeLine,
     UnderlineInfo,
 )
 from .text.font import Font
@@ -84,7 +84,7 @@ __all__ = [
     "Cell",
     "CharacterFormat",
     "CharacterStyle",
-    "CharsCase",
+    "FontVariant",
     "DisplayError",
     "Document",
     "DocumentDefaults",
@@ -124,7 +124,7 @@ __all__ = [
     "RunOMath",
     "RunOMathInnerContent",
     "Settings",
-    "StrikeCase",
+    "StrikeLine",
     "StoryChild",
     "Styles",
     "Tab",

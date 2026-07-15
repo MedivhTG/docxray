@@ -22,6 +22,7 @@ from docxray.oxml.t.shared import (
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_HIGHLIGHT_COLOR,
+    SE_TEXT_EFFECT,
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
@@ -32,6 +33,7 @@ from docxray.oxml.t.st.shared_common import (
 from docxray.oxml.t.st.wml import (
     ST_HexColor,
     ST_HighlightColor,
+    ST_TextEffect,
     ST_TextScale,
     ST_ThemeColor,
     ST_UcharHexNumber,
@@ -45,7 +47,9 @@ class CT_FitText(OxmlElement):
 
 
 class CT_TextEffect(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> SE_TEXT_EFFECT:
+        return self.attr_required(W.VAL, ST_TextEffect)
 
 
 class CT_TextScale(OxmlElement):
@@ -95,7 +99,7 @@ class CT_RPrOriginal(OxmlElement):
 class CT_RPrChange(CT_TrackChange):
     @cached_property
     def rPr(self) -> CT_RPrOriginal:
-        return CT_RPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
+        return self.child_exactly_one(W.R_PR, CT_RPr).recreate(CT_RPrOriginal)
 
 
 class CT_RPr(OxmlElement):
@@ -139,22 +143,18 @@ class CT_RPr(OxmlElement):
     def dstrike(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.DSTRIKE, CT_OnOff)
 
-    # Old
     @cached_property
     def outline(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.OUTLINE, CT_OnOff)
 
-    # Old
     @cached_property
     def shadow(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SHADOW, CT_OnOff)
 
-    # Old
     @cached_property
     def emboss(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.EMBOSS, CT_OnOff)
 
-    # Old
     @cached_property
     def imprint(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.IMPRINT, CT_OnOff)
@@ -215,7 +215,6 @@ class CT_RPr(OxmlElement):
     def u(self) -> CT_Underline | None:
         return self.child_zero_or_one(W.U, CT_Underline)
 
-    # Old
     @cached_property
     def effect(self) -> CT_TextEffect | None:
         return self.child_zero_or_one(W.EFFECT, CT_TextEffect)

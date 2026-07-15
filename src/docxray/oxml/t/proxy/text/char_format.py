@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
@@ -24,6 +25,7 @@ from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
     SE_HIGHLIGHT_COLOR,
+    SE_TEXT_EFFECT,
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
@@ -35,8 +37,9 @@ if TYPE_CHECKING:
 
     from .run import Run
 
-type CharsCase = Literal["caps", "small_caps"]
-type StrikeCase = Literal["single", "double"]
+type FontVariant = Literal["caps", "small_caps"]
+type StrikeLine = Literal["single", "double"]
+type ReliefEffect = Literal["outline", "emboss", "imprint"]
 
 
 class UnderlineInfo(TypedDict):
@@ -82,7 +85,7 @@ class CharacterFormat:
         return self._sz
 
     @cached_property
-    def chars_case(self) -> CharsCase | None:
+    def font_variant(self) -> FontVariant | None:
         """Used text transformation such as caps or font-variant as small-caps."""
         if self._caps and self._small_caps:
             raise DisplayError(
@@ -95,7 +98,7 @@ class CharacterFormat:
         return None
 
     @cached_property
-    def strike_case(self) -> StrikeCase | None:
+    def strike_line(self) -> StrikeLine | None:
         """Used single or double strike for text, not both."""
         if self._single_strike and self._double_strike:
             raise DisplayError(
@@ -171,7 +174,7 @@ class CharacterFormat:
     @cached_property
     def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
         highlight = self._display("rPr.highlight.val")
-        if isinstance(highlight, NotFound) or highlight == "none":
+        if isinstance(highlight, NotFound):
             return None
         return highlight
 
@@ -207,6 +210,55 @@ class CharacterFormat:
         if isinstance(kern, NotFound):
             return None
         return hps_measure(kern)
+
+    @property
+    @warnings.deprecated("Not used in Word since app version `Word 2013`.")
+    def relief_effect(self) -> ReliefEffect | None:
+        count = sum((self._outline, self._emboss, self._imprint))
+        if count > 1:
+            raise DisplayError(
+                "Mentiond 3 cases (outline, emboss, imprint) when they are mutually exclusive"
+            )
+        if self._outline:
+            return "outline"
+        if self._emboss:
+            return "emboss"
+        if self._imprint:
+            return "imprint"
+        return None
+
+    @property
+    @warnings.deprecated("Not used in Word since app version `Word 2013`.")
+    def shadow(self) -> bool:
+        return self._shadow
+
+    @property
+    @warnings.deprecated("Not used in Word since app version `Word 2013`.")
+    def animated_effect(self) -> SE_TEXT_EFFECT | None:
+        return self._effect
+
+    @cached_property
+    def _effect(self) -> SE_TEXT_EFFECT | None:
+        effect = self._display("rPr.effect.val")
+        if isinstance(effect, NotFound):
+            return None
+        return effect
+
+    @cached_property
+    def _shadow(self) -> bool:
+        return self._display_toggled("rPr.shadow.val")
+
+    @cached_property
+    def _outline(self) -> bool:
+        return self._display_toggled("rPr.outline.val")
+
+    @cached_property
+    def _emboss(self) -> bool:
+        return self._display_toggled("rPr.emboss.val")
+
+    @cached_property
+    def _imprint(self) -> bool:
+        return self._display_toggled("rPr.imprint.val")
 
     @cached_property
     def _sz(self) -> Length | None:

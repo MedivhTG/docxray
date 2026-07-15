@@ -117,8 +117,8 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     ch_fmt = proxy.character_format
     if ch_fmt.hide_text:
         style += "display: none; "
-    if ch_fmt.strike_case:
-        strike = ch_fmt.strike_case
+    if ch_fmt.strike_line:
+        strike = ch_fmt.strike_line
         line = "text-decoration: line-through; "
         if strike == "single":
             style += line
@@ -130,8 +130,8 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
             font = ch_fmt.font.guess_font(txt[0], default="")
             if font:
                 style += f"font-family: {font}; "
-    if ch_fmt.chars_case:
-        ch = ch_fmt.chars_case
+    if ch_fmt.font_variant:
+        ch = ch_fmt.font_variant
         if ch == "caps":
             style += "text-transform: uppercase; "
         else:
@@ -146,7 +146,7 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
             style += "font-kerning: normal; "
     if ch_fmt.color != "#000000":
         style += f"color: {ch_fmt.color}; "
-    if ch_fmt.highlight:
+    if ch_fmt.highlight is not None and ch_fmt.highlight != "none":
         style += f"background-color: {ch_fmt.highlight}; "
     if ch_fmt.text_scale != 100:
         if ch_fmt.text_scale > 100:
