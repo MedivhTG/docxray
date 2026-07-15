@@ -10,7 +10,7 @@ from docxray.oxml.t.proxy.text.paragraph import PContent
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.proxy.list import ListItem
+    from docxray.oxml.t.proxy.text.list import ListItem
     from docxray.oxml.t.proxy.text.run import Run
     from docxray.transform.ruleset import RuleSet
 

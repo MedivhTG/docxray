@@ -40,13 +40,13 @@ from .run import Run
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.proxy.document import Body
-    from docxray.oxml.t.proxy.list import (
+    from docxray.oxml.t.proxy.table.cell import Cell
+    from docxray.oxml.t.proxy.table.table import Table
+    from docxray.oxml.t.proxy.text.list import (
         ListItem,
         ListView,
         ListViewInterrupted,
     )
-    from docxray.oxml.t.proxy.table.cell import Cell
-    from docxray.oxml.t.proxy.table.table import Table
 
 type PContent = Run | Hyperlink | OMathParagraph | OMath
 type _RslvOrder = Literal[
@@ -117,7 +117,7 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def list_item(self) -> ListItem | None:
         # docxray stuff
-        from docxray.oxml.t.proxy.list import ListItem
+        from docxray.oxml.t.proxy.text.list import ListItem
 
         if self.document_part.numbering is None:
             return None
@@ -135,7 +135,7 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def list_view(self) -> ListView | None:
         # docxray stuff
-        from docxray.oxml.t.proxy.list import ListView
+        from docxray.oxml.t.proxy.text.list import ListView
 
         if self.list_item is None:
             return None
@@ -144,7 +144,7 @@ class Paragraph(StoryChild[CT_P]):
     @cached_property
     def list_view_interrupted(self) -> ListViewInterrupted | None:
         # docxray stuff
-        from docxray.oxml.t.proxy.list import ListViewInterrupted
+        from docxray.oxml.t.proxy.text.list import ListViewInterrupted
 
         if self.list_item is None:
             return None

@@ -16,7 +16,6 @@ from .document import Document
 from .drawing import Drawing
 from .exceptions import DisplayError, ResolveError
 from .image.picture import Picture
-from .list import ListItem, ListView, ListViewIlvlBlock, ListViewInterrupted
 from .numbering.numbering import (
     AbstractNum,
     Level,
@@ -37,9 +36,21 @@ from .styles.styles import Styles
 from .table.cell import BordersInfo, Cell, PaddingInfo
 from .table.row import Row
 from .table.table import Table
+from .text.char_format import (
+    CharacterFormat,
+    CharsCase,
+    StrikeCase,
+    UnderlineInfo,
+)
 from .text.font import Font
 from .text.hyperlink import Hyperlink
 from .text.language import Language
+from .text.list import (
+    ListItem,
+    ListView,
+    ListViewIlvlBlock,
+    ListViewInterrupted,
+)
 from .text.omath import (
     Accent,
     Arg,
@@ -54,7 +65,7 @@ from .text.omath import (
     TxtFragmentOMath,
 )
 from .text.paragraph import Paragraph, PContent
-from .text.run import CharsCase, Run, StrikeCase, UnderlineInfo
+from .text.run import Run
 from .text.run_content import Break, RunInnerContent, Tab, TxtFragment
 from .theme import FontFamily, FontFamilySupplemental, Theme, ThemeColor
 from .types import ProvidesStoryPart, ProvidesXmlPart
@@ -71,6 +82,7 @@ __all__ = [
     "BoxObject",
     "Break",
     "Cell",
+    "CharacterFormat",
     "CharacterStyle",
     "CharsCase",
     "DisplayError",

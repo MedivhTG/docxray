@@ -4,8 +4,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
-from docxray.colorize import Colorize
-from docxray.length import Length
 from docxray.oxml.t.exceptions import InvalidXmlError
 from docxray.oxml.t.numbering import (
     CT_AbstractNum,
@@ -15,27 +13,19 @@ from docxray.oxml.t.numbering import (
     CT_NumLvl,
 )
 from docxray.oxml.t.proxy.base import ElementProxy, NotFound, from_doc_dflts
-from docxray.oxml.t.proxy.compute import hps_measure, on_off
-from docxray.oxml.t.proxy.exceptions import DisplayError
+from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.styles.style import (
     NumberingStyle,
     ParagraphStyle,
 )
 from docxray.oxml.t.proxy.styles.styles import Styles
-from docxray.oxml.t.proxy.text.font import Font
-from docxray.oxml.t.proxy.text.language import Language
-from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
+from docxray.oxml.t.proxy.text.char_format import CharacterFormat
 from docxray.oxml.t.proxy.types import ProvidesXmlPart
 from docxray.oxml.t.st.enums import (
-    SE_HEX_COLOR_AUTO,
-    SE_HIGHLIGHT_COLOR,
     SE_JC,
     SE_LEVEL_SUFFIX,
     SE_NUMBER_FORMAT,
     SE_STYLE_TYPE,
-    SE_THEME_COLOR,
-    SE_UNDERLINE,
-    SE_VERTICAL_ALIGN_RUN,
 )
 
 if TYPE_CHECKING:
@@ -133,232 +123,8 @@ class Level(ElementProxy[CT_Lvl]):
         )
 
     @cached_property
-    def font(self) -> Font | None:
-        rFonts_elm = self._display("rPr.rFonts")
-        if isinstance(rFonts_elm, NotFound):
-            return None
-        return Font(rFonts_elm, self)
-
-    @cached_property
-    def language(self) -> Language | None:
-        lang_elm = self._display("rPr.lang")
-        if isinstance(lang_elm, NotFound):
-            return None
-        return Language(lang_elm, self)
-
-    @cached_property
-    def right_to_left(self) -> bool:
-        return on_off(self._display("rPr.rtl.val", True))
-
-    @cached_property
-    def italic(self) -> bool:
-        """Used italic bold-decoration."""
-        if self._complex_script:
-            return self._iCs
-        return self._i
-
-    @cached_property
-    def bold(self) -> bool:
-        """Used text bold-decoration."""
-        if self._complex_script:
-            return self._bCs
-        return self._b
-
-    @cached_property
-    def font_size(self) -> Length | None:
-        """Size of characters font."""
-        if self._complex_script:
-            return self._szCs
-        return self._sz
-
-    @cached_property
-    def chars_case(self) -> CharsCase | None:
-        if self._caps and self._small_caps:
-            raise DisplayError(
-                "Mentiond 2 cases (caps, small_caps) when they are mutually exclusive"
-            )
-        if self._caps:
-            return "caps"
-        if self._small_caps:
-            return "small_caps"
-        return None
-
-    @cached_property
-    def underline_info(self) -> UnderlineInfo | None:
-        if self._u_line is None:
-            return None
-        return {
-            "line": self._u_line,
-            "color": Colorize.colorize(
-                self._u_color or SE_HEX_COLOR_AUTO.AUTO,
-                self._u_theme_color,
-                self.document_part.theme.palette,
-                self._u_theme_tint,
-                self._u_theme_shade,
-                prefer_theme=True,
-            ),
-        }
-
-    @cached_property
-    def strike_case(self) -> StrikeCase | None:
-        if self._single_strike and self._double_strike:
-            raise DisplayError(
-                "Mentiond 2 cases (single, double) when they are mutually exclusive"
-            )
-        if self._single_strike:
-            return "single"
-        if self._double_strike:
-            return "double"
-        return None
-
-    @cached_property
-    def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
-        valign = self._display("rPr.vertAlign.val")
-        if (
-            isinstance(valign, NotFound)
-            or valign == SE_VERTICAL_ALIGN_RUN.BASELINE
-        ):
-            return None
-        return valign
-
-    @cached_property
-    def color(self) -> str:
-        """Hexaadecimal color-presentation of an run text, e.g. `#000000` for black."""
-        return Colorize.colorize(
-            self._color or SE_HEX_COLOR_AUTO.AUTO,
-            self._theme_color,
-            self.document_part.theme.palette,
-            self._theme_tint,
-            self._theme_shade,
-            prefer_theme=True,
-        )
-
-    @cached_property
-    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
-        highlight = self._display("rPr.highlight.val")
-        if isinstance(highlight, NotFound) or highlight == "none":
-            return None
-        return highlight
-
-    @cached_property
-    def hide_text(self) -> bool:
-        """Render text as hidden and free display space."""
-        return on_off(self._display("rPr.vanish.val", True))
-
-    @cached_property
-    def _complex_script(self) -> bool:
-        return on_off(self._display("rPr.cs.val", True))
-
-    @cached_property
-    def _sz(self) -> Length | None:
-        size = self._display("rPr.sz.val")
-        if isinstance(size, NotFound):
-            return None
-        return hps_measure(size)
-
-    @cached_property
-    def _szCs(self) -> Length | None:
-        size = self._display("rPr.szCs.val")
-        if isinstance(size, NotFound):
-            return None
-        return hps_measure(size)
-
-    @cached_property
-    def _i(self) -> bool:
-        return on_off(self._display("rPr.i.val", True))
-
-    @cached_property
-    def _iCs(self) -> bool:
-        return on_off(self._display("rPr.iCs.val", True))
-
-    @cached_property
-    def _b(self) -> bool:
-        return on_off(self._display("rPr.b.val", True))
-
-    @cached_property
-    def _bCs(self) -> bool:
-        return on_off(self._display("rPr.bCs.val", True))
-
-    @cached_property
-    def _u_line(self) -> SE_UNDERLINE | None:
-        line = self._display("rPr.u.val", True)
-        if isinstance(line, NotFound) or line == SE_UNDERLINE.NONE:
-            return None
-        if line is None:
-            return SE_UNDERLINE.SINGLE
-        return line
-
-    @cached_property
-    def _u_color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self._display("rPr.u.color")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _u_theme_color(self) -> SE_THEME_COLOR | None:
-        color = self._display("rPr.u.themeColor")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _u_theme_tint(self) -> bytes | None:
-        tint = self._display("rPr.u.themeTint")
-        if isinstance(tint, NotFound):
-            return None
-        return tint
-
-    @cached_property
-    def _u_theme_shade(self) -> bytes | None:
-        shade = self._display("rPr.u.themeShade")
-        if isinstance(shade, NotFound):
-            return None
-        return shade
-
-    @cached_property
-    def _color(self) -> SE_HEX_COLOR_AUTO | bytes | None:
-        color = self._display("rPr.color.val")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _theme_color(self) -> SE_THEME_COLOR | None:
-        color = self._display("rPr.color.themeColor")
-        if isinstance(color, NotFound):
-            return None
-        return color
-
-    @cached_property
-    def _theme_tint(self) -> bytes | None:
-        tint = self._display("rPr.color.themeTint")
-        if isinstance(tint, NotFound):
-            return None
-        return tint
-
-    @cached_property
-    def _theme_shade(self) -> bytes | None:
-        shade = self._display("rPr.color.themeShade")
-        if isinstance(shade, NotFound):
-            return None
-        return shade
-
-    @cached_property
-    def _caps(self) -> bool:
-        return on_off(self._display("rPr.caps.val", True))
-
-    @cached_property
-    def _small_caps(self) -> bool:
-        return on_off(self._display("rPr.smallCaps.val", True))
-
-    @cached_property
-    def _single_strike(self) -> bool:
-        return on_off(self._display("rPr.strike.val", True))
-
-    @cached_property
-    def _double_strike(self) -> bool:
-        return on_off(self._display("rPr.dstrike.val", True))
+    def character_format(self) -> CharacterFormat:
+        return CharacterFormat(self)
 
     def _display(self, path: str, optional: bool = False) -> Any:
         prop = self.prop(path, optional)

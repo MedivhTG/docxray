@@ -19,8 +19,8 @@ from docxray.oxml.t.text.paragraph import CT_P
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.proxy.list import ListViewInterrupted
     from docxray.oxml.t.proxy.table.table import Table
+    from docxray.oxml.t.proxy.text.list import ListViewInterrupted
 
 type _BlockItemElement = CT_Body | CT_Tc
 

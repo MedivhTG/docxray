@@ -35,7 +35,7 @@ from docxray.oxml.t.st.enums import (
 
 if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
-    from docxray.oxml.t.proxy.list import ListItem
+    from docxray.oxml.t.proxy.text.list import ListItem
 
 from .types import RunMaker
 
@@ -76,30 +76,30 @@ TEXT_FLOW_TO_WRITING_MODE = {
 
 
 def i_elm(proxy: Run | ListItem) -> HtmlElement | None:
-    if proxy.italic:
+    if proxy.character_format.italic:
         return Element("i")
     return None
 
 
 def b_elm(proxy: Run | ListItem) -> HtmlElement | None:
-    if proxy.bold:
+    if proxy.character_format.bold:
         return Element("b")
     return None
 
 
 def vert_align_elm(proxy: Run | ListItem) -> HtmlElement | None:
-    if proxy.vertical_alignment is None:
+    if proxy.character_format.vertical_alignment is None:
         return None
-    valign = proxy.vertical_alignment
+    valign = proxy.character_format.vertical_alignment
     if valign == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
         return Element("sup")
     return Element("sub")
 
 
 def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
-    if proxy.underline_info is None:
+    if proxy.character_format.underline_info is None:
         return None
-    u_inf = proxy.underline_info
+    u_inf = proxy.character_format.underline_info
     decor = U_DECOR_MAP.get(u_inf["line"])
     if decor is None:
         decor = "underline"
@@ -114,33 +114,33 @@ def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
 def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     span_elm: HtmlElement | None = None
     style = ""
-    if proxy.hide_text:
+    if proxy.character_format.hide_text:
         style += "display: none; "
-    if proxy.strike_case:
-        strike = proxy.strike_case
+    if proxy.character_format.strike_case:
+        strike = proxy.character_format.strike_case
         line = "text-decoration: line-through; "
         if strike == "single":
             style += line
         else:
             style += f"{line}text-decoration-style: double; "
-    if proxy.font and isinstance(proxy, Run):
+    if proxy.character_format.font and isinstance(proxy, Run):
         txt = proxy.raw_text.strip()
         if txt:
-            font = proxy.font.guess_font(txt[0], default="")
+            font = proxy.character_format.font.guess_font(txt[0], default="")
             if font:
                 style += f"font-family: {font}; "
-    if proxy.chars_case:
-        ch = proxy.chars_case
+    if proxy.character_format.chars_case:
+        ch = proxy.character_format.chars_case
         if ch == "caps":
             style += "text-transform: uppercase; "
         else:
             style += "font-variant: small-caps; "
-    if proxy.font_size is not None:
-        style += f"font-size: {proxy.font_size.pt}pt; "
-    if proxy.color != "#000000":
-        style += f"color: {proxy.color}; "
-    if proxy.highlight:
-        style += f"background-color: {proxy.highlight}; "
+    if proxy.character_format.font_size is not None:
+        style += f"font-size: {proxy.character_format.font_size.pt}pt; "
+    if proxy.character_format.color != "#000000":
+        style += f"color: {proxy.character_format.color}; "
+    if proxy.character_format.highlight:
+        style += f"background-color: {proxy.character_format.highlight}; "
     if style:
         span_elm = Element("span", {"style": style})
     return span_elm

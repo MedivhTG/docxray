@@ -4,19 +4,12 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 # docxray stuff
-from docxray.length import Length
 from docxray.numeral.charset import DECIMAL
 from docxray.numeral.numeral import Numeral
 from docxray.oxml.t.proxy.numbering.numbering import Level, Numbering
-from docxray.oxml.t.proxy.text.font import Font
-from docxray.oxml.t.proxy.text.language import Language
+from docxray.oxml.t.proxy.text.char_format import CharacterFormat
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
-from docxray.oxml.t.proxy.text.run import CharsCase, StrikeCase, UnderlineInfo
-from docxray.oxml.t.st.enums import (
-    SE_HIGHLIGHT_COLOR,
-    SE_NUMBER_FORMAT,
-    SE_VERTICAL_ALIGN_RUN,
-)
+from docxray.oxml.t.st.enums import SE_NUMBER_FORMAT
 from docxray.oxml.t.text.num_props import CT_NumPr
 from docxray.transform.transformer import Transformer
 
@@ -287,12 +280,8 @@ class ListItem:
         return None
 
     @cached_property
-    def font(self) -> Font | None:
-        return self.level.font
-
-    @cached_property
-    def language(self) -> Language | None:
-        return self.level.language
+    def character_format(self) -> CharacterFormat:
+        return self.level.character_format
 
     @cached_property
     def level_text(self) -> str:
@@ -306,46 +295,6 @@ class ListItem:
     @cached_property
     def is_bullet_format(self) -> bool:
         return self.level.numbering_format == SE_NUMBER_FORMAT.BULLET
-
-    @cached_property
-    def italic(self) -> bool:
-        return self.level.italic
-
-    @cached_property
-    def bold(self) -> bool:
-        return self.level.bold
-
-    @cached_property
-    def chars_case(self) -> CharsCase | None:
-        return self.level.chars_case
-
-    @cached_property
-    def underline_info(self) -> UnderlineInfo | None:
-        return self.level.underline_info
-
-    @cached_property
-    def strike_case(self) -> StrikeCase | None:
-        return self.level.strike_case
-
-    @cached_property
-    def vertical_alignment(self) -> None | SE_VERTICAL_ALIGN_RUN:
-        return self.level.vertical_alignment
-
-    @cached_property
-    def color(self) -> str:
-        return self.level.color
-
-    @cached_property
-    def font_size(self) -> Length | None:
-        return self.level.font_size
-
-    @cached_property
-    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
-        return self.level.highlight
-
-    @cached_property
-    def hide_text(self) -> bool:
-        return self.level.hide_text
 
     def _char_ord(self, current_li: ListItem, for_ilvl: int) -> int:
         for_lvl = self._numbering.associated_level(current_li.num_id, for_ilvl)
@@ -389,8 +338,9 @@ class ListItem:
             return Numeral.decimal(ord)
         if format in NUMERAL_WITH_LOCALE:
             locale = "en-US"
-            if for_leveled.language:
-                locale = for_leveled.language.latin_slot or "en-US"
+            ch_fmt = for_leveled.character_format
+            if ch_fmt.language:
+                locale = ch_fmt.language.latin_slot or "en-US"
             return NUMERAL_RULES[format](ord, locale)  # type: ignore[operator]
         return NUMERAL_RULES[format](ord)  # type: ignore[operator]
 

@@ -16,6 +16,7 @@ from docxray.oxml.t.st.enums import SE_HINT, SE_THEME
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.proxy.numbering.numbering import Level
+    from docxray.oxml.t.proxy.text.char_format import CharacterFormat
     from docxray.oxml.t.proxy.text.run import Run
 
 
@@ -63,8 +64,12 @@ class Font(ElementProxy[CT_Fonts]):
         return cast("Level | Run", self._parent)
 
     @cached_property
+    def _ch_fmt(self) -> CharacterFormat:
+        return self.parent.character_format
+
+    @cached_property
     def _lang(self) -> Language | None:
-        return self.parent.language
+        return self._ch_fmt.language
 
     @cached_property
     def _east_asia_lang(self) -> str | None:
@@ -144,7 +149,9 @@ class Font(ElementProxy[CT_Fonts]):
                     font_slot = classificator(self, unicode)
                 if font_slot == "eastAsia" and self._hint == "eastAsia":
                     return FontSlot.EAST_ASIA
-                elif self.parent._complex_script or self.parent.right_to_left:
+                elif (
+                    self._ch_fmt._complex_script or self._ch_fmt.right_to_left
+                ):
                     return FontSlot.COMPLEX_SCRIPT
                 else:
                     return font_slot
@@ -171,14 +178,10 @@ class Font(ElementProxy[CT_Fonts]):
             return theme_proxy.minor_complex_script
 
     def _prop_resolved(self, name: str) -> Any:
-        # docxray stuff
-        from docxray.oxml.t.proxy.text.run import Run
-
-        if isinstance(self.parent, Run):
-            prop = self.parent._display(f"rPr.rFonts.{name}")
-            if isinstance(prop, NotFound):
-                return None
-        return getattr(self.element, name, None)
+        prop = self._ch_fmt._display(f"rPr.rFonts.{name}")
+        if isinstance(prop, NotFound):
+            return None
+        return prop
 
     def _latin_1_supplement_slot(self, unicode: int) -> FontSlot:
         if self._hint == "eastAsia":
