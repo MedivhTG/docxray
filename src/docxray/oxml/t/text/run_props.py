@@ -9,9 +9,7 @@ from docxray.oxml.t.shared import (
     CT_Color,
     CT_EastAsianLayout,
     CT_Em,
-    CT_FitText,
     CT_Fonts,
-    CT_Highlight,
     CT_HpsMeasure,
     CT_Language,
     CT_OnOff,
@@ -19,12 +17,11 @@ from docxray.oxml.t.shared import (
     CT_SignedHpsMeasure,
     CT_SignedTwipsMeasure,
     CT_String,
-    CT_TextEffect,
-    CT_TextScale,
     CT_TrackChange,
 )
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
@@ -34,11 +31,33 @@ from docxray.oxml.t.st.shared_common import (
 )
 from docxray.oxml.t.st.wml import (
     ST_HexColor,
+    ST_HighlightColor,
+    ST_TextScale,
     ST_ThemeColor,
     ST_UcharHexNumber,
     ST_Underline,
 )
 from docxray.oxml.t.xmlchemy import OxmlElement
+
+
+class CT_FitText(OxmlElement):
+    pass
+
+
+class CT_TextEffect(OxmlElement):
+    pass
+
+
+class CT_TextScale(OxmlElement):
+    @cached_property
+    def val(self) -> str | int | None:
+        return self.attr_optional(W.VAL, ST_TextScale)
+
+
+class CT_Highlight(OxmlElement):
+    @cached_property
+    def val(self) -> SE_HIGHLIGHT_COLOR:
+        return self.attr_required(W.VAL, ST_HighlightColor)
 
 
 class CT_VerticalAlignRun(OxmlElement):
@@ -169,7 +188,6 @@ class CT_RPr(OxmlElement):
             return None
         return spacing_elm.recreate(CT_SignedTwipsMeasure)
 
-    # TODO: use
     @cached_property
     def w(self) -> CT_TextScale | None:
         return self.child_zero_or_one(W.W, CT_TextScale)

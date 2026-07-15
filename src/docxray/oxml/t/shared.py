@@ -6,7 +6,6 @@ from docxray.oxml.t.ns import W
 from docxray.oxml.t.st.enums import (
     SE_BORDER,
     SE_HEX_COLOR_AUTO,
-    SE_HIGHLIGHT_COLOR,
     SE_HINT,
     SE_JC,
     SE_ON_OFF_1,
@@ -27,7 +26,6 @@ from docxray.oxml.t.st.wml import (
     ST_DecimalNumber,
     ST_EighthPointMeasure,
     ST_HexColor,
-    ST_HighlightColor,
     ST_Hint,
     ST_HpsMeasure,
     ST_Jc,
@@ -118,10 +116,6 @@ class CT_SignedTwipsMeasure(OxmlElement):
         return self.attr_required(W.VAL, ST_SignedTwipsMeasure)
 
 
-class CT_TextScale(OxmlElement):
-    pass
-
-
 class CT_HpsMeasure(OxmlElement):
     @cached_property
     def val(self) -> int | str:
@@ -129,16 +123,6 @@ class CT_HpsMeasure(OxmlElement):
 
 
 class CT_SignedHpsMeasure(OxmlElement):
-    pass
-
-
-class CT_Highlight(OxmlElement):
-    @cached_property
-    def val(self) -> SE_HIGHLIGHT_COLOR:
-        return self.attr_required(W.VAL, ST_HighlightColor)
-
-
-class CT_TextEffect(OxmlElement):
     pass
 
 
@@ -191,10 +175,6 @@ class CT_TblWidth(OxmlElement):
 
 
 class CT_Shd(OxmlElement):
-    pass
-
-
-class CT_FitText(OxmlElement):
     pass
 
 

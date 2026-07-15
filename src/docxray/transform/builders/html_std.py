@@ -114,33 +114,40 @@ def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
 def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
     span_elm: HtmlElement | None = None
     style = ""
-    if proxy.character_format.hide_text:
+    ch_fmt = proxy.character_format
+    if ch_fmt.hide_text:
         style += "display: none; "
-    if proxy.character_format.strike_case:
-        strike = proxy.character_format.strike_case
+    if ch_fmt.strike_case:
+        strike = ch_fmt.strike_case
         line = "text-decoration: line-through; "
         if strike == "single":
             style += line
         else:
             style += f"{line}text-decoration-style: double; "
-    if proxy.character_format.font and isinstance(proxy, Run):
+    if ch_fmt.font and isinstance(proxy, Run):
         txt = proxy.raw_text.strip()
         if txt:
-            font = proxy.character_format.font.guess_font(txt[0], default="")
+            font = ch_fmt.font.guess_font(txt[0], default="")
             if font:
                 style += f"font-family: {font}; "
-    if proxy.character_format.chars_case:
-        ch = proxy.character_format.chars_case
+    if ch_fmt.chars_case:
+        ch = ch_fmt.chars_case
         if ch == "caps":
             style += "text-transform: uppercase; "
         else:
             style += "font-variant: small-caps; "
-    if proxy.character_format.font_size is not None:
-        style += f"font-size: {proxy.character_format.font_size.pt}pt; "
-    if proxy.character_format.color != "#000000":
-        style += f"color: {proxy.character_format.color}; "
-    if proxy.character_format.highlight:
-        style += f"background-color: {proxy.character_format.highlight}; "
+    if ch_fmt.font_size is not None:
+        style += f"font-size: {ch_fmt.font_size.pt}pt; "
+    if ch_fmt.color != "#000000":
+        style += f"color: {ch_fmt.color}; "
+    if ch_fmt.highlight:
+        style += f"background-color: {ch_fmt.highlight}; "
+    if ch_fmt.text_scale != 100:
+        if ch_fmt.text_scale > 100:
+            mode = "grow"
+        else:
+            mode = "shrink"
+        style += f"text-fit: {mode} {ch_fmt.text_scale}%; "
     if style:
         span_elm = Element("span", {"style": style})
     return span_elm

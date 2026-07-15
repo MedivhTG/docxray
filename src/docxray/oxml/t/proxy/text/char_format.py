@@ -11,7 +11,7 @@ from docxray.oxml.t.proxy.base import (
     from_doc_dflts,
     from_style_inheritance,
 )
-from docxray.oxml.t.proxy.compute import hps_measure, on_off
+from docxray.oxml.t.proxy.compute import hps_measure, on_off, text_scale
 from docxray.oxml.t.proxy.exceptions import DisplayError
 from docxray.oxml.t.proxy.text.font import Font
 from docxray.oxml.t.proxy.text.language import Language
@@ -173,6 +173,13 @@ class CharacterFormat:
     def hide_text(self) -> bool:
         """Render text as hidden and free display space."""
         return self._display_toggled("rPr.vanish.val")
+
+    @cached_property
+    def text_scale(self) -> int:
+        scale = self._display("rPr.w.val")
+        if isinstance(scale, NotFound):
+            return 100
+        return text_scale(scale)
 
     @cached_property
     def _sz(self) -> Length | None:

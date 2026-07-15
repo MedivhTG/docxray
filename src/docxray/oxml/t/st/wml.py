@@ -2,6 +2,8 @@
 from docxray.xsd.facets import (
     EnumerationFacet,
     LengthFacet,
+    MaxInclusiveFacet,
+    MinInclusiveFacet,
     PatternFacet,
 )
 from docxray.xsd.primitives import (
@@ -238,3 +240,20 @@ class ST_WmlColorSchemeIndex(XsdSimpleType):
 class ST_HighlightColor(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_HIGHLIGHT_COLOR)}
+
+
+class ST_TextScalePercent(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"pattern": PatternFacet("0*(600|([0-5]?[0-9]?[0-9]))%")}
+
+
+class ST_TextScaleDecimal(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdInteger)
+    FACETS = {
+        "min_inclusive": MinInclusiveFacet(0),
+        "max_inclusive": MaxInclusiveFacet(600),
+    }
+
+
+class ST_TextScale(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_TextScalePercent, ST_TextScaleDecimal)

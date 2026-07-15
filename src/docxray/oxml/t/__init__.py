@@ -12,10 +12,8 @@ from .shared import (
     CT_EastAsianLayout,
     CT_Em,
     CT_Empty,
-    CT_FitText,
     CT_Fonts,
     CT_FramePr,
-    CT_Highlight,
     CT_HpsMeasure,
     CT_Jc,
     CT_Language,
@@ -31,8 +29,6 @@ from .shared import (
     CT_String,
     CT_TblWidth,
     CT_TextDirection,
-    CT_TextEffect,
-    CT_TextScale,
     CT_TrackChange,
 )
 
@@ -379,8 +375,12 @@ register_element_cls("w:ptab", CT_PTab)
 register_element_cls("w:lastRenderedPageBreak", CT_Empty)
 
 from .text.run_props import (
+    CT_FitText,
+    CT_Highlight,
     CT_RPr,
     CT_RPrChange,
+    CT_TextEffect,
+    CT_TextScale,
     CT_Underline,
     CT_VerticalAlignRun,
 )
