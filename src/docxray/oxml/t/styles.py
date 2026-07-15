@@ -168,10 +168,6 @@ class CT_Style(OxmlElement):
     def tcPr(self) -> CT_TcPr | None:
         return self.child_zero_or_one(W.TC_PR, CT_TcPr)
 
-    @cached_property
-    def tblStylePr_lst(self) -> list[CT_TblStylePr]:
-        return self.child_zero_or_more(W.TBL_STYLE_PR, CT_TblStylePr)
-
     def tblStylePr_for(
         self, type: SE_TBL_STYLE_OVERRIDE_TYPE
     ) -> CT_TblStylePr | None:
@@ -187,14 +183,6 @@ class CT_Styles(OxmlElement):
     @cached_property
     def docDefaults(self) -> CT_DocDefaults | None:
         return self.child_zero_or_one(W.DOC_DEFAULTS, CT_DocDefaults)
-
-    @cached_property
-    def latentStyles_lst(self) -> list[CT_LatentStyles]:
-        return self.child_zero_or_more(W.LATENT_STYLES, CT_LatentStyles)
-
-    @cached_property
-    def style_lst(self) -> list[CT_Style]:
-        return self.child_zero_or_more(W.STYLE, CT_Style)
 
     def get_by_id(self, styleId: str) -> CT_Style | None:
         return self.find(f"{W.STYLE}[@{W.STYLE_ID}='{styleId}']", CT_Style)

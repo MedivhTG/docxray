@@ -11,7 +11,6 @@ import webcolors
 # docxray stuff
 from docxray.exceptions import InvalidXmlError
 from docxray.oxml.t.enums import WIN32_COLOR
-from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy
 from docxray.oxml.t.proxy.compute import percentage
 from docxray.oxml.t.proxy.settings import _SemanticColor
@@ -274,10 +273,7 @@ class Theme(ElementProxy[CT_OfficeStyleSheet]):
 
         C = SE_THEME_COLOR
         clrScheme_elm = self.element.themeElements.clrScheme
-        settings = cast(
-            "TransitionalPackage", self.part.package
-        ).main_document_part.settings
-        mapping = settings.theme_color_mapping
+        mapping = self.document_part.settings.theme_color_mapping
 
         return {
             C.DARK1: ThemeColor(clrScheme_elm.dk1, self),

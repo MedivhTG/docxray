@@ -15,14 +15,17 @@ from docxray.length import Length
 from docxray.oxml.t.proxy.drawing import Drawing
 from docxray.oxml.t.proxy.text.hyperlink import Hyperlink
 from docxray.oxml.t.proxy.text.omath import OMath, OMathParagraph
-from docxray.oxml.t.proxy.text.paragraph import ParaContentProxy
-from docxray.oxml.t.proxy.text.run import (
+from docxray.oxml.t.proxy.text.paragraph import PContent
+from docxray.oxml.t.proxy.text.run import Run
+from docxray.oxml.t.proxy.text.run_content import (
     Break,
-    Run,
-    StrikeCase,
+    CarriageReturn,
+    NonBreakHyphen,
+    OptionalHyphen,
+    Separator,
+    Symbol,
     Tab,
     TxtFragment,
-    UnderlineInfo,
 )
 from docxray.oxml.t.st.enums import (
     SE_TEXT_DIRECTION,
@@ -32,11 +35,14 @@ from docxray.oxml.t.st.enums import (
 
 if TYPE_CHECKING:
     from docxray.transform.ruleset import RuleSet
+    from docxray.oxml.t.proxy.text.list import ListItem
 
-from .types import ElmMaker
+from .types import RunMaker
 
-TAB_MNEMONIC = "&emsp;"
-SPACEBREAK_MNEMONIC = "&nbsp;"
+TAB = "&emsp;"
+SPACEBREAK = "&nbsp;"
+NON_BREAK_HYPHEN = "&#8209;"
+SOFT_HYPHEN = "&shy;"
 U_DECOR_MAP = {
     SE_UNDERLINE.SINGLE: "underline",
     SE_UNDERLINE.DOUBLE: "underline double",
@@ -52,7 +58,7 @@ U_DECOR_MAP = {
     SE_UNDERLINE.DOT_DOT_DASH: "underline dotted",
     SE_UNDERLINE.DASH_DOT_DOT_HEAVY: "underline dashed",
     SE_UNDERLINE.WAVY_HEAVY: "underline wavy",
-    SE_UNDERLINE.WAVY_DOUBLE: "underline waby",
+    SE_UNDERLINE.WAVY_DOUBLE: "underline wavy",
 }
 TEXT_FLOW_TO_WRITING_MODE = {
     SE_TEXT_DIRECTION.TOP_TO_BOTTOM: "vertical-lr",
@@ -69,41 +75,101 @@ TEXT_FLOW_TO_WRITING_MODE = {
 }
 
 
-def i_elm(value: bool) -> HtmlElement:
-    return Element("i")
+def i_elm(proxy: Run | ListItem) -> HtmlElement | None:
+    if proxy.character_format.italic:
+        return Element("i")
+    return None
 
 
-def b_elm(value: bool) -> HtmlElement:
-    return Element("b")
+def b_elm(proxy: Run | ListItem) -> HtmlElement | None:
+    if proxy.character_format.bold:
+        return Element("b")
+    return None
 
 
-def strike_elm(value: StrikeCase) -> HtmlElement:
-    if value == "single":
-        return Element("s")
-    return Element(
-        "span",
-        {
-            "style": "text-decoration: line-through; text-decoration-style: double;"
-        },
-    )
+def vert_align_elm(proxy: Run | ListItem) -> HtmlElement | None:
+    if proxy.character_format.vertical_alignment is None:
+        return None
+    valign = proxy.character_format.vertical_alignment
+    if valign == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
+        return Element("sup")
+    return Element("sub")
 
 
-def underline_elm(value: UnderlineInfo) -> HtmlElement:
-    decor = U_DECOR_MAP.get(value["line"])
+def underline_elm(proxy: Run | ListItem) -> HtmlElement | None:
+    if proxy.character_format.underline_info is None:
+        return None
+    u_inf = proxy.character_format.underline_info
+    decor = U_DECOR_MAP.get(u_inf["line"])
     if decor is None:
         decor = "underline"
     decor_color = ""
-    if value["color"] != "#000000":
-        decor_color = f" text-decoration-color: {value["color"]};"
+    if u_inf["color"] != "#000000":
+        decor_color = f" text-decoration-color: {u_inf["color"]};"
     return Element(
         "span", {"style": f"text-decoration: {decor};{decor_color}"}
     )
 
 
-def vert_align_elm(value: SE_VERTICAL_ALIGN_RUN) -> HtmlElement:
-    if value == SE_VERTICAL_ALIGN_RUN.SUPERSCRIPT:
-        return Element("sup")
-    return Element("sub")
+def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
+    span_elm: HtmlElement | None = None
+    style = ""
+    ch_fmt = proxy.character_format
+    if ch_fmt.hide:
+        style += "display: none; "
+    if ch_fmt.strike_line:
+        strike = ch_fmt.strike_line
+        line = "text-decoration: line-through; "
+        if strike == "single":
+            style += line
+        else:
+            style += f"{line}text-decoration-style: double; "
+    if ch_fmt.font and isinstance(proxy, Run):
+        txt = proxy.raw_text.strip()
+        if txt:
+            font = ch_fmt.font.guess_font(txt[0], default="")
+            if font:
+                style += f"font-family: {font}; "
+    if ch_fmt.font_variant:
+        ch = ch_fmt.font_variant
+        if ch == "caps":
+            style += "text-transform: uppercase; "
+        else:
+            style += "font-variant: small-caps; "
+    if ch_fmt.font_size is not None:
+        style += f"font-size: {ch_fmt.font_size.pt}pt; "
+    if ch_fmt.font_kerning is not None:
+        if (
+            ch_fmt.font_size is not None
+            and ch_fmt.font_size >= ch_fmt.font_kerning
+        ):
+            style += "font-kerning: normal; "
+    if ch_fmt.color != "#000000":
+        style += f"color: {ch_fmt.color}; "
+    if ch_fmt.highlight is not None and ch_fmt.highlight != "none":
+        style += f"background-color: {ch_fmt.highlight}; "
+    if ch_fmt.horizontal_scale != 100:
+        if ch_fmt.horizontal_scale > 100:
+            mode = "grow"
+        else:
+            mode = "shrink"
+        style += f"text-fit: {mode} {ch_fmt.horizontal_scale}%; "
+    if ch_fmt.letter_spacing is not None:
+        style += f"letter-spacing: {ch_fmt.letter_spacing.pt}pt; "
+    if ch_fmt.vertical_offset:
+        style += f"position: relative; top: {-ch_fmt.vertical_offset.pt}pt; "
+    if style:
+        span_elm = Element("span", {"style": style})
+    return span_elm
+
+
+RUN_MAKERS_DEFAULT: list[RunMaker] = [
+    i_elm,
+    b_elm,
+    vert_align_elm,
+    underline_elm,
+    format_run_elm,
+]
 
 
 def pt(length: Length | float) -> str:
@@ -114,16 +180,14 @@ def pt(length: Length | float) -> str:
 
 
 def tag_tree(
-    run_proxy: Any,
-    attr_to_elmmaker: dict[str, ElmMaker],
+    run_proxy: Any, run_makers: list[RunMaker]
 ) -> tuple[HtmlElement, HtmlElement] | None:
     top = None
     bottom = None
-    for attr, maker in attr_to_elmmaker.items():
-        val = getattr(run_proxy, attr, None)
-        if not val:
+    for maker in run_makers:
+        elm = maker(run_proxy)
+        if elm is None:
             continue
-        elm = maker(val)
         if top is None and bottom is None:
             top = elm
             bottom = elm
@@ -185,15 +249,15 @@ def content_append(upper_elm: HtmlElement, content: str | HtmlElement) -> None:
         elm_append_child_or_tail(upper_elm, last_child_elm, content)
 
 
-def txt(run: Run, txt_fgmt: TxtFragment) -> str | HtmlElement:
-    if run.chars_case is None:
-        return txt_fgmt.raw
-    elif run.chars_case == "caps":
-        elm = Element("span", {"style": "text-transform: uppercase;"})
-    else:
-        elm = Element("span", {"style": "font-variant: small-caps;"})
-    elm.text = txt_fgmt.raw
-    return elm
+def txt(txt_fgmt: TxtFragment) -> str | HtmlElement:
+    if txt_fgmt.txt_type != "t":
+        return ""
+    txt = txt_fgmt.raw
+    if txt_fgmt.preserve:
+        elm = Element("span", {"style": "white-space: pre-wrap;"})
+        elm.text = txt
+        return elm
+    return txt
 
 
 def break_elm(br: Break) -> HtmlElement | None:
@@ -203,20 +267,64 @@ def break_elm(br: Break) -> HtmlElement | None:
 
 
 def tab(tab: Tab) -> str:
-    return TAB_MNEMONIC
+    return TAB
 
 
-def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
+def non_br_hyphen(hyphen: NonBreakHyphen) -> str:
+    return NON_BREAK_HYPHEN
+
+
+def soft_hyphen(hyphen: OptionalHyphen) -> str:
+    return SOFT_HYPHEN
+
+
+def carriage_return(cr: CarriageReturn) -> HtmlElement:
+    return Element("br")
+
+
+def separator(sep: Separator) -> HtmlElement:
+    return Element("hr")
+
+
+def symbol(sym: Symbol) -> HtmlElement | str:
+    if sym.font is None:
+        return sym.character
+    elm = Element("span", {"style": f"font-family: {sym.font};"})
+    elm.text = sym.character
+    return elm
+
+
+def run(
+    upper_elm: HtmlElement,
+    run: Run,
+    run_makers: list[RunMaker],
+    ruleset: RuleSet,
+) -> None:
+    tree = tag_tree(run, run_makers)
+    if tree is not None:
+        top, bottom = tree
+        upper_elm.append(top)
+        upper_elm = bottom
     for item in run.iter_inner_content():
         content: str | HtmlElement | None = None
         if isinstance(item, TxtFragment):
-            content = txt(run, item)
+            content = txt(item)
         elif isinstance(item, Drawing):
             content = drawing(item, ruleset)
         elif isinstance(item, Tab):
             content = tab(item)
-        else:
+        elif isinstance(item, Break):
             content = break_elm(item)
+        elif isinstance(item, Symbol):
+            content = symbol(item)
+        elif isinstance(item, NonBreakHyphen):
+            content = non_br_hyphen(item)
+        elif isinstance(item, OptionalHyphen):
+            content = soft_hyphen(item)
+        elif isinstance(item, CarriageReturn):
+            content = carriage_return(item)
+        elif isinstance(item, Separator):
+            content = separator(item)
         if content is not None:
             content_append(upper_elm, content)
 
@@ -224,8 +332,7 @@ def run(upper_elm: HtmlElement, run: Run, ruleset: RuleSet) -> None:
 __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC = OfficeMathRun.process
 
 
-# TODO: look for other content process
-def omath_to_latex(
+def omath_to_mathjax(
     omath: OMath,
     ruleset: RuleSet | None = None,
     include_run_content: bool = True,
@@ -235,7 +342,7 @@ def omath_to_latex(
 
     ruleset = ruleset or cast("DocumentPart", omath.part)._default_html_ruleset
 
-    def _drawing_latex(drawing: Drawing) -> str:
+    def _drawing(drawing: Drawing) -> str:
         img_elm: HtmlElement = drawing.transform(ruleset, False)
         src = img_elm.get("src")
         if src:
@@ -245,6 +352,16 @@ def omath_to_latex(
         width_px = drawing.width.px()
         height_px = drawing.height.px()
         return f"\\style{{display: inline-block; width: {width_px}px; height: {height_px}px; {background}}}{{}}"
+
+    def _sym(sym: Symbol) -> str:
+        font = sym.font or ""
+        return f"\\unicode[{font}]{{{ord(sym.character)}}}"
+
+    def _nb_hyphen() -> str:
+        return f"\\text{{{NON_BREAK_HYPHEN}}}"
+
+    def _soft_hyphen() -> str:
+        return f"\\text{{{SOFT_HYPHEN}}}"
 
     def _process_run(self: OfficeMathRun, chr_: str = "") -> str:
         replacements = [
@@ -333,26 +450,39 @@ def omath_to_latex(
                     ):
                         flag_bold = True
             elif el.tag == qname("m", "t"):
-                text_content = (el.text or "").strip()
+                text_content = el.text or ""
                 if el.get(qname("xml", "space")) == "preserve":
-                    math_string += (
+                    pre = (
                         "\\ \\ "
                         if text_content == ""
                         else OfficeMathFieldCodeText(text_content).process(
                             chr_
                         )
                     )
+                    # Spaces in Word
+                    math_string += pre.replace(" ", r"\,")
                 else:
-                    math_string += (
-                        text_content.replace("_", "\\_")
+                    pre = (
+                        text_content.strip()
+                        .replace("_", "\\_")
                         .replace("^", "\\^")
                         .replace("{", "\\{")
                         .replace("}", "\\}")
                     )
+                    # Spaces in Word
+                    math_string += pre.replace(" ", r"\,")
             elif el.tag == qname("w", "drawing"):
-                math_string += _drawing_latex(
+                math_string += _drawing(
                     Drawing(el, omath)  # pyright: ignore[reportArgumentType]
                 )
+            elif el.tag == qname("w", "sym"):
+                math_string += _sym(
+                    Symbol(el, omath)  # pyright: ignore[reportArgumentType]
+                )
+            elif el.tag == qname("w", "noBreakHyphen"):
+                math_string += _nb_hyphen()
+            elif el.tag == qname("w", "softHyphen"):
+                math_string += _soft_hyphen()
 
         for pre, post in replacements:
             math_string = math_string.replace(pre, post)
@@ -366,14 +496,13 @@ def omath_to_latex(
         OfficeMathRun.process = _process_run
     else:
         OfficeMathRun.process = __OFFICE_MATH_RUN_PROCESS_ORIGIN_FUNC
-    return process_math_node(omath.element)
+    return f"\\[{process_math_node(omath.element)}\\]"
 
 
 def hyperlink(
     upper_elm: HtmlElement, hyperlink: Hyperlink, ruleset: RuleSet
 ) -> None:
-    for run_proxy in hyperlink.iter_inner_content():
-        run(upper_elm, run_proxy, ruleset)
+    content_append(upper_elm, hyperlink.transform(ruleset, False))
 
 
 def drawing(drawing: Drawing, ruleset: RuleSet) -> HtmlElement:
@@ -391,10 +520,13 @@ def omath(upper_elm: HtmlElement, omath: OMath, ruleset: RuleSet) -> None:
 
 
 def paragraph_content(
-    upper_elm: HtmlElement, p_content: ParaContentProxy, ruleset: RuleSet
+    upper_elm: HtmlElement,
+    p_content: PContent,
+    run_makers: list[RunMaker],
+    ruleset: RuleSet,
 ) -> None:
     if isinstance(p_content, Run):
-        run(upper_elm, p_content, ruleset)
+        run(upper_elm, p_content, run_makers, ruleset)
     elif isinstance(p_content, Hyperlink):
         hyperlink(upper_elm, p_content, ruleset)
     elif isinstance(p_content, OMathParagraph):

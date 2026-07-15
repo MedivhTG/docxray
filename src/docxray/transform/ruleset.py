@@ -2,6 +2,7 @@ from typing import Any, Literal, Self
 
 from .builders.base import HtmlBuilder
 from .builders.drawing import HtmlDrawing
+from .builders.hyperlink import HtmlHyperlink
 from .builders.list import HtmlListViewInterrupted
 from .builders.omath import HtmlOMath, HtmlOMathPara
 from .builders.paragraph import HtmlParagraph, HtmlParagraphInList
@@ -11,6 +12,7 @@ type RuleMethod = Literal["html"]
 type RuleProxy = Literal[
     "Paragraph",
     "ParagraphInList",
+    "Hyperlink",
     "Drawing",
     "ListViewInterrupted",
     "Table",
@@ -53,6 +55,7 @@ class RuleSet:
             {
                 "Paragraph": Rule(HtmlParagraph),
                 "ParagraphInList": Rule(HtmlParagraphInList),
+                "Hyperlink": Rule(HtmlHyperlink),
                 "Drawing": Rule(HtmlDrawing),
                 "ListViewInterrupted": Rule(HtmlListViewInterrupted),
                 "Table": Rule(HtmlTable),

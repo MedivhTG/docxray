@@ -159,10 +159,6 @@ class CT_AbstractNum(OxmlElement):
     def numStyleLink(self) -> CT_String | None:
         return self.child_zero_or_one(W.NUM_STYLE_LINK, CT_String)
 
-    @cached_property
-    def lvl_lst(self) -> list[CT_Lvl]:
-        return self.child_zero_or_n(W.LVL, CT_Lvl, 9)
-
     def lvl_by_ilvl(self, ilvl_val: int) -> CT_Lvl | None:
         return self.child_zero_or_one(
             f"./{W.LVL}[@{W.ILVL}='{ilvl_val}']", CT_Lvl
@@ -200,10 +196,6 @@ class CT_Num(OxmlElement):
     def abstractNumId(self) -> CT_DecimalNumber:
         return self.child_exactly_one(W.ABSTRACT_NUM_ID, CT_DecimalNumber)
 
-    @cached_property
-    def lvlOverride_lst(self) -> list[CT_NumLvl]:
-        return self.child_zero_or_n(W.LVL_OVERRIDE, CT_NumLvl, 9)
-
     def override_num_by_ilvl(self, ilvl: int) -> CT_NumLvl | None:
         return self.child_zero_or_one(
             f"./{W.LVL_OVERRIDE}[@{W.ILVL}='{ilvl}']", CT_NumLvl
@@ -211,18 +203,6 @@ class CT_Num(OxmlElement):
 
 
 class CT_Numbering(OxmlElement):
-    @cached_property
-    def numPicBullet_lst(self) -> list[CT_NumPicBullet]:
-        return self.child_zero_or_more(W.NUM_PIC_BULLET, CT_NumPicBullet)
-
-    @cached_property
-    def abstractNum_lst(self) -> list[CT_AbstractNum]:
-        return self.child_zero_or_more(W.ABSTRACT_NUM, CT_AbstractNum)
-
-    @cached_property
-    def num_lst(self) -> list[CT_Num]:
-        return self.child_zero_or_more(W.NUM, CT_Num)
-
     @cached_property
     def numIdMacAtCleanup(self) -> CT_DecimalNumber | None:
         return self.child_zero_or_one(

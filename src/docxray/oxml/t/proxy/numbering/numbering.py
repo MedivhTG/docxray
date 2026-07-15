@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
 from docxray.oxml.t.exceptions import InvalidXmlError
@@ -12,15 +12,14 @@ from docxray.oxml.t.numbering import (
     CT_Numbering,
     CT_NumLvl,
 )
-from docxray.oxml.t.proxy.base import ElementProxy, NotFound
+from docxray.oxml.t.proxy.base import ElementProxy, NotFound, from_doc_dflts
 from docxray.oxml.t.proxy.compute import on_off
 from docxray.oxml.t.proxy.styles.style import (
     NumberingStyle,
     ParagraphStyle,
 )
 from docxray.oxml.t.proxy.styles.styles import Styles
-from docxray.oxml.t.proxy.text.font import Font
-from docxray.oxml.t.proxy.text.language import Language
+from docxray.oxml.t.proxy.text.char_format import CharacterFormat
 from docxray.oxml.t.proxy.types import ProvidesXmlPart
 from docxray.oxml.t.st.enums import (
     SE_JC,
@@ -65,13 +64,6 @@ class Level(ElementProxy[CT_Lvl]):
     @cached_property
     def ilvl(self) -> int:
         return self._element.ilvl
-
-    @cached_property
-    def locale(self) -> str | None:
-        locale = self.prop("rPr.lang.val")
-        if isinstance(locale, NotFound):
-            return None
-        return locale
 
     @cached_property
     def alignment(self) -> SE_JC:
@@ -131,26 +123,14 @@ class Level(ElementProxy[CT_Lvl]):
         )
 
     @cached_property
-    def font(self) -> Font | None:
-        rFonts_elm = self.prop("rPr.rFonts")
-        if isinstance(rFonts_elm, NotFound):
-            return None
-        return Font(rFonts_elm, self)
+    def character_format(self) -> CharacterFormat:
+        return CharacterFormat(self)
 
-    @cached_property
-    def language(self) -> Language | None:
-        lang_elm = self.prop("rPr.lang")
-        if isinstance(lang_elm, NotFound):
-            return None
-        return Language(lang_elm, self)
-
-    @cached_property
-    def is_complex_script(self) -> bool:
-        return on_off(self.prop("rPr.cs.val", True))
-
-    @cached_property
-    def right_to_left(self) -> bool:
-        return on_off(self.prop("rPr.rtl.val", True))
+    def _display(self, path: str, optional: bool = False) -> Any:
+        prop = self.prop(path, optional)
+        if isinstance(prop, NotFound):
+            return from_doc_dflts(self, path, optional)
+        return prop
 
 
 class LevelOverride(ElementProxy[CT_NumLvl]):
@@ -298,10 +278,15 @@ class Numbering(ElementProxy[CT_Numbering]):
             num_style = abstract_num.numbering_style
         return num
 
+    # TODO: if no lvl but override exists - need to get props from it
     def associated_level(
         self, num_id: int, ilvl_or_style_id: int | str
     ) -> Level:
         num = self.find_effective_num(num_id)
         if isinstance(ilvl_or_style_id, int):
+            num_init = self.get_num(num_id)
+            override = num_init.associated_lvl_override(ilvl_or_style_id)
+            if override and override.lvl:
+                return override.lvl
             return num.abstract_num.lvl_by_ilvl(ilvl_or_style_id)
         return num.abstract_num.lvl_by_para_style(ilvl_or_style_id)

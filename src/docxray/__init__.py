@@ -1,6 +1,6 @@
 from .api import Document
 
-__version__ = "0.0.0.alpha19"
+__version__ = "0.0.0.alpha20"
 VERSION = __version__
 
 

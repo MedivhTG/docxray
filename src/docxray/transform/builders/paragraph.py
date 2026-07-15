@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from lxml.html import Element, HtmlElement
@@ -16,31 +15,22 @@ from docxray.oxml.t.st.enums import (
 )
 
 from .base import HtmlBuilder
-from .char_graph import RunChain, RunChainsMap
-from .run import HtmlRun
 
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.proxy.table.cell import Cell
-    from docxray.oxml.t.proxy.text.paragraph import (
-        Paragraph,
-        ParaContentProxy,
-    )
+    from docxray.oxml.t.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
 
 from .html_std import (
-    SPACEBREAK_MNEMONIC,
-    TAB_MNEMONIC,
+    RUN_MAKERS_DEFAULT,
+    SPACEBREAK,
+    TAB,
     TEXT_FLOW_TO_WRITING_MODE,
-    b_elm,
-    i_elm,
     paragraph_content,
-    strike_elm,
     tag_tree,
-    underline_elm,
-    vert_align_elm,
 )
-from .types import ElmMaker
+from .types import PContentFunc, RunMaker
 
 
 class HtmlParagraph(HtmlBuilder["Paragraph"]):
@@ -73,20 +63,9 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         SE_JC.LOW_KASHIDA: "kashida",
         SE_JC.THAI_DISTRIBUTE: "distribute",
     }
-
-    ATTR_TO_ELMMAKER: dict[str, ElmMaker] = {
-        "underline_info": underline_elm,
-        "vertical_alignment": vert_align_elm,
-        "italic": i_elm,
-        "bold": b_elm,
-        "strike_case": strike_elm,
-    }
-
-    P_CONTENT_FUNC: Callable[
-        [HtmlElement, ParaContentProxy, RuleSet], None
-    ] = paragraph_content
-    R_BUILDER = HtmlRun
-    EMPTY_TEXT_FILLER = SPACEBREAK_MNEMONIC
+    RUN_MAKERS: list[RunMaker] = RUN_MAKERS_DEFAULT
+    P_CONTENT_FUNC: PContentFunc = paragraph_content
+    EMPTY_TEXT_FILLER = SPACEBREAK
 
     @classmethod
     def element(cls, proxy: Paragraph, ruleset: RuleSet) -> HtmlElement:
@@ -110,15 +89,8 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         ):
             elm.text = cls.EMPTY_TEXT_FILLER
             return
-        chain_map = RunChainsMap(list(cls.ATTR_TO_ELMMAKER))
         for item in proxy.iter_inner_content():
-            chain_map.chain(item)
-        runs_builder = cls.R_BUILDER(elm, cls, ruleset)
-        for unchained_or_chain in chain_map.chains_ordered():
-            if isinstance(unchained_or_chain, RunChain):
-                runs_builder.run_chain(unchained_or_chain)
-            else:
-                cls.P_CONTENT_FUNC(elm, unchained_or_chain, ruleset)
+            cls.P_CONTENT_FUNC(elm, item, cls.RUN_MAKERS, ruleset)
 
     @classmethod
     def _list_item_content(cls, proxy: Paragraph) -> str | HtmlElement:
@@ -126,27 +98,21 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
             return ""
         li = proxy.list_item
         txt = li.level_text
-        tree = tag_tree(li, cls.ATTR_TO_ELMMAKER)
+        tree = tag_tree(li, cls.RUN_MAKERS)
         suff = li.level.separator
         if suff == SE_LEVEL_SUFFIX.TAB:
-            sep = TAB_MNEMONIC
+            sep = TAB
         elif suff == SE_LEVEL_SUFFIX.SPACE:
             sep = " "
         else:
             sep = ""
         span_style = ""
-        if proxy.list_item.level.numbering_format == "bullet":
-            font = proxy.list_item.level.font
-            font_family = (
-                "Symbol"
-                if font is None
-                else font.guess_font(txt[0], True, "Symbol")
-            )
-            span_style = f"font-family: {font_family};"
-        if li.chars_case == "caps":
-            span_style += "text-transform: uppercase;"
-        elif li.chars_case == "small_caps":
-            span_style += "font-variant: small-caps;"
+        font = proxy.list_item.level.character_format.font
+        if font:
+            default_font = "Symbol" if li.is_bullet_format else ""
+            font_family = font.guess_font(txt[0], default_font)
+            if font_family:
+                span_style = f"font-family: {font_family}; "
         if tree is None:
             if span_style:
                 span_elm = Element("span", {"style": span_style})

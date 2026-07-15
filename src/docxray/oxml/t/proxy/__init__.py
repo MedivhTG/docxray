@@ -16,7 +16,6 @@ from .document import Document
 from .drawing import Drawing
 from .exceptions import DisplayError, ResolveError
 from .image.picture import Picture
-from .list import ListItem, ListView, ListViewIlvlBlock, ListViewInterrupted
 from .numbering.numbering import (
     AbstractNum,
     Level,
@@ -37,9 +36,21 @@ from .styles.styles import Styles
 from .table.cell import BordersInfo, Cell, PaddingInfo
 from .table.row import Row
 from .table.table import Table
+from .text.char_format import (
+    CharacterFormat,
+    FontVariant,
+    StrikeLine,
+    UnderlineInfo,
+)
 from .text.font import Font
 from .text.hyperlink import Hyperlink
 from .text.language import Language
+from .text.list import (
+    ListItem,
+    ListView,
+    ListViewIlvlBlock,
+    ListViewInterrupted,
+)
 from .text.omath import (
     Accent,
     Arg,
@@ -47,23 +58,15 @@ from .text.omath import (
     BoxObject,
     OMath,
     OMathElement,
-    OMathElementsProxy,
+    OMathMathElements,
     OMathParagraph,
     RunOMath,
-    RunOMathContent,
+    RunOMathInnerContent,
     TxtFragmentOMath,
 )
-from .text.paragraph import ParaContentProxy, Paragraph
-from .text.run import (
-    Break,
-    CharsCase,
-    Run,
-    RunContentProxy,
-    StrikeCase,
-    Tab,
-    TxtFragment,
-    UnderlineInfo,
-)
+from .text.paragraph import Paragraph, PContent
+from .text.run import Run
+from .text.run_content import Break, RunInnerContent, Tab, TxtFragment
 from .theme import FontFamily, FontFamilySupplemental, Theme, ThemeColor
 from .types import ProvidesStoryPart, ProvidesXmlPart
 
@@ -79,8 +82,9 @@ __all__ = [
     "BoxObject",
     "Break",
     "Cell",
+    "CharacterFormat",
     "CharacterStyle",
-    "CharsCase",
+    "FontVariant",
     "DisplayError",
     "Document",
     "DocumentDefaults",
@@ -103,10 +107,10 @@ __all__ = [
     "NumberingStyle",
     "OMath",
     "OMathElement",
-    "OMathElementsProxy",
+    "OMathMathElements",
     "OMathParagraph",
     "PaddingInfo",
-    "ParaContentProxy",
+    "PContent",
     "Paragraph",
     "ParagraphStyle",
     "Picture",
@@ -116,11 +120,11 @@ __all__ = [
     "ResolveError",
     "Row",
     "Run",
-    "RunContentProxy",
+    "RunInnerContent",
     "RunOMath",
-    "RunOMathContent",
+    "RunOMathInnerContent",
     "Settings",
-    "StrikeCase",
+    "StrikeLine",
     "StoryChild",
     "Styles",
     "Tab",

@@ -9,9 +9,7 @@ from docxray.oxml.t.shared import (
     CT_Color,
     CT_EastAsianLayout,
     CT_Em,
-    CT_FitText,
     CT_Fonts,
-    CT_Highlight,
     CT_HpsMeasure,
     CT_Language,
     CT_OnOff,
@@ -19,12 +17,12 @@ from docxray.oxml.t.shared import (
     CT_SignedHpsMeasure,
     CT_SignedTwipsMeasure,
     CT_String,
-    CT_TextEffect,
-    CT_TextScale,
     CT_TrackChange,
 )
 from docxray.oxml.t.st.enums import (
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
+    SE_TEXT_EFFECT,
     SE_THEME_COLOR,
     SE_UNDERLINE,
     SE_VERTICAL_ALIGN_RUN,
@@ -34,11 +32,36 @@ from docxray.oxml.t.st.shared_common import (
 )
 from docxray.oxml.t.st.wml import (
     ST_HexColor,
+    ST_HighlightColor,
+    ST_TextEffect,
+    ST_TextScale,
     ST_ThemeColor,
     ST_UcharHexNumber,
     ST_Underline,
 )
 from docxray.oxml.t.xmlchemy import OxmlElement
+
+
+class CT_FitText(OxmlElement):
+    pass
+
+
+class CT_TextEffect(OxmlElement):
+    @cached_property
+    def val(self) -> SE_TEXT_EFFECT:
+        return self.attr_required(W.VAL, ST_TextEffect)
+
+
+class CT_TextScale(OxmlElement):
+    @cached_property
+    def val(self) -> str | int | None:
+        return self.attr_optional(W.VAL, ST_TextScale)
+
+
+class CT_Highlight(OxmlElement):
+    @cached_property
+    def val(self) -> SE_HIGHLIGHT_COLOR:
+        return self.attr_required(W.VAL, ST_HighlightColor)
 
 
 class CT_VerticalAlignRun(OxmlElement):
@@ -76,7 +99,7 @@ class CT_RPrOriginal(OxmlElement):
 class CT_RPrChange(CT_TrackChange):
     @cached_property
     def rPr(self) -> CT_RPrOriginal:
-        return CT_RPrOriginal(self.child_exactly_one(W.R_PR, CT_RPr))
+        return self.child_exactly_one(W.R_PR, CT_RPr).recreate(CT_RPrOriginal)
 
 
 class CT_RPr(OxmlElement):
@@ -140,6 +163,7 @@ class CT_RPr(OxmlElement):
     def noProof(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.NO_PROOF, CT_OnOff)
 
+    # Future
     @cached_property
     def snapToGrid(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SNAP_TO_GRID, CT_OnOff)
@@ -195,14 +219,17 @@ class CT_RPr(OxmlElement):
     def effect(self) -> CT_TextEffect | None:
         return self.child_zero_or_one(W.EFFECT, CT_TextEffect)
 
+    # TODO: use
     @cached_property
     def bdr(self) -> CT_Border | None:
         return self.child_zero_or_one(W.BDR, CT_Border)
 
+    # Future
     @cached_property
     def shd(self) -> CT_Shd | None:
         return self.child_zero_or_one(W.SHD, CT_Shd)
 
+    # Too complex
     @cached_property
     def fitText(self) -> CT_FitText | None:
         return self.child_zero_or_one(W.FIT_TEXT, CT_FitText)
@@ -219,6 +246,7 @@ class CT_RPr(OxmlElement):
     def cs(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.CS, CT_OnOff)
 
+    # Future
     @cached_property
     def em(self) -> CT_Em | None:
         return self.child_zero_or_one(W.EM, CT_Em)
@@ -227,6 +255,7 @@ class CT_RPr(OxmlElement):
     def lang(self) -> CT_Language | None:
         return self.child_zero_or_one(W.LANG, CT_Language)
 
+    # Future
     @cached_property
     def eastAsianLayout(self) -> CT_EastAsianLayout | None:
         return self.child_zero_or_one(W.EAST_ASIAN_LAYOUT, CT_EastAsianLayout)
@@ -235,6 +264,7 @@ class CT_RPr(OxmlElement):
     def specVanish(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.SPEC_VANISH, CT_OnOff)
 
+    # IDK
     @cached_property
     def oMath(self) -> CT_OnOff | None:
         return self.child_zero_or_one(W.O_MATH, CT_OnOff)

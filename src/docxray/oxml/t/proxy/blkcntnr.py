@@ -14,13 +14,13 @@ from typing import TYPE_CHECKING, TypeVar
 from docxray.oxml.t.document import CT_Body
 from docxray.oxml.t.proxy.base import StoryChild
 from docxray.oxml.t.proxy.text.paragraph import Paragraph
-from docxray.oxml.t.table.table import CT_Tc
+from docxray.oxml.t.table.table import CT_Tbl, CT_Tc
 from docxray.oxml.t.text.paragraph import CT_P
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray.oxml.t.proxy.list import ListViewInterrupted
     from docxray.oxml.t.proxy.table.table import Table
+    from docxray.oxml.t.proxy.text.list import ListViewInterrupted
 
 type _BlockItemElement = CT_Body | CT_Tc
 
@@ -37,7 +37,7 @@ class BlockItemContainer(StoryChild[BLCK_ITEM_ELM_T]):
         for element in self._element.inner_content_elements:
             if isinstance(element, CT_P):
                 content.append(Paragraph(element, self))
-            else:
+            elif isinstance(element, CT_Tbl):
                 content.append(Table(element, self))
         return content
 

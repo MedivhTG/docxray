@@ -2,7 +2,7 @@
 
 # ruff: noqa: E402
 
-from .document import CT_Body, CT_Document
+
 from .parser import register_element_cls
 from .shared import (
     CT_Border,
@@ -12,35 +12,103 @@ from .shared import (
     CT_EastAsianLayout,
     CT_Em,
     CT_Empty,
-    CT_FitText,
     CT_Fonts,
     CT_FramePr,
-    CT_Highlight,
     CT_HpsMeasure,
     CT_Jc,
     CT_Language,
     CT_LongHexNumber,
+    CT_Markup,
     CT_OnOff,
+    CT_Perm,
+    CT_PermStart,
+    CT_ProofErr,
+    CT_Rel,
     CT_Shd,
     CT_SignedHpsMeasure,
     CT_String,
     CT_TblWidth,
     CT_TextDirection,
-    CT_TextEffect,
-    CT_TextScale,
     CT_TrackChange,
 )
 
 register_element_cls("w:rsid", CT_LongHexNumber)
 register_element_cls("w:name", CT_String)
 
+
+register_element_cls("w:proofErr", CT_ProofErr)
+register_element_cls("w:permStart", CT_PermStart)
+register_element_cls("w:permEnd", CT_Perm)
+
+from .document import CT_Body, CT_CustomXmlBlock, CT_Document, CT_SdtBlock
+
 register_element_cls("w:document", CT_Document)
 register_element_cls("w:body", CT_Body)
+register_element_cls("w:customXml", CT_CustomXmlBlock)
+register_element_cls("w:sdt", CT_SdtBlock)
 
 
-from .text.paragraph import CT_P
+from .text.paragraph import CT_P, CT_SimpleField
 
 register_element_cls("w:p", CT_P)
+register_element_cls("w:fldSimple", CT_SimpleField)
+register_element_cls("w:subDoc", CT_Rel)
+
+from .text.hyperlink import CT_Hyperlink
+
+register_element_cls("w:hyperlink", CT_Hyperlink)
+
+from .text.paragraph_props import (
+    CT_Ind,
+    CT_PBdr,
+    CT_PPr,
+    CT_Spacing,
+    CT_Tabs,
+    CT_TextAlignment,
+    CT_TextboxTightWrap,
+)
+
+register_element_cls("w:pPr", CT_PPr)
+register_element_cls("w:pStyle", CT_String)
+register_element_cls("w:keepNext", CT_OnOff)
+register_element_cls("w:keepLines", CT_OnOff)
+register_element_cls("w:pageBreakBefore", CT_OnOff)
+register_element_cls("w:framePr", CT_FramePr)
+register_element_cls("w:widowControl", CT_OnOff)
+register_element_cls("w:suppressLineNumbers", CT_OnOff)
+register_element_cls("w:pBdr", CT_PBdr)
+register_element_cls("w:shd", CT_Shd)
+register_element_cls("w:tabs", CT_Tabs)
+register_element_cls("w:suppressAutoHyphens", CT_OnOff)
+register_element_cls("w:kinsoku", CT_OnOff)
+register_element_cls("w:wordWrap", CT_OnOff)
+register_element_cls("w:overflowPunct", CT_OnOff)
+register_element_cls("w:topLinePunct", CT_OnOff)
+register_element_cls("w:autoSpaceDE", CT_OnOff)
+register_element_cls("w:autoSpaceDN", CT_OnOff)
+register_element_cls("w:bidi", CT_OnOff)
+register_element_cls("w:adjustRightInd", CT_OnOff)
+register_element_cls("w:spacing", CT_Spacing)
+register_element_cls("w:snapToGrid", CT_OnOff)
+register_element_cls("w:ind", CT_Ind)
+register_element_cls("w:contextualSpacing", CT_OnOff)
+register_element_cls("w:mirrorIndents", CT_OnOff)
+register_element_cls("w:suppressOverlap", CT_OnOff)
+register_element_cls("w:jc", CT_Jc)
+register_element_cls("w:textDirection", CT_TextDirection)
+register_element_cls("w:textAlignment", CT_TextAlignment)
+register_element_cls("w:textboxTightWrap", CT_TextboxTightWrap)
+register_element_cls("w:outlineLvl", CT_DecimalNumber)
+register_element_cls("w:divId", CT_DecimalNumber)
+register_element_cls("w:cnfStyle", CT_Cnf)
+
+from .text.num_props import CT_NumPr, CT_TrackChangeNumbering
+
+register_element_cls("w:numPr", CT_NumPr)
+register_element_cls("w:ilvl", CT_DecimalNumber)
+register_element_cls("w:numId", CT_DecimalNumber)
+register_element_cls("w:numberingChange", CT_TrackChangeNumbering)
+register_element_cls("w:ins", CT_TrackChange)
 
 from .text.omath import CT_OMath, CT_OMathJc, CT_OMathPara, CT_OMathParaPr
 
@@ -240,78 +308,79 @@ register_element_cls("m:scr", CT_Script)
 register_element_cls("m:sty", CT_Style_OMath)
 register_element_cls("m:t", CT_Text_OMath)
 
-from .text.paragraph_props import (
-    CT_Ind,
-    CT_PBdr,
-    CT_PPr,
-    CT_Spacing,
-    CT_Tabs,
-    CT_TextAlignment,
-    CT_TextboxTightWrap,
+
+from .text.run import (
+    CT_R,
+    CT_BdoContentRun,
+    CT_Br,
+    CT_CustomXmlRun,
+    CT_DirContentRun,
+    CT_FldChar,
+    CT_FtnEdnRef,
+    CT_Object,
+    CT_Picture_RUN,
+    CT_PTab,
+    CT_Ruby,
+    CT_RunTrackChange,
+    CT_SdtRun,
+    CT_SmartTagRun,
+    CT_Sym,
+    CT_Text,
 )
 
-register_element_cls("w:pPr", CT_PPr)
-register_element_cls("w:pStyle", CT_String)
-register_element_cls("w:keepNext", CT_OnOff)
-register_element_cls("w:keepLines", CT_OnOff)
-register_element_cls("w:pageBreakBefore", CT_OnOff)
-register_element_cls("w:framePr", CT_FramePr)
-register_element_cls("w:widowControl", CT_OnOff)
-register_element_cls("w:suppressLineNumbers", CT_OnOff)
-register_element_cls("w:pBdr", CT_PBdr)
-register_element_cls("w:shd", CT_Shd)
-register_element_cls("w:tabs", CT_Tabs)
-register_element_cls("w:suppressAutoHyphens", CT_OnOff)
-register_element_cls("w:kinsoku", CT_OnOff)
-register_element_cls("w:wordWrap", CT_OnOff)
-register_element_cls("w:overflowPunct", CT_OnOff)
-register_element_cls("w:topLinePunct", CT_OnOff)
-register_element_cls("w:autoSpaceDE", CT_OnOff)
-register_element_cls("w:autoSpaceDN", CT_OnOff)
-register_element_cls("w:bidi", CT_OnOff)
-register_element_cls("w:adjustRightInd", CT_OnOff)
-register_element_cls("w:spacing", CT_Spacing)
-register_element_cls("w:snapToGrid", CT_OnOff)
-register_element_cls("w:ind", CT_Ind)
-register_element_cls("w:contextualSpacing", CT_OnOff)
-register_element_cls("w:mirrorIndents", CT_OnOff)
-register_element_cls("w:suppressOverlap", CT_OnOff)
-register_element_cls("w:jc", CT_Jc)
-register_element_cls("w:textDirection", CT_TextDirection)
-register_element_cls("w:textAlignment", CT_TextAlignment)
-register_element_cls("w:textboxTightWrap", CT_TextboxTightWrap)
-register_element_cls("w:outlineLvl", CT_DecimalNumber)
-register_element_cls("w:divId", CT_DecimalNumber)
-register_element_cls("w:cnfStyle", CT_Cnf)
-
-from .text.num_props import CT_NumPr, CT_TrackChangeNumbering
-
-register_element_cls("w:numPr", CT_NumPr)
-register_element_cls("w:ilvl", CT_DecimalNumber)
-register_element_cls("w:numId", CT_DecimalNumber)
-register_element_cls("w:numberingChange", CT_TrackChangeNumbering)
-register_element_cls("w:ins", CT_TrackChange)
+register_element_cls("w:customXml", CT_CustomXmlRun)
+register_element_cls("w:smartTag", CT_SmartTagRun)
+register_element_cls("w:sdt", CT_SdtRun)
+register_element_cls("w:dir", CT_DirContentRun)
+register_element_cls("w:bdo", CT_BdoContentRun)
 
 
-from .text.hyperlink import CT_Hyperlink
-
-register_element_cls("w:hyperlink", CT_Hyperlink)
-
-from .text.run import CT_R, CT_Br, CT_PTab, CT_Sym, CT_Text
+register_element_cls("w:ins", CT_RunTrackChange)
+register_element_cls("w:del", CT_RunTrackChange)
+register_element_cls("w:moveFrom", CT_RunTrackChange)
+register_element_cls("w:moveTo", CT_RunTrackChange)
 
 register_element_cls("w:r", CT_R)
 register_element_cls("w:br", CT_Br)
+register_element_cls("w:t", CT_Text)
+register_element_cls("w:contentPart", CT_Rel)
+register_element_cls("w:delText", CT_Text)
+register_element_cls("w:instrText", CT_Text)
+register_element_cls("w:delInstrText", CT_Text)
 register_element_cls("w:noBreakHyphen", CT_Empty)
 register_element_cls("w:softHyphen", CT_Empty)
+register_element_cls("w:dayShort", CT_Empty)
+register_element_cls("w:monthShort", CT_Empty)
+register_element_cls("w:yearShort", CT_Empty)
+register_element_cls("w:dayLong", CT_Empty)
+register_element_cls("w:monthLong", CT_Empty)
+register_element_cls("w:yearLong", CT_Empty)
+register_element_cls("w:annotationRef", CT_Empty)
+register_element_cls("w:footnoteRef", CT_Empty)
+register_element_cls("w:endnoteRef", CT_Empty)
+register_element_cls("w:separator", CT_Empty)
+register_element_cls("w:continuationSeparator", CT_Empty)
 register_element_cls("w:sym", CT_Sym)
+register_element_cls("w:pgNum", CT_Empty)
 register_element_cls("w:cr", CT_Empty)
 register_element_cls("w:tab", CT_Empty)
+register_element_cls("w:object", CT_Object)
+register_element_cls("w:pict", CT_Picture_RUN)
+register_element_cls("w:fldChar", CT_FldChar)
+register_element_cls("w:ruby", CT_Ruby)
+register_element_cls("w:footnoteReference", CT_FtnEdnRef)
+register_element_cls("w:endnoteReference", CT_FtnEdnRef)
+register_element_cls("w:commentReference", CT_Markup)
 register_element_cls("w:ptab", CT_PTab)
-register_element_cls("w:t", CT_Text)
+register_element_cls("w:lastRenderedPageBreak", CT_Empty)
 
 from .text.run_props import (
+    CT_FitText,
+    CT_Highlight,
     CT_RPr,
     CT_RPrChange,
+    CT_TextEffect,
+    CT_TextScale,
     CT_Underline,
     CT_VerticalAlignRun,
 )
@@ -357,11 +426,32 @@ register_element_cls("w:eastAsianLayout", CT_EastAsianLayout)
 register_element_cls("w:specVanish", CT_OnOff)
 register_element_cls("w:oMath", CT_OnOff)
 
-from .table.table import CT_Row, CT_Tbl, CT_Tc
+from .text.range import CT_Bookmark, CT_MarkupRange, CT_MoveBookmark
+
+register_element_cls("w:bookmarkStart", CT_Bookmark)
+register_element_cls("w:bookmarkEnd", CT_MarkupRange)
+register_element_cls("w:moveFromRangeStart", CT_MoveBookmark)
+register_element_cls("w:moveFromRangeEnd", CT_MarkupRange)
+register_element_cls("w:moveToRangeStart", CT_MoveBookmark)
+register_element_cls("w:moveToRangeEnd", CT_MarkupRange)
+register_element_cls("w:commentRangeStart", CT_MarkupRange)
+register_element_cls("w:commentRangeEnd", CT_MarkupRange)
+register_element_cls("w:customXmlInsRangeStart", CT_TrackChange)
+register_element_cls("w:customXmlInsRangeEnd", CT_Markup)
+register_element_cls("w:customXmlDelRangeStart", CT_TrackChange)
+register_element_cls("w:customXmlDelRangeEnd", CT_Markup)
+register_element_cls("w:customXmlMoveFromRangeStart", CT_TrackChange)
+register_element_cls("w:customXmlMoveFromRangeEnd", CT_Markup)
+register_element_cls("w:customXmlMoveToRangeStart", CT_TrackChange)
+register_element_cls("w:customXmlMoveToRangeEnd", CT_Markup)
+
+
+from .table.table import CT_Row, CT_Tbl, CT_TblGrid, CT_Tc
 
 register_element_cls("w:tbl", CT_Tbl)
 register_element_cls("w:tr", CT_Row)
 register_element_cls("w:tc", CT_Tc)
+register_element_cls("w:tblGrid", CT_TblGrid)
 
 from .table.table_props import (
     CT_TblBorders,

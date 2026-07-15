@@ -10,6 +10,7 @@ from docxray.oxml.t.st.shared_common import (
     ST_PositiveUniversalMeasure,
     ST_UniversalMeasure,
 )
+from docxray.oxml.t.st.wml import ST_TextScalePercent
 from docxray.xsd.facets import PatternFacet
 
 from .base import NotFound
@@ -166,3 +167,58 @@ def universal_measure(val: str, override_pattern: str | None = None) -> Length:
             return Pica(value)
         case _:
             raise err
+
+
+def hps_measure(val: int | str) -> Length:
+    """Parse value of an positive half-points measure to `Length` instance.
+
+    Args:
+        val (int | str): Integer if half-points, else old measure-string.
+
+    Returns:
+        Length: Numeric instance.
+    """
+    if isinstance(val, int):
+        # Half-points
+        return Pt(val / 2)
+    return universal_measure(
+        val,
+        cast(
+            "PatternFacet", ST_PositiveUniversalMeasure.FACETS["pattern"]
+        ).value,
+    )
+
+
+def signed_hps_measure(val: int | str) -> Length:
+    """Parse value of an half-points measure to `Length` instance.
+
+    Args:
+        val (int | str): Integer if half-points, else old measure-string.
+
+    Returns:
+        Length: Numeric instance.
+    """
+    return hps_measure(val)
+
+
+def text_scale(val: str | int) -> int:
+    """Parse text scale in percents (integer).
+
+    Args:
+        val (str | int): Percent string or int as is.
+
+    Returns:
+        int: Percents from 0 to 600.
+    """
+    if isinstance(val, str):
+        err = ValueError("Text Scale Error")
+        pattern = cast(
+            "PatternFacet", ST_TextScalePercent.FACETS["pattern"]
+        ).value
+        if pattern is None:
+            raise err
+        matched = re.search(pattern, val)
+        if not matched:
+            raise err
+        return int(matched.group(1))
+    return val

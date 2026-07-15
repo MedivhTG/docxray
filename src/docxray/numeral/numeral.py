@@ -16,6 +16,7 @@ from .bcp47 import script
 from .charset import NAME_TO_CHARSET, CharsetName
 
 
+# TODO: Some methods are not equals to Word render
 class Numeral:
     """Class for translating ordinal position (int) to symbol from
     chosen word chracter set. `ord` param almost always an 1-based number.

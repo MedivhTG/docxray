@@ -32,6 +32,7 @@ from docxray.oxml.t.st.wml import (
     ST_LongHexNumber,
     ST_MeasurementOrPercent,
     ST_PointMeasure,
+    ST_SignedHpsMeasure,
     ST_SignedTwipsMeasure,
     ST_TblWidth,
     ST_TextDirection,
@@ -95,7 +96,7 @@ class CT_Fonts(OxmlElement):
 class CT_Color(OxmlElement):
     @cached_property
     def val(self) -> SE_HEX_COLOR_AUTO | bytes:
-        return self.attr_optional(W.COLOR, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
+        return self.attr_optional(W.VAL, ST_HexColor, SE_HEX_COLOR_AUTO.AUTO)
 
     @cached_property
     def themeColor(self) -> SE_THEME_COLOR | None:
@@ -116,10 +117,6 @@ class CT_SignedTwipsMeasure(OxmlElement):
         return self.attr_required(W.VAL, ST_SignedTwipsMeasure)
 
 
-class CT_TextScale(OxmlElement):
-    pass
-
-
 class CT_HpsMeasure(OxmlElement):
     @cached_property
     def val(self) -> int | str:
@@ -127,15 +124,9 @@ class CT_HpsMeasure(OxmlElement):
 
 
 class CT_SignedHpsMeasure(OxmlElement):
-    pass
-
-
-class CT_Highlight(OxmlElement):
-    pass
-
-
-class CT_TextEffect(OxmlElement):
-    pass
+    @cached_property
+    def val(self) -> int | str:
+        return self.attr_required(W.VAL, ST_SignedHpsMeasure)
 
 
 class CT_Border(OxmlElement):
@@ -187,10 +178,6 @@ class CT_TblWidth(OxmlElement):
 
 
 class CT_Shd(OxmlElement):
-    pass
-
-
-class CT_FitText(OxmlElement):
     pass
 
 
@@ -275,4 +262,20 @@ class CT_TrackChange(CT_Markup):
 
 
 class CT_Empty(OxmlElement):
+    pass
+
+
+class CT_Rel(OxmlElement):
+    pass
+
+
+class CT_Perm(OxmlElement):
+    pass
+
+
+class CT_PermStart(OxmlElement):
+    pass
+
+
+class CT_ProofErr(OxmlElement):
     pass

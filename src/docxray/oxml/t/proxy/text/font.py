@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import unicodedata
 from collections.abc import Callable
 from enum import StrEnum
 from functools import cached_property, lru_cache
@@ -17,6 +16,7 @@ from docxray.oxml.t.st.enums import SE_HINT, SE_THEME
 if TYPE_CHECKING:
     # docxray stuff
     from docxray.oxml.t.proxy.numbering.numbering import Level
+    from docxray.oxml.t.proxy.text.char_format import CharacterFormat
     from docxray.oxml.t.proxy.text.run import Run
 
 
@@ -64,8 +64,12 @@ class Font(ElementProxy[CT_Fonts]):
         return cast("Level | Run", self._parent)
 
     @cached_property
+    def _ch_fmt(self) -> CharacterFormat:
+        return self.parent.character_format
+
+    @cached_property
     def _lang(self) -> Language | None:
-        return self.parent.language
+        return self._ch_fmt.language
 
     @cached_property
     def _east_asia_lang(self) -> str | None:
@@ -110,18 +114,11 @@ class Font(ElementProxy[CT_Fonts]):
         return self._theme_font("cstheme")
 
     @lru_cache
-    def guess_font(
-        self, char: str, glyph: bool = False, default: str = "Arial"
-    ) -> str:
+    def guess_font(self, char: str, default: str = "Arial") -> str:
         """Guess single character font - which font slot must be used.
-
-
-        When `glyph` is on then there is additional check for char.
-        If not in glyph charset, then fallback to `Times New Roman`.
 
         Args:
             char (str): Character string.
-            glyph (bool): On glyph mark check. Defaults to False.
             default (str): Default font if can't guess current. Defaults to Arial.
 
         Returns:
@@ -140,9 +137,6 @@ class Font(ElementProxy[CT_Fonts]):
             font: str | None = font_family.typeface
         else:
             font = font_family
-        if glyph and not self._is_glyph(char):
-            # Fallback for bullet markers
-            return "Times New Roman"
         return font or default
 
     def _guess_slot(self, char: str) -> FontSlot:
@@ -156,36 +150,12 @@ class Font(ElementProxy[CT_Fonts]):
                 if font_slot == "eastAsia" and self._hint == "eastAsia":
                     return FontSlot.EAST_ASIA
                 elif (
-                    self.parent.is_complex_script or self.parent.right_to_left
+                    self._ch_fmt._complex_script or self._ch_fmt.right_to_left
                 ):
                     return FontSlot.COMPLEX_SCRIPT
                 else:
                     return font_slot
         raise ValueError(f"No font slot for given char `{char}`")
-
-    @lru_cache
-    def _is_glyph(self, char: str) -> bool:
-        code = ord(char)
-        category = unicodedata.category(char)
-        if category in {"So", "Sm", "Sc", "Sk", "Co"}:
-            return True
-        if category in {"Po", "Pd", "Pc", "Ps", "Pe", "Pi", "Pf"}:
-            return True
-        if 0x0370 <= code <= 0x03FF:
-            return True
-        if 0x0100 <= code <= 0x024F:
-            return True
-        if 0x02B0 <= code <= 0x02FF:
-            return True
-        if 0x2100 <= code <= 0x214F:
-            return True
-        if 0x2200 <= code <= 0x22FF:
-            return True
-        if 0x25A0 <= code <= 0x25FF:
-            return True
-        if 0xE000 <= code <= 0xF8FF:
-            return True
-        return False
 
     # TODO: idk how to implement it right (look deep in spec for supplemental fonts)
     def _theme_font(self, name: str) -> FontFamily | None:
@@ -208,14 +178,10 @@ class Font(ElementProxy[CT_Fonts]):
             return theme_proxy.minor_complex_script
 
     def _prop_resolved(self, name: str) -> Any:
-        # docxray stuff
-        from docxray.oxml.t.proxy.text.run import Run
-
-        if isinstance(self.parent, Run):
-            prop = self.parent._display(f"rPr.{name}")
-            if isinstance(prop, NotFound):
-                return None
-        return getattr(self.element, name, None)
+        prop = self._ch_fmt._display(f"rPr.rFonts.{name}")
+        if isinstance(prop, NotFound):
+            return None
+        return prop
 
     def _latin_1_supplement_slot(self, unicode: int) -> FontSlot:
         if self._hint == "eastAsia":

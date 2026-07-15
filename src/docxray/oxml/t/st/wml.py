@@ -2,6 +2,8 @@
 from docxray.xsd.facets import (
     EnumerationFacet,
     LengthFacet,
+    MaxInclusiveFacet,
+    MinInclusiveFacet,
     PatternFacet,
 )
 from docxray.xsd.primitives import (
@@ -22,6 +24,7 @@ from .enums import (
     SE_BR_TYPE,
     SE_HEIGHT_RULE,
     SE_HEX_COLOR_AUTO,
+    SE_HIGHLIGHT_COLOR,
     SE_HINT,
     SE_JC,
     SE_JC_TABLE,
@@ -34,6 +37,7 @@ from .enums import (
     SE_TBL_STYLE_OVERRIDE_TYPE,
     SE_TEXT_ALIGNMENT,
     SE_TEXT_DIRECTION,
+    SE_TEXT_EFFECT,
     SE_THEME,
     SE_THEME_COLOR,
     SE_UNDERLINE,
@@ -232,3 +236,34 @@ class ST_TblLayoutType(XsdSimpleType):
 class ST_WmlColorSchemeIndex(XsdSimpleType):
     SCHEMA = XsdRestriction(XsdString)
     FACETS = {"enum": EnumerationFacet(enum_cls=SE_WML_COLOR_SCHEME_INDEX)}
+
+
+class ST_HighlightColor(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_HIGHLIGHT_COLOR)}
+
+
+class ST_TextScalePercent(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"pattern": PatternFacet("0*(600|([0-5]?[0-9]?[0-9]))%")}
+
+
+class ST_TextScaleDecimal(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdInteger)
+    FACETS = {
+        "min_inclusive": MinInclusiveFacet(0),
+        "max_inclusive": MaxInclusiveFacet(600),
+    }
+
+
+class ST_TextScale(XsdSimpleType):
+    SCHEMA = XsdUnion(ST_TextScalePercent, ST_TextScaleDecimal)
+
+
+class ST_SignedHpsMeasure(XsdSimpleType):
+    SCHEMA = XsdUnion(XsdInteger, ST_UniversalMeasure)
+
+
+class ST_TextEffect(XsdSimpleType):
+    SCHEMA = XsdRestriction(XsdString)
+    FACETS = {"enum": EnumerationFacet(enum_cls=SE_TEXT_EFFECT)}

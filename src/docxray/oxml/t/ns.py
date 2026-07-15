@@ -45,6 +45,24 @@ class W:
     ALT_CHUNK = qn("w:altChunk")
 
     R = qn("w:r")
+    NO_BREAK_HYPHEN = qn("w:noBreakHyphen")
+    SOFT_HYPHEN = qn("w:softHyphen")
+    CR = qn("w:cr")
+    PG_NUM = qn("w:pgNum")
+    DAY_SHORT = qn("w:dayShort")
+    MONTH_SHORT = qn("w:monthShort")
+    YEAR_SHORT = qn("w:yearShort")
+    DAY_LONG = qn("w:dayLong")
+    MONTH_LONG = qn("w:monthLong")
+    YEAR_LONG = qn("w:yearLong")
+    FOOTNOTE_REF = qn("w:footnoteRef")
+    ENDNOTE_REF = qn("w:endnoteRef")
+    ANNOTATION_REF = qn("w:annotationRef")
+    FOOTNOTE_REFERENCE = qn("w:footnoteReference")
+    ENDNOTE_REFERENCE = qn("w:endnoteReference")
+    SEPARATOR = qn("w:separator")
+    CONTINUATION_SEPARATOR = qn("w:continuationSeparator")
+    LAST_RENDERED_PAGE_BREAK = qn("w:lastRenderedPageBreak")
 
     TR = qn("w:tr")
     TC = qn("w:tc")
@@ -155,6 +173,7 @@ class W:
     O_MATH = qn("w:oMath")
 
     TBL_PR = qn("w:tblPr")
+    TBL_GRID = qn("w:tblGrid")
     TBL_STYLE_ROW_BAND_SIZE = qn("w:tblStyleRowBandSize")
     TBL_STYLE_COL_BAND_SIZE = qn("w:tblStyleColBandSize")
     TBL_PR_EX = qn("w:tblPrEx")
@@ -286,6 +305,7 @@ class W:
     RSID_DEL = qn("w:rsidDel")
     RSID_P = qn("w:rsidP")
     RSID_R_DEFAULT = qn("w:rsidRDefault")
+    RSID_TR = qn("w:rsidTr")
 
     THEME_FONT_LANG = qn("w:themeFontLang")
     EAST_ASIA = qn("w:eastAsia")
@@ -312,8 +332,18 @@ class W:
     ACCENT4 = qn("w:accent4")
     ACCENT5 = qn("w:accent5")
     ACCENT6 = qn("w:accent6")
+
     HYPERLINK = qn("w:hyperlink")
+    TGT_FRAME = qn("w:tgtFrame")
+    TOOLTIP = qn("w:tooltip")
+    DOC_LOCATION = qn("w:docLocation")
+    HISTORY = qn("w:history")
+    ANCHOR = qn("w:anchor")
+
     FOLLOWED_HYPERLINK = qn("w:followedHyperlink")
+
+    CUSTOM_XML = qn("w:customXml")
+    SDT = qn("w:sdt")
 
 
 class WP:
@@ -384,6 +414,7 @@ class PIC:
 
 
 class R:
+    ID = qn("r:id")
     EMBED = qn("r:embed")
 
 
