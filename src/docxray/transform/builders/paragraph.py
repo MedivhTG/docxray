@@ -110,7 +110,9 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         font = proxy.list_item.level.character_format.font
         if font:
             default_font = "Symbol" if li.is_bullet_format else ""
-            font_family = font.guess_font(txt[0], default_font)
+            font_family = font.guess_font(
+                txt[0], li.is_bullet_format, default_font
+            )
             if font_family:
                 span_style = f"font-family: {font_family}; "
         if tree is None:
