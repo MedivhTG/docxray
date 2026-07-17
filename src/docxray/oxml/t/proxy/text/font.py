@@ -113,15 +113,11 @@ class Font(ElementProxy[CT_Fonts]):
         return self._theme_font("cstheme")
 
     @lru_cache
-    def guess_font(
-        self, char: str, prefer_direct: bool = False, default: str = "Arial"
-    ) -> str:
+    def guess_font(self, char: str, default: str = "Arial") -> str:
         """Guess single character font - which font slot must be used.
 
         Args:
             char (str): Character string.
-            prefer_direct (bool, optional): Prefer direct font-slot contained in CharacterFormat
-                over Theme.
             default (str, optional): Default font if can't guess current. Defaults to Arial.
 
         Returns:
@@ -129,27 +125,13 @@ class Font(ElementProxy[CT_Fonts]):
         """
         slot = self._guess_slot(char)
         if slot == "ascii":
-            font_family = (
-                self._ascii
-                if prefer_direct
-                else self._asciiTheme or self._ascii
-            )
+            font_family = self._ascii or self._asciiTheme
         elif slot == "hAnsi":
-            font_family = (
-                self._hAnsi
-                if prefer_direct
-                else self._hAnsiTheme or self._hAnsi
-            )
+            font_family = self._hAnsi or self._hAnsiTheme
         elif slot == "eastAsia":
-            font_family = (
-                self._eastAsia
-                if prefer_direct
-                else self._eastAsiaTheme or self._eastAsia
-            )
+            font_family = self._eastAsia or self._eastAsiaTheme
         else:
-            font_family = (
-                self._cs if prefer_direct else self._cstheme or self._cs
-            )
+            font_family = self._cs or self._cstheme
         if isinstance(font_family, FontFamily):
             font: str | None = font_family.typeface
         else:
