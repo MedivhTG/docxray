@@ -26,7 +26,7 @@ class HtmlOMathPara(HtmlBuilder["OMathParagraph"]):
 
     @classmethod
     def element(cls, proxy: OMathParagraph, ruleset: RuleSet) -> HtmlElement:
-        elm = Element("div", cls._attrs(proxy))
+        elm = Element("span", cls._attrs(proxy))
         cls._fill_content(elm, proxy, ruleset)
         return elm
 
@@ -57,13 +57,13 @@ class HtmlOMath(HtmlBuilder["OMath"]):
     def element(cls, proxy: OMath, ruleset: RuleSet) -> HtmlElement:
         mathjax = omath_to_mathjax(proxy)
         if mathjax:
-            div_elm = Element("div", cls._attrs(proxy))
-            div_elm.append(cls._script())
+            span_elm = Element("span", cls._attrs(proxy))
+            span_elm.append(cls._script())
             p_elm = Element("p")
             # MathJax must understand LaTeX
             p_elm.text = mathjax
-            div_elm.append(p_elm)
-            return div_elm
+            span_elm.append(p_elm)
+            return span_elm
         else:
             return Element("p", cls._attrs(proxy))
 
