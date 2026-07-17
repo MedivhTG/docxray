@@ -2,6 +2,7 @@ from .better_lxml import to_str_html
 from .builders import html_std
 from .builders.base import HtmlBuilder
 from .builders.drawing import HtmlDrawing
+from .builders.hyperlink import HtmlHyperlink
 from .builders.list import HtmlListViewInterrupted
 from .builders.omath import HtmlOMath, HtmlOMathPara
 from .builders.paragraph import HtmlParagraph, HtmlParagraphInList
@@ -16,6 +17,7 @@ __all__ = [
     "HtmlBuilder",
     "HtmlDrawing",
     "html_std",
+    "HtmlHyperlink",
     "HtmlListViewInterrupted",
     "HtmlOMath",
     "HtmlOMathPara",

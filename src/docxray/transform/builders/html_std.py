@@ -146,8 +146,11 @@ def format_run_elm(proxy: Run | ListItem) -> HtmlElement | None:
             style += "font-kerning: normal; "
     if ch_fmt.color != "#000000":
         style += f"color: {ch_fmt.color}; "
-    if ch_fmt.highlight is not None and ch_fmt.highlight != "none":
-        style += f"background-color: {ch_fmt.highlight}; "
+    if (
+        ch_fmt.background_color is not None
+        and ch_fmt.background_color != "none"
+    ):
+        style += f"background-color: {ch_fmt.background_color}; "
     if ch_fmt.horizontal_scale != 100:
         if ch_fmt.horizontal_scale > 100:
             mode = "grow"

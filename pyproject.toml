@@ -1,6 +1,6 @@
 [project]
 name = "docxray"
-version = "0.0.0.alpha20"
+version = "0.0.0.alpha21"
 description = "ReadOnly python-docx fork lib"
 readme = "README.md"
 requires-python = ">=3.13"

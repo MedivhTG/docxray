@@ -66,7 +66,32 @@ from .text.omath import (
 )
 from .text.paragraph import Paragraph, PContent
 from .text.run import Run
-from .text.run_content import Break, RunInnerContent, Tab, TxtFragment
+from .text.run_content import (
+    DATE_BLOCK_FMT,
+    FOOTNOTE_MARK_TYPE,
+    TXT_FGMT_TYPE,
+    AbsolutePositionTab,
+    Break,
+    CarriageReturn,
+    Comment,
+    ComplexField,
+    ContentPart,
+    ContinuationSeparatorMark,
+    DateBlock,
+    EmbeddedObject,
+    FootnoteMark,
+    FootnoteReference,
+    LastCalculatedPageBreak,
+    NonBreakHyphen,
+    OptionalHyphen,
+    PageNumber,
+    PhoneticGuide,
+    RunInnerContent,
+    Separator,
+    Symbol,
+    Tab,
+    TxtFragment,
+)
 from .theme import FontFamily, FontFamilySupplemental, Theme, ThemeColor
 from .types import ProvidesStoryPart, ProvidesXmlPart
 
@@ -141,4 +166,24 @@ __all__ = [
     "from_style_inheritance",
     "safe_get_prop",
     "transform",
+    "AbsolutePositionTab",
+    "NonBreakHyphen",
+    "OptionalHyphen",
+    "CarriageReturn",
+    "Symbol",
+    "ComplexField",
+    "PageNumber",
+    "FOOTNOTE_MARK_TYPE",
+    "FootnoteMark",
+    "Comment",
+    "FootnoteReference",
+    "Separator",
+    "ContinuationSeparatorMark",
+    "ContentPart",
+    "DATE_BLOCK_FMT",
+    "DateBlock",
+    "PhoneticGuide",
+    "LastCalculatedPageBreak",
+    "EmbeddedObject",
+    "TXT_FGMT_TYPE",
 ]

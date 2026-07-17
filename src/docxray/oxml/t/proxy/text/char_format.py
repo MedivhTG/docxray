@@ -5,13 +5,13 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 # docxray stuff
-from docxray.colorize import Colorize
 from docxray.length import Length
 from docxray.oxml.t.proxy.base import (
     NotFound,
     from_doc_dflts,
     from_style_inheritance,
 )
+from docxray.oxml.t.proxy.colorize import Colorize
 from docxray.oxml.t.proxy.compute import (
     hps_measure,
     on_off,
@@ -353,7 +353,7 @@ class CharacterFormat:
         )
 
     @cached_property
-    def highlight(self) -> SE_HIGHLIGHT_COLOR | None:
+    def background_color(self) -> SE_HIGHLIGHT_COLOR | None:
         """Specifies a highlighting color which is applied as a background behind the contents of this run.
 
         Highlighting is typically used for marking or emphasizing text. If run shading (shd) is also specified,
@@ -677,7 +677,7 @@ class CharacterFormat:
     def _display_level(self, path: str, optional: bool = False) -> Any:
         prop = self._proxy.prop(path, optional)
         if isinstance(prop, NotFound):
-            return from_doc_dflts(self._proxy, path, optional)
+            return from_doc_dflts(self._proxy, f"rPrDefault.{path}", optional)
         return prop
 
     def _display_level_toggled(self, path: str) -> bool:

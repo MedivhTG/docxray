@@ -6,7 +6,6 @@ from functools import cached_property, lru_cache
 from typing import TYPE_CHECKING, Any, cast
 
 # docxray stuff
-from docxray.oxml.t.package import TransitionalPackage
 from docxray.oxml.t.proxy.base import ElementProxy, NotFound
 from docxray.oxml.t.proxy.text.language import Language
 from docxray.oxml.t.proxy.theme import FontFamily
@@ -162,8 +161,7 @@ class Font(ElementProxy[CT_Fonts]):
         theme: SE_THEME | None = self._prop_resolved(name)
         if theme is None:
             return None
-        pkg = cast("TransitionalPackage", self.part.package)
-        theme_proxy = pkg.main_document_part.theme
+        theme_proxy = self.document_part.theme
         if theme in (SE_THEME.MAJOR_ASCII, SE_THEME.MAJOR_H_ANSI):
             return theme_proxy.major_latin
         elif theme == SE_THEME.MAJOR_EAST_ASIA:
