@@ -42,6 +42,10 @@ class ListViewIlvlBlock:
         return self._li
 
     @cached_property
+    def is_bullet_format(self) -> bool:
+        return self.li.is_bullet_format
+
+    @cached_property
     def ilvl(self) -> int:
         return self._li.ilvl
 

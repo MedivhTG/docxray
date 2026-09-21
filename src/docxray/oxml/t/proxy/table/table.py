@@ -103,9 +103,7 @@ class Table(StoryChild[CT_Tbl]):
         """
         for row in self.iter_rows():
             for cell in row.iter_cells():
-                spacing = cell.borders_info["spacing"]
-                if spacing is not None:
-                    return spacing
+                return cell.borders_info["spacing"]
         return None
 
     @cached_property

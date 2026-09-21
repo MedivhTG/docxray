@@ -47,4 +47,6 @@ class TestDocument:
                 list_html = item.transform()
                 html += list_html
                 w = 1
+        # with open("check2.html", "wt", encoding="utf-8") as f:
+        #     f.write(html)
         w = 1

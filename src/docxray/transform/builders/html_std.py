@@ -290,10 +290,13 @@ def separator(sep: Separator) -> HtmlElement:
 
 
 def symbol(sym: Symbol) -> HtmlElement | str:
+    if sym.unicode is None:
+        return ""
+    char = chr(sym.unicode)
     if sym.font is None:
-        return sym.character
+        return char
     elm = Element("span", {"style": f"font-family: {sym.font};"})
-    elm.text = sym.character
+    elm.text = char
     return elm
 
 
@@ -358,7 +361,9 @@ def omath_to_mathjax(
 
     def _sym(sym: Symbol) -> str:
         font = sym.font or ""
-        return f"\\unicode[{font}]{{{ord(sym.character)}}}"
+        char = sym.character or ""
+        code = int(char, 16)
+        return f"\\unicode[{font}]{{{code}}}"
 
     def _nb_hyphen() -> str:
         return f"\\text{{{NON_BREAK_HYPHEN}}}"

@@ -132,16 +132,20 @@ class CarriageReturn(ElementProxy[CT_Empty]):
 
 class Symbol(ElementProxy[CT_Sym]):
     @cached_property
-    def character(self) -> str:
-        ch = self.element.char
-        if ch is None:
-            sym = ""
-        else:
-            sym = ch.hex()
-        return chr(int(sym, 16))
+    def character(self) -> str | None:
+        """Hexadecimal repr of an character contained."""
+        if self.element.char is None:
+            return None
+        return self.element.char.hex()
+
+    @cached_property
+    def unicode(self) -> int | None:
+        """Decimal repr of an character contained."""
+        return int(self.character, 16) if self.character else None
 
     @cached_property
     def font(self) -> str | None:
+        """Used font for renrdering symbol character."""
         return self.element.font
 
 
