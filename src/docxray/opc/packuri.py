@@ -5,105 +5,96 @@ Also some useful known pack URI strings such as PACKAGE_URI.
 
 from __future__ import annotations
 
-import posixpath
-import re
+from pathlib import PurePosixPath
+from posixpath import abspath, join, relpath
 from typing import Self
 
 
 class PackURI(str):
-    """Provides access to pack URI components such as the baseURI and the filename slice.
+    def __new__(cls, path: str) -> Self:
+        """Value type representing an OPC pack URI (a part name).
 
-    Behaves as |str| otherwise.
-    """
-
-    _filename_re = re.compile("([a-zA-Z]+)([1-9][0-9]*)?")
-
-    def __new__(cls, pack_uri_str: str) -> Self:
-        if pack_uri_str[0] != "/":
-            tmpl = "PackURI must begin with slash, got '%s'"
-            raise ValueError(tmpl % pack_uri_str)
-        return str.__new__(cls, pack_uri_str)
-
-    @staticmethod
-    def from_rel_ref(baseURI: str, relative_ref: str) -> PackURI:
-        """The absolute PackURI formed by translating `relative_ref` onto `baseURI`."""
-        joined_uri = posixpath.join(baseURI, relative_ref)
-        abs_uri = posixpath.abspath(joined_uri)
-        return PackURI(abs_uri)
+        Behaves as `str` otherwise. Always begins with a slash.
+        """
+        if not path.startswith("/"):
+            raise ValueError(f"URI must with begin with slash: `{path}`")
+        return str.__new__(cls, path)
 
     @property
     def baseURI(self) -> str:
-        """The base URI of this pack URI, the directory portion, roughly speaking.
+        """Directory portion of this pack URI.
 
-        E.g. ``'/ppt/slides'`` for ``'/ppt/slides/slide1.xml'``. For the package pseudo-
-        partname '/', baseURI is '/'.
+        Example: ``'/word'`` for ``'/word/document.xml'``.
+        For the package pseudo-partname ``'/'``, returns ``'/'``.
         """
-        return posixpath.split(self)[0]
+        return PurePosixPath(self).parent.as_posix()
 
     @property
     def ext(self) -> str:
-        """The extension portion of this pack URI, e.g. ``'xml'`` for ``'/word/document.xml'``.
+        """File extension of this pack URI, without the leading dot.
 
-        Note the period is not included.
+        Example: ``'xml'`` for ``'/word/document.xml'``.
+        Returns ``''`` if there is no extension.
         """
-        # raw_ext is either empty string or starts with period, e.g. '.xml'
-        raw_ext = posixpath.splitext(self)[1]
-        return raw_ext[1:] if raw_ext.startswith(".") else raw_ext
+        return PurePosixPath(self).suffix.removeprefix(".")
 
     @property
     def filename(self) -> str:
-        """The "filename" portion of this pack URI, e.g. ``'slide1.xml'`` for
-        ``'/ppt/slides/slide1.xml'``.
+        """Last segment of this pack URI.
 
-        For the package pseudo-partname '/', filename is ''.
+        Example: ``'document.xml'`` for ``'/word/document.xml'``.
+        Returns ``''`` for the package pseudo-partname ``'/'``.
         """
-        return posixpath.split(self)[1]
-
-    @property
-    def idx(self) -> int | None:
-        """Return partname index as integer for tuple partname or None for singleton
-        partname, e.g. ``21`` for ``'/ppt/slides/slide21.xml'`` and |None| for
-        ``'/ppt/presentation.xml'``."""
-        filename = self.filename
-        if not filename:
-            return None
-        name_part = posixpath.splitext(filename)[0]  # filename w/ext removed
-        match = self._filename_re.match(name_part)
-        if match is None:
-            return None
-        if match.group(2):
-            return int(match.group(2))
-        return None
+        return PurePosixPath(self).name
 
     @property
     def membername(self) -> str:
-        """The pack URI with the leading slash stripped off, the form used as the Zip
-        file membername for the package item.
+        """Pack URI with the leading slash stripped, the form used as a Zip member name.
 
-        Returns '' for the package pseudo-partname '/'.
+        Example: ``'word/document.xml'`` for ``'/word/document.xml'``.
+        Returns ``''`` for the package pseudo-partname ``'/'``.
         """
-        return self[1:]
-
-    def relative_ref(self, baseURI: str) -> str:
-        """Return string containing relative reference to package item from `baseURI`.
-
-        E.g. PackURI('/ppt/slideLayouts/slideLayout1.xml') would return
-        '../slideLayouts/slideLayout1.xml' for baseURI '/ppt/slides'.
-        """
-        # workaround for posixpath bug in 2.6, doesn't generate correct
-        # relative path when `start` (second) parameter is root ('/')
-        return self[1:] if baseURI == "/" else posixpath.relpath(self, baseURI)
+        return PurePosixPath(self).as_posix().removeprefix("/")
 
     @property
     def rels_uri(self) -> PackURI:
-        """The pack URI of the .rels part corresponding to the current pack URI.
+        """Pack URI of the ``.rels`` part associated with this part.
 
-        Only produces sensible output if the pack URI is a partname or the package
-        pseudo-partname '/'.
+        Example: ``'/word/_rels/document.xml.rels'``
+        for ``'/word/document.xml'``.
         """
-        rels_filename = "%s.rels" % self.filename
-        rels_uri_str = posixpath.join(self.baseURI, "_rels", rels_filename)
+        rels_filename = f"{self.filename}.rels"
+        rels_uri_str = join(self.baseURI, "_rels", rels_filename)
         return PackURI(rels_uri_str)
+
+    def relative_ref(self, baseURI: str) -> str:
+        """Relative reference from `baseURI` to this pack URI.
+
+        Example: for ``PackURI('/ppt/slideLayouts/slideLayout1.xml')``
+        and ``baseURI='/ppt/slides'``, returns
+        ``'../slideLayouts/slideLayout1.xml'``.
+        """
+        if baseURI == "/":
+            return self.membername
+        return relpath(self, baseURI)
+
+    @staticmethod
+    def from_rel_ref(baseURI: str, relative_ref: str) -> PackURI:
+        """Absolute PackURI formed by resolving `relative_ref` against `baseURI`.
+
+        Applies a workaround for packages whose paths do not follow OPC
+        conventions, then normalize.
+
+        Example: ``PackURI.from_rel_ref('/word/document.xml', '../media/image1.jpg')``
+        returns ``PackURI('/word/media/image1.jpg')``.
+        """
+        rel_path = PurePosixPath(relative_ref)
+        # Workaround for paths not followed OPC convetions (e.g.: r7-office/2024.4.2.721)
+        # FIXME: probably will be removed with default paths as in Word app
+        for part in rel_path.parts:
+            baseURI = baseURI.removesuffix(part)
+        # Remove dots, slashes, etc.
+        return PackURI(abspath(join(baseURI, rel_path)))
 
 
 PACKAGE_URI = PackURI("/")
