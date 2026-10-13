@@ -97,7 +97,13 @@ class PackageReader:
         visited_partnames: set[PackURI] | None = None,
     ) -> Iterator[tuple[PackURI, bytes, str, _SerializedRelationships]]:
         """Generate a 4-tuple `(partname, blob, reltype, srels)` for each of the parts
-        in `phys_reader` by walking the relationship graph rooted at srels."""
+        in `phys_reader` by walking the relationship graph rooted at srels.
+
+        Skip parts if:
+        - They are already visited
+        - It is external URI
+        - Target part-file not found
+        """
         if visited_partnames is None:
             visited_partnames = set()
         for srel in srels:
@@ -107,13 +113,24 @@ class PackageReader:
             if partname in visited_partnames:
                 continue
             visited_partnames.add(partname)
+            blob = PackageReader._try_load_blob(phys_reader, partname)
+            if blob is None:
+                continue
             reltype = srel.reltype
             part_srels = PackageReader._srels_for(phys_reader, partname)
-            blob = phys_reader.blob_for(partname)
             yield (partname, blob, reltype, part_srels)
             yield from PackageReader._walk_phys_parts(
                 phys_reader, part_srels, visited_partnames
             )
+
+    @staticmethod
+    def _try_load_blob(
+        phys_reader: PhysPkgReader, partname: PackURI
+    ) -> bytes | None:
+        """Look if given rel exists in package and load it."""
+        if phys_reader.exists(partname):
+            return phys_reader.blob_for(partname)
+        return None
 
 
 class _ContentTypeMap:

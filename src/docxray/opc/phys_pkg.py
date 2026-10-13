@@ -30,6 +30,10 @@ class PhysPkgReader(ABC):
     """Abstract base class for physical package readers."""
 
     @abstractmethod
+    def exists(self, pack_uri: PackURI) -> bool:
+        """Check if given URI exists."""
+
+    @abstractmethod
     def blob_for(self, pack_uri: PackURI) -> bytes:
         """Get raw bytes for given URI."""
 
@@ -54,6 +58,10 @@ class _DirPkgReader(PhysPkgReader):
     def __init__(self, path: str | Path) -> None:
         """`path` is the path to a directory containing an expanded package."""
         self._path = os.path.abspath(path)
+
+    def exists(self, pack_uri: PackURI) -> bool:
+        path = os.path.join(self._path, pack_uri.membername)
+        return os.path.exists(path)
 
     def blob_for(self, pack_uri: PackURI) -> bytes:
         """Return contents of file corresponding to `pack_uri` in package directory."""
@@ -87,6 +95,10 @@ class _ZipPkgReader(PhysPkgReader):
 
     def __init__(self, pkg_file: PkgFile) -> None:
         self._zipf = ZipFile(pkg_file, "r")
+        self._namel = set(self._zipf.namelist())
+
+    def exists(self, pack_uri: PackURI) -> bool:
+        return pack_uri.membername in self._namel
 
     def blob_for(self, pack_uri: PackURI) -> bytes:
         """Return blob corresponding to `pack_uri`.

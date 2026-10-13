@@ -82,17 +82,10 @@ class PackURI(str):
     def from_rel_ref(baseURI: str, relative_ref: str) -> PackURI:
         """Absolute PackURI formed by resolving `relative_ref` against `baseURI`.
 
-        Applies a workaround for packages whose paths do not follow OPC
-        conventions, then normalize.
-
         Example: ``PackURI.from_rel_ref('/word/document.xml', '../media/image1.jpg')``
         returns ``PackURI('/word/media/image1.jpg')``.
         """
         rel_path = PurePosixPath(relative_ref)
-        # Workaround for paths not followed OPC convetions (e.g.: r7-office/2024.4.2.721)
-        # FIXME: probably will be removed with default paths as in Word app
-        for part in rel_path.parts:
-            baseURI = baseURI.removesuffix(part)
         # Remove dots, slashes, etc.
         return PackURI(abspath(join(baseURI, rel_path)))
 

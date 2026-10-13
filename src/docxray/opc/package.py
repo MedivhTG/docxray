@@ -177,12 +177,17 @@ class Unmarshaller:
     ) -> None:
         """Add a relationship to the source object corresponding to each of the
         relationships in `pkg_reader` with its target_part set to the actual target part
-        in `parts`."""
+        in `parts`.
+
+        Rels that has wrong paths skipped.
+        """
         for source_uri, srel in pkg_reader.iter_srels():
             source = package if source_uri == "/" else parts[source_uri]
             target = (
                 srel.target_ref
                 if srel.is_external
-                else parts[srel.target_partname]
+                else parts.get(srel.target_partname)
             )
+            if target is None:
+                continue
             source.load_rel(srel.reltype, target, srel.rId, srel.is_external)
