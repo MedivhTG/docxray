@@ -110,7 +110,7 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
                 default_font = "Symbol"
             else:
                 default_font = ""
-            font_family = font.guess_font(bullet_char, default_font)
+            font_family = font.guess_font(txt[:1], default_font)
             if font_family:
                 span_style = f"font-family: {font_family}; "
         end_text = cls._bullet_or_txt(txt, bullet_char)
