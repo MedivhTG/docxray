@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
+from warnings import warn
 
 # docxray stuff
 from docxray.opc.constants import RELATIONSHIP_TARGET_MODE as RTM
@@ -113,24 +114,21 @@ class PackageReader:
             if partname in visited_partnames:
                 continue
             visited_partnames.add(partname)
-            blob = PackageReader._try_load_blob(phys_reader, partname)
-            if blob is None:
+            if not phys_reader.exists(partname):
+                srels.drop(srel)
+                warn(
+                    "Realationship missing in the package for: "
+                    f"rId={srel.rId}, partname={partname}",
+                    stacklevel=2,
+                )
                 continue
+            blob = phys_reader.blob_for(partname)
             reltype = srel.reltype
             part_srels = PackageReader._srels_for(phys_reader, partname)
             yield (partname, blob, reltype, part_srels)
             yield from PackageReader._walk_phys_parts(
                 phys_reader, part_srels, visited_partnames
             )
-
-    @staticmethod
-    def _try_load_blob(
-        phys_reader: PhysPkgReader, partname: PackURI
-    ) -> bytes | None:
-        """Look if given rel exists in package and load it."""
-        if phys_reader.exists(partname):
-            return phys_reader.blob_for(partname)
-        return None
 
 
 class _ContentTypeMap:
@@ -286,6 +284,9 @@ class _SerializedRelationships:
     def __iter__(self) -> Iterator[_SerializedRelationship]:
         """Support iteration, e.g. 'for x in srels:'."""
         return self._srels.__iter__()
+
+    def drop(self, srel: _SerializedRelationship) -> None:
+        self._srels.remove(srel)
 
     @staticmethod
     def load_from_xml(
