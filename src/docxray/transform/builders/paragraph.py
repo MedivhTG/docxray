@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from docxray.oxml.t.proxy.table.cell import Cell
     from docxray.oxml.t.proxy.text.paragraph import Paragraph
     from docxray.transform.ruleset import RuleSet
+    from docxray.oxml.t.proxy.text.list import ListItem
 
 from .html_std import (
     RUN_MAKERS_DEFAULT,
@@ -99,35 +100,47 @@ class HtmlParagraph(HtmlBuilder["Paragraph"]):
         li = proxy.list_item
         txt = li.level_text
         tree = tag_tree(li, cls.RUN_MAKERS)
-        suff = li.level.separator
-        if suff == SE_LEVEL_SUFFIX.TAB:
-            sep = TAB
-        elif suff == SE_LEVEL_SUFFIX.SPACE:
-            sep = " "
-        else:
-            sep = ""
+        sep = cls._sep(li)
         span_style = ""
         font = proxy.list_item.level.character_format.font
+        bullet_char: str | None = None
         if font:
-            default_font = "Symbol" if li.is_bullet_format else ""
-            font_family = font.guess_font(txt[0], default_font)
+            if li.is_bullet_format:
+                bullet_char = txt[:1]
+                default_font = "Symbol"
+            else:
+                default_font = ""
+            font_family = font.guess_font(bullet_char, default_font)
             if font_family:
                 span_style = f"font-family: {font_family}; "
+        end_text = cls._bullet_or_txt(txt, bullet_char)
         if tree is None:
             if span_style:
                 span_elm = Element("span", {"style": span_style})
-                span_elm.text = txt
+                span_elm.text = end_text
                 span_elm.tail = sep
                 return span_elm
-            return txt + sep
+            return end_text + sep
         top, bottom = tree
         if span_style:
             span_elm = Element("span", {"style": span_style})
             bottom.append(span_elm)
             bottom = span_elm
-        bottom.text = txt
+        bottom.text = end_text
         top.tail = sep
         return top
+
+    @classmethod
+    def _bullet_or_txt(cls, txt: str, bullet_char: str | None) -> str:
+        return txt if not bullet_char else f"&#{ord(bullet_char)}"
+
+    @classmethod
+    def _sep(cls, li: ListItem) -> str:
+        if li.level.separator == SE_LEVEL_SUFFIX.TAB:
+            return TAB
+        elif li.level.separator == SE_LEVEL_SUFFIX.SPACE:
+            return " "
+        return ""
 
     @classmethod
     def _attrs(cls, proxy: Paragraph) -> dict[str, str]:
