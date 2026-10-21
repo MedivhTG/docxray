@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, TypeVar, cast
 
 from lxml import etree
 from typing_extensions import Sentinel
 
 from .exceptions import OxmlAttrRequiredError
+from .xsd.simple_type import SimpleType
+from .xsd.st_primitives import XsdAnySimpleType
 
 MISSING = Sentinel("MISSING")
+T = TypeVar("T")
 
 
 def elm_ns_cls_lookup(
@@ -57,7 +60,12 @@ class BaseOxmlElement(etree.ElementBase):
             raise ValueError("No qualified name provided")
         return self.__qname__
 
-    def attr_required(self, name: str, fixed: str | None = None) -> str:
+    def attr_required(
+        self,
+        name: str,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        fixed: str | None = None,
+    ) -> T:
         value = self.get(name, MISSING)
         if value is MISSING:
             raise OxmlAttrRequiredError(
@@ -67,17 +75,24 @@ class BaseOxmlElement(etree.ElementBase):
             raise OxmlAttrRequiredError(
                 f"Value must equals to `{fixed}`, got `{value}`"
             )
-        return value  # pyright: ignore[reportReturnType]
+        return simple_type.validate_schema(
+            value  # pyright: ignore[reportArgumentType]
+        )
 
     def attr_optional(
-        self, name: str, default: str | None = None
-    ) -> str | Sentinel:
+        self,
+        name: str,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        default: str | None = None,
+    ) -> T | Sentinel:
         value = self.get(name, MISSING)
         if value is MISSING:
             if default is not None:
-                return default
+                return simple_type.validate_schema(default)
             return MISSING
-        return value
+        return simple_type.validate_schema(
+            value  # pyright: ignore[reportArgumentType]
+        )
 
     @classmethod
     def register_elm(
