@@ -23,7 +23,7 @@ class Union:
 
 class SimpleType[T]:
     SCHEMA: Restriction | Union
-    FACETS: dict[str, Any]
+    FACETS: dict[str, Any] | None = None
 
     @classmethod
     def validate_schema(
