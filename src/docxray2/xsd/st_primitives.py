@@ -10,7 +10,7 @@ class XsdAnySimpleType(SimpleType[str]):
     SCHEMA = Restriction(SimpleType)
 
 
-class XsdString(SimpleType[str]):
+class XsdString(SimpleType[str | StrEnum]):
     SCHEMA = Restriction(SimpleType)
 
     @classmethod
