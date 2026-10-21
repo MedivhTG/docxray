@@ -8,7 +8,7 @@ set "RESET=%ESC%[0m"
 echo %RED%======== run tests ========%RESET%
 
 echo %RED%^>^>^> run ruff ^<^<^<%RESET%
-ruff check ./src
+ruff check ./src/docxray2
 if %errorlevel% neq 0 (
     echo %RED%test ruff failed%RESET%
     exit /b 1
