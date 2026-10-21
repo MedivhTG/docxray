@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from typing_extensions import Sentinel
 
@@ -21,15 +21,15 @@ class Union:
         self.member_types = member_types
 
 
-class SimpleType(Generic[T]):
+class SimpleType[T]:
     SCHEMA: Restriction | Union
-    FACETS: dict[str, Any] = {}
+    FACETS: dict[str, Any]
 
     @classmethod
     def validate_schema(
         cls, xml_value: str, facets: dict[str, Any] | None = None
     ) -> T:
-        facets_final = cls.FACETS
+        facets_final = cls.FACETS or {}
         if facets:
             facets_final.update(facets)
         if isinstance(cls.SCHEMA, Restriction):
