@@ -8,6 +8,18 @@
             "module": "pytest",
             "console": "integratedTerminal",
             "justMyCode": true,
+        },
+        {
+            "name": "Python: docxray2.main (module)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "docxray2.main",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
         }
     ]
 }
