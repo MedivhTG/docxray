@@ -1,9 +1,9 @@
-from enum import StrEnum
 import re
+from enum import StrEnum
 from typing import Any
 
 from .exceptions import XsdValidationError
-from .simple_type import SimpleType, Restriction
+from .simple_type import Restriction, SimpleType
 
 
 class XsdAnySimpleType(SimpleType[str]):
