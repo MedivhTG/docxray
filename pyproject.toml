@@ -54,6 +54,9 @@ line-length = 79
 indent-width = 4
 target-version = "py313"
 
+[tool.ruff.lint]
+ignore = ["RUF012"]
+
 [tool.mypy]
 strict = true
 strict_bytes = true
