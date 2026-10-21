@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, TypeVar, cast
+from typing import ClassVar, Self, TypeVar
 
 from lxml import etree
 from typing_extensions import Sentinel
@@ -13,28 +13,6 @@ from .xsd.st_primitives import XsdAnySimpleType
 
 MISSING = Sentinel("MISSING")
 T = TypeVar("T")
-
-
-def elm_ns_cls_lookup(
-    fallback_elm: type[etree.ElementBase] = etree.ElementBase,
-) -> etree.ElementNamespaceClassLookup:
-    nslookup: etree.ElementNamespaceClassLookup = (
-        etree.ElementNamespaceClassLookup()
-    )
-    nsfallback = etree.ElementDefaultClassLookup(element=fallback_elm)
-    nslookup.set_fallback(nsfallback)
-    return nslookup
-
-
-def oxml_parser(
-    nslookup_fallback_elm: type[BaseOxmlElement],
-) -> etree.XMLParser:
-    xml_parser = etree.XMLParser(
-        remove_blank_text=True, resolve_entities=False
-    )
-    nslookup = elm_ns_cls_lookup(nslookup_fallback_elm)
-    xml_parser.set_element_class_lookup(nslookup)
-    return xml_parser
 
 
 class BaseOxmlElement(etree.ElementBase):
@@ -59,6 +37,12 @@ class BaseOxmlElement(etree.ElementBase):
         if not self.__qname__:
             raise ValueError("No qualified name provided")
         return self.__qname__
+
+    @classmethod
+    def parse(cls, text: str, parser: etree.XMLParser) -> Self:
+        return etree.fromstring(
+            text, parser
+        )  # pyright: ignore[reportReturnType]
 
     def attr_required(
         self,
@@ -102,17 +86,32 @@ class BaseOxmlElement(etree.ElementBase):
         namespace: str | None = None,
         tagname: str | None = None,
     ) -> None:
-        cls._nslookup = nslookup
-        cls._nsmap = nsmap
-        cls._namespace = namespace
+        if nslookup:
+            cls._nslookup = nslookup
+        if nsmap:
+            cls._nsmap = nsmap
         if namespace:
+            cls._namespace = namespace
             cls.NAMESPACE = namespace
-        cls._tagname = tagname
         if tagname:
+            cls._tagname = tagname
             cls.TAG = tagname
-        if not (nslookup and nsmap and namespace and tagname):
+        if not (
+            cls._nslookup and cls._nsmap and cls._namespace and cls._tagname
+        ):
             return
-        uri = nsmap[namespace]
-        ns = nslookup.get_namespace(uri)
-        ns[tagname] = cls
-        cls.__qname__ = etree.QName(uri, tagname)
+        uri = cls._nsmap[cls._namespace]
+        ns = cls._nslookup.get_namespace(uri)
+        ns[cls._tagname] = cls
+        cls.__qname__ = etree.QName(uri, cls._tagname)
+
+
+def elm_ns_cls_lookup(
+    fallback_elm: type[BaseOxmlElement] = BaseOxmlElement,
+) -> etree.ElementNamespaceClassLookup:
+    nslookup: etree.ElementNamespaceClassLookup = (
+        etree.ElementNamespaceClassLookup()
+    )
+    nsfallback = etree.ElementDefaultClassLookup(element=fallback_elm)
+    nslookup.set_fallback(nsfallback)
+    return nslookup
