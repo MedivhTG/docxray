@@ -51,3 +51,14 @@ class XsdString(SimpleType[str | StrEnum]):
                 f"Pattern mismatch for `{xml_value}` <= `{pattern}`"
             )
         return xml_value
+
+
+class XsdAnyUri(SimpleType[str]):
+    SCHEMA = Restriction(SimpleType)
+    URI_INVALID_PATTERN = re.compile(r"%(?![0-9A-Fa-f]{2})|#.*#")
+
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> str:
+        if cls.URI_INVALID_PATTERN.search(xml_value) is not None:
+            raise XsdValidationError(f"Invalid anyURI value: `{xml_value}`")
+        return xml_value
