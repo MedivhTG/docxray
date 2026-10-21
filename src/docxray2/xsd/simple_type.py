@@ -26,7 +26,7 @@ class SimpleType(Generic[T]):
     FACETS: dict[str, Any] = {}
 
     @classmethod
-    def validate_python(
+    def validate_schema(
         cls, xml_value: str, facets: dict[str, Any] | None = None
     ) -> T:
         facets_final = cls.FACETS
@@ -38,7 +38,7 @@ class SimpleType(Generic[T]):
         exceptions_raised = []
         for simple_type in cls.SCHEMA.member_types:
             try:
-                union_value = simple_type.validate_python(
+                union_value = simple_type.validate_schema(
                     xml_value, facets_final
                 )
             except XsdValidationError as e:
