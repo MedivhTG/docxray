@@ -13,6 +13,7 @@ from .xsd.st_primitives import XsdAnySimpleType
 
 MISSING = Sentinel("MISSING")
 T = TypeVar("T")
+FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
 
 
 class BaseOxmlElement(etree.ElementBase):
@@ -32,22 +33,20 @@ class BaseOxmlElement(etree.ElementBase):
         super().__init_subclass__()
         return cls.register_elm(nslookup, nsmap, ns, tag)
 
-    @property
-    def qname(self) -> etree.QName:
-        if not self.__qname__:
+    @classmethod
+    def qname(cls) -> etree.QName:
+        if not cls.__qname__:
             raise ValueError("No qualified name provided")
-        return self.__qname__
+        return cls.__qname__
 
     @classmethod
     def parse(cls, text: str, parser: etree.XMLParser) -> Self:
-        return etree.fromstring(
-            text, parser
-        )  # pyright: ignore[reportReturnType]
+        return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     def attr_required(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> T:
         value = self.get(name, MISSING)
@@ -66,7 +65,7 @@ class BaseOxmlElement(etree.ElementBase):
     def attr_optional(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
     ) -> T | Sentinel:
         value = self.get(name, MISSING)
@@ -77,6 +76,11 @@ class BaseOxmlElement(etree.ElementBase):
         return simple_type.validate_schema(
             value  # pyright: ignore[reportArgumentType]
         )
+
+    def zero_or_more(self, element: type[FIND_T]) -> list[FIND_T]:
+        return self.findall(
+            element.qname(), self._nsmap
+        )  # type: ignore[return-value]
 
     @classmethod
     def register_elm(
