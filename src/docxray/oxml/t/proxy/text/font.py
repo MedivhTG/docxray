@@ -162,6 +162,8 @@ class Font(ElementProxy[CT_Fonts]):
         if theme is None:
             return None
         theme_proxy = self.document_part.theme
+        if theme_proxy is None:
+            return None
         if theme in (SE_THEME.MAJOR_ASCII, SE_THEME.MAJOR_H_ANSI):
             return theme_proxy.major_latin
         elif theme == SE_THEME.MAJOR_EAST_ASIA:

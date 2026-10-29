@@ -131,8 +131,8 @@ class Table(StoryChild[CT_Tbl]):
 
     @cached_property
     def _cnf_look(self) -> WD_CNF_TABLE_LOOK:
-        mask: bytes | None = self._prop("tblPr.tblLook.val", True)
-        if mask is None:
+        mask: bytes | NotFound | None = self._prop("tblPr.tblLook.val", True)
+        if mask is None or isinstance(mask, NotFound):
             return WD_CNF_TABLE_LOOK.from_bytes(b"")
         return WD_CNF_TABLE_LOOK.from_bytes(mask)
 

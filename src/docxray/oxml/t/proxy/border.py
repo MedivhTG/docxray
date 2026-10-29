@@ -102,10 +102,12 @@ class Border(ElementProxy[CT_Border]):
 
     @cached_property
     def final_color(self) -> str | None:
+        theme = self.document_part.theme
+        palette = theme.palette if theme else {}
         return Colorize.colorize(
             self.element.color,
             self.element.themeColor,
-            self.document_part.theme.palette,
+            palette,
             self.element.themeTint,
             self.element.themeShade,
         )

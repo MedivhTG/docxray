@@ -223,12 +223,14 @@ class CharacterFormat:
         """
         if self._u_line is None:
             return None
+        theme = self._proxy.document_part.theme
+        palette = theme.palette if theme else {}
         return {
             "line": self._u_line,
             "color": Colorize.colorize(
                 self._u_color or SE_HEX_COLOR_AUTO.AUTO,
                 self._u_theme_color,
-                self._proxy.document_part.theme.palette,
+                palette,
                 self._u_theme_tint,
                 self._u_theme_shade,
                 prefer_theme=True,
@@ -343,10 +345,12 @@ class CharacterFormat:
         Returns:
             str: Color string in hex format (e.g., '#FF0000' for red) or 'auto'.
         """
+        theme = self._proxy.document_part.theme
+        palette = theme.palette if theme else {}
         return Colorize.colorize(
             self._color or SE_HEX_COLOR_AUTO.AUTO,
             self._theme_color,
-            self._proxy.document_part.theme.palette,
+            palette,
             self._theme_tint,
             self._theme_shade,
             prefer_theme=True,

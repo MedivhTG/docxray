@@ -64,12 +64,17 @@ class DocumentPart(StoryPart[CT_Document]):
         return self.settings_part.settings
 
     @cached_property
-    def theme_part(self) -> ThemePart:
-        return self.part_related_by(RT.THEME, ThemePart)
+    def theme_part(self) -> ThemePart | None:
+        try:
+            return self.part_related_by(RT.THEME, ThemePart)
+        except KeyError:
+            return None
 
     @cached_property
-    def theme(self) -> Theme:
-        return self.theme_part.theme
+    def theme(self) -> Theme | None:
+        if self.theme_part:
+            return self.theme_part.theme
+        return None
 
     @cached_property
     def _default_html_ruleset(self) -> RuleSet:
