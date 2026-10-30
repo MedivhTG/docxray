@@ -10,7 +10,7 @@ class PkgReader:
     @staticmethod
     def from_file(pkg_file: PkgFile) -> PkgReader:
         phys_reader = phys_pkg_reader(pkg_file)
-        ct_map = _ContentTypeMap.from_xml(phys_reader.content_types_xml)
+        # ct_map = _ContentTypeMap.from_xml(phys_reader.content_types_xml)
         phys_reader.close()
         return PkgReader()
 
@@ -33,14 +33,13 @@ class _ContentTypeMap:
                 override_elm.part_name, override_elm.content_type
             )
         for default_elm in types_elm.defaults:
-            default_elm.content_type = "!"
             ct_map._add_default(
                 default_elm.extension, default_elm.content_type
             )
         return ct_map
 
-    def _add_default(self, extension: str, content_type: str):
+    def _add_default(self, extension: str, content_type: str) -> None:
         self._defaults[extension] = content_type
 
-    def _add_override(self, part_name: str, content_type: str):
+    def _add_override(self, part_name: str, content_type: str) -> None:
         self._overrides[part_name] = content_type
