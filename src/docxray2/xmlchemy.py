@@ -46,7 +46,7 @@ class BaseOxmlElement(etree.ElementBase):
         value = self.get(name, MISSING)
         if value is MISSING:
             raise OxmlAttrRequiredError(
-                f"Cannot get required attribute `{name}`"
+                f"Cannot get required attribute `{name}`: missing"
             )
         if fixed is not None and value != fixed:
             raise OxmlAttrRequiredError(
