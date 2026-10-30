@@ -8,6 +8,7 @@ from lxml import etree
 from typing_extensions import Sentinel
 
 from .exceptions import OxmlAttrRequiredError
+from .xsd.exceptions import XsdValidationError
 from .xsd.simple_type import SimpleType
 from .xsd.st_primitives import XsdAnySimpleType
 
@@ -40,17 +41,17 @@ class BaseOxmlElement(etree.ElementBase):
     def attr_required(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> T:
         value = self.get(name, MISSING)
         if value is MISSING:
             raise OxmlAttrRequiredError(
-                f"Cannot get required attribute `{name}`: missing"
+                f"Cannot get required attribute `{name}` from `{self.__class__}`: missing"
             )
         if fixed is not None and value != fixed:
             raise OxmlAttrRequiredError(
-                f"Cannot get required attribute `{name}`: value must equals to `{fixed}`, got `{value}`"
+                f"Cannot get required attribute `{name}` from `{self.__class__}`: value must equals to `{fixed}`, got `{value}`"
             )
         return simple_type.validate_schema(
             value  # pyright: ignore[reportArgumentType]
@@ -118,16 +119,12 @@ class AttrRequired[T]:
     def __init__(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> None:
         self.name = name
         self.simple_type = simple_type
         self.fixed = fixed
-
-    def __set_name__(self, owner: type, name: str) -> None:
-        self.owner = owner
-        self.attr_name = name
 
     def __get__(
         self, instance: BaseOxmlElement | None, owner: type | None = None
@@ -138,14 +135,14 @@ class AttrRequired[T]:
 
     def __set__(self, instance: BaseOxmlElement | None, value: Any) -> None:
         if instance is None:
-            return None
+            return
         instance.set(self.name, value)
         try:
             instance.attr_required(self.name, self.simple_type, self.fixed)
-        except Exception as e:
+        except (OxmlAttrRequiredError, XsdValidationError) as e:
             instance.attrib.pop(self.name)
             raise OxmlAttrRequiredError(
-                f"Cannot set attribute `{self.name}`: `{e}`"
+                f"Cannot set required attribute `{self.name}` to `{instance.__class__}`: `{e}`"
             )
 
 
