@@ -35,6 +35,9 @@ class PhysPkgReader(ABC):
     @abstractmethod
     def blob_for(self, pkg_uri: PkgURI) -> bytes: ...
 
+    @abstractmethod
+    def rels_xml_for(self, source_uri: PkgURI) -> bytes | None: ...
+
 
 class _ZipPkgReader(PhysPkgReader):
     def __init__(self, pkg_file: PkgFile) -> None:
@@ -47,6 +50,12 @@ class _ZipPkgReader(PhysPkgReader):
 
     def blob_for(self, pkg_uri: PkgURI) -> bytes:
         return self._zipf.read(pkg_uri.member_name)
+
+    def rels_xml_for(self, source_uri: PkgURI) -> bytes | None:
+        try:
+            return self.blob_for(source_uri.rels_uri)
+        except KeyError:
+            return None
 
     def close(self) -> None:
         self._zipf.close()
@@ -65,6 +74,12 @@ class _DirPkgReader(PhysPkgReader):
         with open(path, "rb") as f:
             blob = f.read()
         return blob
+
+    def rels_xml_for(self, source_uri: PkgURI) -> bytes | None:
+        try:
+            return self.blob_for(source_uri.rels_uri)
+        except KeyError:
+            return None
 
     def close(self) -> None:
         pass
