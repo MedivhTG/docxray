@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, Self, TypeVar
+from typing import Any, ClassVar, Self, TypeVar
 
 from lxml import etree
 from typing_extensions import Sentinel
@@ -33,20 +33,14 @@ class BaseOxmlElement(etree.ElementBase):
         super().__init_subclass__()
         return cls.register_elm(nslookup, nsmap, ns, tag)
 
-    @classmethod
-    def qname(cls) -> etree.QName:
-        if not cls.__qname__:
-            raise ValueError("No qualified name provided")
-        return cls.__qname__
-
-    @classmethod
-    def parse(cls, text: str, parser: etree.XMLParser) -> Self:
-        return etree.fromstring(text, parser)  # type: ignore[return-value]
+    def __repr__(self) -> str:
+        # Now we can watch right cls name in debug
+        return super().__repr__().replace("Element", type(self).__name__, 1)
 
     def attr_required(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
         fixed: str | None = None,
     ) -> T:
         value = self.get(name, MISSING)
@@ -56,7 +50,7 @@ class BaseOxmlElement(etree.ElementBase):
             )
         if fixed is not None and value != fixed:
             raise OxmlAttrRequiredError(
-                f"Value must equals to `{fixed}`, got `{value}`"
+                f"Cannot get required attribute `{name}`: value must equals to `{fixed}`, got `{value}`"
             )
         return simple_type.validate_schema(
             value  # pyright: ignore[reportArgumentType]
@@ -81,6 +75,16 @@ class BaseOxmlElement(etree.ElementBase):
         return self.findall(
             element.qname(), self._nsmap
         )  # type: ignore[return-value]
+
+    @classmethod
+    def qname(cls) -> etree.QName:
+        if not cls.__qname__:
+            raise ValueError("No qualified name provided")
+        return cls.__qname__
+
+    @classmethod
+    def parse(cls, text: str | bytes, parser: etree.XMLParser) -> Self:
+        return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     @classmethod
     def register_elm(
@@ -108,6 +112,41 @@ class BaseOxmlElement(etree.ElementBase):
         ns = cls._nslookup.get_namespace(uri)
         ns[cls._tagname] = cls
         cls.__qname__ = etree.QName(uri, cls._tagname)
+
+
+class AttrRequired[T]:
+    def __init__(
+        self,
+        name: str,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        fixed: str | None = None,
+    ) -> None:
+        self.name = name
+        self.simple_type = simple_type
+        self.fixed = fixed
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        self.owner = owner
+        self.attr_name = name
+
+    def __get__(
+        self, instance: BaseOxmlElement | None, owner: type | None = None
+    ) -> T:
+        if instance is None:
+            return self  # type: ignore[return-value]
+        return instance.attr_required(self.name, self.simple_type, self.fixed)
+
+    def __set__(self, instance: BaseOxmlElement | None, value: Any) -> None:
+        if instance is None:
+            return None
+        instance.set(self.name, value)
+        try:
+            instance.attr_required(self.name, self.simple_type, self.fixed)
+        except Exception as e:
+            instance.attrib.pop(self.name)
+            raise OxmlAttrRequiredError(
+                f"Cannot set attribute `{self.name}`: `{e}`"
+            )
 
 
 def elm_ns_cls_lookup(
