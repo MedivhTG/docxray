@@ -32,8 +32,13 @@ class SimpleType[T]:
         facets_final = cls.FACETS or {}
         if facets:
             facets_final.update(facets)
+        if not hasattr(cls, "SCHEMA"):
+            return cls._validate(xml_value, facets_final)
         if isinstance(cls.SCHEMA, Restriction):
-            return cls.SCHEMA.base._validate(xml_value, facets_final)
+            schema = cls.SCHEMA
+            if schema.base is SimpleType:
+                return cls._validate(xml_value, facets_final)
+            return cls.SCHEMA.base.validate_schema(xml_value, facets_final)
         union_value = NOT_VALIDATED
         exceptions_raised = []
         for simple_type in cls.SCHEMA.member_types:
