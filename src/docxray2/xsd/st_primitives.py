@@ -62,3 +62,21 @@ class XsdAnyUri(SimpleType[str]):
         if cls.URI_INVALID_PATTERN.search(xml_value) is not None:
             raise XsdValidationError(f"Invalid anyURI value: `{xml_value}`")
         return xml_value
+
+
+NAME_PATTERN = re.compile(r"^[^\W\d:][\w.:-]*$", re.UNICODE)
+NCNAME_PATTERN = re.compile(r"^[^\W\d][\w.-]*$", re.UNICODE)
+
+
+class XsdName(SimpleType[str]):
+    SCHEMA = Restriction(XsdString)
+    FACETS = {"pattern": NAME_PATTERN}
+
+
+class XsdNCName(SimpleType[str]):
+    SCHEMA = Restriction(XsdName)
+    FACETS = {"pattern": NCNAME_PATTERN}
+
+
+class XsdID(SimpleType[str]):
+    SCHEMA = Restriction(XsdNCName)
