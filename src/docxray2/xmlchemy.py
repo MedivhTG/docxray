@@ -18,6 +18,16 @@ FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
 
 
 class BaseOxmlElement(etree.ElementBase):
+    """Base class for all OXML elements.
+
+    Subclasses declare their XML identity via class kwargs
+    (``nslookup=``, ``nsmap=``, ``ns=``, ``tag=``) which are forwarded to
+    ``register_elm``; once the namespace lookup, nsmap, namespace and tag are
+    all known, the class is registered in ``nslookup`` and its QName is
+    computed. Attribute access is provided by ``attr_required`` /
+    ``attr_optional``, which read and validate values through ``SimpleType``.
+    """
+
     _nslookup: ClassVar[etree.ElementNamespaceClassLookup | None] = None
     _nsmap: ClassVar[dict[str, str] | None] = None
     _namespace: ClassVar[str | None] = None
@@ -32,7 +42,7 @@ class BaseOxmlElement(etree.ElementBase):
         tag: str | None = None,
     ) -> None:
         super().__init_subclass__()
-        return cls.register_elm(nslookup, nsmap, ns, tag)
+        cls.register_elm(nslookup, nsmap, ns, tag)
 
     def __repr__(self) -> str:
         # Now we can watch right cls name in debug
@@ -44,6 +54,23 @@ class BaseOxmlElement(etree.ElementBase):
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> T:
+        """Read a required attribute and validate it.
+
+        Args:
+            name (str): Attribute name.
+            simple_type (type[SimpleType[T]]): Type used to validate and
+                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
+            fixed (str | None): Optional raw XML value (a string) that the
+                stored attribute must equal exactly. Defaults to ``None``.
+
+        Returns:
+            T: Converted attribute value.
+
+        Raises:
+            OxmlAttrRequiredError: If the attribute is missing or its raw XML
+                value does not equal ``fixed``.
+            XsdValidationError: If validation by ``simple_type`` fails.
+        """
         value = self.get(name, MISSING)
         if value is MISSING:
             raise OxmlAttrRequiredError(
@@ -63,6 +90,23 @@ class BaseOxmlElement(etree.ElementBase):
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
     ) -> T | None:
+        """Read an optional attribute and validate it.
+
+        Args:
+            name (str): Attribute name.
+            simple_type (type[SimpleType[T]]): Type used to validate and
+                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
+            default (str | None): Optional raw XML value (a string) to
+                validate and return when the attribute is absent. Defaults to
+                ``None``.
+
+        Returns:
+            T | None: Converted attribute value; the converted ``default`` if
+            the attribute is absent; or ``None`` if both are absent.
+
+        Raises:
+            XsdValidationError: If validation by ``simple_type`` fails.
+        """
         value = self.get(name, MISSING)
         if value is MISSING:
             if default is not None:
@@ -73,18 +117,44 @@ class BaseOxmlElement(etree.ElementBase):
         )
 
     def zero_or_more(self, element: type[FIND_T]) -> list[FIND_T]:
+        """Return all direct children matching ``element``'s QName.
+
+        Args:
+            element (type[FIND_T]): Element class whose QName is matched.
+
+        Returns:
+            list[FIND_T]: Matching child elements.
+        """
         return self.findall(
             element.qname(), self._nsmap
         )  # type: ignore[return-value]
 
     @classmethod
     def qname(cls) -> etree.QName:
+        """Return the element's qualified name.
+
+        Returns:
+            etree.QName: Qualified name (namespace URI + local tag).
+
+        Raises:
+            ValueError: If the class was never fully registered.
+        """
         if not cls.__qname__:
             raise ValueError("No qualified name provided")
         return cls.__qname__
 
     @classmethod
     def parse(cls, text: str | bytes, parser: etree.XMLParser) -> Self:
+        """Parse XML text into an instance of this element class.
+
+        Args:
+            text (str | bytes): XML source.
+            parser (etree.XMLParser): Parser configured with the appropriate
+                class lookup.
+
+        Returns:
+            Self: Parsed element.
+        """
         return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     @classmethod
@@ -95,6 +165,20 @@ class BaseOxmlElement(etree.ElementBase):
         namespace: str | None = None,
         tagname: str | None = None,
     ) -> None:
+        """Store element identity and register the class in the namespace.
+
+        Each argument is applied only if truthy; registration and QName
+        computation happen once all four pieces (``nslookup``, ``nsmap``,
+        ``namespace``, ``tagname``) are known.
+
+        Args:
+            nslookup (etree.ElementNamespaceClassLookup | None): Namespace
+                lookup to register into. Defaults to ``None``.
+            nsmap (dict[str, str] | None): Prefix → URI map. Defaults to
+                ``None``.
+            namespace (str | None): Namespace prefix. Defaults to ``None``.
+            tagname (str | None): Local tag name. Defaults to ``None``.
+        """
         if nslookup:
             cls._nslookup = nslookup
         if nsmap:
@@ -116,6 +200,18 @@ class BaseOxmlElement(etree.ElementBase):
 
 
 class AttrRequired[T]:
+    """Descriptor for a required, XSD-validated attribute.
+
+    Reading delegates to ``attr_required``; writing sets the attribute and
+    re-validates it, rolling back on failure.
+
+    Attributes:
+        name (str): Attribute name.
+        simple_type (type[SimpleType[T]]): Type used for validation.
+        fixed (str | None): Optional raw XML value (a string) the attribute
+            must equal exactly.
+    """
+
     __slots__ = ("fixed", "name", "simple_type")
 
     def __init__(
@@ -149,6 +245,18 @@ class AttrRequired[T]:
 
 
 class AttrOptional[T]:
+    """Descriptor for an optional, XSD-validated attribute.
+
+    Reading delegates to ``attr_optional``; writing sets the attribute and
+    re-validates it, rolling back on failure.
+
+    Attributes:
+        name (str): Attribute name.
+        simple_type (type[SimpleType[T]]): Type used for validation.
+        default (str | None): Optional raw XML value (a string) validated and
+            returned when the attribute is absent.
+    """
+
     __slots__ = ("default", "name", "simple_type")
 
     def __init__(
@@ -184,6 +292,16 @@ class AttrOptional[T]:
 def elm_ns_cls_lookup(
     fallback_elm: type[BaseOxmlElement] = BaseOxmlElement,
 ) -> etree.ElementNamespaceClassLookup:
+    """Build a namespace-aware class lookup with a default fallback.
+
+    Args:
+        fallback_elm (type[BaseOxmlElement]): Element class used for unknown
+            namespaces/tags. Defaults to ``BaseOxmlElement``.
+
+    Returns:
+        etree.ElementNamespaceClassLookup: Lookup ready to be passed as
+        ``nslookup=`` to element subclasses.
+    """
     nslookup: etree.ElementNamespaceClassLookup = (
         etree.ElementNamespaceClassLookup()
     )
