@@ -1,3 +1,6 @@
+"""XSD module errors"""
+
+
 class XsdBaseError(Exception):
     pass
 
