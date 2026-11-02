@@ -26,6 +26,10 @@ class PkgURI(str):
         return self._path.name
 
     @property
+    def ext(self) -> str:
+        return self._path.suffix.removeprefix(".")
+
+    @property
     def member_name(self) -> str:
         return self._path.as_posix().removeprefix(SLASH)
 
@@ -34,6 +38,11 @@ class PkgURI(str):
         rels_filename = f"{self.file_name}.rels"
         rels_uri_str = posixpath.join(self.baseURI, "_rels", rels_filename)
         return PkgURI(rels_uri_str)
+
+    @staticmethod
+    def from_rel_ref(baseURI: str, relative_ref: str) -> PkgURI:
+        rel_path = PurePosixPath(relative_ref)
+        return PkgURI(posixpath.abspath(posixpath.join(baseURI, rel_path)))
 
 
 PKG_URI = PkgURI("/")

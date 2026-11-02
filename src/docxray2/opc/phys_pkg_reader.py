@@ -25,8 +25,6 @@ def phys_pkg_reader(pkg_file: PkgFile) -> PhysPkgReader:
 
 
 class PhysPkgReader(ABC):
-    @abstractmethod
-    def close(self) -> None: ...
 
     @property
     @abstractmethod
@@ -38,10 +36,16 @@ class PhysPkgReader(ABC):
     @abstractmethod
     def rels_xml_for(self, source_uri: PkgURI) -> bytes | None: ...
 
+    @abstractmethod
+    def exists(self, pkg_uri: PkgURI) -> bool: ...
+
+    @abstractmethod
+    def close(self) -> None: ...
+
 
 class _ZipPkgReader(PhysPkgReader):
     def __init__(self, pkg_file: PkgFile) -> None:
-        self._zipf = ZipFile(pkg_file)
+        self._zipf = ZipFile(pkg_file, "r")
         self._namel = set(self._zipf.namelist())
 
     @property
@@ -56,6 +60,9 @@ class _ZipPkgReader(PhysPkgReader):
             return self.blob_for(source_uri.rels_uri)
         except KeyError:
             return None
+
+    def exists(self, pkg_uri: PkgURI) -> bool:
+        return pkg_uri.member_name in self._namel
 
     def close(self) -> None:
         self._zipf.close()
@@ -80,6 +87,10 @@ class _DirPkgReader(PhysPkgReader):
             return self.blob_for(source_uri.rels_uri)
         except KeyError:
             return None
+
+    def exists(self, pkg_uri: PkgURI) -> bool:
+        path = os.path.join(self._path, pkg_uri.member_name)
+        return os.path.exists(path)
 
     def close(self) -> None:
         pass

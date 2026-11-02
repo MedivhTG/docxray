@@ -43,7 +43,7 @@ class Union:
         ValueError: If no member types are provided.
     """
 
-    __slots__ = "member_types"
+    __slots__ = ("member_types",)
 
     def __init__(self, *member_types: type[SimpleType]) -> None:
         """Initialize the union.

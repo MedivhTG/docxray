@@ -262,7 +262,7 @@ class AttrOptional[T]:
     def __init__(
         self,
         name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
     ) -> None:
         self.name = name
