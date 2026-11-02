@@ -4,14 +4,16 @@ from typing import Self
 
 from lxml import etree
 
-from ..ns import NAMESPACE_URI
-from ..xmlchemy import (
+# docxray stuff
+from docxray2.ns import NAMESPACE_URI
+from docxray2.xmlchemy import (
     AttrOptional,
     AttrRequired,
     BaseOxmlElement,
     elm_ns_cls_lookup,
 )
-from ..xsd.st_primitives import XsdAnyUri, XsdID
+from docxray2.xsd.st_primitives import XsdAnyUri, XsdID
+
 from .xsd import ST_ContentType, ST_Extension, ST_TargetMode
 
 opc_nslookup = elm_ns_cls_lookup()
