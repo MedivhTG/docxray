@@ -7,8 +7,8 @@ from zipfile import ZipFile, is_zipfile
 
 # docxray stuff
 from docxray2.opc.exceptions import OpcPackageNotFoundError
+from docxray2.types import PkgFile
 
-from ..types import PkgFile
 from .pkg_uri import CONTENT_TYPES_PKG_URI, PkgURI
 
 
