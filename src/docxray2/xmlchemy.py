@@ -7,7 +7,7 @@ from typing import Any, ClassVar, Self, TypeVar
 from lxml import etree
 from typing_extensions import Sentinel
 
-from .exceptions import OxmlAttrRequiredError
+from .exceptions import OxmlAttrOptionalError, OxmlAttrRequiredError
 from .xsd.exceptions import XsdValidationError
 from .xsd.simple_type import SimpleType
 from .xsd.st_primitives import XsdAnySimpleType
@@ -62,12 +62,12 @@ class BaseOxmlElement(etree.ElementBase):
         name: str,
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
-    ) -> T | Sentinel:
+    ) -> T | None:
         value = self.get(name, MISSING)
         if value is MISSING:
             if default is not None:
                 return simple_type.validate_schema(default)
-            return MISSING
+            return None
         return simple_type.validate_schema(
             value  # pyright: ignore[reportArgumentType]
         )
@@ -116,6 +116,8 @@ class BaseOxmlElement(etree.ElementBase):
 
 
 class AttrRequired[T]:
+    __slots__ = ("fixed", "name", "simple_type")
+
     def __init__(
         self,
         name: str,
@@ -127,22 +129,55 @@ class AttrRequired[T]:
         self.fixed = fixed
 
     def __get__(
-        self, instance: BaseOxmlElement | None, owner: type | None = None
+        self, element: BaseOxmlElement | None, owner: type | None = None
     ) -> T:
-        if instance is None:
+        if element is None:
             return self  # type: ignore[return-value]
-        return instance.attr_required(self.name, self.simple_type, self.fixed)
+        return element.attr_required(self.name, self.simple_type, self.fixed)
 
-    def __set__(self, instance: BaseOxmlElement | None, value: Any) -> None:
-        if instance is None:
+    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+        if element is None:
             return
-        instance.set(self.name, value)
+        element.set(self.name, value)
         try:
-            instance.attr_required(self.name, self.simple_type, self.fixed)
+            element.attr_required(self.name, self.simple_type, self.fixed)
         except (OxmlAttrRequiredError, XsdValidationError) as e:
-            instance.attrib.pop(self.name)
+            element.attrib.pop(self.name)
             raise OxmlAttrRequiredError(
-                f"Cannot set required attribute `{self.name}` to `{instance.__class__}`: `{e}`"
+                f"Cannot set required attribute `{self.name}` to `{element.__class__}`: `{e}`"
+            )
+
+
+class AttrOptional[T]:
+    __slots__ = ("default", "name", "simple_type")
+
+    def __init__(
+        self,
+        name: str,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,
+        default: str | None = None,
+    ) -> None:
+        self.name = name
+        self.simple_type = simple_type
+        self.default = default
+
+    def __get__(
+        self, element: BaseOxmlElement | None, owner: type | None = None
+    ) -> T | None:
+        if element is None:
+            return self  # type: ignore[return-value]
+        return element.attr_optional(self.name, self.simple_type, self.default)
+
+    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+        if element is None:
+            return
+        element.set(self.name, value)
+        try:
+            element.attr_optional(self.name, self.simple_type, self.default)
+        except XsdValidationError as e:
+            element.attrib.pop(self.name)
+            raise OxmlAttrOptionalError(
+                f"Cannot set optional attribute `{self.name}` to `{element.__class__}`: `{e}`"
             )
 
 
