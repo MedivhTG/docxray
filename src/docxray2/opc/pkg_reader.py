@@ -35,6 +35,17 @@ class PkgReader:
         phys_reader.close()
         return PkgReader(ct_map, pkg_srels, pkg_sparts)
 
+    def iter_sparts(self) -> Generator[tuple[PkgURI, str, str, bytes]]:
+        for s in self._sparts:
+            yield (s.part_name, s.content_type, s.rel_type, s.blob)
+
+    def iter_srels(self) -> Generator[tuple[PkgURI, _SerializedRelationship]]:
+        for srel in self._srels:
+            yield (PKG_URI, srel)
+        for spart in self._sparts:
+            for srel in spart.srels:
+                yield (spart.part_name, srel)
+
     @staticmethod
     def _srels_for(
         phys_reader: PhysPkgReader, source_uri: PkgURI
