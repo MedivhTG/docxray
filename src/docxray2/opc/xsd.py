@@ -1,7 +1,9 @@
 import re
 
-from ..xsd.simple_type import Restriction, SimpleType
-from ..xsd.st_primitives import XsdString
+# docxray stuff
+from docxray2.xsd.simple_type import Restriction, SimpleType
+from docxray2.xsd.st_primitives import XsdString
+
 from .enums import SE_TARGET_MODE
 
 ST_EXTENSION_PATTERN = re.compile(

@@ -4,7 +4,9 @@ from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from warnings import warn
 
-from ..types import PkgFile
+# docxray stuff
+from docxray2.types import PkgFile
+
 from .enums import SE_TARGET_MODE
 from .oxml import E_Relationships, E_Types
 from .phys_pkg_reader import PhysPkgReader, phys_pkg_reader
