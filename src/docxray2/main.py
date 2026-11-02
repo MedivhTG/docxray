@@ -1,4 +1,5 @@
-from .opc.pkg_reader import PkgReader
+from .opc.package import OpcPackage
+from .opc.part import PartFactory
 
-reader = PkgReader.from_file("tests/examples/content_check.docx")
+package = OpcPackage.open("tests/examples/content_check.docx", PartFactory)
 wait = 1
