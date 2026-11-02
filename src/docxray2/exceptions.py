@@ -5,5 +5,9 @@ class OxmlBaseError(Exception):
     pass
 
 
-class OxmlAttrRequiredError(Exception):
+class OxmlAttrRequiredError(OxmlBaseError):
+    pass
+
+
+class OxmlAttrOptionalError(OxmlBaseError):
     pass
