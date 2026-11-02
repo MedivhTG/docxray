@@ -6,12 +6,13 @@ from lxml import etree
 
 from ..ns import NAMESPACE_URI
 from ..xmlchemy import (
+    AttrOptional,
     AttrRequired,
     BaseOxmlElement,
     elm_ns_cls_lookup,
 )
 from ..xsd.st_primitives import XsdAnyUri, XsdID
-from .xsd import ST_ContentType, ST_Extension
+from .xsd import ST_ContentType, ST_Extension, ST_TargetMode
 
 opc_nslookup = elm_ns_cls_lookup()
 opc_parser = etree.XMLParser(remove_blank_text=True, resolve_entities=False)
@@ -64,6 +65,7 @@ class CT_Relationships(OpcOxmlNSRelationships):
 
 
 class CT_Relationship(OpcOxmlNSRelationships):
+    target_mode = AttrOptional("TargetMode", ST_TargetMode)
     target_part = AttrRequired("Target", XsdAnyUri)
     rel_type = AttrRequired("Type", XsdAnyUri)
     rel_id = AttrRequired("Id", XsdID)

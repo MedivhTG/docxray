@@ -2,6 +2,7 @@ import re
 
 from ..xsd.simple_type import Restriction, SimpleType
 from ..xsd.st_primitives import XsdString
+from .enums import SE_TARGET_MODE
 
 ST_EXTENSION_PATTERN = re.compile(
     r"([!$&amp;'\(\)\*\+,:=]|(%[0-9a-fA-F][0-9a-fA-F])|[:@]|[a-zA-Z0-9\-_~])+"
@@ -26,3 +27,8 @@ ST_CONTENT_TYPE_PATTERN = re.compile(
 class ST_ContentType(SimpleType[str]):
     SCHEMA = Restriction(XsdString)
     FACETS = {"pattern": ST_CONTENT_TYPE_PATTERN}
+
+
+class ST_TargetMode(SimpleType[SE_TARGET_MODE]):
+    SCHEMA = Restriction(XsdString)
+    FACETS = {"enumeration": SE_TARGET_MODE}
