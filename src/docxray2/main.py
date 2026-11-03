@@ -1,5 +1,4 @@
-from .opc.package import OpcPackage
-from .opc.part import PartFactory
+from . import Document
 
-package = OpcPackage.open("tests/examples/content_check.docx", PartFactory)
+doc = Document("tests/examples/content_check.docx")
 wait = 1
