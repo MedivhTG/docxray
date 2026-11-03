@@ -1,5 +1,7 @@
 # docxray stuff
-from docxray2.oxml.elements.core_properties import E_CoreProperties
+
+# docxray stuff
+from docxray2.oxml.xml.core_properties import E_CoreProperties
 
 from .xml import XmlPart
 

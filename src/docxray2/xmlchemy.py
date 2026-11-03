@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Any, ClassVar, Self, TypeVar
+from warnings import warn
 
 from lxml import etree
 from typing_extensions import Sentinel
 
-from .exceptions import OxmlAttrOptionalError, OxmlAttrRequiredError
+from .exceptions import (
+    OxmlAttrOptionalError,
+    OxmlAttrRequiredError,
+    OxmlContentError,
+)
 from .xsd.exceptions import XsdValidationError
 from .xsd.simple_type import SimpleType
 from .xsd.st_primitives import XsdAnySimpleType
@@ -117,6 +122,14 @@ class BaseOxmlElement(etree.ElementBase):
             value  # pyright: ignore[reportArgumentType]
         )
 
+    def tag_content(
+        self, simple_type: type[SimpleType[T]] = XsdAnySimpleType  # type: ignore[assignment]
+    ) -> T | None:
+        content = self.text
+        if content is None:
+            return None
+        return simple_type.validate_schema(content)
+
     def zero_or_more(self, element: type[FIND_T]) -> list[FIND_T]:
         """Return all direct children matching ``element``'s QName.
 
@@ -129,6 +142,22 @@ class BaseOxmlElement(etree.ElementBase):
         return self.findall(
             element.qname(), self._nsmap
         )  # type: ignore[return-value]
+
+    def zero_or_one(self, element: type[FIND_T]) -> FIND_T | None:
+        iterator = self.iterfind(element.qname())
+        found_elm = next(iterator, None)
+        if found_elm is None:
+            return None
+        found_ahead = next(iterator, None)
+        if found_ahead is None:
+            return found_elm  # type: ignore[return-value]
+        warn(f"Child element `{element.qname()}` must appear once!")
+        while found_ahead is not None:
+            found_ahead_next = next(iterator, None)
+            if found_ahead_next is None:
+                break
+            found_ahead = found_ahead_next
+        return found_ahead  # type: ignore[return-value]
 
     @classmethod
     def qname(cls) -> etree.QName:
@@ -237,11 +266,17 @@ class AttrRequired[T]:
     def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
         if element is None:
             return
+        old_value = element.get(self.name, MISSING)
         element.set(self.name, value)
         try:
             element.attr_required(self.name, self.simple_type, self.fixed)
         except (OxmlAttrRequiredError, XsdValidationError) as e:
-            element.attrib.pop(self.name)
+            if old_value is MISSING:
+                element.attrib.pop(self.name)
+            else:
+                element.set(
+                    self.name, old_value  # pyright: ignore[reportArgumentType]
+                )
             raise OxmlAttrRequiredError(
                 f"Cannot set required attribute `{self.name}` to `{element.__class__}`: `{e}`"
             )
@@ -282,13 +317,49 @@ class AttrOptional[T]:
     def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
         if element is None:
             return
+        old_value = element.get(self.name, MISSING)
         element.set(self.name, value)
         try:
             element.attr_optional(self.name, self.simple_type, self.default)
         except XsdValidationError as e:
-            element.attrib.pop(self.name)
+            if old_value is MISSING:
+                element.attrib.pop(self.name)
+            else:
+                element.set(
+                    self.name, old_value  # pyright: ignore[reportArgumentType]
+                )
             raise OxmlAttrOptionalError(
                 f"Cannot set optional attribute `{self.name}` to `{element.__class__}`: `{e}`"
+            )
+
+
+class Content[T]:
+    __slots__ = ("simple_type",)
+
+    def __init__(
+        self,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+    ) -> None:
+        self.simple_type = simple_type
+
+    def __get__(
+        self, element: BaseOxmlElement | None, owner: type | None = None
+    ) -> T | None:
+        if element is None:
+            return self  # type: ignore[return-value]
+        return element.tag_content(self.simple_type)
+
+    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+        if element is None:
+            return
+        old_value = element.text
+        element.text = value
+        try:
+            element.tag_content(self.simple_type)
+        except XsdValidationError as e:
+            element.text = old_value
+            raise OxmlContentError(
+                f"Cannot set content (text) to `{element.__class__}`: `{e}`"
             )
 
 
