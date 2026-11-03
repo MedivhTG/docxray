@@ -1,6 +1,8 @@
 # docxray stuff
-from docxray2.opc.part import XmlPart
+from docxray2.oxml.elements.extended_file_properties import E_Properties
+
+from .xml import XmlPart
 
 
 class ExtendedFilePropertiesPart(XmlPart):
-    pass
+    ELEMENT = E_Properties

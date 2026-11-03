@@ -9,5 +9,5 @@ class DocxPackage(OpcPackage):
     @cached_property
     def main_document_part(self) -> MainDocumentPart:
         return self.part_related_by(
-            RELATIONSHIP_TYPE.MAIN_DOCUMENT_PART_TRANSITIONAL, MainDocumentPart
+            RELATIONSHIP_TYPE.MAIN_DOCUMENT, MainDocumentPart
         )

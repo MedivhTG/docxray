@@ -15,8 +15,8 @@ class Part:
         self,
         part_name: PkgURI,
         content_type: str,
-        blob: bytes,
-        package: OpcPackage,
+        blob: bytes | None = None,
+        package: OpcPackage | None = None,
     ) -> None:
         self._part_name = part_name
         self._content_type = content_type
@@ -54,15 +54,3 @@ class Part:
         package: OpcPackage,
     ) -> Self:
         return cls(part_name, content_type, blob, package)
-
-
-class XmlPart(Part):
-    @classmethod
-    def load(
-        cls,
-        part_name: PkgURI,
-        content_type: str,
-        blob: bytes,
-        package: OpcPackage,
-    ) -> Self:
-        return super().load(part_name, content_type, blob, package)
