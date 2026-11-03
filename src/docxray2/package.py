@@ -1,8 +1,10 @@
 from functools import cached_property
 
+# docxray stuff
+from docxray2.parts.main_document import MainDocumentPart
+
 from .ns import RELATIONSHIP_TYPE
 from .opc.package import OpcPackage
-from .parts import MainDocumentPart
 
 
 class DocxPackage(OpcPackage):

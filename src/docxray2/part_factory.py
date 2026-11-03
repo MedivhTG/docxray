@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # docxray stuff
-import docxray2.parts as p
+from docxray2.parts.core_properties import CorePropertiesPart
+from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
+from docxray2.parts.main_document import MainDocumentPart
 
 from .ns import MEDIA_TYPE
 from .opc.part import Part
@@ -35,10 +37,8 @@ class DocxPartFactory:
         return cls.part_type_for.get(content_type, cls.DEFAULT_PART_TYPE)
 
 
-DocxPartFactory.part_type_for[MEDIA_TYPE.CORE_PROPERTIES] = (
-    p.CorePropertiesPart
-)
-DocxPartFactory.part_type_for[MEDIA_TYPE.MAIN_DOCUMENT] = p.MainDocumentPart
+DocxPartFactory.part_type_for[MEDIA_TYPE.CORE_PROPERTIES] = CorePropertiesPart
+DocxPartFactory.part_type_for[MEDIA_TYPE.MAIN_DOCUMENT] = MainDocumentPart
 DocxPartFactory.part_type_for[MEDIA_TYPE.EXTENDED_FILE_PROPERTIES] = (
-    p.ExtendedFilePropertiesPart
+    ExtendedFilePropertiesPart
 )
