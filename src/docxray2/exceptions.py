@@ -11,3 +11,7 @@ class OxmlAttrRequiredError(OxmlBaseError):
 
 class OxmlAttrOptionalError(OxmlBaseError):
     pass
+
+
+class OxmlContentError(OxmlBaseError):
+    pass

@@ -1,6 +1,6 @@
 import re
 from enum import StrEnum
-from typing import Any
+from typing import Any, TypeVar
 
 from .exceptions import XsdValidationError
 from .simple_type import Restriction, SimpleType
@@ -10,7 +10,10 @@ class XsdAnySimpleType(SimpleType[str]):
     SCHEMA = Restriction(SimpleType)
 
 
-class XsdString(SimpleType[str | StrEnum]):
+STRING_T = TypeVar("STRING_T", bound=str | StrEnum)
+
+
+class XsdString(SimpleType[STRING_T]):
     SCHEMA = Restriction(SimpleType)
 
     @classmethod
