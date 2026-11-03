@@ -23,6 +23,14 @@ class Part:
         self._blob = blob
         self._package = package
 
+    @property
+    def content_type(self) -> str:
+        return self._content_type
+
+    @cached_property
+    def rels(self) -> Relationships:
+        return Relationships(self._part_name.baseURI)
+
     def load_rel(
         self,
         rel_type: str,
@@ -34,9 +42,8 @@ class Part:
             rel_type, target, rel_id, is_external
         )
 
-    @cached_property
-    def rels(self) -> Relationships:
-        return Relationships(self._part_name.baseURI)
+    def after_unmarshal(self) -> None:
+        pass
 
     @classmethod
     def load(
@@ -48,26 +55,14 @@ class Part:
     ) -> Self:
         return cls(part_name, content_type, blob, package)
 
-    def after_unmarshal(self) -> None:
-        pass
 
-
-class PartFactory:
-    part_type_for: dict[str, type[Part]] = {}
-    DEFAULT_PART_TYPE = Part
-
+class XmlPart(Part):
     @classmethod
-    def create_part(
+    def load(
         cls,
         part_name: PkgURI,
         content_type: str,
-        rel_type: str,
         blob: bytes,
         package: OpcPackage,
-    ) -> Part:
-        PartClass = cls._part_cls_for(content_type)
-        return PartClass.load(part_name, content_type, blob, package)
-
-    @classmethod
-    def _part_cls_for(cls, content_type: str) -> type[Part]:
-        return cls.part_type_for.get(content_type, cls.DEFAULT_PART_TYPE)
+    ) -> Self:
+        return super().load(part_name, content_type, blob, package)

@@ -27,6 +27,17 @@ class Relationships(dict[str, "Relationship"]):
             self._target_parts_referenced[rel_id] = target
         return rel
 
+    def part_with_rel_type(self, rel_type: str) -> Part:
+        return self._get_rel_of_type(rel_type).target_part
+
+    def _get_rel_of_type(self, rel_type: str) -> Relationship:
+        matching = [rel for rel in self.values() if rel.rel_type == rel_type]
+        if len(matching) == 0:
+            raise KeyError(f"No matched rel of type {rel_type}")
+        if len(matching) > 1:
+            raise ValueError(f"Multiple rels of type {rel_type}")
+        return matching[0]
+
 
 @dataclass
 class Relationship:
@@ -35,3 +46,9 @@ class Relationship:
     target: str | Part
     baseURI: str
     external: bool = False
+
+    @property
+    def target_part(self) -> Part:
+        if self.external or isinstance(self.target, str):
+            raise ValueError("Target part is external resource (link)")
+        return self.target
