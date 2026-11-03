@@ -1,13 +1,16 @@
 from functools import cached_property
-from typing import Self
+from typing import Self, TypeVar
 
 # docxray stuff
 from docxray2.types import PkgFile
 
-from .part import Part, PartFactory
+from .part import Part
 from .pkg_reader import PkgReader
 from .pkg_uri import PKG_URI, PkgURI
 from .rel import Relationship, Relationships
+from .types import PartFactory
+
+PART_T = TypeVar("PART_T", bound=Part)
 
 
 class OpcPackage:
@@ -17,6 +20,13 @@ class OpcPackage:
         package = cls()
         Unmarshaller.unmarshal(pkg_reader, package, part_factory)
         return package
+
+    def part_related_by(
+        self, rel_type: str, part_type: type[PART_T] = Part  # type: ignore[assignment]
+    ) -> PART_T:
+        part = self.rels.part_with_rel_type(rel_type)
+        assert isinstance(part, part_type)
+        return part
 
     def load_rel(
         self,
