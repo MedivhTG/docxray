@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import abstractmethod
 from typing import Any, ClassVar, Self, TypeVar
 
 from lxml import etree
@@ -158,6 +159,10 @@ class BaseOxmlElement(etree.ElementBase):
         return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     @classmethod
+    @abstractmethod
+    def from_xml(cls, text: str | bytes) -> Self: ...
+
+    @classmethod
     def register_elm(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
@@ -185,10 +190,8 @@ class BaseOxmlElement(etree.ElementBase):
             cls._nsmap = nsmap
         if namespace:
             cls._namespace = namespace
-            cls.NAMESPACE = namespace
         if tagname:
             cls._tagname = tagname
-            cls.TAG = tagname
         if not (
             cls._nslookup and cls._nsmap and cls._namespace and cls._tagname
         ):

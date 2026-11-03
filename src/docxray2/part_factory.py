@@ -35,12 +35,10 @@ class DocxPartFactory:
         return cls.part_type_for.get(content_type, cls.DEFAULT_PART_TYPE)
 
 
-DocxPartFactory.part_type_for[MEDIA_TYPE.CORE_PROPERTIES_PART] = (
+DocxPartFactory.part_type_for[MEDIA_TYPE.CORE_PROPERTIES] = (
     p.CorePropertiesPart
 )
-DocxPartFactory.part_type_for[MEDIA_TYPE.MAIN_DOCUMENT_PART] = (
-    p.MainDocumentPart
-)
-DocxPartFactory.part_type_for[MEDIA_TYPE.EXTENDED_FILE_PROPERTIES_PART] = (
+DocxPartFactory.part_type_for[MEDIA_TYPE.MAIN_DOCUMENT] = p.MainDocumentPart
+DocxPartFactory.part_type_for[MEDIA_TYPE.EXTENDED_FILE_PROPERTIES] = (
     p.ExtendedFilePropertiesPart
 )
