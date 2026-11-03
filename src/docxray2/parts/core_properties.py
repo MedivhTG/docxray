@@ -1,6 +1,8 @@
 # docxray stuff
-from docxray2.opc.part import XmlPart
+from docxray2.oxml.elements.core_properties import E_CoreProperties
+
+from .xml import XmlPart
 
 
 class CorePropertiesPart(XmlPart):
-    pass
+    ELEMENT = E_CoreProperties
