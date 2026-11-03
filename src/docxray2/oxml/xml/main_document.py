@@ -12,3 +12,8 @@ class CT_DocumentBase(OxmlNSWml):
 
 class CT_Document(CT_DocumentBase):
     pass
+
+
+# -------------------- ELEMENTS --------------------
+class E_Document(CT_Document, tag="document"):
+    pass

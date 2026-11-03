@@ -8,3 +8,10 @@ class OxmlNSExtendedFileProperties(Oxml, ns="ep"):
 
 class CT_Properties(OxmlNSExtendedFileProperties):
     pass
+
+
+# -------------------- ELEMENTS --------------------
+
+
+class E_Properties(CT_Properties, tag="Properties"):
+    pass

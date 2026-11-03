@@ -1,8 +1,8 @@
 from functools import cached_property
 
 # docxray stuff
-from docxray2.oxml.elements.main_document import E_Document
 from docxray2.oxml.proxy.document import Document
+from docxray2.oxml.xml.main_document import E_Document
 
 from .xml import XmlPart
 

@@ -28,6 +28,3 @@ allure-results/
 coverage.xml
 report.xml
 .coverage
-
-# TODO: Delete after
-src/docxray2/schema/
