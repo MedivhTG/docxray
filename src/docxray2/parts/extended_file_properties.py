@@ -3,8 +3,8 @@
 # docxray stuff
 from docxray2.oxml.xml.extended_file_properties import E_Properties
 
-from .xml import XmlPart
+from .base import DocxXmlPart
 
 
-class ExtendedFilePropertiesPart(XmlPart):
+class ExtendedFilePropertiesPart(DocxXmlPart):
     ELEMENT = E_Properties

@@ -38,7 +38,8 @@ class MEDIA_TYPE:
 
 class RELATIONSHIP_TYPE:
     MAIN_DOCUMENT = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
-    CORE_PROPERTIES = "http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/coreproperties"
+    # This is a known erratum in ECMA-376 Part 4: URI defined wrong, here is real URI
+    CORE_PROPERTIES = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"
     EXTENDED_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
 
 

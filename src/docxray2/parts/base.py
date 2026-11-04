@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 # docxray stuff
-from docxray2.opc.package import OpcPackage
+# from docxray2.opc.package import OpcPackage
 from docxray2.opc.part import Part
 from docxray2.opc.pkg_uri import PkgURI
 from docxray2.xmlchemy import BaseOxmlElement
 
+if TYPE_CHECKING:
+    # docxray stuff
+    from docxray2.package import DocxPackage
 
-class XmlPart[ELM_T: BaseOxmlElement](Part):
+
+class DocxPart(Part["DocxPackage"]):
+    pass
+
+
+class DocxXmlPart[ELM_T: BaseOxmlElement](DocxPart):
     ELEMENT: type[ELM_T]
 
     def __init__(
@@ -17,7 +27,7 @@ class XmlPart[ELM_T: BaseOxmlElement](Part):
         content_type: str,
         element: ELM_T,
         blob: bytes | None = None,
-        package: OpcPackage | None = None,
+        package: DocxPackage | None = None,
     ) -> None:
         super().__init__(part_name, content_type, blob, package)
         self._element = element
@@ -36,7 +46,7 @@ class XmlPart[ELM_T: BaseOxmlElement](Part):
         part_name: PkgURI,
         content_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: DocxPackage,
     ) -> Self:
         element = cls.ELEMENT.from_xml(blob)
         return cls(part_name, content_type, element, package=package)

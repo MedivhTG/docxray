@@ -4,10 +4,10 @@ from functools import cached_property
 from docxray2.oxml.proxy.document import Document
 from docxray2.oxml.xml.main_document import E_Document
 
-from .xml import XmlPart
+from .base import DocxXmlPart
 
 
-class MainDocumentPart(XmlPart):
+class MainDocumentPart(DocxXmlPart):
     ELEMENT = E_Document
 
     @cached_property

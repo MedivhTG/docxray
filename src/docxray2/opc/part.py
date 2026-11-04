@@ -10,13 +10,13 @@ if TYPE_CHECKING:
     from .package import OpcPackage
 
 
-class Part:
+class Part[PACK_T: OpcPackage]:
     def __init__(
         self,
         part_name: PkgURI,
         content_type: str,
         blob: bytes | None = None,
-        package: OpcPackage | None = None,
+        package: PACK_T | None = None,
     ) -> None:
         self._part_name = part_name
         self._content_type = content_type
@@ -26,6 +26,10 @@ class Part:
     @property
     def content_type(self) -> str:
         return self._content_type
+
+    @property
+    def package(self) -> PACK_T | None:
+        return self._package
 
     @cached_property
     def rels(self) -> Relationships:
@@ -51,6 +55,6 @@ class Part:
         part_name: PkgURI,
         content_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: PACK_T,
     ) -> Self:
         return cls(part_name, content_type, blob, package)
