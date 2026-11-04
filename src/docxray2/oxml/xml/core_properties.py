@@ -3,7 +3,7 @@ from __future__ import annotations
 # docxray stuff
 from docxray2.oxml.parser import Oxml
 from docxray2.xmlchemy import Content
-from docxray2.xsd.st_primitives import XsdString
+from docxray2.xsd.st_primitives import XsdDateTime, XsdString
 
 
 class OxmlNSCoreProperties(Oxml, ns="cp"):
@@ -66,9 +66,8 @@ class E_LastModifiedBy(OxmlNSCoreProperties, tag="lastModifiedBy"):
     content = Content(XsdString[str])
 
 
-# TODO: realise
-# class E_LastPrinted(OxmlNSCoreProperties, tag="lastPrinted"):
-#     txt = Content(XsdDateTime)  # xs:dateTime
+class E_LastPrinted(OxmlNSCoreProperties, tag="lastPrinted"):
+    content = Content(XsdDateTime)
 
 
 class E_Revision(OxmlNSCoreProperties, tag="revision"):
