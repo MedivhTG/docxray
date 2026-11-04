@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from .xml import XmlPart
+    from .base import DocxXmlPart
 
 
-class ProvidesXmlPart(Protocol):
+class ProvidesDocxXmlPart(Protocol):
     @property
-    def part(self) -> XmlPart: ...
+    def part(self) -> DocxXmlPart: ...
