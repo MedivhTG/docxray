@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from enum import StrEnum
 from typing import Any, TypeVar
 
@@ -20,49 +21,25 @@ class XsdString(SimpleType[STRING_T]):
     def _validate(
         cls, xml_value: str, facets: dict[str, Any]
     ) -> str | StrEnum:
-        length = facets.get("length")
-        min_length = facets.get("min_length")
-        max_length = facets.get("max_length")
-        if length is not None and (
-            max_length is not None or min_length is not None
-        ):
-            raise ValueError(
-                "Length and (MinLength or MaxLength) are mutually exclusive"
-            )
-        if length is not None and len(xml_value) != length:
-            raise XsdValidationError(
-                f"Length must be `{length}`, got `{len(xml_value)}`"
-            )
-        if min_length is not None and len(xml_value) < min_length:
-            raise XsdValidationError(
-                f"MinLength must be `{min_length}`, got `{len(xml_value)}`"
-            )
-        if max_length is not None and len(xml_value) > max_length:
-            raise XsdValidationError(
-                f"MaxLength must be `{max_length}`, got `{len(xml_value)}`"
-            )
-        enumeration: type[StrEnum] | None = facets.get("enumeration")
-        if enumeration is not None:
-            if xml_value in enumeration._value2member_map_:
-                return enumeration(xml_value)
-            raise XsdValidationError(
-                f"Got `{xml_value}`, must be in values: {enumeration.__members__}"
-            )
-        pattern = facets.get("pattern")
-        if pattern is not None and re.search(pattern, xml_value) is None:
-            raise XsdValidationError(
-                f"Pattern mismatch for `{xml_value}` <= `{pattern}`"
-            )
+        whitespace = facets.get("whitespace", "preserve")
+        xml_value = cls.apply_whitespace(xml_value, whitespace)
+        cls.validate_length(xml_value, **facets)
+        cls.validate_pattern(xml_value, **facets)
+        validated = cls.validate_enumaration(xml_value, **facets)
+        if validated is not None:
+            return validated
         return xml_value
+
+
+URI_INVALID_PATTERN = re.compile(r"%(?![0-9A-Fa-f]{2})|#.*#")
 
 
 class XsdAnyUri(SimpleType[str]):
     SCHEMA = Restriction(SimpleType)
-    URI_INVALID_PATTERN = re.compile(r"%(?![0-9A-Fa-f]{2})|#.*#")
 
     @classmethod
     def _validate(cls, xml_value: str, facets: dict[str, Any]) -> str:
-        if cls.URI_INVALID_PATTERN.search(xml_value) is not None:
+        if URI_INVALID_PATTERN.search(xml_value) is not None:
             raise XsdValidationError(f"Invalid anyURI value: `{xml_value}`")
         return xml_value
 
@@ -83,3 +60,16 @@ class XsdNCName(SimpleType[str]):
 
 class XsdID(SimpleType[str]):
     SCHEMA = Restriction(XsdNCName)
+
+
+class XsdDateTime(SimpleType[datetime]):
+    SCHEMA = Restriction(SimpleType)
+
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> datetime:
+        xml_value = cls.apply_whitespace(xml_value)
+        cls.validate_pattern(**facets)
+        cls.validate_enumaration(**facets)
+        dt = cls.convert_to_datetime_from_iso8601(xml_value)
+        cls.validate_datetime(dt, **facets)
+        return dt

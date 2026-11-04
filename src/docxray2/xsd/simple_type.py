@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from datetime import datetime
+from enum import StrEnum
+from re import Pattern
+from typing import Any, Literal, TypeVar
 
 from typing_extensions import Sentinel
 
@@ -146,3 +150,119 @@ class SimpleType[T]:
             XsdValidationError: If the value violates the type's constraints.
         """
         return xml_value
+
+    @classmethod
+    def apply_whitespace(
+        cls,
+        xml_value: str,
+        whitespace: Literal["preserve", "replace", "collapse"] = "collapse",
+        **kwargs: dict[str, Any],
+    ) -> str:
+        if whitespace == "collapse":
+            replaced = (
+                xml_value.replace("\t", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+            )
+            return re.sub(r" +", " ", replaced).strip()
+        elif whitespace == "preserve":
+            return xml_value
+        elif whitespace == "replace":
+            return (
+                xml_value.replace("\t", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+            )
+        else:
+            raise ValueError(f"Unkown whitespace mode: {whitespace}")
+
+    @classmethod
+    def convert_to_datetime_from_iso8601(cls, xml_value: str) -> datetime:
+        return datetime.fromisoformat(xml_value)
+
+    @classmethod
+    def validate_datetime(
+        cls,
+        dt: datetime,
+        min_inclusive: datetime | None = None,
+        max_inclusive: datetime | None = None,
+        min_exclusive: datetime | None = None,
+        max_exclusive: datetime | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        inc_on = min_inclusive is not None or max_inclusive is not None
+        exc_on = min_exclusive is not None or max_exclusive is not None
+        if inc_on and exc_on:
+            raise ValueError(
+                "Inclusive and Exclusive params are mutually exclusive"
+            )
+        if min_inclusive is not None and dt < min_inclusive:
+            raise XsdValidationError(
+                f"Datetime {dt} less than {min_inclusive}"
+            )
+        if max_inclusive is not None and dt > max_inclusive:
+            raise XsdValidationError(
+                f"Datetime {dt} greater than {max_inclusive}"
+            )
+        if min_exclusive is not None and dt <= min_exclusive:
+            raise XsdValidationError(
+                f"Datetime {dt} less or equal than {min_exclusive}"
+            )
+        if max_exclusive is not None and dt >= max_exclusive:
+            raise XsdValidationError(
+                f"Datetime {dt} greater or equal than {max_exclusive}"
+            )
+
+    @classmethod
+    def validate_length(
+        cls,
+        xml_value: str,
+        length: int | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        len_bounds_on = max_length is not None or min_length is not None
+        if length is not None and len_bounds_on:
+            raise ValueError(
+                "Length and (MinLength or MaxLength) are mutually exclusive"
+            )
+        if length is not None and len(xml_value) != length:
+            raise XsdValidationError(
+                f"Length must be `{length}`, got `{len(xml_value)}`"
+            )
+        if min_length is not None and len(xml_value) < min_length:
+            raise XsdValidationError(
+                f"MinLength must be `{min_length}`, got `{len(xml_value)}`"
+            )
+        if max_length is not None and len(xml_value) > max_length:
+            raise XsdValidationError(
+                f"MaxLength must be `{max_length}`, got `{len(xml_value)}`"
+            )
+
+    @classmethod
+    def validate_enumaration(
+        cls,
+        xml_value: str,
+        enumeration: type[StrEnum] | None = None,
+        **kwargs: dict[str, Any],
+    ) -> StrEnum | None:
+        if enumeration is not None:
+            if xml_value in enumeration._value2member_map_:
+                return enumeration(xml_value)
+            raise XsdValidationError(
+                f"Got `{xml_value}`, must be in values: {enumeration.__members__}"
+            )
+        return None
+
+    @classmethod
+    def validate_pattern(
+        cls,
+        xml_value: str,
+        pattern: str | Pattern | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        if pattern is not None and re.search(pattern, xml_value) is None:
+            raise XsdValidationError(
+                f"Pattern mismatch for `{xml_value}` <= `{pattern}`"
+            )
