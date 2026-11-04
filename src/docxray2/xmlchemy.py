@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from functools import cached_property
 from typing import Any, ClassVar, Self, TypeVar
 from warnings import warn
 
@@ -56,7 +57,7 @@ class BaseOxmlElement(etree.ElementBase):
 
     def attr_required(
         self,
-        name: str,
+        name: str | etree.QName,
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> T:
@@ -92,7 +93,7 @@ class BaseOxmlElement(etree.ElementBase):
 
     def attr_optional(
         self,
-        name: str,
+        name: str | etree.QName,
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
     ) -> T | None:
@@ -244,41 +245,55 @@ class AttrRequired[T]:
             must equal exactly.
     """
 
-    __slots__ = ("fixed", "name", "simple_type")
-
     def __init__(
         self,
-        name: str,
+        attr_name: str,
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> None:
-        self.name = name
+        self._attr_name = attr_name
+        self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.fixed = fixed
+
+    def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
+        if not issubclass(owner, BaseOxmlElement):
+            raise TypeError(
+                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
+            )
+        self.owner = owner
+        self.name = name
+
+    @cached_property
+    def qname(self) -> etree.QName:
+        if self._qname is None:
+            self._qname = qn(self.owner._nsmap or {}, self._attr_name)
+        return self._qname
 
     def __get__(
         self, element: BaseOxmlElement | None, owner: type | None = None
     ) -> T:
         if element is None:
             return self  # type: ignore[return-value]
-        return element.attr_required(self.name, self.simple_type, self.fixed)
+        return element.attr_required(self.qname, self.simple_type, self.fixed)
 
     def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
         if element is None:
             return
-        old_value = element.get(self.name, MISSING)
-        element.set(self.name, value)
+        old_value = element.get(self.qname, MISSING)
+        element.set(self.qname, value)
         try:
-            element.attr_required(self.name, self.simple_type, self.fixed)
+            element.attr_required(self.qname, self.simple_type, self.fixed)
         except (OxmlAttrRequiredError, XsdValidationError) as e:
             if old_value is MISSING:
-                element.attrib.pop(self.name)
+                element.attrib.pop(self.qname)
             else:
                 element.set(
-                    self.name, old_value  # pyright: ignore[reportArgumentType]
+                    self.qname,
+                    old_value,  # pyright: ignore[reportArgumentType]
                 )
             raise OxmlAttrRequiredError(
-                f"Cannot set required attribute `{self.name}` to `{element.__class__}`: `{e}`"
+                f"Cannot set required attribute `{self.qname}` to `{element.__class__}`: `{e}`"
             )
 
 
@@ -295,41 +310,57 @@ class AttrOptional[T]:
             returned when the attribute is absent.
     """
 
-    __slots__ = ("default", "name", "simple_type")
-
     def __init__(
         self,
-        name: str,
+        attr_name: str,
         simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
         default: str | None = None,
     ) -> None:
-        self.name = name
+        self._attr_name = attr_name
+        self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.default = default
+
+    def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
+        if not issubclass(owner, BaseOxmlElement):
+            raise TypeError(
+                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
+            )
+        self.owner = owner
+        self.name = name
+
+    @cached_property
+    def qname(self) -> etree.QName:
+        if self._qname is None:
+            self._qname = qn(self.owner._nsmap or {}, self._attr_name)
+        return self._qname
 
     def __get__(
         self, element: BaseOxmlElement | None, owner: type | None = None
     ) -> T | None:
         if element is None:
             return self  # type: ignore[return-value]
-        return element.attr_optional(self.name, self.simple_type, self.default)
+        return element.attr_optional(
+            self.qname, self.simple_type, self.default
+        )
 
     def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
         if element is None:
             return
-        old_value = element.get(self.name, MISSING)
-        element.set(self.name, value)
+        old_value = element.get(self.qname, MISSING)
+        element.set(self.qname, value)
         try:
-            element.attr_optional(self.name, self.simple_type, self.default)
+            element.attr_optional(self.qname, self.simple_type, self.default)
         except XsdValidationError as e:
             if old_value is MISSING:
-                element.attrib.pop(self.name)
+                element.attrib.pop(self.qname)
             else:
                 element.set(
-                    self.name, old_value  # pyright: ignore[reportArgumentType]
+                    self.qname,
+                    old_value,  # pyright: ignore[reportArgumentType]
                 )
             raise OxmlAttrOptionalError(
-                f"Cannot set optional attribute `{self.name}` to `{element.__class__}`: `{e}`"
+                f"Cannot set optional attribute `{self.qname}` to `{element.__class__}`: `{e}`"
             )
 
 
@@ -382,3 +413,13 @@ def elm_ns_cls_lookup(
     nsfallback = etree.ElementDefaultClassLookup(element=fallback_elm)
     nslookup.set_fallback(nsfallback)
     return nslookup
+
+
+def qn(nsmap: dict[str, str], tag_clark: str) -> etree.QName:
+    tag_parts = tag_clark.split(":")
+    if len(tag_parts) == 2:
+        tag_root, tag_name = tag_parts
+        return etree.QName(nsmap[tag_root], tag_name)
+    elif len(tag_parts) == 1:
+        return etree.QName(None, tag_parts[0])
+    raise ValueError(f"Not parsed tagname: {tag_clark}")
