@@ -3,8 +3,8 @@
 # docxray stuff
 from docxray2.oxml.xml.core_properties import E_CoreProperties
 
-from .xml import XmlPart
+from .base import DocxXmlPart
 
 
-class CorePropertiesPart(XmlPart):
+class CorePropertiesPart(DocxXmlPart):
     ELEMENT = E_CoreProperties
