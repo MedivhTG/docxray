@@ -1,8 +1,9 @@
+# mypy: disable-error-code="var-annotated"
 from __future__ import annotations
 
 # docxray stuff
 from docxray2.oxml.parser import Oxml
-from docxray2.xmlchemy import Content
+from docxray2.xmlchemy import AttrOptional, Content
 from docxray2.xsd.st_primitives import XsdDateTime, XsdString
 
 
@@ -20,17 +21,17 @@ class CT_CoreProperties(OxmlNSCoreProperties):
     def content_status(self) -> E_ContentStatus | None:
         return self.zero_or_one(E_ContentStatus)
 
-    # @property
-    # def keywords(self) -> CT_Keywords | None:
-    #     return self.zero_or_one(CT_Keywords)
+    @property
+    def keywords(self) -> E_Keywords | None:
+        return self.zero_or_one(E_Keywords)
 
     @property
     def last_modified_by(self) -> E_LastModifiedBy | None:
         return self.zero_or_one(E_LastModifiedBy)
 
-    # @property
-    # def last_printed(self) -> E_LastPrinted | None:
-    #     return self.zero_or_one(E_LastPrinted)
+    @property
+    def last_printed(self) -> E_LastPrinted | None:
+        return self.zero_or_one(E_LastPrinted)
 
     @property
     def revision(self) -> E_Revision | None:
@@ -39,6 +40,20 @@ class CT_CoreProperties(OxmlNSCoreProperties):
     @property
     def version(self) -> E_Version | None:
         return self.zero_or_one(E_Version)
+
+
+# MIXED
+class CT_Keywords(OxmlNSCoreProperties):
+    content = Content()
+
+    @property
+    def keywords(self) -> list[E_Value]:
+        return self.zero_or_more(E_Value)
+
+
+class CT_Keyword(OxmlNSCoreProperties):
+    lang = AttrOptional("xml:lang")
+    content = Content()
 
 
 # -------------------- ELEMENTS --------------------
@@ -56,10 +71,12 @@ class E_ContentStatus(OxmlNSCoreProperties, tag="contentStatus"):
     content = Content(XsdString[str])
 
 
-# TODO: realise
-# class E_Keywords(OxmlNSCoreProperties, tag="keywords"):
-#     # complex type CT_Keywords — не простой текст
-#     ...
+class E_Keywords(CT_Keywords, tag="keywords"):
+    pass
+
+
+class E_Value(CT_Keyword, tag="value"):
+    pass
 
 
 class E_LastModifiedBy(OxmlNSCoreProperties, tag="lastModifiedBy"):
