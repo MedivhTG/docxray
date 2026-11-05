@@ -6,36 +6,78 @@ from docxray2.oxml.parser import Oxml
 from docxray2.xmlchemy import AttrOptional, Content
 from docxray2.xsd.st_primitives import XsdDateTime, XsdString
 
+from .dublin_core import (
+    E_Created,
+    E_Creator,
+    E_Description,
+    E_Identifier,
+    E_Language,
+    E_Modified,
+    E_Subject,
+    E_Title,
+)
+
 
 class OxmlNSCoreProperties(Oxml, ns="cp"):
     pass
 
 
-# TODO: extend elements (uncomment, add all)
 class CT_CoreProperties(OxmlNSCoreProperties):
     @property
     def category(self) -> E_Category | None:
         return self.zero_or_one(E_Category)
 
     @property
-    def content_status(self) -> E_ContentStatus | None:
+    def contentStatus(self) -> E_ContentStatus | None:
         return self.zero_or_one(E_ContentStatus)
+
+    @property
+    def created(self) -> E_Created | None:
+        return self.zero_or_one(E_Created)
+
+    @property
+    def creator(self) -> E_Creator | None:
+        return self.zero_or_one(E_Creator)
+
+    @property
+    def description(self) -> E_Description | None:
+        return self.zero_or_one(E_Description)
+
+    @property
+    def identifier(self) -> E_Identifier | None:
+        return self.zero_or_one(E_Identifier)
 
     @property
     def keywords(self) -> E_Keywords | None:
         return self.zero_or_one(E_Keywords)
 
     @property
-    def last_modified_by(self) -> E_LastModifiedBy | None:
+    def language(self) -> E_Language | None:
+        return self.zero_or_one(E_Language)
+
+    @property
+    def lastModifiedBy(self) -> E_LastModifiedBy | None:
         return self.zero_or_one(E_LastModifiedBy)
 
     @property
-    def last_printed(self) -> E_LastPrinted | None:
+    def lastPrinted(self) -> E_LastPrinted | None:
         return self.zero_or_one(E_LastPrinted)
+
+    @property
+    def modified(self) -> E_Modified | None:
+        return self.zero_or_one(E_Modified)
 
     @property
     def revision(self) -> E_Revision | None:
         return self.zero_or_one(E_Revision)
+
+    @property
+    def subject(self) -> E_Subject | None:
+        return self.zero_or_one(E_Subject)
+
+    @property
+    def title(self) -> E_Title | None:
+        return self.zero_or_one(E_Title)
 
     @property
     def version(self) -> E_Version | None:

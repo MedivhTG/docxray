@@ -37,7 +37,7 @@ class DocxXmlPart[ELM_T: BaseOxmlElement](DocxPart):
         return self._element
 
     @property
-    def part(self) -> Self:
+    def _part(self) -> Self:
         return self
 
     @classmethod

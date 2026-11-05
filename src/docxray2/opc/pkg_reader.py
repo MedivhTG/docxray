@@ -122,12 +122,10 @@ class _ContentTypeMap:
         ct_map = _ContentTypeMap()
         for override_elm in types_elm.overrides:
             ct_map._add_override(
-                override_elm.part_name, override_elm.content_type
+                override_elm.PartName, override_elm.ContentType
             )
         for default_elm in types_elm.defaults:
-            ct_map._add_default(
-                default_elm.extension, default_elm.content_type
-            )
+            ct_map._add_default(default_elm.Extension, default_elm.ContentType)
         return ct_map
 
     def _add_default(self, extension: str, content_type: str) -> None:
@@ -189,11 +187,10 @@ class _SerializedRelationships:
                 srels.append(
                     _SerializedRelationship(
                         baseURI,
-                        relationship_elm.rel_id,
-                        relationship_elm.rel_type,
-                        relationship_elm.target_mode
-                        or SE_TARGET_MODE.INTERNAL,
-                        relationship_elm.target_part,
+                        relationship_elm.Id,
+                        relationship_elm.Type,
+                        relationship_elm.TargetMode or SE_TARGET_MODE.INTERNAL,
+                        relationship_elm.Target,
                     )
                 )
         return srels

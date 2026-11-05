@@ -44,7 +44,6 @@ class RELATIONSHIP_TYPE:
 
 
 class NAMESPACE:
-
     MAIN_DOCUMENT = (
         "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
     )
@@ -52,3 +51,7 @@ class NAMESPACE:
     EXTENDED_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"
     # W3C
     XML = "http://www.w3.org/XML/1998/namespace"
+    XML_SHEMA_INSTANCE = "http://www.w3.org/2001/XMLSchema-instance"
+    # Dublin Core
+    DUBLIN_CORE = "http://purl.org/dc/elements/1.1/"
+    DUBLIN_CORE_TERMS = "http://purl.org/dc/terms/"
