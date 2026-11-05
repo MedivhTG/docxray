@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from functools import cached_property
 from typing import Self, TypeVar
 
@@ -7,6 +8,7 @@ from docxray2.types import PkgFile
 from .part import Part
 from .pkg_reader import PkgReader
 from .pkg_uri import PKG_URI, PkgURI
+from .pkg_writer import PkgWriter
 from .rel import Relationship, Relationships
 from .types import PartFactory
 
@@ -14,12 +16,39 @@ PART_T = TypeVar("PART_T", bound=Part)
 
 
 class OpcPackage:
-    @classmethod
-    def open(cls, pkg_file: PkgFile, part_factory: type[PartFactory]) -> Self:
-        pkg_reader = PkgReader.from_file(pkg_file)
-        package = cls()
-        Unmarshaller.unmarshal(pkg_reader, package, part_factory)
-        return package
+    @cached_property
+    def rels(self) -> Relationships:
+        return Relationships(PKG_URI.baseURI)
+
+    @property
+    def parts(self) -> list[Part]:
+        return list(self.iter_parts())
+
+    def save(self, pkg_file: PkgFile) -> None:
+        parts = self.parts
+        for part in parts:
+            part.before_marshal()
+        PkgWriter.write(pkg_file, self.rels, parts)
+
+    def iter_parts(self) -> Generator[Part]:
+        def walk_parts(
+            source: OpcPackage | Part, visited: list[Part] | None = None
+        ) -> Generator[Part]:
+            for rel in source.rels.values():
+                if visited is None:
+                    visited = []
+                if rel.external:
+                    continue
+                part = rel.target_part
+                if part in visited:
+                    continue
+                visited.append(part)
+                yield part
+                new_source = part
+                for part in walk_parts(new_source, visited):
+                    yield part
+
+        yield from walk_parts(self)
 
     def part_related_by(
         self, rel_type: str, part_type: type[PART_T] = Part  # type: ignore[assignment]
@@ -42,9 +71,12 @@ class OpcPackage:
     def after_unmarshal(self) -> None:
         pass
 
-    @cached_property
-    def rels(self) -> Relationships:
-        return Relationships(PKG_URI.baseURI)
+    @classmethod
+    def open(cls, pkg_file: PkgFile, part_factory: type[PartFactory]) -> Self:
+        pkg_reader = PkgReader.from_file(pkg_file)
+        package = cls()
+        Unmarshaller.unmarshal(pkg_reader, package, part_factory)
+        return package
 
 
 class Unmarshaller:

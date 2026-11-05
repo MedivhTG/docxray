@@ -24,6 +24,25 @@ T = TypeVar("T")
 FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
 
 
+class ElementAttrsRegistry:
+    __map__ = {}
+
+    @classmethod
+    def attrs(cls, elm_cls) -> dict[str, Attr]:
+        merged: dict[str, Attr] = {}
+        for base in reversed(elm_cls.__mro__):
+            merged.update(cls.__map__.get(base, {}))
+        return merged
+
+    @classmethod
+    def register(cls, elm_cls, name, attr) -> None:
+        attr_map = cls.__map__.get(elm_cls)
+        if attr_map:
+            attr_map[name] = attr
+        else:
+            cls.__map__[elm_cls] = {name: attr}
+
+
 class BaseOxmlElement(etree.ElementBase):
     """Base class for all OXML elements.
 
@@ -54,6 +73,10 @@ class BaseOxmlElement(etree.ElementBase):
     def __repr__(self) -> str:
         # Now we can watch right cls name in debug
         return super().__repr__().replace("Element", type(self).__name__, 1)
+
+    @classmethod
+    def attrs(cls) -> dict[str, Attr]:
+        return ElementAttrsRegistry.attrs(cls)
 
     def attr_required(
         self,
@@ -131,6 +154,10 @@ class BaseOxmlElement(etree.ElementBase):
             return None
         return simple_type.validate_schema(content)
 
+    def tag_full_content(self, simple_type: type[SimpleType[T]] = XsdAnySimpleType) -> T:  # type: ignore[assignment]
+        full_content = "".join(self.itertext())
+        return simple_type.validate_schema(full_content)
+
     def zero_or_more(self, element: type[FIND_T]) -> list[FIND_T]:
         """Return all direct children matching ``element``'s QName.
 
@@ -160,6 +187,14 @@ class BaseOxmlElement(etree.ElementBase):
             found_ahead = found_ahead_next
         return found_ahead  # type: ignore[return-value]
 
+    def append(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, element: BaseOxmlElement
+    ) -> None:
+        return super().append(element)  # pyright: ignore[reportArgumentType]
+
+    def to_string(self) -> bytes:
+        return etree.tostring(self)
+
     @classmethod
     def qname(cls) -> etree.QName:
         """Return the element's qualified name.
@@ -187,6 +222,9 @@ class BaseOxmlElement(etree.ElementBase):
             Self: Parsed element.
         """
         return etree.fromstring(text, parser)  # type: ignore[return-value]
+
+    @classmethod
+    def new(cls) -> Self: ...
 
     @classmethod
     @abstractmethod
@@ -232,7 +270,18 @@ class BaseOxmlElement(etree.ElementBase):
         cls.__qname__ = etree.QName(uri, cls._tagname)
 
 
-class AttrRequired[T]:
+class Attr:
+    def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
+        if not issubclass(owner, BaseOxmlElement):
+            raise TypeError(
+                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
+            )
+        self.owner = owner
+        self.name = name
+        ElementAttrsRegistry.register(owner, name, self)
+
+
+class AttrRequired[T](Attr):
     """Descriptor for a required, XSD-validated attribute.
 
     Reading delegates to ``attr_required``; writing sets the attribute and
@@ -255,14 +304,6 @@ class AttrRequired[T]:
         self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.fixed = fixed
-
-    def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
-        if not issubclass(owner, BaseOxmlElement):
-            raise TypeError(
-                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
-            )
-        self.owner = owner
-        self.name = name
 
     @cached_property
     def qname(self) -> etree.QName:
@@ -297,7 +338,7 @@ class AttrRequired[T]:
             )
 
 
-class AttrOptional[T]:
+class AttrOptional[T](Attr):
     """Descriptor for an optional, XSD-validated attribute.
 
     Reading delegates to ``attr_optional``; writing sets the attribute and
@@ -320,14 +361,6 @@ class AttrOptional[T]:
         self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.default = default
-
-    def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
-        if not issubclass(owner, BaseOxmlElement):
-            raise TypeError(
-                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
-            )
-        self.owner = owner
-        self.name = name
 
     @cached_property
     def qname(self) -> etree.QName:
