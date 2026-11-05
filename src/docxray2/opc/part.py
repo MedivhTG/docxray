@@ -24,6 +24,14 @@ class Part[PACK_T: OpcPackage]:
         self._package = package
 
     @property
+    def part_name(self) -> PkgURI:
+        return self._part_name
+
+    @property
+    def blob(self) -> bytes:
+        return self._blob or b""
+
+    @property
     def content_type(self) -> str:
         return self._content_type
 
@@ -45,6 +53,12 @@ class Part[PACK_T: OpcPackage]:
         return self.rels.add_relationship(
             rel_type, target, rel_id, is_external
         )
+
+    def target_ref(self, rel_id: str) -> str:
+        return self.rels[rel_id].target_ref
+
+    def before_marshal(self) -> None:
+        pass
 
     def after_unmarshal(self) -> None:
         pass

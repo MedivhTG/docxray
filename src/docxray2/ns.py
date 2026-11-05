@@ -1,6 +1,7 @@
 """XML namespace URIs for OOXML/Word documents, grouped by OPC part."""
 
 
+# TODO: add other for all
 class NAMESPACE_URI:
     """Namespace URIs for OOXML/Word package parts (class-level str constants)."""
 
@@ -34,6 +35,9 @@ class MEDIA_TYPE:
     EXTENDED_FILE_PROPERTIES = (
         "application/vnd.openxmlformats-officedocument.extended-properties+xml"
     )
+    # Other
+    XML = "application/xml"
+    PNG = "image/png"
 
 
 class RELATIONSHIP_TYPE:

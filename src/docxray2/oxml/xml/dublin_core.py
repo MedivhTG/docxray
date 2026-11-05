@@ -46,8 +46,8 @@ class E_Title(OxmlNSDublinCore, tag="title"):
 
 
 class E_Created(CT_W3CDTF, tag="created"):
-    schemaType = AttrRequired("xsi:type")
+    schemaType = AttrRequired("xsi:type", fixed="dcterms:W3CDTF")
 
 
 class E_Modified(CT_W3CDTF, tag="modified"):
-    schemaType = AttrRequired("xsi:type")
+    schemaType = AttrRequired("xsi:type", fixed="dcterms:W3CDTF")

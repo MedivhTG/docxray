@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from docxray2.oxml.proxy.core_props import CoreProperties
 from docxray2.oxml.proxy.document import Document
 from docxray2.oxml.xml.main_document import E_Document
+from docxray2.types import PkgFile
 
 from .base import DocxXmlPart
 
@@ -24,10 +25,13 @@ class MainDocumentPart(DocxXmlPart[E_Document]):
 
     @cached_property
     def core_props(self) -> CoreProperties:
-        return self.docx_package.core_properties_part.core_props
+        return self._docx_package.core_properties_part.core_props
+
+    def save(self, file: PkgFile) -> None:
+        self._docx_package.save(file)
 
     @property
-    def docx_package(self) -> DocxPackage:
+    def _docx_package(self) -> DocxPackage:
         # docxray stuff
         from docxray2.package import DocxPackage
 

@@ -39,6 +39,9 @@ class PkgURI(str):
         rels_uri_str = posixpath.join(self.baseURI, "_rels", rels_filename)
         return PkgURI(rels_uri_str)
 
+    def relative_ref(self, baseURI: str) -> str:
+        return self[1:] if baseURI == "/" else posixpath.relpath(self, baseURI)
+
     @staticmethod
     def from_rel_ref(baseURI: str, relative_ref: str) -> PkgURI:
         rel_path = PurePosixPath(relative_ref)
