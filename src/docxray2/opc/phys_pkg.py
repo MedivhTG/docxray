@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from zipfile import ZipFile, is_zipfile
+from zipfile import ZIP_DEFLATED, ZipFile, is_zipfile
 
 # docxray stuff
 from docxray2.opc.exceptions import OpcPackageNotFoundError
@@ -22,6 +22,10 @@ def phys_pkg_reader(pkg_file: PkgFile) -> PhysPkgReader:
             raise OpcPackageNotFoundError(f"Package not found at '{pkg_file}'")
     else:
         return _ZipPkgReader(pkg_file)
+
+
+def phys_pkg_writer(pkg_file: PkgFile) -> PhysPkgWriter:
+    return _ZipPkgWriter(pkg_file)
 
 
 class PhysPkgReader(ABC):
@@ -94,3 +98,22 @@ class _DirPkgReader(PhysPkgReader):
 
     def close(self) -> None:
         pass
+
+
+class PhysPkgWriter(ABC):
+    @abstractmethod
+    def write(self, pkg_uri: PkgURI, blob: bytes) -> None: ...
+
+    @abstractmethod
+    def close(self) -> None: ...
+
+
+class _ZipPkgWriter(PhysPkgWriter):
+    def __init__(self, pkg_file: PkgFile) -> None:
+        self._zipf = ZipFile(pkg_file, "w", ZIP_DEFLATED)
+
+    def write(self, pkg_uri: PkgURI, blob: bytes) -> None:
+        self._zipf.writestr(pkg_uri.member_name, blob)
+
+    def close(self) -> None:
+        self._zipf.close()

@@ -9,7 +9,7 @@ from docxray2.types import PkgFile
 
 from .enums import SE_TARGET_MODE
 from .oxml import E_Relationships, E_Types
-from .phys_pkg_reader import PhysPkgReader, phys_pkg_reader
+from .phys_pkg import PhysPkgReader, phys_pkg_reader
 from .pkg_uri import PKG_URI, PkgURI
 
 

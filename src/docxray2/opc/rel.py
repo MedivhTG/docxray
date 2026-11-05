@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+from .enums import SE_TARGET_MODE
+from .oxml import E_Relationship, E_Relationships
 
 if TYPE_CHECKING:
     from .part import Part
@@ -11,6 +14,19 @@ class Relationships(dict[str, "Relationship"]):
     def __init__(self, baseURI: str) -> None:
         self._baseURI = baseURI
         self._target_parts_referenced: dict[str, str | Part] = {}
+
+    @property
+    def xml(self) -> bytes:
+        rels_elm = E_Relationships.new(True)
+        for rel in self.values():
+            rel_elm = E_Relationship.new(True)
+            rel_elm.Id = rel.rel_id
+            rel_elm.Type = rel.rel_type
+            rel_elm.Target = rel.target_ref
+            if rel.external:
+                rel_elm.TargetMode = SE_TARGET_MODE.EXTERNAL
+            rels_elm.append(rel_elm)
+        return rels_elm.to_string()
 
     def add_relationship(
         self,
@@ -52,3 +68,10 @@ class Relationship:
         if self.external or isinstance(self.target, str):
             raise ValueError("Target part is external resource (link)")
         return self.target
+
+    @property
+    def target_ref(self) -> str:
+        if self.external:
+            return cast("str", self.target)
+        target = cast("Part", self.target)
+        return target.part_name.relative_ref(self.baseURI)

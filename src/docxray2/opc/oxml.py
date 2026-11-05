@@ -26,7 +26,26 @@ OPC_NSMAP = {
 }
 
 
-class OpcOxml(BaseOxmlElement, nslookup=opc_nslookup, nsmap=OPC_NSMAP):
+class OpcOxml(
+    BaseOxmlElement,
+    nslookup=opc_nslookup,
+    nsmap=OPC_NSMAP,
+):
+    @classmethod
+    def new(cls, exclude_namespace: bool = False) -> Self:
+        attrib = {}
+        for attr in cls.attrs().values():
+            if isinstance(attr, AttrRequired):
+                attrib[attr.qname] = attr.fixed or ""
+        qname = cls.qname()
+        if exclude_namespace:
+            tagname = qname.localname
+        else:
+            tagname = qname
+        return opc_parser.makeelement(
+            tagname, nsmap=OPC_NSMAP, attrib=attrib
+        )  # pyright: ignore[reportReturnType]
+
     @classmethod
     def from_xml(cls, text: str | bytes) -> Self:
         return cls.parse(text, opc_parser)
