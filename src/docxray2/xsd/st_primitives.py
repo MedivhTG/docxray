@@ -68,8 +68,8 @@ class XsdDateTime(SimpleType[datetime]):
     @classmethod
     def _validate(cls, xml_value: str, facets: dict[str, Any]) -> datetime:
         xml_value = cls.apply_whitespace(xml_value)
-        cls.validate_pattern(**facets)
-        cls.validate_enumaration(**facets)
+        cls.validate_pattern(xml_value, **facets)
+        cls.validate_enumaration(xml_value, **facets)
         dt = cls.convert_to_datetime_from_iso8601(xml_value)
         cls.validate_datetime(dt, **facets)
         return dt

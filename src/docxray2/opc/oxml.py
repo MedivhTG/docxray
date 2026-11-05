@@ -51,13 +51,13 @@ class CT_Types(OpcOxmlNSMediaTypesStream):
 
 
 class CT_Default(OpcOxmlNSMediaTypesStream):
-    extension = AttrRequired("Extension", ST_Extension)
-    content_type = AttrRequired("ContentType", ST_ContentType)
+    Extension = AttrRequired("Extension", ST_Extension)
+    ContentType = AttrRequired("ContentType", ST_ContentType)
 
 
 class CT_Override(OpcOxmlNSMediaTypesStream):
-    content_type = AttrRequired("ContentType", ST_ContentType)
-    part_name = AttrRequired("PartName", XsdAnyUri)
+    ContentType = AttrRequired("ContentType", ST_ContentType)
+    PartName = AttrRequired("PartName", XsdAnyUri)
 
 
 class CT_Relationships(OpcOxmlNSRelationships):
@@ -67,10 +67,10 @@ class CT_Relationships(OpcOxmlNSRelationships):
 
 
 class CT_Relationship(OpcOxmlNSRelationships):
-    target_mode = AttrOptional("TargetMode", ST_TargetMode)
-    target_part = AttrRequired("Target", XsdAnyUri)
-    rel_type = AttrRequired("Type", XsdAnyUri)
-    rel_id = AttrRequired("Id", XsdID)
+    TargetMode = AttrOptional("TargetMode", ST_TargetMode)
+    Target = AttrRequired("Target", XsdAnyUri)
+    Type = AttrRequired("Type", XsdAnyUri)
+    Id = AttrRequired("Id", XsdID)
 
 
 # Registration
