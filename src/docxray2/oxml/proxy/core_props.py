@@ -89,5 +89,5 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
         if w3cdtf_elm is None:
             return None
         # Call for validate
-        w3cdtf_elm.schemaType
+        _ = w3cdtf_elm.schemaType
         return w3cdtf_elm.content

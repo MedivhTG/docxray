@@ -7,7 +7,6 @@ from docxray2.ns import NAMESPACE
 from docxray2.xmlchemy import (
     AttrRequired,
     BaseOxmlElement,
-    ElementAttrsRegistry,
     elm_ns_cls_lookup,
 )
 
@@ -16,7 +15,7 @@ oxml_parser = etree.XMLParser(remove_blank_text=True, resolve_entities=False)
 oxml_parser.set_element_class_lookup(oxml_nslookup)
 
 
-OXML_NSMAP = {
+OXML_NSMAP: dict[str | None, str] = {
     "w": NAMESPACE.MAIN_DOCUMENT,
     "cp": NAMESPACE.CORE_PROPERTIES,
     "ep": NAMESPACE.EXTENDED_PROPERTIES,
@@ -33,19 +32,27 @@ class Oxml(
     nsmap=OXML_NSMAP,
 ):
     @classmethod
-    def new(cls, exclude_namespace: bool = False) -> Self:
+    def new(
+        cls,
+        exclude_tag_prefix: bool = False,
+        nsmap: dict[str | None, str] | None = None,
+    ) -> Self:
         attrib = {}
         for attr in cls.attrs().values():
             if isinstance(attr, AttrRequired):
                 attrib[attr.qname] = attr.fixed or ""
         qname = cls.qname()
-        if exclude_namespace:
-            tagname = qname.localname
-        else:
-            tagname = qname
+        if nsmap is None:
+            uri = qname.namespace
+            if exclude_tag_prefix and uri:
+                nsmap = {None: uri}
+            elif cls._namespace in OXML_NSMAP:
+                nsmap = {cls._namespace: OXML_NSMAP[cls._namespace]}
+            else:
+                nsmap = OXML_NSMAP
         return oxml_parser.makeelement(
-            tagname, nsmap=OXML_NSMAP, attrib=attrib
-        )  # pyright: ignore[reportReturnType]
+            qname, nsmap=nsmap, attrib=attrib
+        )  # type: ignore[return-value]
 
     @classmethod
     def from_xml(cls, text: str | bytes) -> Self:
