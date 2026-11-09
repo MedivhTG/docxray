@@ -30,12 +30,24 @@ class OxmlElement(BaseOxmlElement):
     @cached_property
     def is_first(self) -> bool:
         """XML-node has no siblings with same tage before."""
-        return self.xpath(f"not(preceding-sibling::{self.xml_tag_self})")
+        tag = self.tag
+        prev = self.getprevious()
+        while prev is not None:
+            if prev.tag == tag:
+                return False
+            prev = prev.getprevious()
+        return True
 
     @cached_property
     def is_last(self) -> bool:
         """XML-node has no siblings with same tage after."""
-        return self.xpath(f"not(following-sibling::{self.xml_tag_self})")
+        tag = self.tag
+        nxt = self.getnext()
+        while nxt is not None:
+            if nxt.tag == tag:
+                return False
+            nxt = nxt.getnext()
+        return True
 
     @cached_property
     def xml_pos(self) -> POS:
