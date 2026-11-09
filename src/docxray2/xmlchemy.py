@@ -35,6 +35,10 @@ class ElementAttrsRegistry:
         return merged
 
     @classmethod
+    def get_descriptor(cls, elm_cls: type[BaseOxmlElement], name: str) -> Attr:
+        return cls.attrs(elm_cls)[name]
+
+    @classmethod
     def register(
         cls, elm_cls: type[BaseOxmlElement], name: str, attr: Attr
     ) -> None:
@@ -271,6 +275,10 @@ class BaseOxmlElement(etree.ElementBase):
         ns = cls._nslookup.get_namespace(uri)
         ns[cls._tagname] = cls
         cls.__qname__ = etree.QName(uri, cls._tagname)
+
+    @classmethod
+    def _get_descriptor(cls, name: str) -> Attr:
+        return ElementAttrsRegistry.get_descriptor(cls, name)
 
 
 class Attr:
