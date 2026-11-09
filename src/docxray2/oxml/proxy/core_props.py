@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 
 # docxray stuff
+from docxray2.oxml.parser import Oxml
 from docxray2.oxml.xml.core_properties import CT_CoreProperties, E_Category
 
 from .base import DocxElementProxy
@@ -14,10 +15,7 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
 
     @category.setter
     def category(self, value: str) -> None:
-        category_elm = self.element.category
-        if category_elm is None:
-            category_elm = E_Category.new()
-        category_elm.text = value
+        self._set_elm_content(E_Category, "category", value)
 
     @property
     def content_status(self) -> str | None:
@@ -83,6 +81,15 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
         if elm is None:
             return None
         return elm.content
+
+    def _set_elm_content(
+        self, elm_cls: type[Oxml], name: str, value: Any
+    ) -> None:
+        elm = getattr(self.element, name)
+        if elm is None:
+            elm = elm_cls.new()
+            self.element.append(elm)
+        elm.content = value  # pyright: ignore[reportAttributeAccessIssue]
 
     def _get_w3cdtf_elm_content(self, name: str) -> datetime | None:
         w3cdtf_elm = getattr(self.element, name)
