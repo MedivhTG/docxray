@@ -20,7 +20,7 @@ opc_nslookup = elm_ns_cls_lookup()
 opc_parser = etree.XMLParser(remove_blank_text=True, resolve_entities=False)
 opc_parser.set_element_class_lookup(opc_nslookup)
 
-OPC_NSMAP = {
+OPC_NSMAP: dict[str | None, str] = {
     "ct": NAMESPACE_URI.MEDIA_TYPES_STREAM,
     "r": NAMESPACE_URI.RELATIONSHIPS,
 }
@@ -32,19 +32,27 @@ class OpcOxml(
     nsmap=OPC_NSMAP,
 ):
     @classmethod
-    def new(cls, exclude_namespace: bool = False) -> Self:
+    def new(
+        cls,
+        exclude_tag_prefix: bool = False,
+        nsmap: dict[None | str, str] | None = None,
+    ) -> Self:
         attrib = {}
         for attr in cls.attrs().values():
             if isinstance(attr, AttrRequired):
                 attrib[attr.qname] = attr.fixed or ""
         qname = cls.qname()
-        if exclude_namespace:
-            tagname = qname.localname
-        else:
-            tagname = qname
+        if nsmap is None:
+            uri = qname.namespace
+            if exclude_tag_prefix and uri:
+                nsmap = {None: uri}
+            elif cls._namespace in OPC_NSMAP:
+                nsmap = {cls._namespace: OPC_NSMAP[cls._namespace]}
+            else:
+                nsmap = OPC_NSMAP
         return opc_parser.makeelement(
-            tagname, nsmap=OPC_NSMAP, attrib=attrib
-        )  # pyright: ignore[reportReturnType]
+            qname, nsmap=nsmap, attrib=attrib
+        )  # type: ignore[return-value]
 
     @classmethod
     def from_xml(cls, text: str | bytes) -> Self:
@@ -92,9 +100,17 @@ class CT_Relationship(OpcOxmlNSRelationships):
     Id = AttrRequired("Id", XsdID)
 
 
-# Registration
+# -------------------- ELEMENTS --------------------
 class E_Types(CT_Types, tag="Types"):
-    pass
+    @classmethod
+    def new(
+        cls,
+        exclude_tag_prefix: bool = True,
+        nsmap: dict[str | None, str] | None = None,
+    ) -> Self:
+        # To create with xmlns="http://schemas.openxmlformats.org/package/2006/content-types"
+        nsmap = {None: NAMESPACE_URI.MEDIA_TYPES_STREAM}
+        return super().new(exclude_tag_prefix, nsmap)
 
 
 class E_Default(CT_Default, tag="Default"):

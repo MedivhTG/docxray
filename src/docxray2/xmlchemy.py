@@ -25,17 +25,19 @@ FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
 
 
 class ElementAttrsRegistry:
-    __map__ = {}
+    __map__: dict[type[BaseOxmlElement], dict[str, Attr]] = {}
 
     @classmethod
-    def attrs(cls, elm_cls) -> dict[str, Attr]:
+    def attrs(cls, elm_cls: type[BaseOxmlElement]) -> dict[str, Attr]:
         merged: dict[str, Attr] = {}
         for base in reversed(elm_cls.__mro__):
             merged.update(cls.__map__.get(base, {}))
         return merged
 
     @classmethod
-    def register(cls, elm_cls, name, attr) -> None:
+    def register(
+        cls, elm_cls: type[BaseOxmlElement], name: str, attr: Attr
+    ) -> None:
         attr_map = cls.__map__.get(elm_cls)
         if attr_map:
             attr_map[name] = attr
@@ -55,7 +57,7 @@ class BaseOxmlElement(etree.ElementBase):
     """
 
     _nslookup: ClassVar[etree.ElementNamespaceClassLookup | None] = None
-    _nsmap: ClassVar[dict[str, str] | None] = None
+    _nsmap: ClassVar[dict[str | None, str] | None] = None
     _namespace: ClassVar[str | None] = None
     _tagname: ClassVar[str | None] = None
     __qname__: ClassVar[etree.QName | None] = None
@@ -63,7 +65,7 @@ class BaseOxmlElement(etree.ElementBase):
     def __init_subclass__(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
-        nsmap: dict[str, str] | None = None,
+        nsmap: dict[str | None, str] | None = None,
         ns: str | None = None,
         tag: str | None = None,
     ) -> None:
@@ -224,6 +226,7 @@ class BaseOxmlElement(etree.ElementBase):
         return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     @classmethod
+    @abstractmethod
     def new(cls) -> Self: ...
 
     @classmethod
@@ -234,7 +237,7 @@ class BaseOxmlElement(etree.ElementBase):
     def register_elm(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
-        nsmap: dict[str, str] | None = None,
+        nsmap: dict[str | None, str] | None = None,
         namespace: str | None = None,
         tagname: str | None = None,
     ) -> None:
@@ -448,7 +451,7 @@ def elm_ns_cls_lookup(
     return nslookup
 
 
-def qn(nsmap: dict[str, str], tag_clark: str) -> etree.QName:
+def qn(nsmap: dict[str | None, str], tag_clark: str) -> etree.QName:
     tag_parts = tag_clark.split(":")
     if len(tag_parts) == 2:
         tag_root, tag_name = tag_parts

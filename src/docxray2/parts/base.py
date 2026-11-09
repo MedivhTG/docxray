@@ -37,6 +37,10 @@ class DocxXmlPart[ELM_T: BaseOxmlElement](DocxPart):
         return self._element
 
     @property
+    def blob(self) -> bytes:
+        return self.element.to_string()
+
+    @property
     def _part(self) -> Self:
         return self
 
