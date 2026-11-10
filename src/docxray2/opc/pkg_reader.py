@@ -90,7 +90,7 @@ class PkgReader:
             if not phys_reader.exists(part_name):
                 srels.drop(srel)
                 warn(
-                    "Realationship missing in the package for: "
+                    "Relationship missing in the package for: "
                     f"rId={srel.rel_id}, partname={part_name}",
                     stacklevel=2,
                 )
