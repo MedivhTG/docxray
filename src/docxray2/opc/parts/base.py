@@ -10,10 +10,10 @@ from docxray2.xmlchemy import BaseOxmlElement
 
 if TYPE_CHECKING:
     # docxray stuff
-    from docxray2.opc.package import OpcPackage
+    from docxray2.opc.package import Package
 
 
-class OpcPart(Part["OpcPackage"]):
+class OpcPart(Part["Package"]):
     pass
 
 
@@ -26,7 +26,7 @@ class OpcXmlPart[ELM_T: BaseOxmlElement](OpcPart):
         content_type: str,
         element: ELM_T,
         blob: bytes | None = None,
-        package: OpcPackage | None = None,
+        package: Package | None = None,
     ) -> None:
         super().__init__(part_name, content_type, blob, package)
         self._element = element
@@ -49,7 +49,7 @@ class OpcXmlPart[ELM_T: BaseOxmlElement](OpcPart):
         part_name: PkgURI,
         content_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: Package,
     ) -> Self:
         element = cls.ELEMENT.from_xml(blob)
         return cls(part_name, content_type, element, package=package)
