@@ -1,47 +1,48 @@
 # mypy: disable-error-code="var-annotated"
 # docxray stuff
-from docxray2.oxml.parser import Oxml
-from docxray2.oxml.xsd.dublin_core import W3CDTF
+from docxray2.opc.xsd.dublin_core import W3CDTF
 from docxray2.xmlchemy import AttrRequired, Content
 from docxray2.xsd.st_primitives import XsdString
 
+from .parser import OpcOxml
 
-class OxmlNSDublinCore(Oxml, ns="dc"):
+
+class OpcOxmlNSDublinCore(OpcOxml, ns="dc"):
     pass
 
 
-class OxmlNSDublinCoreTerms(Oxml, ns="dcterms"):
+class OpcOxmlNSDublinCoreTerms(OpcOxml, ns="dcterms"):
     pass
 
 
-class CT_W3CDTF(OxmlNSDublinCoreTerms):
+class CT_W3CDTF(OpcOxmlNSDublinCoreTerms):
     content = Content(W3CDTF)
 
 
 # -------------------- ELEMENTS --------------------
 
 
-class E_Creator(OxmlNSDublinCore, tag="creator"):
+class E_Creator(OpcOxmlNSDublinCore, tag="creator"):
     content = Content(XsdString)
 
 
-class E_Description(OxmlNSDublinCore, tag="description"):
+class E_Description(OpcOxmlNSDublinCore, tag="description"):
     content = Content(XsdString)
 
 
-class E_Identifier(OxmlNSDublinCore, tag="identifier"):
+class E_Identifier(OpcOxmlNSDublinCore, tag="identifier"):
     content = Content(XsdString)
 
 
-class E_Language(OxmlNSDublinCore, tag="language"):
+class E_Language(OpcOxmlNSDublinCore, tag="language"):
     content = Content(XsdString)
 
 
-class E_Subject(OxmlNSDublinCore, tag="subject"):
+class E_Subject(OpcOxmlNSDublinCore, tag="subject"):
     content = Content(XsdString)
 
 
-class E_Title(OxmlNSDublinCore, tag="title"):
+class E_Title(OpcOxmlNSDublinCore, tag="title"):
     content = Content(XsdString)
 
 

@@ -4,7 +4,8 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray2.oxml.proxy.core_props import CoreProperties
+from docxray2.opc.parts.core_properties import CorePropertiesPart
+from docxray2.opc.proxy.core_props import CoreProperties
 from docxray2.oxml.proxy.document import Document
 from docxray2.oxml.xml.main_document import E_Document
 from docxray2.types import PkgFile
@@ -23,9 +24,15 @@ class MainDocumentPart(DocxXmlPart[E_Document]):
     def document(self) -> Document:
         return Document(self.element, self)
 
-    @cached_property
-    def core_props(self) -> CoreProperties:
-        return self._docx_package.core_properties_part.core_props
+    @property
+    def core_props_part(self) -> CorePropertiesPart | None:
+        return self._docx_package.core_properties_part
+
+    @property
+    def core_props(self) -> CoreProperties | None:
+        if self.core_props_part is None:
+            return None
+        return self.core_props_part.core_props
 
     def save(self, file: PkgFile) -> None:
         self._docx_package.save(file)

@@ -4,7 +4,7 @@ from typing import Self
 from docxray2.ns import MEDIA_TYPE
 from docxray2.types import PkgFile
 
-from .oxml import E_Default, E_Override, E_Types
+from .oxml.content_types import E_Default, E_Override, E_Types
 from .part import Part
 from .phys_pkg import PhysPkgWriter, phys_pkg_writer
 from .pkg_uri import CONTENT_TYPES_PKG_URI, PKG_URI, PkgURI

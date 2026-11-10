@@ -52,8 +52,10 @@ class OpcPackage:
 
     def part_related_by(
         self, rel_type: str, part_type: type[PART_T] = Part  # type: ignore[assignment]
-    ) -> PART_T:
+    ) -> PART_T | None:
         part = self.rels.part_with_rel_type(rel_type)
+        if part is None:
+            return None
         assert isinstance(part, part_type)
         return part
 
