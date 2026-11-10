@@ -1,5 +1,7 @@
+import re
 from datetime import datetime
 from typing import Any
+from warnings import warn
 
 # docxray stuff
 from docxray2.oxml.parser import Oxml
@@ -8,15 +10,25 @@ from docxray2.oxml.xml.core_properties import (
     E_Category,
     E_ContentStatus,
     E_Keywords,
+    E_LastModifiedBy,
+    E_LastPrinted,
+    E_Revision,
+    E_Version,
 )
 from docxray2.oxml.xml.dublin_core import (
     E_Created,
     E_Creator,
     E_Description,
     E_Identifier,
+    E_Language,
+    E_Modified,
+    E_Subject,
+    E_Title,
 )
 
 from .base import DocxElementProxy
+
+LANG_RFC3066_RE = re.compile(r"^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 
 
 class CoreProperties(DocxElementProxy[CT_CoreProperties]):
@@ -103,33 +115,80 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
     def language(self) -> str | None:
         return self._get_elm_content("language")
 
+    @language.setter
+    def language(self, value: str) -> None:
+        if not LANG_RFC3066_RE.match(value):
+            warn(
+                f"Language tag {value!r} does not match the recommended "
+                f"RFC 3066 / BCP 47 format. It will be stored as-is.",
+                UserWarning,
+                stacklevel=2,
+            )
+        self._set_elm_content(E_Language, "language", value)
+
     @property
     def last_modified_by(self) -> str | None:
+        """The user who performed the last modification. The
+        identification is environment-specific."""
         return self._get_elm_content("lastModifiedBy")
+
+    @last_modified_by.setter
+    def last_modified_by(self, value: str) -> None:
+        self._set_elm_content(E_LastModifiedBy, "lastModifiedBy", value)
 
     @property
     def last_printed(self) -> datetime | None:
+        """The date and time of the last printing."""
         return self._get_elm_content("lastPrinted")
+
+    @last_printed.setter
+    def last_printed(self, value: datetime) -> None:
+        self._set_elm_content(E_LastPrinted, "lastPrinted", value)
 
     @property
     def modified(self) -> datetime | None:
+        """Date on which the resource was changed."""
         return self._get_w3cdtf_elm_content("modified")
+
+    @modified.setter
+    def modified(self, value: datetime) -> None:
+        self._set_elm_content(E_Modified, "modified", value)
 
     @property
     def revision(self) -> str | None:
+        """The revision number."""
         return self._get_elm_content("revision")
+
+    @revision.setter
+    def revision(self, value: str) -> None:
+        self._set_elm_content(E_Revision, "revision", value)
 
     @property
     def subject(self) -> str | None:
+        """The topic of the content of the resource."""
         return self._get_elm_content("subject")
+
+    @subject.setter
+    def subject(self, value: str) -> None:
+        self._set_elm_content(E_Subject, "subject", value)
 
     @property
     def title(self) -> str | None:
+        """The name given to the resource."""
         return self._get_elm_content("title")
+
+    @title.setter
+    def title(self, value: str) -> None:
+        self._set_elm_content(E_Title, "title", value)
 
     @property
     def version(self) -> str | None:
+        """The version number."""
         return self._get_elm_content("version")
+
+    @version.setter
+    def version(self, value: str) -> None:
+        self._set_elm_content(E_Version, "version", value)
 
     def _get_elm_content(self, name: str) -> Any | None:
         elm = getattr(self.element, name)
