@@ -17,5 +17,11 @@ class Document(DocxElementProxy[E_Document, "MainDocumentPart"]):
     def core_props(self) -> CoreProperties | None:
         return self.part.core_props
 
+    def get_or_add_core_props(self) -> CoreProperties:
+        core_props = self.core_props
+        if core_props:
+            return core_props
+        return self.part._docx_package.create_core_properties_part().core_props
+
     def save(self, file: PkgFile) -> None:
         self.part.save(file)

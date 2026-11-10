@@ -15,7 +15,7 @@ from .types import PartFactory
 PART_T = TypeVar("PART_T", bound=Part)
 
 
-class OpcPackage:
+class Package:
     @cached_property
     def rels(self) -> Relationships:
         return Relationships(PKG_URI.baseURI)
@@ -32,7 +32,7 @@ class OpcPackage:
 
     def iter_parts(self) -> Generator[Part]:
         def walk_parts(
-            source: OpcPackage | Part, visited: list[Part] | None = None
+            source: Package | Part, visited: list[Part] | None = None
         ) -> Generator[Part]:
             for rel in source.rels.values():
                 if visited is None:
@@ -86,22 +86,22 @@ class Unmarshaller:
     def unmarshal(
         cls,
         pkg_reader: PkgReader,
-        opc_package: OpcPackage,
+        package: Package,
         part_factory: type[PartFactory],
     ) -> None:
         parts = Unmarshaller._unmarshal_parts(
-            pkg_reader, opc_package, part_factory
+            pkg_reader, package, part_factory
         )
-        Unmarshaller._unmarshal_relationships(pkg_reader, opc_package, parts)
+        Unmarshaller._unmarshal_relationships(pkg_reader, package, parts)
         for part in parts.values():
             part.after_unmarshal()
-        opc_package.after_unmarshal()
+        package.after_unmarshal()
 
     @classmethod
     def _unmarshal_parts(
         cls,
         pkg_reader: PkgReader,
-        opc_package: OpcPackage,
+        package: Package,
         part_factory: type[PartFactory],
     ) -> dict[PkgURI, Part]:
         parts: dict[PkgURI, Part] = {}
@@ -112,7 +112,7 @@ class Unmarshaller:
             blob,
         ) in pkg_reader.iter_sparts():
             parts[part_name] = part_factory.create_part(
-                part_name, content_type, rel_type, blob, opc_package
+                part_name, content_type, rel_type, blob, package
             )
         return parts
 
@@ -120,11 +120,11 @@ class Unmarshaller:
     def _unmarshal_relationships(
         cls,
         pkg_reader: PkgReader,
-        opc_package: OpcPackage,
+        package: Package,
         parts: dict[PkgURI, Part],
     ) -> None:
         for source_uri, srel in pkg_reader.iter_srels():
-            source = opc_package if source_uri == "/" else parts[source_uri]
+            source = package if source_uri == "/" else parts[source_uri]
             target = (
                 srel.target_part
                 if srel.is_external

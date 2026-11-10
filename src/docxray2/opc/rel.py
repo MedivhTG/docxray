@@ -28,6 +28,14 @@ class Relationships(dict[str, "Relationship"]):
             rels_elm.append(rel_elm)
         return rels_elm.to_string()
 
+    @property
+    def _next_rel_id(self) -> str:
+        for n in range(1, len(self) + 2):
+            rId_candidate = f"rId{n}"
+            if rId_candidate not in self:
+                return rId_candidate
+        return "rId1"
+
     def add_relationship(
         self,
         rel_type: str,
@@ -43,6 +51,13 @@ class Relationships(dict[str, "Relationship"]):
             self._target_parts_referenced[rel_id] = target
         return rel
 
+    def get_or_add(self, rel_type: str, target_part: Part) -> Relationship:
+        rel = self._get_matching(rel_type, target_part)
+        if rel is None:
+            rel_Id = self._next_rel_id
+            rel = self.add_relationship(rel_type, target_part, rel_Id)
+        return rel
+
     def part_with_rel_type(self, rel_type: str) -> Part | None:
         rel = self._get_rel_of_type(rel_type)
         if rel is None:
@@ -56,6 +71,27 @@ class Relationships(dict[str, "Relationship"]):
         if len(matching) > 1:
             raise ValueError(f"Multiple rels of type {rel_type}")
         return matching[0]
+
+    def _get_matching(
+        self, rel_type: str, target: Part | str, external: bool = False
+    ) -> Relationship | None:
+        def matches(
+            rel: Relationship,
+            reltype: str,
+            target: Part | str,
+            is_external: bool,
+        ) -> bool:
+            if rel.rel_type != reltype:
+                return False
+            if rel.external != is_external:
+                return False
+            rel_target = rel.target_ref if rel.external else rel.target_part
+            return rel_target == target
+
+        for rel in self.values():
+            if matches(rel, rel_type, target, external):
+                return rel
+        return None
 
 
 @dataclass

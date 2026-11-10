@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Protocol
 from .pkg_uri import PkgURI
 
 if TYPE_CHECKING:
-    from .package import OpcPackage
+    from .package import Package
     from .part import Part
 
 
@@ -17,5 +17,5 @@ class PartFactory(Protocol):
         content_type: str,
         rel_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: Package,
     ) -> Part: ...

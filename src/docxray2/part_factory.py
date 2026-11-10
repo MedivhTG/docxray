@@ -12,7 +12,7 @@ from .opc.part import Part
 from .opc.pkg_uri import PkgURI
 
 if TYPE_CHECKING:
-    from .opc.package import OpcPackage
+    from .opc.package import Package
 
 
 class DocxPartFactory:
@@ -27,7 +27,7 @@ class DocxPartFactory:
         content_type: str,
         rel_type: str,
         blob: bytes,
-        package: OpcPackage,
+        package: Package,
     ) -> Part:
         PartClass = cls._part_cls_for(content_type)
         return PartClass.load(part_name, content_type, blob, package)
