@@ -32,6 +32,19 @@ LANG_RFC3066_RE = re.compile(r"^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 
 
 class CoreProperties(DocxElementProxy[CT_CoreProperties]):
+    """Core properties of a package as defined in ECMA-376 Part 2, Section 8.
+
+    These properties provide a well-known set of metadata for packages,
+    drawn from three sources:
+      - Open Packaging Conventions (category, contentStatus, keywords,
+        lastModifiedBy, lastPrinted, revision, version)
+      - Dublin Core Metadata Element Set (creator, description, identifier,
+        language, subject, title)
+      - DCMI Metadata Terms (created, modified, as W3CDTF)
+
+    See ECMA-376 Part 2, Table 3 for the authoritative mapping.
+    """
+
     @property
     def category(self) -> str | None:
         """A categorization of the content of this package."""
@@ -113,6 +126,9 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
 
     @property
     def language(self) -> str | None:
+        """The language of the intellectual content of the resource.
+        Note that IETF RFC 3066 provides guidance on encoding to
+        represent languages."""
         return self._get_elm_content("language")
 
     @language.setter
