@@ -16,6 +16,7 @@ STRING_T = TypeVar("STRING_T", bound=str | StrEnum)
 
 class XsdString(SimpleType[STRING_T]):
     SCHEMA = Restriction(SimpleType)
+    FACETS = {"whitespace": "preserve"}
 
     @classmethod
     def _validate(
@@ -70,7 +71,7 @@ class XsdDateTime(SimpleType[datetime]):
 
     @classmethod
     def _validate(cls, xml_value: str, facets: dict[str, Any]) -> datetime:
-        xml_value = cls.apply_whitespace(xml_value)
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
         cls.validate_pattern(xml_value, **facets)
         cls.validate_enumaration(xml_value, **facets)
         dt = cls.convert_to_datetime_from_iso8601(xml_value)
@@ -78,6 +79,6 @@ class XsdDateTime(SimpleType[datetime]):
         return dt
 
     @classmethod
-    def _stringify(cls, py_value: datetime) -> str:
+    def _stringify(cls, py_value: datetime, facets: dict[str, str]) -> str:
         utc_dt = py_value.astimezone(UTC)
         return utc_dt.strftime(W3CDTF_FORMAT)

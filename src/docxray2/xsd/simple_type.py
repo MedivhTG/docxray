@@ -152,37 +152,42 @@ class SimpleType[T]:
         return xml_value
 
     @classmethod
-    def stringify(cls, py_value: Any) -> str:
+    def stringify(
+        cls, py_value: Any, facets: dict[str, Any] | None = None
+    ) -> str:
+        facets_final = cls.FACETS.copy() if cls.FACETS else {}
+        if facets:
+            facets_final.update(facets)
         if not hasattr(cls, "SCHEMA"):
-            return cls._stringify(py_value)
+            return cls._stringify(py_value, facets_final)
         if isinstance(cls.SCHEMA, Restriction):
             schema = cls.SCHEMA
             if schema.base is SimpleType:
-                return cls._stringify(py_value)
-            return cls.SCHEMA.base.stringify(py_value)
+                return cls._stringify(py_value, facets_final)
+            return cls.SCHEMA.base.stringify(py_value, facets_final)
         # We will get first type (as rule)
-        return cls.SCHEMA.member_types[0].stringify(py_value)
+        return cls.SCHEMA.member_types[0].stringify(py_value, facets_final)
 
     @classmethod
-    def _stringify(cls, py_value: Any) -> str:
-        return str(py_value)
+    def _stringify(cls, py_value: Any, facets: dict[str, Any]) -> str:
+        return cls.apply_whitespace(str(py_value), **facets)
 
     @classmethod
     def apply_whitespace(
         cls,
         xml_value: str,
-        whitespace: Literal["preserve", "replace", "collapse"] = "collapse",
+        whitespace: Literal["preserve", "replace", "collapse"] = "preserve",
         **kwargs: dict[str, Any],
     ) -> str:
-        if whitespace == "collapse":
+        if whitespace == "preserve":
+            return xml_value
+        elif whitespace == "collapse":
             replaced = (
                 xml_value.replace("\t", " ")
                 .replace("\n", " ")
                 .replace("\r", " ")
             )
             return re.sub(r" +", " ", replaced).strip()
-        elif whitespace == "preserve":
-            return xml_value
         elif whitespace == "replace":
             return (
                 xml_value.replace("\t", " ")
