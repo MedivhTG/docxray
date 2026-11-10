@@ -3,7 +3,12 @@ from typing import Any
 
 # docxray stuff
 from docxray2.oxml.parser import Oxml
-from docxray2.oxml.xml.core_properties import CT_CoreProperties, E_Category
+from docxray2.oxml.xml.core_properties import (
+    CT_CoreProperties,
+    E_Category,
+    E_ContentStatus,
+)
+from docxray2.oxml.xml.dublin_core import E_Created
 
 from .base import DocxElementProxy
 
@@ -21,9 +26,17 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
     def content_status(self) -> str | None:
         return self._get_elm_content("contentStatus")
 
+    @content_status.setter
+    def content_status(self, value: str) -> None:
+        return self._set_elm_content(E_ContentStatus, "contentStatus", value)
+
     @property
     def created(self) -> datetime | None:
         return self._get_w3cdtf_elm_content("created")
+
+    @created.setter
+    def created(self, value: datetime) -> None:
+        return self._set_elm_content(E_Created, "created", value)
 
     @property
     def creator(self) -> str | None:

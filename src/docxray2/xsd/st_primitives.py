@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, TypeVar
 
@@ -62,6 +62,9 @@ class XsdID(SimpleType[str]):
     SCHEMA = Restriction(XsdNCName)
 
 
+W3CDTF_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+
 class XsdDateTime(SimpleType[datetime]):
     SCHEMA = Restriction(SimpleType)
 
@@ -73,3 +76,8 @@ class XsdDateTime(SimpleType[datetime]):
         dt = cls.convert_to_datetime_from_iso8601(xml_value)
         cls.validate_datetime(dt, **facets)
         return dt
+
+    @classmethod
+    def _stringify(cls, py_value: datetime) -> str:
+        utc_dt = py_value.astimezone(UTC)
+        return utc_dt.strftime(W3CDTF_FORMAT)

@@ -333,7 +333,7 @@ class AttrRequired[T](Attr):
         if element is None:
             return
         old_value = element.get(self.qname, MISSING)
-        element.set(self.qname, value)
+        element.set(self.qname, self.simple_type.stringify(value))
         try:
             element.attr_required(self.qname, self.simple_type, self.fixed)
         except (OxmlAttrRequiredError, XsdValidationError) as e:
@@ -392,7 +392,7 @@ class AttrOptional[T](Attr):
         if element is None:
             return
         old_value = element.get(self.qname, MISSING)
-        element.set(self.qname, value)
+        element.set(self.qname, self.simple_type.stringify(value))
         try:
             element.attr_optional(self.qname, self.simple_type, self.default)
         except XsdValidationError as e:
@@ -428,7 +428,7 @@ class Content[T]:
         if element is None:
             return
         old_value = element.text
-        element.text = value
+        element.text = self.simple_type.stringify(value)
         try:
             element.tag_content(self.simple_type)
         except XsdValidationError as e:
