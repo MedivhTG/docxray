@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 # docxray stuff
-from docxray2.oxml.parser import Oxml
 from docxray2.xmlchemy import AttrOptional, Content
 from docxray2.xsd.st_primitives import XsdDateTime, XsdString
 
@@ -16,13 +15,14 @@ from .dublin_core import (
     E_Subject,
     E_Title,
 )
+from .parser import OpcOxml
 
 
-class OxmlNSCoreProperties(Oxml, ns="cp"):
+class OpcOxmlNSCoreProperties(OpcOxml, ns="cp"):
     pass
 
 
-class CT_CoreProperties(OxmlNSCoreProperties):
+class CT_CoreProperties(OpcOxmlNSCoreProperties):
     @property
     def category(self) -> E_Category | None:
         return self.zero_or_one(E_Category)
@@ -85,7 +85,7 @@ class CT_CoreProperties(OxmlNSCoreProperties):
 
 
 # MIXED
-class CT_Keywords(OxmlNSCoreProperties):
+class CT_Keywords(OpcOxmlNSCoreProperties):
     content = Content()
 
     @property
@@ -93,7 +93,7 @@ class CT_Keywords(OxmlNSCoreProperties):
         return self.zero_or_more(E_Value)
 
 
-class CT_Keyword(OxmlNSCoreProperties):
+class CT_Keyword(OpcOxmlNSCoreProperties):
     lang = AttrOptional("xml:lang")
     content = Content()
 
@@ -105,11 +105,11 @@ class E_CoreProperties(CT_CoreProperties, tag="coreProperties"):
     pass
 
 
-class E_Category(OxmlNSCoreProperties, tag="category"):
+class E_Category(OpcOxmlNSCoreProperties, tag="category"):
     content = Content(XsdString[str])
 
 
-class E_ContentStatus(OxmlNSCoreProperties, tag="contentStatus"):
+class E_ContentStatus(OpcOxmlNSCoreProperties, tag="contentStatus"):
     content = Content(XsdString[str])
 
 
@@ -121,17 +121,17 @@ class E_Value(CT_Keyword, tag="value"):
     pass
 
 
-class E_LastModifiedBy(OxmlNSCoreProperties, tag="lastModifiedBy"):
+class E_LastModifiedBy(OpcOxmlNSCoreProperties, tag="lastModifiedBy"):
     content = Content(XsdString[str])
 
 
-class E_LastPrinted(OxmlNSCoreProperties, tag="lastPrinted"):
+class E_LastPrinted(OpcOxmlNSCoreProperties, tag="lastPrinted"):
     content = Content(XsdDateTime)
 
 
-class E_Revision(OxmlNSCoreProperties, tag="revision"):
+class E_Revision(OpcOxmlNSCoreProperties, tag="revision"):
     content = Content(XsdString[str])
 
 
-class E_Version(OxmlNSCoreProperties, tag="version"):
+class E_Version(OpcOxmlNSCoreProperties, tag="version"):
     content = Content(XsdString[str])

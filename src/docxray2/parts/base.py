@@ -4,7 +4,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Self
 
 # docxray stuff
-# from docxray2.opc.package import OpcPackage
 from docxray2.opc.part import Part
 from docxray2.opc.pkg_uri import PkgURI
 from docxray2.xmlchemy import BaseOxmlElement

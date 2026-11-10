@@ -4,8 +4,7 @@ from typing import Any
 from warnings import warn
 
 # docxray stuff
-from docxray2.oxml.parser import Oxml
-from docxray2.oxml.xml.core_properties import (
+from docxray2.opc.oxml.core_properties import (
     CT_CoreProperties,
     E_Category,
     E_ContentStatus,
@@ -15,7 +14,7 @@ from docxray2.oxml.xml.core_properties import (
     E_Revision,
     E_Version,
 )
-from docxray2.oxml.xml.dublin_core import (
+from docxray2.opc.oxml.dublin_core import (
     E_Created,
     E_Creator,
     E_Description,
@@ -25,13 +24,13 @@ from docxray2.oxml.xml.dublin_core import (
     E_Subject,
     E_Title,
 )
-
-from .base import DocxElementProxy
+from docxray2.opc.oxml.parser import OpcOxml
+from docxray2.opc.proxy.base import OpcElementProxy
 
 LANG_RFC3066_RE = re.compile(r"^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 
 
-class CoreProperties(DocxElementProxy[CT_CoreProperties]):
+class CoreProperties(OpcElementProxy[CT_CoreProperties]):
     """Core properties of a package as defined in ECMA-376 Part 2, Section 8.
 
     These properties provide a well-known set of metadata for packages,
@@ -213,7 +212,7 @@ class CoreProperties(DocxElementProxy[CT_CoreProperties]):
         return elm.content
 
     def _set_elm_content(
-        self, elm_cls: type[Oxml], name: str, value: Any
+        self, elm_cls: type[OpcOxml], name: str, value: Any
     ) -> None:
         elm = getattr(self.element, name)
         if elm is None:

@@ -5,12 +5,13 @@ from dataclasses import dataclass
 from warnings import warn
 
 # docxray stuff
+from docxray2.opc.oxml.relationships import E_Relationships
 from docxray2.types import PkgFile
 
-from .enums import SE_TARGET_MODE
-from .oxml import E_Relationships, E_Types
+from .oxml.content_types import E_Types
 from .phys_pkg import PhysPkgReader, phys_pkg_reader
 from .pkg_uri import PKG_URI, PkgURI
+from .xsd.enums import SE_TARGET_MODE
 
 
 class PkgReader:

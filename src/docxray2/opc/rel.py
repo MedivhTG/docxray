@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from .enums import SE_TARGET_MODE
-from .oxml import E_Relationship, E_Relationships
+from .oxml.relationships import E_Relationship, E_Relationships
+from .xsd.enums import SE_TARGET_MODE
 
 if TYPE_CHECKING:
     from .part import Part
@@ -43,13 +43,16 @@ class Relationships(dict[str, "Relationship"]):
             self._target_parts_referenced[rel_id] = target
         return rel
 
-    def part_with_rel_type(self, rel_type: str) -> Part:
-        return self._get_rel_of_type(rel_type).target_part
+    def part_with_rel_type(self, rel_type: str) -> Part | None:
+        rel = self._get_rel_of_type(rel_type)
+        if rel is None:
+            return None
+        return rel.target_part
 
-    def _get_rel_of_type(self, rel_type: str) -> Relationship:
+    def _get_rel_of_type(self, rel_type: str) -> Relationship | None:
         matching = [rel for rel in self.values() if rel.rel_type == rel_type]
         if len(matching) == 0:
-            raise KeyError(f"No matched rel of type {rel_type}")
+            return None
         if len(matching) > 1:
             raise ValueError(f"Multiple rels of type {rel_type}")
         return matching[0]

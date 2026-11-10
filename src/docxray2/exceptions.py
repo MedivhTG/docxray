@@ -1,4 +1,4 @@
-"""Module for base OXML errors."""
+"""Module for base errors."""
 
 
 class OxmlBaseError(Exception):
@@ -14,4 +14,12 @@ class OxmlAttrOptionalError(OxmlBaseError):
 
 
 class OxmlContentError(OxmlBaseError):
+    pass
+
+
+class DocxBaseError(Exception):
+    pass
+
+
+class DocxMissingPart(DocxBaseError):
     pass

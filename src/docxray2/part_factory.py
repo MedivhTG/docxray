@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray2.parts.core_properties import CorePropertiesPart
+from docxray2.opc.parts.core_properties import CorePropertiesPart
 from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
 from docxray2.parts.main_document import MainDocumentPart
 

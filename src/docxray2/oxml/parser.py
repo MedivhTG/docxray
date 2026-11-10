@@ -17,12 +17,7 @@ oxml_parser.set_element_class_lookup(oxml_nslookup)
 
 OXML_NSMAP: dict[str | None, str] = {
     "w": NAMESPACE.MAIN_DOCUMENT,
-    "cp": NAMESPACE.CORE_PROPERTIES,
     "ep": NAMESPACE.EXTENDED_PROPERTIES,
-    "xml": NAMESPACE.XML,
-    "xsi": NAMESPACE.XML_SHEMA_INSTANCE,
-    "dc": NAMESPACE.DUBLIN_CORE,
-    "dcterms": NAMESPACE.DUBLIN_CORE_TERMS,
 }
 
 
