@@ -152,6 +152,22 @@ class SimpleType[T]:
         return xml_value
 
     @classmethod
+    def stringify(cls, py_value: Any) -> str:
+        if not hasattr(cls, "SCHEMA"):
+            return cls._stringify(py_value)
+        if isinstance(cls.SCHEMA, Restriction):
+            schema = cls.SCHEMA
+            if schema.base is SimpleType:
+                return cls._stringify(py_value)
+            return cls.SCHEMA.base.stringify(py_value)
+        # We will get first type (as rule)
+        return cls.SCHEMA.member_types[0].stringify(py_value)
+
+    @classmethod
+    def _stringify(cls, py_value: Any) -> str:
+        return str(py_value)
+
+    @classmethod
     def apply_whitespace(
         cls,
         xml_value: str,
