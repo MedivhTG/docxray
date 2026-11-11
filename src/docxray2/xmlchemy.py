@@ -86,7 +86,7 @@ class BaseOxmlElement(etree.ElementBase):
     def attr_required(
         self,
         name: str | etree.QName,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> T:
         """Read a required attribute and validate it.
@@ -122,7 +122,7 @@ class BaseOxmlElement(etree.ElementBase):
     def attr_optional(
         self,
         name: str | etree.QName,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
         default: str | None = None,
     ) -> T | None:
         """Read an optional attribute and validate it.
@@ -152,14 +152,14 @@ class BaseOxmlElement(etree.ElementBase):
         )
 
     def tag_content(
-        self, simple_type: type[SimpleType[T]] = XsdAnySimpleType  # type: ignore[assignment]
+        self, simple_type: type[SimpleType[T]] = XsdAnySimpleType[str]  # type: ignore[assignment]
     ) -> T | None:
         content = self.text
         if content is None:
             return None
         return simple_type.validate_schema(content)
 
-    def tag_full_content(self, simple_type: type[SimpleType[T]] = XsdAnySimpleType) -> T:  # type: ignore[assignment]
+    def tag_full_content(self, simple_type: type[SimpleType[T]] = XsdAnySimpleType[str]) -> T:  # type: ignore[assignment]
         full_content = "".join(self.itertext())
         return simple_type.validate_schema(full_content)
 
@@ -294,7 +294,7 @@ class AttrRequired[T](Attr):
     def __init__(
         self,
         attr_name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
         fixed: str | None = None,
     ) -> None:
         self._attr_name = attr_name
@@ -302,7 +302,7 @@ class AttrRequired[T](Attr):
         self.simple_type = simple_type
         self.fixed = fixed
 
-    @cached_property
+    @property
     def qname(self) -> etree.QName:
         if self._qname is None:
             self._qname = qn(self.owner._nsmap or {}, self._attr_name)
@@ -351,7 +351,7 @@ class AttrOptional[T](Attr):
     def __init__(
         self,
         attr_name: str,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
         default: str | None = None,
     ) -> None:
         self._attr_name = attr_name
@@ -399,7 +399,7 @@ class Content[T]:
 
     def __init__(
         self,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType,  # type: ignore[assignment]
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
     ) -> None:
         self.simple_type = simple_type
 

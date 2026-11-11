@@ -24,27 +24,27 @@ class CT_W3CDTF(OpcOxmlNSDublinCoreTerms):
 
 
 class E_Creator(OpcOxmlNSDublinCore, tag="creator"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Description(OpcOxmlNSDublinCore, tag="description"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Identifier(OpcOxmlNSDublinCore, tag="identifier"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Language(OpcOxmlNSDublinCore, tag="language"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Subject(OpcOxmlNSDublinCore, tag="subject"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Title(OpcOxmlNSDublinCore, tag="title"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Created(CT_W3CDTF, tag="created"):
