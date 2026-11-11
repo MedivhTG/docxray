@@ -19,7 +19,7 @@ class OpcElementProxy[ELM_T: OpcOxml, PART_T: OpcXmlPart = OpcXmlPart[ELM_T]]:
     def parent(self) -> ProvidesOpcXmlPart:
         return self._parent
 
-    @cached_property
+    @property
     def element(self) -> ELM_T:
         return self._element
 
