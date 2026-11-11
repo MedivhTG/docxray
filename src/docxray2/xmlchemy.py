@@ -23,7 +23,7 @@ T = TypeVar("T")
 FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
 
 
-class ElementAttrsRegistry:
+class _ElementAttrsRegistry:
     __map__: dict[type[BaseOxmlElement], dict[str, Attr]] = {}
 
     @classmethod
@@ -64,6 +64,7 @@ class BaseOxmlElement(etree.ElementBase):
     _namespace: ClassVar[str | None] = None
     _tagname: ClassVar[str | None] = None
     __qname__: ClassVar[etree.QName | None] = None
+    __attrs__: dict[str, Attr] | None = None
 
     def __init_subclass__(
         cls,
@@ -79,10 +80,6 @@ class BaseOxmlElement(etree.ElementBase):
     def __repr__(self) -> str:
         # Now we can watch right cls name in debug
         return super().__repr__().replace("Element", type(self).__name__, 1)
-
-    @classmethod
-    def attrs(cls) -> dict[str, Attr]:
-        return ElementAttrsRegistry.attrs(cls)
 
     def attr_required(
         self,
@@ -225,6 +222,12 @@ class BaseOxmlElement(etree.ElementBase):
     def from_xml(cls, text: str | bytes) -> Self: ...
 
     @classmethod
+    def attributes(cls) -> dict[str, Attr]:
+        if cls.__attrs__ is None:
+            cls.__attrs__ = {}
+        return cls.__attrs__
+
+    @classmethod
     def register_elm(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
@@ -266,12 +269,15 @@ class BaseOxmlElement(etree.ElementBase):
     @classmethod
     def _register_attrs(cls) -> None:
         if cls.__qname__ is not None:
-            for attr in ElementAttrsRegistry.attrs(cls).values():
+            for attr_name, attr in _ElementAttrsRegistry.attrs(cls).items():
                 attr.compute_qname()
+                if cls.__attrs__ is None:
+                    cls.__attrs__ = {}
+                cls.__attrs__[attr_name] = attr
 
     @classmethod
     def _get_descriptor(cls, name: str) -> Attr:
-        return ElementAttrsRegistry.get_descriptor(cls, name)
+        return _ElementAttrsRegistry.get_descriptor(cls, name)
 
 
 class Attr:
@@ -283,7 +289,7 @@ class Attr:
         self.owner = owner
         self.name = name
         self._qname: etree.QName | None = None
-        ElementAttrsRegistry.register(owner, name, self)
+        _ElementAttrsRegistry.register(owner, name, self)
 
     def _compute_qname(self, attr_name: str) -> None:
         if self._qname is None and self.owner._nsmap is not None:
