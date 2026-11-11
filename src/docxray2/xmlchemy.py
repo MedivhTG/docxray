@@ -381,7 +381,7 @@ class AttrOptional[T](Attr):
         self.simple_type = simple_type
         self.default = default
 
-    @cached_property
+    @property
     def qname(self) -> etree.QName:
         if self._qname is None:
             self._qname = qn(self.owner._nsmap or {}, self._attr_name)
