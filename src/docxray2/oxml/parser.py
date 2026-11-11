@@ -34,7 +34,7 @@ class Oxml(
         nsmap: dict[str | None, str] | None = None,
     ) -> Self:
         attrib = {}
-        for attr in cls.attrs().values():
+        for attr in cls.attributes().values():
             if isinstance(attr, AttrRequired):
                 attrib[attr.qname] = attr.fixed or ""
         qname = cls.qname()
