@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import abstractmethod
 from functools import cached_property
 from typing import Any, ClassVar, Self, TypeVar
-from warnings import warn
 
 from lxml import etree
 from typing_extensions import Sentinel
@@ -13,7 +12,6 @@ from typing_extensions import Sentinel
 from .exceptions import (
     OxmlAttrOptionalError,
     OxmlAttrRequiredError,
-    OxmlChildWarning,
     OxmlContentError,
 )
 from .xsd.exceptions import XsdValidationError
@@ -179,24 +177,7 @@ class BaseOxmlElement(etree.ElementBase):
         )  # type: ignore[return-value]
 
     def zero_or_one(self, element: type[FIND_T]) -> FIND_T | None:
-        iterator = self.iterfind(element.qname())
-        found_elm = next(iterator, None)
-        if found_elm is None:
-            return None
-        found_ahead = next(iterator, None)
-        if found_ahead is None:
-            return found_elm  # type: ignore[return-value]
-        warn(
-            f"Child element `{element.qname()}` must appear once!",
-            OxmlChildWarning,
-            stacklevel=2,
-        )
-        while found_ahead is not None:
-            found_ahead_next = next(iterator, None)
-            if found_ahead_next is None:
-                break
-            found_ahead = found_ahead_next
-        return found_ahead  # type: ignore[return-value]
+        return next(self.iterchildren(element.qname(), reversed=True), None)  # type: ignore[return-value]
 
     def append(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, element: BaseOxmlElement
