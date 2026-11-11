@@ -5,9 +5,9 @@ from warnings import warn
 
 # docxray stuff
 from docxray2.opc.oxml.core_properties import (
-    CT_CoreProperties,
     E_Category,
     E_ContentStatus,
+    E_CoreProperties,
     E_Keywords,
     E_LastModifiedBy,
     E_LastPrinted,
@@ -31,7 +31,7 @@ from docxray2.xsd.w3cdtf import W3CDTFDateTime
 LANG_RFC3066_RE = re.compile(r"^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 
 
-class CoreProperties(OpcElementProxy[CT_CoreProperties]):
+class CoreProperties(OpcElementProxy[E_CoreProperties]):
     """Core properties of a package as defined in ECMA-376 Part 2, Section 8.
 
     These properties provide a well-known set of metadata for packages,

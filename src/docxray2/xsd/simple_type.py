@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from decimal import Decimal
 from enum import StrEnum
 from re import Pattern
 from typing import Any, Literal, TypeVar
@@ -82,6 +83,20 @@ class SimpleType[T]:
 
     SCHEMA: Restriction | Union
     FACETS: dict[str, Any] | None = None
+    __facets_mro__: dict[str, Any]
+
+    def __init_subclass__(cls) -> None:
+        super().__init_subclass__()
+        facets_mro = {}
+        for base in reversed(cls.__mro__):
+            facets = base.__dict__.get("FACETS")
+            if isinstance(facets, dict):
+                facets_mro.update(facets)
+        cls.__facets_mro__ = facets_mro
+
+    @classmethod
+    def facets(cls) -> dict[str, Any]:
+        return cls.__facets_mro__.copy()
 
     @classmethod
     def validate_schema(
@@ -107,7 +122,7 @@ class SimpleType[T]:
             XsdValidationError: If validation fails (directly, via the base
                 type, or because no union member accepted the value).
         """
-        facets_final = cls.FACETS.copy() if cls.FACETS else {}
+        facets_final = cls.facets()
         if facets:
             facets_final.update(facets)
         if not hasattr(cls, "SCHEMA"):
@@ -156,7 +171,7 @@ class SimpleType[T]:
     def stringify(
         cls, py_value: Any, facets: dict[str, Any] | None = None
     ) -> str:
-        facets_final = cls.FACETS.copy() if cls.FACETS else {}
+        facets_final = cls.facets()
         if facets:
             facets_final.update(facets)
         if not hasattr(cls, "SCHEMA"):
@@ -220,13 +235,9 @@ class SimpleType[T]:
         max_exclusive: datetime | None = None,
         **kwargs: dict[str, Any],
     ) -> None:
-        inc_on = min_inclusive is not None or max_inclusive is not None
-        exc_on = min_exclusive is not None or max_exclusive is not None
-        if inc_on and exc_on:
-            raise ValueError(
-                "Inclusive and Exclusive params are mutually exclusive"
-            )
-
+        cls._check_min_max_facets(
+            min_inclusive, max_inclusive, min_exclusive, max_exclusive
+        )
         dt_utc = cls._dt_to_utc(dt)
         lo_inc = (
             cls._dt_to_utc(min_inclusive)
@@ -264,6 +275,78 @@ class SimpleType[T]:
         if hi_exc is not None and dt_utc >= hi_exc:
             raise XsdValidationError(
                 f"Datetime {dt} greater or equal than {max_exclusive}"
+            )
+
+    @classmethod
+    def validate_numeric_ranges(
+        cls,
+        num: int | Decimal,
+        min_inclusive: int | Decimal | None = None,
+        max_inclusive: int | Decimal | None = None,
+        min_exclusive: int | Decimal | None = None,
+        max_exclusive: int | Decimal | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        cls._check_min_max_facets(
+            min_inclusive, max_inclusive, min_exclusive, max_exclusive
+        )
+        if min_inclusive is not None and num < min_inclusive:
+            raise XsdValidationError(
+                f"Numeric {num} less than {min_inclusive}"
+            )
+        if max_inclusive is not None and num > max_inclusive:
+            raise XsdValidationError(
+                f"Numeric {num} greater than {max_inclusive}"
+            )
+        if min_exclusive is not None and num <= min_exclusive:
+            raise XsdValidationError(
+                f"Numeric {num} less or equal than {min_exclusive}"
+            )
+        if max_exclusive is not None and num >= max_exclusive:
+            raise XsdValidationError(
+                f"Numeric {num} greater or equal than {max_exclusive}"
+            )
+
+    @classmethod
+    def validate_fraction_digits(
+        cls,
+        num: Decimal | int,
+        fraction_digits: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        if fraction_digits is None:
+            return
+        if isinstance(num, int):
+            num = Decimal(num)
+        normalized = num.normalize()
+        exp = normalized.as_tuple().exponent
+        if not isinstance(exp, int):
+            raise XsdValidationError(
+                f"Unexpected exponent for finite decimal: {exp!r}"
+            )
+        frac = -exp if exp < 0 else 0
+        if frac > fraction_digits:
+            raise XsdValidationError(
+                f"fractionDigits exceeded: {num!r} has {frac} fraction digits, "
+                f"max {fraction_digits}"
+            )
+
+    @classmethod
+    def validate_total_digits(
+        cls,
+        num: Decimal | int,
+        total_digits: int | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        if total_digits is None:
+            return
+        if isinstance(num, int):
+            num = Decimal(num)
+        actual = len(num.as_tuple().digits)
+        if actual > total_digits:
+            raise XsdValidationError(
+                f"totalDigits exceeded: {num!r} has {actual} significant digits, "
+                f"max {total_digits}"
             )
 
     @classmethod
@@ -325,3 +408,18 @@ class SimpleType[T]:
         if dt.tzinfo is None:
             return dt.replace(tzinfo=UTC)
         return dt.astimezone(UTC)
+
+    @classmethod
+    def _check_min_max_facets(
+        cls,
+        min_inclusive: Any | None,
+        max_inclusive: Any | None,
+        min_exclusive: Any | None,
+        max_exclusive: Any | None,
+    ) -> None:
+        inc_on = min_inclusive is not None or max_inclusive is not None
+        exc_on = min_exclusive is not None or max_exclusive is not None
+        if inc_on and exc_on:
+            raise ValueError(
+                "Inclusive and Exclusive params are mutually exclusive"
+            )
