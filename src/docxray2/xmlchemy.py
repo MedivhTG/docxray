@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from functools import cached_property
 from typing import Any, ClassVar, Self, TypeVar
 
 from lxml import etree
