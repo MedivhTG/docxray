@@ -25,5 +25,7 @@ core_props.subject = "DOCXRAY"
 core_props.title = "Call"
 core_props.version = "111"
 
+extf_props = doc.get_or_add_extf_props()
+
 doc.save(out)
 wait = 1

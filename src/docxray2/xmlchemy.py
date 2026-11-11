@@ -13,6 +13,7 @@ from typing_extensions import Sentinel
 from .exceptions import (
     OxmlAttrOptionalError,
     OxmlAttrRequiredError,
+    OxmlChildWarning,
     OxmlContentError,
 )
 from .xsd.exceptions import XsdValidationError
@@ -185,7 +186,11 @@ class BaseOxmlElement(etree.ElementBase):
         found_ahead = next(iterator, None)
         if found_ahead is None:
             return found_elm  # type: ignore[return-value]
-        warn(f"Child element `{element.qname()}` must appear once!")
+        warn(
+            f"Child element `{element.qname()}` must appear once!",
+            OxmlChildWarning,
+            stacklevel=2,
+        )
         while found_ahead is not None:
             found_ahead_next = next(iterator, None)
             if found_ahead_next is None:
