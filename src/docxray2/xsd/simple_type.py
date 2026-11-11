@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from re import Pattern
 from typing import Any, Literal, TypeVar
@@ -226,19 +226,42 @@ class SimpleType[T]:
             raise ValueError(
                 "Inclusive and Exclusive params are mutually exclusive"
             )
-        if min_inclusive is not None and dt < min_inclusive:
+
+        dt_utc = cls._dt_to_utc(dt)
+        lo_inc = (
+            cls._dt_to_utc(min_inclusive)
+            if min_inclusive is not None
+            else None
+        )
+        hi_inc = (
+            cls._dt_to_utc(max_inclusive)
+            if max_inclusive is not None
+            else None
+        )
+        lo_exc = (
+            cls._dt_to_utc(min_exclusive)
+            if min_exclusive is not None
+            else None
+        )
+        hi_exc = (
+            cls._dt_to_utc(max_exclusive)
+            if max_exclusive is not None
+            else None
+        )
+
+        if lo_inc is not None and dt_utc < lo_inc:
             raise XsdValidationError(
                 f"Datetime {dt} less than {min_inclusive}"
             )
-        if max_inclusive is not None and dt > max_inclusive:
+        if hi_inc is not None and dt_utc > hi_inc:
             raise XsdValidationError(
                 f"Datetime {dt} greater than {max_inclusive}"
             )
-        if min_exclusive is not None and dt <= min_exclusive:
+        if lo_exc is not None and dt_utc <= lo_exc:
             raise XsdValidationError(
                 f"Datetime {dt} less or equal than {min_exclusive}"
             )
-        if max_exclusive is not None and dt >= max_exclusive:
+        if hi_exc is not None and dt_utc >= hi_exc:
             raise XsdValidationError(
                 f"Datetime {dt} greater or equal than {max_exclusive}"
             )
@@ -296,3 +319,9 @@ class SimpleType[T]:
             raise XsdValidationError(
                 f"Pattern mismatch for `{xml_value}` <= `{pattern}`"
             )
+
+    @classmethod
+    def _dt_to_utc(cls, dt: datetime) -> datetime:
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=UTC)
+        return dt.astimezone(UTC)
