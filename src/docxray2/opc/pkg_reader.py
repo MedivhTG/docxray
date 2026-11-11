@@ -5,10 +5,11 @@ from dataclasses import dataclass
 from warnings import warn
 
 # docxray stuff
-from docxray2.opc.oxml.relationships import E_Relationships
 from docxray2.types import PkgFile
 
+from .exceptions import DanglingRelationshipWarning
 from .oxml.content_types import E_Types
+from .oxml.relationships import E_Relationships
 from .phys_pkg import PhysPkgReader, phys_pkg_reader
 from .pkg_uri import PKG_URI, PkgURI
 from .xsd.enums import SE_TARGET_MODE
@@ -80,7 +81,7 @@ class PkgReader:
     ) -> Generator[tuple[PkgURI, bytes, str, _SerializedRelationships]]:
         if visited_part_names is None:
             visited_part_names = set()
-        for srel in srels:
+        for srel in list(srels):
             if srel.is_external:
                 continue
             part_name = srel.target_part_name
@@ -92,6 +93,7 @@ class PkgReader:
                 warn(
                     "Relationship missing in the package for: "
                     f"rId={srel.rel_id}, partname={part_name}",
+                    DanglingRelationshipWarning,
                     stacklevel=2,
                 )
                 continue

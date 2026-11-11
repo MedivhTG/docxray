@@ -225,6 +225,6 @@ class CoreProperties(OpcElementProxy[CT_CoreProperties]):
         w3cdtf_elm = getattr(self.element, name)
         if w3cdtf_elm is None:
             return None
-        # Call for validate
+        # Call to validate
         _ = w3cdtf_elm.schemaType
         return w3cdtf_elm.content

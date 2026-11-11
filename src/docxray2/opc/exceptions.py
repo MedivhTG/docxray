@@ -4,3 +4,7 @@ class OpcError(Exception):
 
 class OpcPackageNotFoundError(OpcError):
     pass
+
+
+class DanglingRelationshipWarning(UserWarning):
+    pass

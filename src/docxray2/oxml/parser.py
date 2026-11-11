@@ -18,6 +18,7 @@ oxml_parser.set_element_class_lookup(oxml_nslookup)
 OXML_NSMAP: dict[str | None, str] = {
     "w": NAMESPACE.MAIN_DOCUMENT,
     "ep": NAMESPACE.EXTENDED_PROPERTIES,
+    "vt": NAMESPACE.VARIANT_TYPES,
 }
 
 

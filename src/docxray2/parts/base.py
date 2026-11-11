@@ -9,6 +9,7 @@ from docxray2.opc.pkg_uri import PkgURI
 from docxray2.xmlchemy import BaseOxmlElement
 
 if TYPE_CHECKING:
+
     # docxray stuff
     from docxray2.package import DocxPackage
 
