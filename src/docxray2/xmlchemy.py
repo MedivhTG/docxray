@@ -74,6 +74,7 @@ class BaseOxmlElement(etree.ElementBase):
     ) -> None:
         super().__init_subclass__()
         cls.register_elm(nslookup, nsmap, ns, tag)
+        cls._register_attrs()
 
     def __repr__(self) -> str:
         # Now we can watch right cls name in debug
@@ -263,6 +264,12 @@ class BaseOxmlElement(etree.ElementBase):
         cls.__qname__ = etree.QName(uri, cls._tagname)
 
     @classmethod
+    def _register_attrs(cls) -> None:
+        if cls.__qname__ is not None:
+            for attr in ElementAttrsRegistry.attrs(cls).values():
+                attr.compute_qname()
+
+    @classmethod
     def _get_descriptor(cls, name: str) -> Attr:
         return ElementAttrsRegistry.get_descriptor(cls, name)
 
@@ -271,11 +278,19 @@ class Attr:
     def __set_name__(self, owner: type[BaseOxmlElement], name: str) -> None:
         if not issubclass(owner, BaseOxmlElement):
             raise TypeError(
-                f"Derived {AttrOptional} must be in {BaseOxmlElement} subclass!"
+                f"Derived {self.__class__} must be {BaseOxmlElement} subclass!"
             )
         self.owner = owner
         self.name = name
+        self._qname: etree.QName | None = None
         ElementAttrsRegistry.register(owner, name, self)
+
+    def _compute_qname(self, attr_name: str) -> None:
+        if self._qname is None and self.owner._nsmap is not None:
+            self._qname = qn(self.owner._nsmap, attr_name)
+
+    @abstractmethod
+    def compute_qname(self) -> None: ...
 
 
 class AttrRequired[T](Attr):
@@ -298,7 +313,6 @@ class AttrRequired[T](Attr):
         fixed: str | None = None,
     ) -> None:
         self._attr_name = attr_name
-        self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.fixed = fixed
 
@@ -307,6 +321,9 @@ class AttrRequired[T](Attr):
         if self._qname is None:
             self._qname = qn(self.owner._nsmap or {}, self._attr_name)
         return self._qname
+
+    def compute_qname(self) -> None:
+        self._compute_qname(self._attr_name)
 
     def __get__(
         self, element: BaseOxmlElement | None, owner: type | None = None
@@ -355,7 +372,6 @@ class AttrOptional[T](Attr):
         default: str | None = None,
     ) -> None:
         self._attr_name = attr_name
-        self._qname: etree.QName | None = None
         self.simple_type = simple_type
         self.default = default
 
@@ -364,6 +380,9 @@ class AttrOptional[T](Attr):
         if self._qname is None:
             self._qname = qn(self.owner._nsmap or {}, self._attr_name)
         return self._qname
+
+    def compute_qname(self) -> None:
+        self._compute_qname(self._attr_name)
 
     def __get__(
         self, element: BaseOxmlElement | None, owner: type | None = None
