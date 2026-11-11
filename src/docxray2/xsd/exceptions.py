@@ -7,3 +7,7 @@ class XsdBaseError(Exception):
 
 class XsdValidationError(XsdBaseError):
     pass
+
+
+class XsdStringifyError(XsdBaseError):
+    pass

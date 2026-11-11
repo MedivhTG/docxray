@@ -1,11 +1,13 @@
-from datetime import datetime
-
 # docxray stuff
 from docxray2.xsd.simple_type import SimpleType, Union
-from docxray2.xsd.st_primitives import XsdDateTime
+from docxray2.xsd.st_primitives import (
+    XsdDate,
+    XsdDateTime,
+    XsdGYear,
+    XsdGYearMonth,
+)
+from docxray2.xsd.w3cdtf import W3CDTFDateTime
 
 
-# TODO: mb later, it's enough
-# Member types (union): xs:gYear xs:gYearMonth xs:date xs:dateTime
-class W3CDTF(SimpleType[datetime]):
-    SCHEMA = Union(XsdDateTime)
+class W3CDTF(SimpleType[W3CDTFDateTime]):
+    SCHEMA = Union(XsdDateTime, XsdDate, XsdGYearMonth, XsdGYear)

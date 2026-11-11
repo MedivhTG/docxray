@@ -26,6 +26,7 @@ from docxray2.opc.oxml.dublin_core import (
 )
 from docxray2.opc.oxml.parser import OpcOxml
 from docxray2.opc.proxy.base import OpcElementProxy
+from docxray2.xsd.w3cdtf import W3CDTFDateTime
 
 LANG_RFC3066_RE = re.compile(r"^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 
@@ -63,12 +64,12 @@ class CoreProperties(OpcElementProxy[CT_CoreProperties]):
         self._set_elm_content(E_ContentStatus, "contentStatus", value)
 
     @property
-    def created(self) -> datetime | None:
+    def created(self) -> W3CDTFDateTime | None:
         """Date of creation of the resource."""
         return self._get_w3cdtf_elm_content("created")
 
     @created.setter
-    def created(self, value: datetime) -> None:
+    def created(self, value: W3CDTFDateTime | datetime) -> None:
         self._set_elm_content(E_Created, "created", value)
 
     @property
@@ -152,21 +153,21 @@ class CoreProperties(OpcElementProxy[CT_CoreProperties]):
         self._set_elm_content(E_LastModifiedBy, "lastModifiedBy", value)
 
     @property
-    def last_printed(self) -> datetime | None:
+    def last_printed(self) -> W3CDTFDateTime | None:
         """The date and time of the last printing."""
         return self._get_elm_content("lastPrinted")
 
     @last_printed.setter
-    def last_printed(self, value: datetime) -> None:
+    def last_printed(self, value: W3CDTFDateTime | datetime) -> None:
         self._set_elm_content(E_LastPrinted, "lastPrinted", value)
 
     @property
-    def modified(self) -> datetime | None:
+    def modified(self) -> W3CDTFDateTime | None:
         """Date on which the resource was changed."""
         return self._get_w3cdtf_elm_content("modified")
 
     @modified.setter
-    def modified(self, value: datetime) -> None:
+    def modified(self, value: W3CDTFDateTime | datetime) -> None:
         self._set_elm_content(E_Modified, "modified", value)
 
     @property
@@ -220,7 +221,7 @@ class CoreProperties(OpcElementProxy[CT_CoreProperties]):
             self.element.append(elm)
         elm.content = value  # pyright: ignore[reportAttributeAccessIssue]
 
-    def _get_w3cdtf_elm_content(self, name: str) -> datetime | None:
+    def _get_w3cdtf_elm_content(self, name: str) -> W3CDTFDateTime | None:
         w3cdtf_elm = getattr(self.element, name)
         if w3cdtf_elm is None:
             return None

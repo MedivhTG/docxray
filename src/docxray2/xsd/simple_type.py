@@ -11,10 +11,11 @@ from typing import Any, Literal, TypeVar
 
 from typing_extensions import Sentinel
 
-from .exceptions import XsdValidationError
+from .exceptions import XsdStringifyError, XsdValidationError
 
 T = TypeVar("T")
 NOT_VALIDATED = Sentinel("NOT_VALIDATED")
+NOT_STRINGIFIED = Sentinel("NOT_STRINGIFIED")
 
 
 @dataclass(slots=True)
@@ -124,7 +125,7 @@ class SimpleType[T]:
                     xml_value, facets_final
                 )
                 break
-            except XsdValidationError as e:
+            except (ValueError, XsdValidationError) as e:
                 exceptions_raised.append(str(e))
         if union_value is NOT_VALIDATED:
             raise XsdValidationError(
@@ -166,7 +167,19 @@ class SimpleType[T]:
                 return cls._stringify(py_value, facets_final)
             return cls.SCHEMA.base.stringify(py_value, facets_final)
         # We will get first type (as rule)
-        return cls.SCHEMA.member_types[0].stringify(py_value, facets_final)
+        str_value = NOT_STRINGIFIED
+        exceptions_raised = []
+        for simple_type in cls.SCHEMA.member_types:
+            try:
+                str_value = simple_type.stringify(py_value, facets_final)  # type: ignore[assignment]
+                break
+            except (ValueError, XsdStringifyError) as e:
+                exceptions_raised.append(str(e))
+        if str_value is NOT_STRINGIFIED:
+            raise XsdStringifyError(
+                f"None of the types can stingify value: [{"; ".join(exceptions_raised)}]"
+            )
+        return str_value
 
     @classmethod
     def _stringify(cls, py_value: Any, facets: dict[str, Any]) -> str:
@@ -198,11 +211,7 @@ class SimpleType[T]:
             raise ValueError(f"Unkown whitespace mode: {whitespace}")
 
     @classmethod
-    def convert_to_datetime_from_iso8601(cls, xml_value: str) -> datetime:
-        return datetime.fromisoformat(xml_value)
-
-    @classmethod
-    def validate_datetime(
+    def validate_datetime_ranges(
         cls,
         dt: datetime,
         min_inclusive: datetime | None = None,
@@ -262,7 +271,7 @@ class SimpleType[T]:
             )
 
     @classmethod
-    def validate_enumaration(
+    def validate_enumeration(
         cls,
         xml_value: str,
         enumeration: type[StrEnum] | None = None,
