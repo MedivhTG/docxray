@@ -1,5 +1,4 @@
-# docxray stuff
-from docxray2.oxml.parser import Oxml
+from .parser import Oxml
 
 
 class OxmlNSWml(Oxml, ns="w"):

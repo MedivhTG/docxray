@@ -1,4 +1,8 @@
+import binascii
+import math
 import re
+import struct
+from base64 import b64decode, b64encode
 from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
@@ -33,6 +37,33 @@ class XsdString(XsdAnySimpleType[STRING_T]):
         if enum_member is not None:
             return enum_member
         return xml_value
+
+
+class XsdNormalizedString(XsdString[STRING_T]):
+    @classmethod
+    def _validate(
+        cls, xml_value: str, facets: dict[str, Any]
+    ) -> str | StrEnum:
+        xml_value = cls.apply_whitespace(xml_value, "replace")
+        return super()._validate(xml_value, facets)
+
+    @classmethod
+    def _stringify(cls, py_value: str, facets: dict[str, Any]) -> str:
+        return cls.apply_whitespace(py_value, "replace")
+
+
+class XsdToken(XsdNormalizedString[STRING_T]):
+    @classmethod
+    def _validate(
+        cls, xml_value: str, facets: dict[str, Any]
+    ) -> str | StrEnum:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        return super()._validate(xml_value, facets)
+
+    @classmethod
+    def _stringify(cls, py_value: str, facets: dict[str, Any]) -> str:
+        py_value = cls.apply_whitespace(py_value, "collapse")
+        return super()._stringify(py_value, facets)
 
 
 URI_INVALID_RE = re.compile(r"%(?![0-9A-Fa-f]{2})|#.*#")
@@ -215,9 +246,167 @@ class XsdLong(XsdInteger):
     FACETS = {
         "min_inclusive": -9223372036854775808,
         "max_inclusive": 9223372036854775807,
-        "some_shit": 3,
     }
 
 
 class XsdInt(XsdLong):
     FACETS = {"min_inclusive": -2147483648, "max_inclusive": 2147483647}
+
+
+class XsdShort(XsdInt):
+    FACETS = {"min_inclusive": -32768, "max_inclusive": 32767}
+
+
+class XsdByte(XsdShort):
+    FACETS = {"min_inclusive": -128, "max_inclusive": 127}
+
+
+class XsdNonNegativeInteger(XsdInteger):
+    FACETS = {"min_inclusive": 0}
+
+
+class XsdUnsignedLong(XsdNonNegativeInteger):
+    FACETS = {"max_inclusive": 18446744073709551615}
+
+
+class XsdUnsignedInt(XsdUnsignedLong):
+    FACETS = {"max_inclusive": 4294967295}
+
+
+class XsdUnsignedShort(XsdUnsignedInt):
+    FACETS = {"max_inclusive": 65535}
+
+
+class XsdUnsignedByte(XsdUnsignedShort):
+    FACETS = {"max_inclusive": 255}
+
+
+FLOAT_SPECIAL = {"INF": math.inf, "-INF": -math.inf, "NaN": math.nan}
+FLOAT_RE = re.compile(r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$")
+
+
+class XsdFloat(XsdAnySimpleType[float]):
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> float:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        cls.validate_pattern(xml_value, **facets)
+        cls.validate_enumeration(xml_value, **facets)
+        f = cls.to_float(xml_value)
+        cls.validate_numeric_ranges(f, **facets)
+        return f
+
+    @classmethod
+    def _stringify(cls, py_value: float, facets: dict[str, Any]) -> str:
+        if math.isnan(py_value):
+            return "NaN"
+        if math.isinf(py_value):
+            return "INF" if py_value > 0 else "-INF"
+        try:
+            v32 = struct.unpack(">f", struct.pack(">f", py_value))[0]
+        except OverflowError:
+            return "INF" if py_value > 0 else "-INF"
+        s = repr(v32)
+        if s == "-0.0":
+            return "-0"
+        if s == "0.0":
+            return "0"
+        if "e" in s:
+            mantissa, exp = s.split("e")
+            s = f"{mantissa}E{exp}"
+        return s
+
+    @classmethod
+    def to_float(cls, xml_value: str) -> float:
+        if xml_value in FLOAT_SPECIAL:
+            return FLOAT_SPECIAL[xml_value]
+        if not FLOAT_RE.match(xml_value):
+            raise XsdValidationError(
+                f"Invalid xs:float lexical value: {xml_value!r}"
+            )
+        return float(xml_value)
+
+
+DOUBLE_RE = re.compile(r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$")
+
+
+class XsdDouble(XsdAnySimpleType[float]):
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> float:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        cls.validate_pattern(xml_value, **facets)
+        cls.validate_enumeration(xml_value, **facets)
+        d = cls.to_double(xml_value)
+        cls.validate_numeric_ranges(d, **facets)
+        return d
+
+    @classmethod
+    def _stringify(cls, py_value: Any, facets: dict[str, Any]) -> str:
+        if math.isnan(py_value):
+            return "NaN"
+        if math.isinf(py_value):
+            return "INF" if py_value > 0 else "-INF"
+        s = repr(py_value)
+        if s == "-0.0":
+            return "-0"
+        if s == "0.0":
+            return "0"
+        if "e" in s:
+            mantissa, exp = s.split("e")
+            s = f"{mantissa}E{exp}"
+        return s
+
+    @classmethod
+    def to_double(cls, xml_value: str) -> float:
+        if xml_value in FLOAT_SPECIAL:
+            return FLOAT_SPECIAL[xml_value]
+        if not DOUBLE_RE.match(xml_value):
+            raise XsdValidationError(
+                f"Invalid xs:double lexical value: {xml_value!r}"
+            )
+        return float(xml_value)
+
+
+BOOLEAN_FALSE_XML_VALUES = {"false", "0"}
+BOOLEAN_TRUE_XML_VALUES = {"true", "1"}
+
+
+class XsdBoolean(XsdAnySimpleType[bool]):
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> bool:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        cls.validate_pattern(xml_value, **facets)
+        return cls.to_bool(
+            xml_value, BOOLEAN_FALSE_XML_VALUES, BOOLEAN_TRUE_XML_VALUES
+        )
+
+    @classmethod
+    def to_bool(
+        cls, xml_value: str, false_set: set[str], true_set: set[str]
+    ) -> bool:
+        if xml_value in false_set:
+            return False
+        if xml_value in true_set:
+            return True
+        raise XsdValidationError(
+            f"Invalid xs:boolean lexical form: not in `{list(*false_set, *true_set)}`"
+        )
+
+
+class XsdBase64Binary(XsdAnySimpleType[bytes]):
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> bytes:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        cls.validate_pattern(xml_value, **facets)
+        cls.validate_enumeration(xml_value, **facets)
+        cls.validate_length(xml_value, **facets)
+        try:
+            return b64decode(xml_value, validate=True)
+        except (binascii.Error, ValueError) as e:
+            raise XsdValidationError(f"Invalid xs:base64Binary: {e}")
+
+    @classmethod
+    def _stringify(cls, py_value: bytes, facets: dict[str, Any]) -> str:
+        try:
+            return b64encode(py_value).decode("ascii")
+        except (binascii.Error, TypeError, ValueError) as e:
+            raise XsdStringifyError(f"Invalid xs:base64Binary: {e}")

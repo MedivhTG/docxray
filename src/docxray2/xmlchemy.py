@@ -12,6 +12,7 @@ from .exceptions import (
     OxmlAttrOptionalError,
     OxmlAttrRequiredError,
     OxmlContentError,
+    OxmlExactlyOneError,
 )
 from .xsd.exceptions import XsdStringifyError, XsdValidationError
 from .xsd.primitives import XsdAnySimpleType
@@ -170,6 +171,16 @@ class BaseOxmlElement(etree.ElementBase):
 
     def zero_or_one(self, element: type[FIND_T]) -> FIND_T | None:
         return next(self.iterchildren(element.qname(), reversed=True), None)  # type: ignore[return-value]
+
+    def exactly_one(self, element: type[FIND_T]) -> FIND_T:
+        found_elm = next(
+            self.iterchildren(element.qname(), reversed=True), None
+        )
+        if found_elm is None:
+            raise OxmlExactlyOneError(
+                f"Must be at least one element: `{element.qname()}`!"
+            )
+        return found_elm  # type: ignore[return-value]
 
     def append(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, element: BaseOxmlElement

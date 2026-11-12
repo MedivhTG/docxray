@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 # docxray stuff
-from docxray2.oxml.extended_file_properties import E_Properties
+from docxray2.oxml.shared_dpe import E_Properties
 
 from .base import DocxElementProxy
 
