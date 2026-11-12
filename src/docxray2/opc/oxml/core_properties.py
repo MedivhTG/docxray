@@ -3,7 +3,7 @@ from __future__ import annotations
 
 # docxray stuff
 from docxray2.xmlchemy import AttrOptional, Content
-from docxray2.xsd.st_primitives import XsdDateTime, XsdString
+from docxray2.xsd.primitives import XsdDateTime, XsdString
 
 from .dublin_core import (
     E_Created,

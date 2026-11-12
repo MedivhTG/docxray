@@ -4,7 +4,7 @@
 # docxray stuff
 from docxray2.opc.xsd.dublin_core import W3CDTF
 from docxray2.xmlchemy import AttrRequired, Content
-from docxray2.xsd.st_primitives import XsdString
+from docxray2.xsd.primitives import XsdString
 
 from .parser import OpcOxml
 

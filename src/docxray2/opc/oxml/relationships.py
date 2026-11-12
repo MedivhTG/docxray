@@ -3,7 +3,7 @@ from __future__ import annotations
 # docxray stuff
 from docxray2.opc.xsd.relationships import ST_TargetMode
 from docxray2.xmlchemy import AttrOptional, AttrRequired
-from docxray2.xsd.st_primitives import XsdAnyUri, XsdID
+from docxray2.xsd.primitives import XsdAnyUri, XsdID
 
 from .parser import OpcOxml
 

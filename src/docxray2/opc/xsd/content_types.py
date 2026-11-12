@@ -1,8 +1,8 @@
 import re
 
 # docxray stuff
+from docxray2.xsd.primitives import XsdString
 from docxray2.xsd.simple_type import Restriction, SimpleType
-from docxray2.xsd.st_primitives import XsdString
 
 ST_EXTENSION_PATTERN = re.compile(
     r"([!$&amp;'\(\)\*\+,:=]|(%[0-9a-fA-F][0-9a-fA-F])|[:@]|[a-zA-Z0-9\-_~])+"

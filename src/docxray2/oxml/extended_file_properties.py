@@ -3,7 +3,7 @@ from __future__ import annotations
 # docxray stuff
 from docxray2.oxml.parser import Oxml
 from docxray2.xmlchemy import Content
-from docxray2.xsd.st_primitives import XsdInt, XsdString
+from docxray2.xsd.primitives import XsdInt, XsdString
 
 
 class OxmlNSExtendedFileProperties(Oxml, ns="ep"):
