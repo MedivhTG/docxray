@@ -1,7 +1,7 @@
 from .ns import MEDIA_TYPE
-from .oxml.proxy.document import Document as DocumentObject
 from .package import DocxPackage
 from .part_factory import DocxPartFactory
+from .proxy.document import Document as DocumentObject
 from .types import PkgFile
 
 

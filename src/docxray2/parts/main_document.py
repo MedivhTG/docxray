@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 # docxray stuff
 from docxray2.opc.parts.core_properties import CorePropertiesPart
 from docxray2.opc.proxy.core_props import CoreProperties
-from docxray2.oxml.proxy.document import Document
-from docxray2.oxml.proxy.extf_props import ExtentedFileProperties
-from docxray2.oxml.xml.main_document import E_Document
+from docxray2.oxml.main_document import E_Document
 from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
+from docxray2.proxy.document import Document
+from docxray2.proxy.extf_props import ExtentedFileProperties
 from docxray2.types import PkgFile
 
 from .base import DocxXmlPart

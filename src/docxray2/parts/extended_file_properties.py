@@ -3,8 +3,8 @@ from functools import cached_property
 # docxray stuff
 from docxray2.ns import MEDIA_TYPE, NAMESPACE, RELATIONSHIP_TYPE
 from docxray2.opc.pkg_uri import PkgURI
-from docxray2.oxml.proxy.extf_props import ExtentedFileProperties
-from docxray2.oxml.xml.extended_file_properties import E_Properties
+from docxray2.oxml.extended_file_properties import E_Properties
+from docxray2.proxy.extf_props import ExtentedFileProperties
 
 from .base import DocxXmlPart
 

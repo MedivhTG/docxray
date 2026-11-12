@@ -19,7 +19,7 @@ class DocxElementProxy[ELM_T: Oxml, PART_T: DocxXmlPart = DocxXmlPart[ELM_T]]:
     def parent(self) -> ProvidesDocxXmlPart:
         return self._parent
 
-    @cached_property
+    @property
     def element(self) -> ELM_T:
         return self._element
 
