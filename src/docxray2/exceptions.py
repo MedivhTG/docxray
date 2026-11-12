@@ -13,6 +13,10 @@ class OxmlAttrOptionalError(OxmlBaseError):
     pass
 
 
+class OxmlExactlyOneError(OxmlBaseError):
+    pass
+
+
 class OxmlContentError(OxmlBaseError):
     pass
 

@@ -280,11 +280,11 @@ class SimpleType[T]:
     @classmethod
     def validate_numeric_ranges(
         cls,
-        num: int | Decimal,
-        min_inclusive: int | Decimal | None = None,
-        max_inclusive: int | Decimal | None = None,
-        min_exclusive: int | Decimal | None = None,
-        max_exclusive: int | Decimal | None = None,
+        num: float | Decimal,
+        min_inclusive: float | Decimal | None = None,
+        max_inclusive: float | Decimal | None = None,
+        min_exclusive: float | Decimal | None = None,
+        max_exclusive: float | Decimal | None = None,
         **kwargs: dict[str, Any],
     ) -> None:
         cls._check_min_max_facets(
