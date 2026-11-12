@@ -2,11 +2,11 @@ from typing import TYPE_CHECKING
 
 # docxray stuff
 from docxray2.opc.proxy.core_props import CoreProperties
-from docxray2.oxml.proxy.extf_props import ExtentedFileProperties
-from docxray2.oxml.xml.main_document import E_Document
+from docxray2.oxml.main_document import E_Document
 from docxray2.types import PkgFile
 
 from .base import DocxElementProxy
+from .extf_props import ExtentedFileProperties
 
 if TYPE_CHECKING:
 

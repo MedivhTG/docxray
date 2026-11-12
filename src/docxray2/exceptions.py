@@ -17,10 +17,6 @@ class OxmlContentError(OxmlBaseError):
     pass
 
 
-class OxmlChildWarning(UserWarning):
-    pass
-
-
 class DocxBaseError(Exception):
     pass
 

@@ -1,5 +1,6 @@
 # mypy: disable-error-code="var-annotated"
 
+
 # docxray stuff
 from docxray2.opc.xsd.dublin_core import W3CDTF
 from docxray2.xmlchemy import AttrRequired, Content
