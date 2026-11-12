@@ -13,9 +13,9 @@ from .exceptions import (
     OxmlAttrRequiredError,
     OxmlContentError,
 )
-from .xsd.exceptions import XsdValidationError
+from .xsd.exceptions import XsdStringifyError, XsdValidationError
+from .xsd.primitives import XsdAnySimpleType
 from .xsd.simple_type import SimpleType
-from .xsd.st_primitives import XsdAnySimpleType
 
 MISSING = Sentinel("MISSING")
 T = TypeVar("T")
@@ -329,24 +329,17 @@ class AttrRequired[T](Attr):
             return self  # type: ignore[return-value]
         return element.attr_required(self.qname, self.simple_type, self.fixed)
 
-    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+    def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
             return
-        old_value = element.get(self.qname, MISSING)
-        element.set(self.qname, self.simple_type.stringify(value))
         try:
-            element.attr_required(self.qname, self.simple_type, self.fixed)
-        except (OxmlAttrRequiredError, XsdValidationError) as e:
-            if old_value is MISSING:
-                element.attrib.pop(self.qname)
-            else:
-                element.set(
-                    self.qname,
-                    old_value,  # pyright: ignore[reportArgumentType]
-                )
+            xml_value = self.simple_type.stringify(py_value)
+            self.simple_type.validate_schema(xml_value)
+        except (XsdValidationError, XsdStringifyError) as e:
             raise OxmlAttrRequiredError(
                 f"Cannot set required attribute `{self.qname}` to `{element.__class__}`: `{e}`"
             )
+        element.set(self.qname, xml_value)
 
 
 class AttrOptional[T](Attr):
@@ -390,24 +383,17 @@ class AttrOptional[T](Attr):
             self.qname, self.simple_type, self.default
         )
 
-    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+    def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
             return
-        old_value = element.get(self.qname, MISSING)
-        element.set(self.qname, self.simple_type.stringify(value))
         try:
-            element.attr_optional(self.qname, self.simple_type, self.default)
-        except XsdValidationError as e:
-            if old_value is MISSING:
-                element.attrib.pop(self.qname)
-            else:
-                element.set(
-                    self.qname,
-                    old_value,  # pyright: ignore[reportArgumentType]
-                )
+            xml_value = self.simple_type.stringify(py_value)
+            self.simple_type.validate_schema(xml_value)
+        except (XsdValidationError, XsdStringifyError) as e:
             raise OxmlAttrOptionalError(
                 f"Cannot set optional attribute `{self.qname}` to `{element.__class__}`: `{e}`"
             )
+        element.set(self.qname, xml_value)
 
 
 class Content[T]:
@@ -426,18 +412,17 @@ class Content[T]:
             return self  # type: ignore[return-value]
         return element.tag_content(self.simple_type)
 
-    def __set__(self, element: BaseOxmlElement | None, value: Any) -> None:
+    def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
             return
-        old_value = element.text
-        element.text = self.simple_type.stringify(value)
         try:
-            element.tag_content(self.simple_type)
-        except XsdValidationError as e:
-            element.text = old_value
+            xml_value = self.simple_type.stringify(py_value)
+            self.simple_type.validate_schema(xml_value)
+        except (XsdValidationError, XsdStringifyError) as e:
             raise OxmlContentError(
                 f"Cannot set content (text) to `{element.__class__}`: `{e}`"
             )
+        element.text = xml_value
 
 
 def elm_ns_cls_lookup(
