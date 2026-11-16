@@ -125,19 +125,19 @@ class CT_Properties(OxmlNSDocumentPropertiesExtended):
 class CT_VectorVariant(OxmlNSDocumentPropertiesExtended):
     @property
     def vector(self) -> E_Vector:
-        return self.exactly_one(E_Vector)
+        return self.one(E_Vector)
 
 
 class CT_VectorLpstr(OxmlNSDocumentPropertiesExtended):
     @property
     def vector(self) -> E_Vector:
-        return self.exactly_one(E_Vector)
+        return self.one(E_Vector)
 
 
 class CT_DigSigBlob(OxmlNSDocumentPropertiesExtended):
     @property
     def blob(self) -> E_Blob:
-        return self.exactly_one(E_Blob)
+        return self.one(E_Blob)
 
 
 # -------------------- ELEMENTS --------------------

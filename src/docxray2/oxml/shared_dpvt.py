@@ -205,140 +205,43 @@ class CT_Array(OxmlNSDocumentPropertiesVariantTypes):
 
 class CT_Variant(OxmlNSDocumentPropertiesVariantTypes):
     @property
-    def variant(self) -> E_Variant:
-        return self.exactly_one(E_Variant)
-
-    @property
-    def vector(self) -> E_Vector:
-        return self.exactly_one(E_Vector)
-
-    @property
-    def array(self) -> E_Array:
-        return self.exactly_one(E_Array)
-
-    @property
-    def blob(self) -> E_Blob:
-        return self.exactly_one(E_Blob)
-
-    @property
-    def oblob(self) -> E_Oblob:
-        return self.exactly_one(E_Oblob)
-
-    @property
-    def empty(self) -> E_Empty:
-        return self.exactly_one(E_Empty)
-
-    @property
-    def null(self) -> E_Null:
-        return self.exactly_one(E_Null)
-
-    @property
-    def i1(self) -> E_I1:
-        return self.exactly_one(E_I1)
-
-    @property
-    def i2(self) -> E_I2:
-        return self.exactly_one(E_I2)
-
-    @property
-    def i4(self) -> E_I4:
-        return self.exactly_one(E_I4)
-
-    @property
-    def i8(self) -> E_I8:
-        return self.exactly_one(E_I8)
-
-    @property
-    def int(self) -> E_Int:
-        return self.exactly_one(E_Int)
-
-    @property
-    def ui1(self) -> E_Ui1:
-        return self.exactly_one(E_Ui1)
-
-    @property
-    def ui2(self) -> E_Ui2:
-        return self.exactly_one(E_Ui2)
-
-    @property
-    def ui4(self) -> E_Ui4:
-        return self.exactly_one(E_Ui4)
-
-    @property
-    def ui8(self) -> E_Ui8:
-        return self.exactly_one(E_Ui8)
-
-    @property
-    def uint(self) -> E_Uint:
-        return self.exactly_one(E_Uint)
-
-    @property
-    def r4(self) -> E_R4:
-        return self.exactly_one(E_R4)
-
-    @property
-    def r8(self) -> E_R8:
-        return self.exactly_one(E_R8)
-
-    @property
-    def decimal(self) -> E_Decimal:
-        return self.exactly_one(E_Decimal)
-
-    @property
-    def lpstr(self) -> E_Lpstr:
-        return self.exactly_one(E_Lpstr)
-
-    @property
-    def lpwstr(self) -> E_Lpwstr:
-        return self.exactly_one(E_Lpwstr)
-
-    @property
-    def bstr(self) -> E_Bstr:
-        return self.exactly_one(E_Bstr)
-
-    @property
-    def date(self) -> E_Date:
-        return self.exactly_one(E_Date)
-
-    @property
-    def filetime(self) -> E_Filetime:
-        return self.exactly_one(E_Filetime)
-
-    @property
-    def bool(self) -> E_Bool:
-        return self.exactly_one(E_Bool)
-
-    @property
-    def cy(self) -> E_Cy:
-        return self.exactly_one(E_Cy)
-
-    @property
-    def error(self) -> E_Error:
-        return self.exactly_one(E_Error)
-
-    @property
-    def stream(self) -> E_Stream:
-        return self.exactly_one(E_Stream)
-
-    @property
-    def ostream(self) -> E_Ostream:
-        return self.exactly_one(E_Ostream)
-
-    @property
-    def storage(self) -> E_Storage:
-        return self.exactly_one(E_Storage)
-
-    @property
-    def ostorage(self) -> E_Ostorage:
-        return self.exactly_one(E_Ostorage)
-
-    @property
-    def vstream(self) -> E_Vstream:
-        return self.exactly_one(E_Vstream)
-
-    @property
-    def clsid(self) -> E_Clsid:
-        return self.exactly_one(E_Clsid)
+    def chosen_variant(self) -> Variant:
+        return self.choice_one(
+            E_Variant,
+            E_Vector,
+            E_Array,
+            E_Blob,
+            E_Oblob,
+            E_Empty,
+            E_Null,
+            E_I1,
+            E_I2,
+            E_I4,
+            E_I8,
+            E_Int,
+            E_Ui1,
+            E_Ui2,
+            E_Ui4,
+            E_Ui8,
+            E_Uint,
+            E_R4,
+            E_R8,
+            E_Decimal,
+            E_Lpstr,
+            E_Lpwstr,
+            E_Bstr,
+            E_Date,
+            E_Filetime,
+            E_Bool,
+            E_Cy,
+            E_Error,
+            E_Stream,
+            E_Ostream,
+            E_Storage,
+            E_Ostorage,
+            E_Vstream,
+            E_Clsid,
+        )  # type: ignore[return-value]
 
 
 class CT_Vstream(OxmlNSDocumentPropertiesVariantTypes):
@@ -482,3 +385,41 @@ class E_Vstream(CT_Vstream, tag="vstream"):
 
 class E_Clsid(OxmlNSDocumentPropertiesVariantTypes, tag="clsid"):
     content = Content(ST_Guid)
+
+
+type Variant = (
+    E_Variant
+    | E_Vector
+    | E_Array
+    | E_Blob
+    | E_Oblob
+    | E_Empty
+    | E_Null
+    | E_I1
+    | E_I2
+    | E_I4
+    | E_I8
+    | E_Int
+    | E_Ui1
+    | E_Ui2
+    | E_Ui4
+    | E_Ui8
+    | E_Uint
+    | E_R4
+    | E_R8
+    | E_Decimal
+    | E_Lpstr
+    | E_Lpwstr
+    | E_Bstr
+    | E_Date
+    | E_Filetime
+    | E_Bool
+    | E_Cy
+    | E_Error
+    | E_Stream
+    | E_Ostream
+    | E_Storage
+    | E_Ostorage
+    | E_Vstream
+    | E_Clsid
+)

@@ -11,6 +11,7 @@ from typing_extensions import Sentinel
 from .exceptions import (
     OxmlAttrOptionalError,
     OxmlAttrRequiredError,
+    OxmlChoiceOneError,
     OxmlContentError,
     OxmlExactlyOneError,
 )
@@ -172,13 +173,24 @@ class BaseOxmlElement(etree.ElementBase):
     def zero_or_one(self, element: type[FIND_T]) -> FIND_T | None:
         return next(self.iterchildren(element.qname(), reversed=True), None)  # type: ignore[return-value]
 
-    def exactly_one(self, element: type[FIND_T]) -> FIND_T:
+    def one(self, element: type[FIND_T]) -> FIND_T:
         found_elm = next(
             self.iterchildren(element.qname(), reversed=True), None
         )
         if found_elm is None:
             raise OxmlExactlyOneError(
                 f"Must be at least one element: `{element.qname()}`!"
+            )
+        return found_elm  # type: ignore[return-value]
+
+    def choice_one(self, *choices: type[FIND_T]) -> FIND_T:
+        found_elm = next(
+            self.iterchildren(*[ch.qname() for ch in choices], reversed=True),
+            None,
+        )
+        if found_elm is None:
+            raise OxmlChoiceOneError(
+                f"Must be at least one chosen element: `{[e.qname() for e in choices]}`"
             )
         return found_elm  # type: ignore[return-value]
 
