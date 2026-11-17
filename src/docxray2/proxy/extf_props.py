@@ -71,6 +71,16 @@ if TYPE_CHECKING:
 class ExtentedFileProperties(
     DocxElementProxy[E_Properties, "ExtendedFilePropertiesPart"]
 ):
+    """
+    Extended properties are a predefined set of metadata properties that are applicable to Office Open XML
+    documents. These properties extend the set of core properties defined in Part 2: "Open Packaging Conventions"
+    which are common to all packages.
+
+    Each extended property is represented as an element in the extended properties part. Extended properties
+    elements are non-repeatable and can be empty or omitted. If all extended property elements are omitted then
+    the extended properties part can be excluded from a document.
+    """
+
     @property
     def application_name(self) -> str | None:
         """Specifies the name of the application that created this document."""
@@ -140,6 +150,11 @@ class ExtentedFileProperties(
         return dig_sig_elm.blob.content
 
     @digital_signature.setter
+    @deprecated(
+        "This property is a mechanism used by legacy documents to store the digital signature of its binary "
+        "representation, and should be avoided in favor of the well-defined mechanism defined in Part 2 (OPC). Any use of this "
+        "property should be for legacy compatibility only, and is application-defined."
+    )
     def digital_signature(self, value: bytes | None) -> None:
         dig_sig_elm = self.element.dig_sig
         if dig_sig_elm is None:
@@ -188,6 +203,36 @@ class ExtentedFileProperties(
 
     @property
     def heading_groups(self) -> list[HeadingGroup]:
+        """Specifies the grouping of document parts and the title of each part as a list of named
+        groups.
+
+        This property exposes a structured view over the `HeadingPairs` (§22.2.2.8) and
+        `TitlesOfParts` (§22.2.2.26) elements. These parts are not document parts but conceptual
+        representations of document sections: each group pairs a heading name with the consecutive
+        run of titles it owns. For example, a presentation comprising three slides with an applied
+        theme is represented as the groups ``Theme`` (1 title) and ``Slide Titles`` (3 titles).
+
+        On assignment, both underlying elements are regenerated: `TitlesOfParts` is written as a
+        flat ``lpstr`` vector containing all group titles in order, and `HeadingPairs` as a
+        ``variant`` vector of ``name``/``count`` pairs, where each count is the number of titles in
+        the corresponding group.
+
+        Args:
+            value: The heading groups to store, in order. An empty list removes both the
+                `HeadingPairs` and `TitlesOfParts` elements from the document.
+
+        Returns:
+            The heading groups read from the document, in declaration order, or an empty list if
+            `HeadingPairs` is absent.
+
+        Raises:
+            TypeError: If an element of `value` is not a `HeadingGroup`, or if the stored
+                `HeadingPairs`/`TitlesOfParts` content contains variants of unexpected types.
+            ValueError: If `HeadingPairs` is present but `TitlesOfParts` is missing, if the
+                `HeadingPairs` vector does not contain name/count pairs, if a group name is
+                empty, if a group count is negative, or if `TitlesOfParts` holds fewer titles
+                than the declared counts require.
+        """
         return HeadingGroup.from_elm(self.element)
 
     @heading_groups.setter
