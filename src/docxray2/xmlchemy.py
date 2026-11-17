@@ -41,7 +41,7 @@ class BaseOxmlElement(etree.ElementBase):
     _namespace: ClassVar[str | None] = None
     _tagname: ClassVar[str | None] = None
     __qname__: ClassVar[etree.QName | None] = None
-    __attrs__: dict[str, Attr] | None = None
+    __attrs__: ClassVar[dict[str, Attr] | None] = None
 
     class _ElementAttrsRegistry:
         __map__: dict[type[BaseOxmlElement], dict[str, Attr]] = {}
@@ -77,74 +77,6 @@ class BaseOxmlElement(etree.ElementBase):
     def __repr__(self) -> str:
         # Now we can watch right cls name in debug
         return super().__repr__().replace("Element", type(self).__name__, 1)
-
-    def attr_required(
-        self,
-        name: str | etree.QName,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
-        fixed: str | None = None,
-    ) -> T:
-        """Read a required attribute and validate it.
-
-        Args:
-            name (str): Attribute name.
-            simple_type (type[SimpleType[T]]): Type used to validate and
-                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
-            fixed (str | None): Optional raw XML value (a string) that the
-                stored attribute must equal exactly. Defaults to ``None``.
-
-        Returns:
-            T: Converted attribute value.
-
-        Raises:
-            OxmlAttrRequiredError: If the attribute is missing or its raw XML
-                value does not equal ``fixed``.
-            XsdValidationError: If validation by ``simple_type`` fails.
-        """
-        value = self.get(name, MISSING)
-        if value is MISSING:
-            raise OxmlAttrRequiredError(
-                f"Cannot get required attribute `{name}` from `{self.__class__}`: missing"
-            )
-        if fixed is not None and value != fixed:
-            raise OxmlAttrRequiredError(
-                f"Cannot get required attribute `{name}` from `{self.__class__}`: value must equals to `{fixed}`, got `{value}`"
-            )
-        return simple_type.validate_schema(
-            value  # pyright: ignore[reportArgumentType]
-        )
-
-    def attr_optional(
-        self,
-        name: str | etree.QName,
-        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
-        default: str | None = None,
-    ) -> T | None:
-        """Read an optional attribute and validate it.
-
-        Args:
-            name (str): Attribute name.
-            simple_type (type[SimpleType[T]]): Type used to validate and
-                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
-            default (str | None): Optional raw XML value (a string) to
-                validate and return when the attribute is absent. Defaults to
-                ``None``.
-
-        Returns:
-            T | None: Converted attribute value; the converted ``default`` if
-            the attribute is absent; or ``None`` if both are absent.
-
-        Raises:
-            XsdValidationError: If validation by ``simple_type`` fails.
-        """
-        value = self.get(name, MISSING)
-        if value is MISSING:
-            if default is not None:
-                return simple_type.validate_schema(default)
-            return None
-        return simple_type.validate_schema(
-            value  # pyright: ignore[reportArgumentType]
-        )
 
     def tag_content(
         self, simple_type: type[SimpleType[T]] = XsdAnySimpleType[str]  # type: ignore[assignment]
@@ -208,6 +140,74 @@ class BaseOxmlElement(etree.ElementBase):
 
     def to_string(self) -> bytes:
         return etree.tostring(self)
+
+    def _attr_required(
+        self,
+        name: str | etree.QName,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
+        fixed: str | None = None,
+    ) -> T:
+        """Read a required attribute and validate it.
+
+        Args:
+            name (str): Attribute name.
+            simple_type (type[SimpleType[T]]): Type used to validate and
+                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
+            fixed (str | None): Optional raw XML value (a string) that the
+                stored attribute must equal exactly. Defaults to ``None``.
+
+        Returns:
+            T: Converted attribute value.
+
+        Raises:
+            OxmlAttrRequiredError: If the attribute is missing or its raw XML
+                value does not equal ``fixed``.
+            XsdValidationError: If validation by ``simple_type`` fails.
+        """
+        value = self.get(name, MISSING)
+        if value is MISSING:
+            raise OxmlAttrRequiredError(
+                f"Cannot get required attribute `{name}` from `{self.__class__}`: missing"
+            )
+        if fixed is not None and value != fixed:
+            raise OxmlAttrRequiredError(
+                f"Cannot get required attribute `{name}` from `{self.__class__}`: value must equals to `{fixed}`, got `{value}`"
+            )
+        return simple_type.validate_schema(
+            value  # pyright: ignore[reportArgumentType]
+        )
+
+    def _attr_optional(
+        self,
+        name: str | etree.QName,
+        simple_type: type[SimpleType[T]] = XsdAnySimpleType[str],  # type: ignore[assignment]
+        default: str | None = None,
+    ) -> T | None:
+        """Read an optional attribute and validate it.
+
+        Args:
+            name (str): Attribute name.
+            simple_type (type[SimpleType[T]]): Type used to validate and
+                convert the raw XML value. Defaults to ``XsdAnySimpleType``.
+            default (str | None): Optional raw XML value (a string) to
+                validate and return when the attribute is absent. Defaults to
+                ``None``.
+
+        Returns:
+            T | None: Converted attribute value; the converted ``default`` if
+            the attribute is absent; or ``None`` if both are absent.
+
+        Raises:
+            XsdValidationError: If validation by ``simple_type`` fails.
+        """
+        value = self.get(name, MISSING)
+        if value is MISSING:
+            if default is not None:
+                return simple_type.validate_schema(default)
+            return None
+        return simple_type.validate_schema(
+            value  # pyright: ignore[reportArgumentType]
+        )
 
     @classmethod
     def qname(cls) -> etree.QName:
@@ -275,14 +275,17 @@ class BaseOxmlElement(etree.ElementBase):
         """
         if nslookup:
             cls._nslookup = nslookup
-        if nsmap:
+        if nsmap is not None:
             cls._nsmap = nsmap
         if namespace:
             cls._namespace = namespace
         if tagname:
             cls._tagname = tagname
         if not (
-            cls._nslookup and cls._nsmap and cls._namespace and cls._tagname
+            cls._nslookup
+            and cls._nsmap is not None
+            and cls._namespace
+            and cls._tagname
         ):
             return
         uri = cls._nsmap[cls._namespace]
@@ -315,7 +318,7 @@ class Attr:
 
     def _compute_qname(self, attr_name: str) -> None:
         if self._qname is None and self.owner._nsmap is not None:
-            self._qname = qn(self.owner._nsmap, attr_name)
+            self._qname = qname(self.owner._nsmap, attr_name)
 
     @abstractmethod
     def compute_qname(self) -> None: ...
@@ -347,7 +350,7 @@ class AttrRequired[T](Attr):
     @property
     def qname(self) -> etree.QName:
         if self._qname is None:
-            self._qname = qn(self.owner._nsmap or {}, self._attr_name)
+            self._qname = qname(self.owner._nsmap or {}, self._attr_name)
         return self._qname
 
     def compute_qname(self) -> None:
@@ -358,7 +361,7 @@ class AttrRequired[T](Attr):
     ) -> T:
         if element is None:
             return self  # type: ignore[return-value]
-        return element.attr_required(self.qname, self.simple_type, self.fixed)
+        return element._attr_required(self.qname, self.simple_type, self.fixed)
 
     def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
@@ -399,7 +402,7 @@ class AttrOptional[T](Attr):
     @property
     def qname(self) -> etree.QName:
         if self._qname is None:
-            self._qname = qn(self.owner._nsmap or {}, self._attr_name)
+            self._qname = qname(self.owner._nsmap or {}, self._attr_name)
         return self._qname
 
     def compute_qname(self) -> None:
@@ -410,7 +413,7 @@ class AttrOptional[T](Attr):
     ) -> T | None:
         if element is None:
             return self  # type: ignore[return-value]
-        return element.attr_optional(
+        return element._attr_optional(
             self.qname, self.simple_type, self.default
         )
 
@@ -477,11 +480,11 @@ def elm_ns_cls_lookup(
     return nslookup
 
 
-def qn(nsmap: dict[str | None, str], clark_name: str) -> etree.QName:
-    tag_parts = clark_name.split(":")
+def qname(nsmap: dict[str | None, str], qn: str) -> etree.QName:
+    tag_parts = qn.split(":")
     if len(tag_parts) == 2:
         tag_root, tag_name = tag_parts
         return etree.QName(nsmap[tag_root], tag_name)
     elif len(tag_parts) == 1:
         return etree.QName(None, tag_parts[0])
-    raise ValueError(f"Not parsed tagname: {clark_name}")
+    raise ValueError(f"Not parsed tagname: {qn}")
