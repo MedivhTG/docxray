@@ -271,12 +271,12 @@ class ExtentedFileProperties(
                 lpstr_elm = E_Lpstr.new()
                 lpstr_elm.content = hg.name
                 name_vec_elm.append_child(lpstr_elm)
-                count_v = E_Variant.new()
-                i4 = E_I4.new()
-                i4.content = len(hg.titles)
-                count_v.append_child(i4)
+                count_vec_elm = E_Variant.new()
+                i4_elm = E_I4.new()
+                i4_elm.content = len(hg.titles)
+                count_vec_elm.append_child(i4_elm)
                 hp_vec_elm.append_child(name_vec_elm)
-                hp_vec_elm.append_child(count_v)
+                hp_vec_elm.append_child(count_vec_elm)
         hp_elm_new = None
         if hp_vec_elm is not None:
             hp_elm_new = E_HeadingPairs.new()
