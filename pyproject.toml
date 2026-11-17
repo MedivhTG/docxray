@@ -13,6 +13,7 @@ dependencies = [
     "num2words>=0.5.14",
     "officemath2latex>=0.1.1",
     "pillow>=12.2.0",
+    "pydantic>=2.14.3",
     "python-dateutil>=2.9.0.post0",
     "unicode-rbnf>=2.4.0",
     "webcolors>=25.10.0",

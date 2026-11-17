@@ -380,6 +380,10 @@ class XsdBoolean(XsdAnySimpleType[bool]):
         )
 
     @classmethod
+    def _stringify(cls, py_value: bool, facets: dict[str, Any]) -> str:
+        return str(py_value).lower()
+
+    @classmethod
     def to_bool(
         cls, xml_value: str, false_set: set[str], true_set: set[str]
     ) -> bool:

@@ -231,15 +231,15 @@ class E_Decimal(OxmlNSDocumentPropertiesVariantTypes, tag="decimal"):
 
 
 class E_Lpstr(OxmlNSDocumentPropertiesVariantTypes, tag="lpstr"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Lpwstr(OxmlNSDocumentPropertiesVariantTypes, tag="lpwstr"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Bstr(OxmlNSDocumentPropertiesVariantTypes, tag="bstr"):
-    content = Content(XsdString)
+    content = Content(XsdString[str])
 
 
 class E_Date(OxmlNSDocumentPropertiesVariantTypes, tag="date"):
