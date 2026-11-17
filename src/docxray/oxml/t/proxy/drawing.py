@@ -33,7 +33,9 @@ class Drawing(ElementProxy[CT_Drawing]):
         )
         if not pic_rIds:
             return None
-        return cast("ImagePart", self.part.related_parts[pic_rIds[0]]).picture
+        pic = cast("ImagePart", self.part.related_parts[pic_rIds[0]]).picture
+        pic.load(self.size_px)
+        return pic
 
     @cached_property
     def identifier(self) -> int:

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from base64 import b64encode
 from typing import TYPE_CHECKING
 
 from lxml.html import Element, HtmlElement
@@ -29,8 +28,11 @@ class HtmlDrawing(HtmlBuilder["Drawing"]):
                 "height": f"{proxy.height.px()}px",
                 "alt": proxy.name,
             }
-        base64 = b64encode(pic.resized(proxy.size_px).blob).decode()
         return {
-            "src": f"data:{pic.content_type};base64,{base64}",
+            "src": pic.render_img_src_base64(),
+            # When it's rendered as vector we must sure that image will not
+            # cross other tags in browser
+            "width": f"{proxy.width.px()}px",
+            "height": f"{proxy.height.px()}px",
             "alt": proxy.name,
         }
