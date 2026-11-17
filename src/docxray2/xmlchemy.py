@@ -11,6 +11,7 @@ from typing_extensions import Sentinel
 from .exceptions import (
     OxmlAttrOptionalError,
     OxmlAttrRequiredError,
+    OxmlChoiceManyAtLeastOneError,
     OxmlChoiceOneError,
     OxmlContentError,
     OxmlExactlyOneError,
@@ -157,7 +158,7 @@ class BaseOxmlElement(etree.ElementBase):
         full_content = "".join(self.itertext())
         return simple_type.validate_schema(full_content)
 
-    def zero_or_more(self, element: type[FIND_T]) -> list[FIND_T]:
+    def all(self, element: type[FIND_T]) -> list[FIND_T]:
         """Return all direct children matching ``element``'s QName.
 
         Args:
@@ -166,11 +167,9 @@ class BaseOxmlElement(etree.ElementBase):
         Returns:
             list[FIND_T]: Matching child elements.
         """
-        return self.findall(
-            element.qname(), self._nsmap
-        )  # type: ignore[return-value]
+        return list(self.iterchildren(element.qname()))  # type: ignore[arg-type]
 
-    def zero_or_one(self, element: type[FIND_T]) -> FIND_T | None:
+    def one_or_none(self, element: type[FIND_T]) -> FIND_T | None:
         return next(self.iterchildren(element.qname(), reversed=True), None)  # type: ignore[return-value]
 
     def one(self, element: type[FIND_T]) -> FIND_T:
@@ -194,7 +193,15 @@ class BaseOxmlElement(etree.ElementBase):
             )
         return found_elm  # type: ignore[return-value]
 
-    def append(  # pyright: ignore[reportIncompatibleMethodOverride]
+    def choice_many_at_least_one(self, *choices: type[FIND_T]) -> list[FIND_T]:
+        found_lst = list(self.iterchildren(*[ch.qname() for ch in choices]))
+        if not found_lst:
+            raise OxmlChoiceManyAtLeastOneError(
+                f"Must be at least one chosen element in choice list: `{[e.qname() for e in choices]}`"
+            )
+        return found_lst  # type: ignore[return-value]
+
+    def append_child(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, element: BaseOxmlElement
     ) -> None:
         return super().append(element)  # pyright: ignore[reportArgumentType]
@@ -470,11 +477,11 @@ def elm_ns_cls_lookup(
     return nslookup
 
 
-def qn(nsmap: dict[str | None, str], tag_clark: str) -> etree.QName:
-    tag_parts = tag_clark.split(":")
+def qn(nsmap: dict[str | None, str], clark_name: str) -> etree.QName:
+    tag_parts = clark_name.split(":")
     if len(tag_parts) == 2:
         tag_root, tag_name = tag_parts
         return etree.QName(nsmap[tag_root], tag_name)
     elif len(tag_parts) == 1:
         return etree.QName(None, tag_parts[0])
-    raise ValueError(f"Not parsed tagname: {tag_clark}")
+    raise ValueError(f"Not parsed tagname: {clark_name}")

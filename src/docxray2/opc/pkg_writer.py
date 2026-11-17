@@ -74,10 +74,10 @@ class _ContentTypesItem:
             elm_default = E_Default.new(True)
             elm_default.Extension = ext
             elm_default.ContentType = self._defaults[ext]
-            types_elm.append(elm_default)
+            types_elm.append_child(elm_default)
         for part_name in sorted(self._overrides.keys()):
             elm_override = E_Override.new(True)
             elm_override.PartName = part_name
             elm_override.ContentType = self._overrides[part_name]
-            types_elm.append(elm_override)
+            types_elm.append_child(elm_override)
         return types_elm

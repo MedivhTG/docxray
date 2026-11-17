@@ -25,7 +25,7 @@ class Relationships(dict[str, "Relationship"]):
             rel_elm.Target = rel.target_ref
             if rel.external:
                 rel_elm.TargetMode = SE_TARGET_MODE.EXTERNAL
-            rels_elm.append(rel_elm)
+            rels_elm.append_child(rel_elm)
         return rels_elm.to_string()
 
     @property

@@ -15,7 +15,7 @@ class OpcOxmlNSRelationships(OpcOxml, ns="r"):
 class CT_Relationships(OpcOxmlNSRelationships):
     @property
     def relationships(self) -> list[E_Relationship]:
-        return self.zero_or_more(E_Relationship)
+        return self.all(E_Relationship)
 
 
 class CT_Relationship(OpcOxmlNSRelationships):

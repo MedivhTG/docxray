@@ -18,11 +18,11 @@ class OpcOxmlNSMediaTypesStream(OpcOxml, ns="ct"):
 class CT_Types(OpcOxmlNSMediaTypesStream):
     @property
     def defaults(self) -> list[E_Default]:
-        return self.zero_or_more(E_Default)
+        return self.all(E_Default)
 
     @property
     def overrides(self) -> list[E_Override]:
-        return self.zero_or_more(E_Override)
+        return self.all(E_Override)
 
 
 class CT_Default(OpcOxmlNSMediaTypesStream):

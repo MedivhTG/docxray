@@ -49,84 +49,29 @@ class CT_Vector(OxmlNSDocumentPropertiesVariantTypes):
     size = AttrRequired("size", XsdUnsignedInt)
 
     @property
-    def variant(self) -> list[E_Variant]:
-        return self.zero_or_more(E_Variant)
-
-    @property
-    def i1(self) -> list[E_I1]:
-        return self.zero_or_more(E_I1)
-
-    @property
-    def i2(self) -> list[E_I2]:
-        return self.zero_or_more(E_I2)
-
-    @property
-    def i4(self) -> list[E_I4]:
-        return self.zero_or_more(E_I4)
-
-    @property
-    def i8(self) -> list[E_I8]:
-        return self.zero_or_more(E_I8)
-
-    @property
-    def ui1(self) -> list[E_Ui1]:
-        return self.zero_or_more(E_Ui1)
-
-    @property
-    def ui2(self) -> list[E_Ui2]:
-        return self.zero_or_more(E_Ui2)
-
-    @property
-    def ui4(self) -> list[E_Ui4]:
-        return self.zero_or_more(E_Ui4)
-
-    @property
-    def ui8(self) -> list[E_Ui8]:
-        return self.zero_or_more(E_Ui8)
-
-    @property
-    def r4(self) -> list[E_R4]:
-        return self.zero_or_more(E_R4)
-
-    @property
-    def r8(self) -> list[E_R8]:
-        return self.zero_or_more(E_R8)
-
-    @property
-    def lpstr(self) -> list[E_Lpstr]:
-        return self.zero_or_more(E_Lpstr)
-
-    @property
-    def lpwstr(self) -> list[E_Lpwstr]:
-        return self.zero_or_more(E_Lpwstr)
-
-    @property
-    def bstr(self) -> list[E_Bstr]:
-        return self.zero_or_more(E_Bstr)
-
-    @property
-    def date(self) -> list[E_Date]:
-        return self.zero_or_more(E_Date)
-
-    @property
-    def filetime(self) -> list[E_Filetime]:
-        return self.zero_or_more(E_Filetime)
-
-    @property
-    def bool(self) -> list[E_Bool]:
-        return self.zero_or_more(E_Bool)
-
-    @property
-    def cy(self) -> list[E_Cy]:
-        return self.zero_or_more(E_Cy)
-
-    @property
-    def error(self) -> list[E_Error]:
-        return self.zero_or_more(E_Error)
-
-    @property
-    def clsid(self) -> list[E_Clsid]:
-        return self.zero_or_more(E_Clsid)
+    def vectors(self) -> list[Vector]:
+        return self.choice_many_at_least_one(
+            E_Variant,
+            E_I1,
+            E_I2,
+            E_I4,
+            E_I8,
+            E_Ui1,
+            E_Ui2,
+            E_Ui4,
+            E_Ui8,
+            E_R4,
+            E_R8,
+            E_Lpstr,
+            E_Lpwstr,
+            E_Bstr,
+            E_Date,
+            E_Filetime,
+            E_Bool,
+            E_Cy,
+            E_Error,
+            E_Clsid,
+        )
 
 
 class CT_Array(OxmlNSDocumentPropertiesVariantTypes):
@@ -135,77 +80,31 @@ class CT_Array(OxmlNSDocumentPropertiesVariantTypes):
     base_type = AttrRequired("baseType", ST_ArrayBaseType)
 
     @property
-    def variant(self) -> list[E_Variant]:
-        return self.zero_or_more(E_Variant)
-
-    @property
-    def i1(self) -> list[E_I1]:
-        return self.zero_or_more(E_I1)
-
-    @property
-    def i2(self) -> list[E_I2]:
-        return self.zero_or_more(E_I2)
-
-    @property
-    def i4(self) -> list[E_I4]:
-        return self.zero_or_more(E_I4)
-
-    @property
-    def int(self) -> list[E_Int]:
-        return self.zero_or_more(E_Int)
-
-    @property
-    def ui1(self) -> list[E_Ui1]:
-        return self.zero_or_more(E_Ui1)
-
-    @property
-    def ui2(self) -> list[E_Ui2]:
-        return self.zero_or_more(E_Ui2)
-
-    @property
-    def ui4(self) -> list[E_Ui4]:
-        return self.zero_or_more(E_Ui4)
-
-    @property
-    def uint(self) -> list[E_Uint]:
-        return self.zero_or_more(E_Uint)
-
-    @property
-    def r4(self) -> list[E_R4]:
-        return self.zero_or_more(E_R4)
-
-    @property
-    def r8(self) -> list[E_R8]:
-        return self.zero_or_more(E_R8)
-
-    @property
-    def decimal(self) -> list[E_Decimal]:
-        return self.zero_or_more(E_Decimal)
-
-    @property
-    def bstr(self) -> list[E_Bstr]:
-        return self.zero_or_more(E_Bstr)
-
-    @property
-    def date(self) -> list[E_Date]:
-        return self.zero_or_more(E_Date)
-
-    @property
-    def bool(self) -> list[E_Bool]:
-        return self.zero_or_more(E_Bool)
-
-    @property
-    def error(self) -> list[E_Error]:
-        return self.zero_or_more(E_Error)
-
-    @property
-    def cy(self) -> list[E_Cy]:
-        return self.zero_or_more(E_Cy)
+    def arrays(self) -> list[Array]:
+        return self.choice_many_at_least_one(
+            E_Variant,
+            E_I1,
+            E_I2,
+            E_I4,
+            E_Int,
+            E_Ui1,
+            E_Ui2,
+            E_Ui4,
+            E_Uint,
+            E_R4,
+            E_R8,
+            E_Decimal,
+            E_Bstr,
+            E_Date,
+            E_Bool,
+            E_Error,
+            E_Cy,
+        )
 
 
 class CT_Variant(OxmlNSDocumentPropertiesVariantTypes):
     @property
-    def chosen_variant(self) -> Variant:
+    def variant(self) -> Variant:
         return self.choice_one(
             E_Variant,
             E_Vector,
@@ -422,4 +321,49 @@ type Variant = (
     | E_Ostorage
     | E_Vstream
     | E_Clsid
+)
+
+
+type Vector = (
+    E_Variant
+    | E_I1
+    | E_I2
+    | E_I4
+    | E_I8
+    | E_Ui1
+    | E_Ui2
+    | E_Ui4
+    | E_Ui8
+    | E_R4
+    | E_R8
+    | E_Lpstr
+    | E_Lpwstr
+    | E_Bstr
+    | E_Date
+    | E_Filetime
+    | E_Bool
+    | E_Cy
+    | E_Error
+    | E_Clsid
+)
+
+
+type Array = (
+    E_Variant
+    | E_I1
+    | E_I2
+    | E_I4
+    | E_Int
+    | E_Ui1
+    | E_Ui2
+    | E_Ui4
+    | E_Uint
+    | E_R4
+    | E_R8
+    | E_Decimal
+    | E_Bstr
+    | E_Date
+    | E_Bool
+    | E_Error
+    | E_Cy
 )

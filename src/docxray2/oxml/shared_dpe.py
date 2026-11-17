@@ -15,111 +15,111 @@ class OxmlNSDocumentPropertiesExtended(Oxml, ns="ep"):
 class CT_Properties(OxmlNSDocumentPropertiesExtended):
     @property
     def template(self) -> E_Template | None:
-        return self.zero_or_one(E_Template)
+        return self.one_or_none(E_Template)
 
     @property
     def manager(self) -> E_Manager | None:
-        return self.zero_or_one(E_Manager)
+        return self.one_or_none(E_Manager)
 
     @property
     def company(self) -> E_Company | None:
-        return self.zero_or_one(E_Company)
+        return self.one_or_none(E_Company)
 
     @property
     def pages(self) -> E_Pages | None:
-        return self.zero_or_one(E_Pages)
+        return self.one_or_none(E_Pages)
 
     @property
     def words(self) -> E_Words | None:
-        return self.zero_or_one(E_Words)
+        return self.one_or_none(E_Words)
 
     @property
     def characters(self) -> E_Characters | None:
-        return self.zero_or_one(E_Characters)
+        return self.one_or_none(E_Characters)
 
     @property
     def presentation_format(self) -> E_PresentationFormat | None:
-        return self.zero_or_one(E_PresentationFormat)
+        return self.one_or_none(E_PresentationFormat)
 
     @property
     def lines(self) -> E_Lines | None:
-        return self.zero_or_one(E_Lines)
+        return self.one_or_none(E_Lines)
 
     @property
     def paragraphs(self) -> E_Paragraphs | None:
-        return self.zero_or_one(E_Paragraphs)
+        return self.one_or_none(E_Paragraphs)
 
     @property
     def slides(self) -> E_Slides | None:
-        return self.zero_or_one(E_Slides)
+        return self.one_or_none(E_Slides)
 
     @property
     def notes(self) -> E_Notes | None:
-        return self.zero_or_one(E_Notes)
+        return self.one_or_none(E_Notes)
 
     @property
     def total_time(self) -> E_TotalTime | None:
-        return self.zero_or_one(E_TotalTime)
+        return self.one_or_none(E_TotalTime)
 
     @property
     def hidden_slides(self) -> E_HiddenSlides | None:
-        return self.zero_or_one(E_HiddenSlides)
+        return self.one_or_none(E_HiddenSlides)
 
     @property
     def mm_clips(self) -> E_MMClips | None:
-        return self.zero_or_one(E_MMClips)
+        return self.one_or_none(E_MMClips)
 
     @property
     def scale_crop(self) -> E_ScaleCrop | None:
-        return self.zero_or_one(E_ScaleCrop)
+        return self.one_or_none(E_ScaleCrop)
 
     @property
     def heading_pairs(self) -> E_HeadingPairs | None:
-        return self.zero_or_one(E_HeadingPairs)
+        return self.one_or_none(E_HeadingPairs)
 
     @property
     def titles_of_parts(self) -> E_TitlesOfParts | None:
-        return self.zero_or_one(E_TitlesOfParts)
+        return self.one_or_none(E_TitlesOfParts)
 
     @property
     def links_up_to_date(self) -> E_LinksUpToDate | None:
-        return self.zero_or_one(E_LinksUpToDate)
+        return self.one_or_none(E_LinksUpToDate)
 
     @property
     def characters_with_spaces(self) -> E_CharactersWithSpaces | None:
-        return self.zero_or_one(E_CharactersWithSpaces)
+        return self.one_or_none(E_CharactersWithSpaces)
 
     @property
     def shared_doc(self) -> E_SharedDoc | None:
-        return self.zero_or_one(E_SharedDoc)
+        return self.one_or_none(E_SharedDoc)
 
     @property
     def hyperlink_base(self) -> E_HyperlinkBase | None:
-        return self.zero_or_one(E_HyperlinkBase)
+        return self.one_or_none(E_HyperlinkBase)
 
     @property
     def h_links(self) -> E_HLinks | None:
-        return self.zero_or_one(E_HLinks)
+        return self.one_or_none(E_HLinks)
 
     @property
     def hyperlinks_changed(self) -> E_HyperlinksChanged | None:
-        return self.zero_or_one(E_HyperlinksChanged)
+        return self.one_or_none(E_HyperlinksChanged)
 
     @property
     def dig_sig(self) -> E_DigSig | None:
-        return self.zero_or_one(E_DigSig)
+        return self.one_or_none(E_DigSig)
 
     @property
     def application(self) -> E_Application | None:
-        return self.zero_or_one(E_Application)
+        return self.one_or_none(E_Application)
 
     @property
     def app_version(self) -> E_AppVersion | None:
-        return self.zero_or_one(E_AppVersion)
+        return self.one_or_none(E_AppVersion)
 
     @property
     def doc_security(self) -> E_DocSecurity | None:
-        return self.zero_or_one(E_DocSecurity)
+        return self.one_or_none(E_DocSecurity)
 
 
 class CT_VectorVariant(OxmlNSDocumentPropertiesExtended):

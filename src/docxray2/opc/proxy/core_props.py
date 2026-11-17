@@ -119,7 +119,7 @@ class CoreProperties(OpcElementProxy[E_CoreProperties]):
         if keywords_elm is None:
             keywords_elm = E_Keywords.new()
             keywords_elm.content = value
-            self.element.append(keywords_elm)
+            self.element.append_child(keywords_elm)
         else:
             keywords_elm.clear()
             keywords_elm.content = value
@@ -218,7 +218,7 @@ class CoreProperties(OpcElementProxy[E_CoreProperties]):
         elm = getattr(self.element, name)
         if elm is None:
             elm = elm_cls.new()
-            self.element.append(elm)
+            self.element.append_child(elm)
         elm.content = value  # pyright: ignore[reportAttributeAccessIssue]
 
     def _get_w3cdtf_elm_content(self, name: str) -> W3CDTFDateTime | None:
