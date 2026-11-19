@@ -17,6 +17,7 @@ from docxray2.oxml.shared_dpe import (
     E_DocSecurity,
     E_HeadingPairs,
     E_HiddenSlides,
+    E_HLinks,
     E_HyperlinkBase,
     E_HyperlinksChanged,
     E_Lines,
@@ -67,7 +68,6 @@ if TYPE_CHECKING:
     )
 
 
-# TODO: add other getters, add setters
 class ExtentedFileProperties(
     DocxElementProxy[E_Properties, "ExtendedFilePropertiesPart"]
 ):
@@ -109,7 +109,10 @@ class ExtentedFileProperties(
 
     @property
     def total_number_of_characters(self) -> int | None:
-        """Specifies the total number of characters in a document."""
+        """Specifies the total number of characters in a document.
+
+        **NOTE**: Word will count characters itself, it's only last-save info.
+        """
         return self._get_elm_content("characters")
 
     @total_number_of_characters.setter
@@ -118,7 +121,10 @@ class ExtentedFileProperties(
 
     @property
     def number_of_characters_with_spaces(self) -> int | None:
-        """Specifies the last count of the number of characters (including spaces) in this document."""
+        """Specifies the last count of the number of characters (including spaces) in this document.
+
+        **NOTE**: Word will count characters itself, it's only last-save info.
+        """
         return self._get_elm_content("characters_with_spaces")
 
     @number_of_characters_with_spaces.setter
@@ -236,9 +242,16 @@ class ExtentedFileProperties(
         return HeadingGroup.from_elm(self.element)
 
     @heading_groups.setter
-    def heading_groups(self, value: list[HeadingGroup]) -> None:
+    def heading_groups(self, value: list[HeadingGroup] | None) -> None:
         hp_elm_old = self.element.heading_pairs
         top_elm_old = self.element.titles_of_parts
+        # Unset
+        if not value:
+            if hp_elm_old is not None:
+                self.element.remove_child(hp_elm_old)
+            if top_elm_old is not None:
+                self.element.remove_child(top_elm_old)
+            return
         # TitlesOfParts
         top_size = sum(len(hg.titles) for hg in value)
         top_vec_elm = None
@@ -281,7 +294,7 @@ class ExtentedFileProperties(
         if hp_vec_elm is not None:
             hp_elm_new = E_HeadingPairs.new()
             hp_elm_new.append_child(hp_vec_elm)
-        # Fallback on empty list
+        # Fallback unset
         if top_elm_new is None or hp_elm_new is None:
             if top_elm_old is not None:
                 self.element.remove_child(top_elm_old)
@@ -289,14 +302,8 @@ class ExtentedFileProperties(
                 self.element.remove_child(hp_elm_old)
             return
         # Set elements (final)
-        if top_elm_old is not None:
-            self.element.replace_child(top_elm_old, top_elm_new)
-        else:
-            self.element.append_child(top_elm_new)
-        if hp_elm_old is not None:
-            self.element.replace_child(hp_elm_old, hp_elm_new)
-        else:
-            self.element.append_child(hp_elm_new)
+        self.element.upsert_child(top_elm_old, top_elm_new)
+        self.element.upsert_child(hp_elm_old, hp_elm_new)
 
     @property
     def number_of_hidden_slides(self) -> int | None:
@@ -307,10 +314,51 @@ class ExtentedFileProperties(
     def number_of_hidden_slides(self, value: int | None) -> None:
         self._set_content_elm(E_HiddenSlides, "hidden_slides", value)
 
-    # TODO: realize
     @property
-    def hyperlink_list(self) -> None:
-        """Specifies the set of hyperlinks that were in this document when last saved."""
+    @deprecated(
+        "This format is superseded by [ECMA-376]. Use Hyperlinks presented in main document."
+    )
+    def hyperlink_list(self) -> list[bytes]:
+        """Specifies the set of hyperlinks that were in this document when last saved.
+
+        **NOTE**: Here is hyperlinks presented as base64 decoded bytes, to parse them use
+        microsoft spec [MS-OSHARED] 2.3.3.1.18 VtHyperlink.
+        """
+        hlinks_elm = self.element.h_links
+        hlinks_blobs: list[bytes] = []
+        if hlinks_elm is None:
+            return hlinks_blobs
+        for vector in hlinks_elm.vector.vectors:
+            if not isinstance(vector, E_Variant):
+                continue
+            blob_elm = vector.variant
+            if not isinstance(blob_elm, E_Blob):
+                continue
+            hlink_blob = blob_elm.content
+            if hlink_blob is not None:
+                hlinks_blobs.append(hlink_blob)
+        return hlinks_blobs
+
+    @hyperlink_list.setter
+    @deprecated(
+        "This format is superseded by [ECMA-376]. Use Hyperlinks presented in main document."
+    )
+    def hyperlink_list(self, value: list[bytes] | None = None) -> None:
+        hlinks_elm_old = self.element.h_links
+        if not value:
+            if hlinks_elm_old is not None:
+                self.element.remove_child(hlinks_elm_old)
+            return
+        vec_elm = E_Vector.new()
+        vec_elm.size = len(value)
+        vec_elm.base_type = SE_VECTOR_BASE_TYPE.VARIANT
+        for hlink_blob in value:
+            blob_elm = E_Blob.new()
+            blob_elm.content = hlink_blob
+            vec_elm.append_child(blob_elm)
+        hlinks_elm_new = E_HLinks.new()
+        hlinks_elm_new.append_child(vec_elm)
+        self.element.upsert_child(hlinks_elm_old, hlinks_elm_new)
 
     @property
     def relative_hyperlink_base(self) -> str | None:
@@ -336,7 +384,10 @@ class ExtentedFileProperties(
     @property
     def number_of_lines(self) -> int | None:
         """Specifies the total number of lines in a document when last saved by a conforming producer if
-        applicable."""
+        applicable.
+
+        **NOTE**: Word will count lines itself, it's only last-save info.
+        """
         return self._get_elm_content("lines")
 
     @number_of_lines.setter
@@ -365,7 +416,10 @@ class ExtentedFileProperties(
 
     @property
     def total_number_of_multimedia_clips(self) -> int | None:
-        """Specifies the total number of sound or video clips that are present in the document."""
+        """Specifies the total number of sound or video clips that are present in the document.
+
+        **NOTE**: Word will count multimedia clips itself, it's only last-save info.
+        """
         return self._get_elm_content("mm_clips")
 
     @total_number_of_multimedia_clips.setter
@@ -374,7 +428,10 @@ class ExtentedFileProperties(
 
     @property
     def number_of_slides_containing_notes(self) -> int | None:
-        """Specifies the number of slides in a presentation containing notes."""
+        """Specifies the number of slides in a presentation containing notes.
+
+        **NOTE**: Word will count notes itself, it's only last-save info.
+        """
         return self._get_elm_content("notes")
 
     @number_of_slides_containing_notes.setter
@@ -383,7 +440,10 @@ class ExtentedFileProperties(
 
     @property
     def total_number_of_pages(self) -> int | None:
-        """Specifies the total number of pages of a document if applicable."""
+        """Specifies the total number of pages of a document if applicable.
+
+        **NOTE**: Word will count pages itself, it's only last-save info.
+        """
         return self._get_elm_content("pages")
 
     @total_number_of_pages.setter
@@ -392,7 +452,10 @@ class ExtentedFileProperties(
 
     @property
     def total_number_of_paragraphs(self) -> int | None:
-        """Specifies the total number of paragraphs found in a document if applicable."""
+        """Specifies the total number of paragraphs found in a document if applicable.
+
+        **NOTE**: Word will count paragraphs itself, it's only last-save info.
+        """
         return self._get_elm_content("paragraphs")
 
     @total_number_of_paragraphs.setter
@@ -434,7 +497,10 @@ class ExtentedFileProperties(
 
     @property
     def slides_metadata(self) -> int | None:
-        """Specifies the total number of slides in a presentation document."""
+        """Specifies the total number of slides in a presentation document.
+
+        **NOTE**: Word will count slides itself, it's only last-save info.
+        """
         return self._get_elm_content("slides")
 
     @slides_metadata.setter
@@ -453,7 +519,10 @@ class ExtentedFileProperties(
 
     @property
     def total_edit_time_metadata(self) -> int | None:
-        """Total time that a document has been edited. The default time unit is minutes."""
+        """Total time that a document has been edited. The default time unit is minutes.
+
+        **NOTE**: Word will count total time itself, it's only last-save info.
+        """
         return self._get_elm_content("total_time")
 
     @total_edit_time_metadata.setter
@@ -462,7 +531,10 @@ class ExtentedFileProperties(
 
     @property
     def word_count(self) -> int | None:
-        """Specifies the total number of words contained in a document when last saved."""
+        """Specifies the total number of words contained in a document when last saved.
+
+        **NOTE**: Word will count words itself, it's only last-save info.
+        """
         return self._get_elm_content("words")
 
     @word_count.setter

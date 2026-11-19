@@ -148,6 +148,14 @@ class BaseOxmlElement(etree.ElementBase):
             old_element, new_element  # pyright: ignore[reportArgumentType]
         )
 
+    def upsert_child(
+        self, old_element: BaseOxmlElement | None, new_element: BaseOxmlElement
+    ) -> None:
+        if old_element is None:
+            self.append_child(new_element)
+        else:
+            self.replace_child(old_element, new_element)
+
     def remove_child(self, element: BaseOxmlElement) -> None:
         return super().remove(element)  # pyright: ignore[reportArgumentType]
 
