@@ -97,7 +97,7 @@ class ExtentedFileProperties(
         The content of this property shall be of the form XX.YYYY where X and Y represent numerical values, or the
         document shall be considered non-conformant.
 
-        **Note**: The contents of this property do not represent absolute values, but rather qualify the contents of the
+        **NOTE**: The contents of this property do not represent absolute values, but rather qualify the contents of the
         `application_name` property to differentiate between different versions of the same producer. Applications should use
         this information in an informative manner only (as document metadata).
         """
