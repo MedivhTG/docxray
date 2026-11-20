@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, ClassVar, Self, TypeVar
+from typing import Any, ClassVar, Literal, Self, TypeVar
 
 from lxml import etree
 from typing_extensions import Sentinel
@@ -22,7 +22,10 @@ from .xsd.simple_type import SimpleType
 
 MISSING = Sentinel("MISSING")
 T = TypeVar("T")
-FIND_T = TypeVar("FIND_T", bound="BaseOxmlElement")
+ELM_T = TypeVar("ELM_T", bound="BaseOxmlElement")
+
+type NsmapMode = Literal["single_ns_no_prefix", "single_ns", "full_nsmap"]
+type Attrib = dict[str | etree.QName, Any]
 
 
 class BaseOxmlElement(etree.ElementBase):
@@ -90,7 +93,7 @@ class BaseOxmlElement(etree.ElementBase):
         full_content = "".join(self.itertext())
         return simple_type.validate_schema(full_content)
 
-    def all(self, element: type[FIND_T]) -> list[FIND_T]:
+    def all(self, element: type[ELM_T]) -> list[ELM_T]:
         """Return all direct children matching ``element``'s QName.
 
         Args:
@@ -101,10 +104,10 @@ class BaseOxmlElement(etree.ElementBase):
         """
         return list(self.iterchildren(element.qname()))  # type: ignore[arg-type]
 
-    def one_or_none(self, element: type[FIND_T]) -> FIND_T | None:
+    def one_or_none(self, element: type[ELM_T]) -> ELM_T | None:
         return next(self.iterchildren(element.qname(), reversed=True), None)  # type: ignore[return-value]
 
-    def one(self, element: type[FIND_T]) -> FIND_T:
+    def one(self, element: type[ELM_T]) -> ELM_T:
         found_elm = next(
             self.iterchildren(element.qname(), reversed=True), None
         )
@@ -114,7 +117,7 @@ class BaseOxmlElement(etree.ElementBase):
             )
         return found_elm  # type: ignore[return-value]
 
-    def choice_one(self, *choices: type[FIND_T]) -> FIND_T:
+    def choice_one(self, *choices: type[ELM_T]) -> ELM_T:
         found_elm = next(
             self.iterchildren(*[ch.qname() for ch in choices], reversed=True),
             None,
@@ -125,7 +128,7 @@ class BaseOxmlElement(etree.ElementBase):
             )
         return found_elm  # type: ignore[return-value]
 
-    def choice_many_at_least_one(self, *choices: type[FIND_T]) -> list[FIND_T]:
+    def choice_many_at_least_one(self, *choices: type[ELM_T]) -> list[ELM_T]:
         found_lst = list(self.iterchildren(*[ch.qname() for ch in choices]))
         if not found_lst:
             raise OxmlChoiceManyAtLeastOneError(
@@ -256,8 +259,42 @@ class BaseOxmlElement(etree.ElementBase):
         return etree.fromstring(text, parser)  # type: ignore[return-value]
 
     @classmethod
+    def new_element(
+        cls,
+        *children: BaseOxmlElement,
+        parser: etree.XMLParser[ELM_T],
+        nsmap: dict[str | None, str],
+        nsmap_mode: NsmapMode = "single_ns",
+        attrib_update: Attrib | None = None,
+    ) -> Self:
+        attrib: Attrib = {}
+        for attr in cls.attributes().values():
+            if isinstance(attr, AttrRequired):
+                attrib[attr.qname] = (
+                    attr.fixed if attr.fixed is not None else ""
+                )
+        if attrib_update:
+            attrib.update(attrib_update)
+        qname = cls.qname()
+        uri = qname.namespace
+        if nsmap_mode == "single_ns":
+            nsmap = {cls._namespace: nsmap[cls._namespace]}
+        elif nsmap_mode == "single_ns_no_prefix" and uri:
+            nsmap = {None: uri}
+        elm = parser.makeelement(qname, nsmap=nsmap, attrib=attrib)
+        for child in children:
+            elm.append_child(child)
+        return elm  # type: ignore[return-value]
+
+    @classmethod
     @abstractmethod
-    def new(cls) -> Self: ...
+    def new(
+        cls,
+        *children: BaseOxmlElement,
+        nsmap_override: dict[str | None, str],
+        nsmap_mode: NsmapMode = "single_ns",
+        attrib_update: Attrib | None = None,
+    ) -> Self: ...
 
     @classmethod
     @abstractmethod

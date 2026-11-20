@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import Self
-
 # docxray stuff
-from docxray2.ns import NAMESPACE_URI
 from docxray2.opc.xsd.content_types import ST_ContentType, ST_Extension
 from docxray2.xmlchemy import AttrRequired
 from docxray2.xsd.primitives import XsdAnyUri
@@ -39,15 +36,7 @@ class CT_Override(OpcOxmlNSMediaTypesStream):
 
 
 class E_Types(CT_Types, tag="Types"):
-    @classmethod
-    def new(
-        cls,
-        exclude_tag_prefix: bool = True,
-        nsmap: dict[str | None, str] | None = None,
-    ) -> Self:
-        # To create with xmlns="http://schemas.openxmlformats.org/package/2006/content-types"
-        nsmap = {None: NAMESPACE_URI.MEDIA_TYPES_STREAM}
-        return super().new(exclude_tag_prefix, nsmap)
+    pass
 
 
 class E_Default(CT_Default, tag="Default"):

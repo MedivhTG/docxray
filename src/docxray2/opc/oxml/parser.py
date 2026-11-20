@@ -5,8 +5,9 @@ from lxml import etree
 # docxray stuff
 from docxray2.ns import NAMESPACE, NAMESPACE_URI
 from docxray2.xmlchemy import (
-    AttrRequired,
+    Attrib,
     BaseOxmlElement,
+    NsmapMode,
     elm_ns_cls_lookup,
 )
 
@@ -33,25 +34,19 @@ class OpcOxml(
     @classmethod
     def new(
         cls,
-        exclude_tag_prefix: bool = False,
-        nsmap: dict[None | str, str] | None = None,
+        *children: BaseOxmlElement,
+        nsmap_override: dict[str | None, str] | None = None,
+        nsmap_mode: NsmapMode = "single_ns",
+        attrib_update: Attrib | None = None,
     ) -> Self:
-        attrib = {}
-        for attr in cls.attributes().values():
-            if isinstance(attr, AttrRequired):
-                attrib[attr.qname] = attr.fixed or ""
-        qname = cls.qname()
-        if nsmap is None:
-            uri = qname.namespace
-            if exclude_tag_prefix and uri:
-                nsmap = {None: uri}
-            elif cls._namespace in OPC_NSMAP:
-                nsmap = {cls._namespace: OPC_NSMAP[cls._namespace]}
-            else:
-                nsmap = OPC_NSMAP
-        return opc_parser.makeelement(
-            qname, nsmap=nsmap, attrib=attrib
-        )  # type: ignore[return-value]
+        nsmap = OPC_NSMAP if nsmap_override is None else nsmap_override
+        return cls.new_element(  # type: ignore[type-var]
+            *children,
+            parser=opc_parser,  # pyright: ignore[reportArgumentType]
+            nsmap=nsmap,
+            nsmap_mode=nsmap_mode,
+            attrib_update=attrib_update,
+        )
 
     @classmethod
     def from_xml(cls, text: str | bytes) -> Self:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Self
 
 from lxml import etree
@@ -5,13 +7,16 @@ from lxml import etree
 # docxray stuff
 from docxray2.ns import NAMESPACE
 from docxray2.xmlchemy import (
-    AttrRequired,
+    Attrib,
     BaseOxmlElement,
+    NsmapMode,
     elm_ns_cls_lookup,
 )
 
 oxml_nslookup = elm_ns_cls_lookup()
-oxml_parser = etree.XMLParser(remove_blank_text=True, resolve_entities=False)
+oxml_parser: etree.XMLParser = etree.XMLParser(
+    remove_blank_text=True, resolve_entities=False
+)
 oxml_parser.set_element_class_lookup(oxml_nslookup)
 
 
@@ -30,25 +35,19 @@ class Oxml(
     @classmethod
     def new(
         cls,
-        exclude_tag_prefix: bool = False,
-        nsmap: dict[str | None, str] | None = None,
+        *children: BaseOxmlElement,
+        nsmap_override: dict[str | None, str] | None = None,
+        nsmap_mode: NsmapMode = "single_ns",
+        attrib_update: Attrib | None = None,
     ) -> Self:
-        attrib = {}
-        for attr in cls.attributes().values():
-            if isinstance(attr, AttrRequired):
-                attrib[attr.qname] = attr.fixed or ""
-        qname = cls.qname()
-        if nsmap is None:
-            uri = qname.namespace
-            if exclude_tag_prefix and uri:
-                nsmap = {None: uri}
-            elif cls._namespace in OXML_NSMAP:
-                nsmap = {cls._namespace: OXML_NSMAP[cls._namespace]}
-            else:
-                nsmap = OXML_NSMAP
-        return oxml_parser.makeelement(
-            qname, nsmap=nsmap, attrib=attrib
-        )  # type: ignore[return-value]
+        nsmap = OXML_NSMAP if nsmap_override is None else nsmap_override
+        return cls.new_element(  # type: ignore[type-var]
+            *children,
+            parser=oxml_parser,  # pyright: ignore[reportArgumentType]
+            nsmap=nsmap,
+            nsmap_mode=nsmap_mode,
+            attrib_update=attrib_update,
+        )
 
     @classmethod
     def from_xml(cls, text: str | bytes) -> Self:

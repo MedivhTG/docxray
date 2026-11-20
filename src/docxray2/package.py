@@ -62,7 +62,7 @@ class DocxPackage(Package):
             element=cast(
                 "type[OpcOxml | Oxml]",
                 part_xml_cls.ELEMENT,  # pyright: ignore[reportGeneralTypeIssues]
-            ).new(nsmap=nsmap),
+            ).new(nsmap_override=nsmap, nsmap_mode="full_nsmap"),
         )
         self.rels.get_or_add(part_xml_cls.RELATIONSHIP_TYPE_DEFAULT, part_xml)
         return part_xml
