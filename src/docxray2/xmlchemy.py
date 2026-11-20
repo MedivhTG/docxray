@@ -139,15 +139,13 @@ class BaseOxmlElement(etree.ElementBase):
     def to_string(self) -> bytes:
         return etree.tostring(self)
 
-    def append_child(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, element: BaseOxmlElement
-    ) -> None:
-        return super().append(element)  # pyright: ignore[reportArgumentType]
+    def append_child(self, element: BaseOxmlElement) -> None:
+        return self.append(element)  # pyright: ignore[reportArgumentType]
 
     def replace_child(
         self, old_element: BaseOxmlElement, new_element: BaseOxmlElement
     ) -> None:
-        return super().replace(
+        return self.replace(
             old_element, new_element  # pyright: ignore[reportArgumentType]
         )
 
@@ -160,7 +158,7 @@ class BaseOxmlElement(etree.ElementBase):
             self.replace_child(old_element, new_element)
 
     def remove_child(self, element: BaseOxmlElement) -> None:
-        return super().remove(element)  # pyright: ignore[reportArgumentType]
+        return self.remove(element)  # pyright: ignore[reportArgumentType]
 
     def _attr_required(
         self,
