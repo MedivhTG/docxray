@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 # docxray stuff
 from docxray2 import Document
+from docxray2.proxy.extf_props import HeadingGroup
 
 origin = "tests/examples/content_check.docx"
 out = "here.docx"
@@ -34,7 +35,7 @@ extf_props.number_of_characters_with_spaces = None
 extf_props.name_of_company = None
 extf_props.digital_signature = None
 extf_props.document_security = 1
-extf_props.heading_groups = None
+extf_props.heading_groups = [HeadingGroup(name="Headers", titles=["Название"])]
 extf_props.number_of_hidden_slides = 5
 extf_props.hyperlink_list = None
 extf_props.relative_hyperlink_base = "http://google.com"
