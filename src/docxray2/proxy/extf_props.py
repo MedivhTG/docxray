@@ -565,11 +565,48 @@ class ExtentedFileProperties(
 
 
 class HeadingGroup(BaseModel):
+    """A single named group of titles as stored in the extended properties part.
+
+    Corresponds to one name/count pair in `HeadingPairs` (§22.2.2.8) together with the
+    consecutive run of `TitlesOfParts` (§22.2.2.26) entries it owns. For example, a
+    presentation may yield the groups ``Theme`` (1 title) and ``Slide Titles`` (3 titles).
+
+    This is a plain value object; reading from and writing to the document is handled by
+    :attr:`ExtentedFileProperties.heading_groups`.
+    """
+
     name: str
+    """The heading name of this group, e.g. ``"Slide Titles"``. Shall be non-empty."""
+
     titles: list[str]
+    """The consecutive titles belonging to this group, in document order.
+
+    The length of this list is the group's count stored in `HeadingPairs`.
+    """
 
     @classmethod
     def from_elm(cls, elm: E_Properties) -> list[HeadingGroup]:
+        """Read the heading groups from the given extended properties element.
+
+        Parses the `HeadingPairs`/`TitlesOfParts` pair and reconstructs the ordered list of
+        groups by consuming each group's declared count of consecutive titles.
+
+        Args:
+            elm: The `Properties` element to read from.
+
+        Returns:
+            The heading groups in declaration order, or an empty list if `HeadingPairs` is
+            absent.
+
+        Raises:
+            ValueError: If `HeadingPairs` is present but `TitlesOfParts` is missing, if the
+                `HeadingPairs` vector does not contain name/count pairs, if a group name is
+                empty, if a group count is negative, or if `TitlesOfParts` holds fewer titles
+                than the declared counts require.
+            TypeError: If a name variant is not `lpstr`/`lpwstr`, if a count variant is not
+                an integer type, if a count is missing or not an integer, or if a
+                `TitlesOfParts` entry is not a string type.
+        """
         hp_elm = elm.heading_pairs
         if hp_elm is None:
             return []
