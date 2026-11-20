@@ -52,17 +52,14 @@ class DocxPackage(Package):
         return self._create_xml_part(ExtendedFilePropertiesPart)
 
     def _create_xml_part(self, part_xml_cls: type[PART_T]) -> PART_T:
-        if hasattr(part_xml_cls, "NSMAP_DEFAULT"):
-            nsmap = part_xml_cls.NSMAP_DEFAULT
-        else:
-            nsmap = None
+        elm_cls = cast(
+            "type[OpcOxml | Oxml]",
+            part_xml_cls.ELEMENT,  # pyright: ignore[reportGeneralTypeIssues]
+        )
         part_xml = part_xml_cls(
             part_name=part_xml_cls.PART_NAME_DEFAULT,
             content_type=part_xml_cls.CONTENT_TYPE_DEFAULT,
-            element=cast(
-                "type[OpcOxml | Oxml]",
-                part_xml_cls.ELEMENT,  # pyright: ignore[reportGeneralTypeIssues]
-            ).new(nsmap_override=nsmap, nsmap_mode="full_nsmap"),
+            element=elm_cls.new(nsmap_mode="full_nsmap"),
         )
         self.rels.get_or_add(part_xml_cls.RELATIONSHIP_TYPE_DEFAULT, part_xml)
         return part_xml

@@ -2,18 +2,25 @@
 
 
 # docxray stuff
+from docxray2.ns import NAMESPACE
 from docxray2.opc.xsd.dublin_core import W3CDTF
-from docxray2.xmlchemy import AttrRequired, Content
+from docxray2.xmlchemy import AttrRequired, Content, Nsmap
 from docxray2.xsd.primitives import XsdString
 
 from .parser import OpcOxml
 
+NSMAP: Nsmap = {
+    "dc": NAMESPACE.DUBLIN_CORE,
+    "dcterms": NAMESPACE.DUBLIN_CORE_TERMS,
+    "xsi": NAMESPACE.XML_SHEMA_INSTANCE,
+}
 
-class OpcOxmlNSDublinCore(OpcOxml, ns="dc"):
+
+class OpcOxmlNSDublinCore(OpcOxml, ns="dc", nsmap=NSMAP):
     pass
 
 
-class OpcOxmlNSDublinCoreTerms(OpcOxml, ns="dcterms"):
+class OpcOxmlNSDublinCoreTerms(OpcOxml, ns="dcterms", nsmap=NSMAP):
     pass
 
 

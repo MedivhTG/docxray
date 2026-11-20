@@ -14,7 +14,6 @@ class Part[PACK_T: Package]:
     PART_NAME_DEFAULT: PkgURI
     CONTENT_TYPE_DEFAULT: str
     RELATIONSHIP_TYPE_DEFAULT: str
-    NSMAP_DEFAULT: dict[str | None, str]
 
     def __init__(
         self,

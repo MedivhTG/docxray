@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 # docxray stuff
+from docxray2.ns import NAMESPACE
 from docxray2.xmlchemy import Content
 from docxray2.xsd.primitives import XsdBoolean, XsdInt, XsdString
 
 from .parser import Oxml
 from .shared_dpvt import E_Blob, E_Vector
 
+NSMAP = {
+    None: NAMESPACE.EXTENDED_PROPERTIES,
+    "vt": NAMESPACE.VARIANT_TYPES,
+}
 
-class OxmlNSDocumentPropertiesExtended(Oxml, ns="ep"):
+
+class OxmlNSDocumentPropertiesExtended(Oxml, nsmap=NSMAP):
     pass
 
 

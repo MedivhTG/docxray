@@ -3,6 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 # docxray stuff
+from docxray2.ns import NAMESPACE
 from docxray2.oxml.shared_common_st import ST_Guid
 from docxray2.simple_types.shared_dpvt import (
     ST_ArrayBaseType,
@@ -10,7 +11,7 @@ from docxray2.simple_types.shared_dpvt import (
     ST_Error,
     ST_VectorBaseType,
 )
-from docxray2.xmlchemy import AttrOptional, AttrRequired, Content
+from docxray2.xmlchemy import AttrOptional, AttrRequired, Content, Nsmap
 from docxray2.xsd.primitives import (
     XsdBase64Binary,
     XsdBoolean,
@@ -31,8 +32,10 @@ from docxray2.xsd.primitives import (
 
 from .parser import Oxml
 
+NSMAP: Nsmap = {None: NAMESPACE.VARIANT_TYPES}
 
-class OxmlNSDocumentPropertiesVariantTypes(Oxml, ns="vt"):
+
+class OxmlNSDocumentPropertiesVariantTypes(Oxml, nsmap=NSMAP):
     pass
 
 

@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 # docxray stuff
-from docxray2.xmlchemy import AttrOptional, Content
+from docxray2.ns import NAMESPACE
+from docxray2.xmlchemy import AttrOptional, Content, Nsmap
 from docxray2.xsd.primitives import XsdDateTime, XsdString
 
 from .dublin_core import (
@@ -17,8 +18,15 @@ from .dublin_core import (
 )
 from .parser import OpcOxml
 
+NSMAP: Nsmap = {
+    "cp": NAMESPACE.CORE_PROPERTIES,
+    "dc": NAMESPACE.DUBLIN_CORE,
+    "dcterms": NAMESPACE.DUBLIN_CORE_TERMS,
+    "xml": NAMESPACE.XML,
+}
 
-class OpcOxmlNSCoreProperties(OpcOxml, ns="cp"):
+
+class OpcOxmlNSCoreProperties(OpcOxml, ns="cp", nsmap=NSMAP):
     pass
 
 

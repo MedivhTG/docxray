@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 # docxray stuff
+from docxray2.ns import NAMESPACE_URI
 from docxray2.opc.xsd.content_types import ST_ContentType, ST_Extension
-from docxray2.xmlchemy import AttrRequired
+from docxray2.xmlchemy import AttrRequired, Nsmap
 from docxray2.xsd.primitives import XsdAnyUri
 
 from .parser import OpcOxml
 
+NSMAP: Nsmap = {None: NAMESPACE_URI.MEDIA_TYPES_STREAM}
 
-class OpcOxmlNSMediaTypesStream(OpcOxml, ns="ct"):
+
+class OpcOxmlNSMediaTypesStream(OpcOxml, nsmap=NSMAP):
     pass
 
 

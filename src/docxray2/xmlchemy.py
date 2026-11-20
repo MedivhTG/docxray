@@ -24,6 +24,7 @@ MISSING = Sentinel("MISSING")
 T = TypeVar("T")
 ELM_T = TypeVar("ELM_T", bound="BaseOxmlElement")
 
+type Nsmap = dict[str | None, str]
 type NsmapMode = Literal["single_ns_no_prefix", "single_ns", "full_nsmap"]
 type Attrib = dict[str | etree.QName, Any]
 
@@ -40,7 +41,7 @@ class BaseOxmlElement(etree.ElementBase):
     """
 
     _nslookup: ClassVar[etree.ElementNamespaceClassLookup | None] = None
-    _nsmap: ClassVar[dict[str | None, str] | None] = None
+    _nsmap: ClassVar[Nsmap | None] = None
     _namespace: ClassVar[str | None] = None
     _tagname: ClassVar[str | None] = None
     __qname__: ClassVar[etree.QName | None] = None
@@ -69,12 +70,12 @@ class BaseOxmlElement(etree.ElementBase):
     def __init_subclass__(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
-        nsmap: dict[str | None, str] | None = None,
+        nsmap: Nsmap | None = None,
         ns: str | None = None,
         tag: str | None = None,
     ) -> None:
         super().__init_subclass__()
-        cls.register_elm(nslookup, nsmap, ns, tag)
+        cls._register_elm(nslookup, nsmap, ns, tag)
         cls._register_attrs()
 
     def __repr__(self) -> str:
@@ -261,10 +262,11 @@ class BaseOxmlElement(etree.ElementBase):
         cls,
         *children: BaseOxmlElement,
         parser: etree.XMLParser[ELM_T],
-        nsmap: dict[str | None, str],
+        nsmap_override: Nsmap | None = None,
         nsmap_mode: NsmapMode = "single_ns",
         attrib_update: Attrib | None = None,
     ) -> Self:
+        # Create attributes
         attrib: Attrib = {}
         for attr in cls.attributes().values():
             if isinstance(attr, AttrRequired):
@@ -273,15 +275,26 @@ class BaseOxmlElement(etree.ElementBase):
                 )
         if attrib_update:
             attrib.update(attrib_update)
+        # Names
         qname = cls.qname()
         uri = qname.namespace
-        if nsmap_mode == "single_ns":
+        # Nsmap init
+        if nsmap_override is not None:
+            nsmap = nsmap_override
+        elif cls._nsmap is not None:
+            nsmap = cls._nsmap
+        else:
+            nsmap = {}
+        if nsmap_mode == "single_ns" and cls._namespace in nsmap:
             nsmap = {cls._namespace: nsmap[cls._namespace]}
         elif nsmap_mode == "single_ns_no_prefix" and uri:
             nsmap = {None: uri}
+        # Create element
         elm = parser.makeelement(qname, nsmap=nsmap, attrib=attrib)
+        # Append children
         for child in children:
             elm.append_child(child)
+        # Return
         return elm  # type: ignore[return-value]
 
     @classmethod
@@ -289,7 +302,7 @@ class BaseOxmlElement(etree.ElementBase):
     def new(
         cls,
         *children: BaseOxmlElement,
-        nsmap_override: dict[str | None, str],
+        nsmap_override: Nsmap,
         nsmap_mode: NsmapMode = "single_ns",
         attrib_update: Attrib | None = None,
     ) -> Self: ...
@@ -305,46 +318,35 @@ class BaseOxmlElement(etree.ElementBase):
         return cls.__attrs__
 
     @classmethod
-    def register_elm(
+    def _register_elm(
         cls,
         nslookup: etree.ElementNamespaceClassLookup | None = None,
-        nsmap: dict[str | None, str] | None = None,
+        nsmap: Nsmap | None = None,
         namespace: str | None = None,
         tagname: str | None = None,
     ) -> None:
-        """Store element identity and register the class in the namespace.
-
-        Each argument is applied only if truthy; registration and QName
-        computation happen once all four pieces (``nslookup``, ``nsmap``,
-        ``namespace``, ``tagname``) are known.
-
-        Args:
-            nslookup (etree.ElementNamespaceClassLookup | None): Namespace
-                lookup to register into. Defaults to ``None``.
-            nsmap (dict[str, str] | None): Prefix → URI map. Defaults to
-                ``None``.
-            namespace (str | None): Namespace prefix. Defaults to ``None``.
-            tagname (str | None): Local tag name. Defaults to ``None``.
-        """
-        if nslookup:
-            cls._nslookup = nslookup
-        if nsmap is not None:
-            cls._nsmap = nsmap
-        if namespace:
-            cls._namespace = namespace
+        cls._nsmap = nsmap if nsmap is not None else cls._resolve_nsmap()
         if tagname:
             cls._tagname = tagname
-        if not (
-            cls._nslookup
-            and cls._nsmap is not None
-            and cls._namespace
-            and cls._tagname
-        ):
+        if nslookup:
+            cls._nslookup = nslookup
+        if namespace:
+            cls._namespace = namespace
+        if not (cls._nslookup and cls._nsmap and cls._tagname):
             return
         uri = cls._nsmap[cls._namespace]
         ns = cls._nslookup.get_namespace(uri)
         ns[cls._tagname] = cls
         cls.__qname__ = etree.QName(uri, cls._tagname)
+
+    @classmethod
+    def _resolve_nsmap(cls) -> Nsmap | None:
+        for parent_cls in cls.__mro__:
+            if not issubclass(parent_cls, BaseOxmlElement):
+                continue
+            if parent_cls._nsmap:
+                return parent_cls._nsmap
+        return None
 
     @classmethod
     def _register_attrs(cls) -> None:
@@ -533,7 +535,7 @@ def elm_ns_cls_lookup(
     return nslookup
 
 
-def qname(nsmap: dict[str | None, str], qn: str) -> etree.QName:
+def qname(nsmap: Nsmap, qn: str) -> etree.QName:
     tag_parts = qn.split(":")
     if len(tag_parts) == 2:
         tag_root, tag_name = tag_parts
