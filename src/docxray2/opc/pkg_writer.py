@@ -69,14 +69,14 @@ class _ContentTypesItem:
 
     @property
     def _element(self) -> E_Types:
-        types_elm = E_Types.new(nsmap_mode="single_ns_no_prefix")
+        types_elm = E_Types.new()
         for ext in sorted(self._defaults.keys()):
-            elm_default = E_Default.new(nsmap_mode="single_ns_no_prefix")
+            elm_default = E_Default.new()
             elm_default.Extension = ext
             elm_default.ContentType = self._defaults[ext]
             types_elm.append_child(elm_default)
         for part_name in sorted(self._overrides.keys()):
-            elm_override = E_Override.new(nsmap_mode="single_ns_no_prefix")
+            elm_override = E_Override.new()
             elm_override.PartName = part_name
             elm_override.ContentType = self._overrides[part_name]
             types_elm.append_child(elm_override)

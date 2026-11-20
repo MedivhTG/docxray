@@ -17,9 +17,9 @@ class Relationships(dict[str, "Relationship"]):
 
     @property
     def xml(self) -> bytes:
-        rels_elm = E_Relationships.new(nsmap_mode="single_ns_no_prefix")
+        rels_elm = E_Relationships.new()
         for rel in self.values():
-            rel_elm = E_Relationship.new(nsmap_mode="single_ns_no_prefix")
+            rel_elm = E_Relationship.new()
             rel_elm.Id = rel.rel_id
             rel_elm.Type = rel.rel_type
             rel_elm.Target = rel.target_ref
