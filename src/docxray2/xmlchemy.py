@@ -44,28 +44,28 @@ class BaseOxmlElement(etree.ElementBase):
     _nsmap: ClassVar[Nsmap | None] = None
     _namespace: ClassVar[str | None] = None
     _tagname: ClassVar[str | None] = None
-    __qname__: ClassVar[etree.QName | None] = None
-    __attrs__: ClassVar[dict[str, Attr] | None] = None
+    _qname: ClassVar[etree.QName | None] = None
+    _attrs: ClassVar[dict[str, Attr] | None] = None
 
-    class _ElementAttrsRegistry:
-        __map__: dict[type[BaseOxmlElement], dict[str, Attr]] = {}
+    class _Registry:
+        _attrs_map: dict[type[BaseOxmlElement], dict[str, Attr]] = {}
 
         @classmethod
         def attrs(cls, elm_cls: type[BaseOxmlElement]) -> dict[str, Attr]:
             merged: dict[str, Attr] = {}
             for base in reversed(elm_cls.__mro__):
-                merged.update(cls.__map__.get(base, {}))
+                merged.update(cls._attrs_map.get(base, {}))
             return merged
 
         @classmethod
-        def register(
+        def register_attr(
             cls, elm_cls: type[BaseOxmlElement], name: str, attr: Attr
         ) -> None:
-            attr_map = cls.__map__.get(elm_cls)
+            attr_map = cls._attrs_map.get(elm_cls)
             if attr_map:
                 attr_map[name] = attr
             else:
-                cls.__map__[elm_cls] = {name: attr}
+                cls._attrs_map[elm_cls] = {name: attr}
 
     def __init_subclass__(
         cls,
@@ -239,9 +239,9 @@ class BaseOxmlElement(etree.ElementBase):
         Raises:
             ValueError: If the class was never fully registered.
         """
-        if not cls.__qname__:
+        if not cls._qname:
             raise ValueError("No qualified name provided")
-        return cls.__qname__
+        return cls._qname
 
     @classmethod
     def parse(cls, text: str | bytes, parser: etree.XMLParser) -> Self:
@@ -313,9 +313,9 @@ class BaseOxmlElement(etree.ElementBase):
 
     @classmethod
     def attributes(cls) -> dict[str, Attr]:
-        if cls.__attrs__ is None:
-            cls.__attrs__ = {}
-        return cls.__attrs__
+        if cls._attrs is None:
+            cls._attrs = {}
+        return cls._attrs
 
     @classmethod
     def _register_elm(
@@ -337,7 +337,7 @@ class BaseOxmlElement(etree.ElementBase):
         uri = cls._nsmap[cls._namespace]
         ns = cls._nslookup.get_namespace(uri)
         ns[cls._tagname] = cls
-        cls.__qname__ = etree.QName(uri, cls._tagname)
+        cls._qname = etree.QName(uri, cls._tagname)
 
     @classmethod
     def _resolve_nsmap(cls) -> Nsmap | None:
@@ -350,14 +350,12 @@ class BaseOxmlElement(etree.ElementBase):
 
     @classmethod
     def _register_attrs(cls) -> None:
-        if cls.__qname__ is not None:
-            for attr_name, attr in cls._ElementAttrsRegistry.attrs(
-                cls
-            ).items():
+        if cls._qname is not None:
+            for attr_name, attr in cls._Registry.attrs(cls).items():
                 attr.compute_qname()
-                if cls.__attrs__ is None:
-                    cls.__attrs__ = {}
-                cls.__attrs__[attr_name] = attr
+                if cls._attrs is None:
+                    cls._attrs = {}
+                cls._attrs[attr_name] = attr
 
 
 class Attr:
@@ -369,7 +367,7 @@ class Attr:
         self.owner = owner
         self.name = name
         self._qname: etree.QName | None = None
-        owner._ElementAttrsRegistry.register(owner, name, self)
+        owner._Registry.register_attr(owner, name, self)
 
     def _compute_qname(self, attr_name: str) -> None:
         if self._qname is None and self.owner._nsmap is not None:
