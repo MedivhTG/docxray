@@ -4,7 +4,7 @@ from functools import cached_property
 from docxray2.ns import MEDIA_TYPE, RELATIONSHIP_TYPE
 from docxray2.opc.pkg_uri import PkgURI
 from docxray2.oxml.shared_dpe import E_Properties
-from docxray2.proxy.extf_props import ExtentedFileProperties
+from docxray2.proxy.extf_props import ExtentedProperties
 
 from .base import DocxXmlPart
 
@@ -12,9 +12,9 @@ from .base import DocxXmlPart
 class ExtendedFilePropertiesPart(DocxXmlPart[E_Properties]):
     ELEMENT = E_Properties
     PART_NAME_DEFAULT = PkgURI("/docProps/app.xml")
-    CONTENT_TYPE_DEFAULT = MEDIA_TYPE.EXTENDED_FILE_PROPERTIES
+    CONTENT_TYPE_DEFAULT = MEDIA_TYPE.EXTENDED_PROPERTIES
     RELATIONSHIP_TYPE_DEFAULT = RELATIONSHIP_TYPE.EXTENDED_PROPERTIES
 
     @cached_property
-    def extf_props(self) -> ExtentedFileProperties:
-        return ExtentedFileProperties(self.element, self)
+    def extf_props(self) -> ExtentedProperties:
+        return ExtentedProperties(self.element, self)

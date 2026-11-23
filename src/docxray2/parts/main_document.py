@@ -7,9 +7,11 @@ from typing import TYPE_CHECKING
 from docxray2.opc.parts.core_properties import CorePropertiesPart
 from docxray2.opc.proxy.core_props import CoreProperties
 from docxray2.oxml.wml import E_Document
+from docxray2.parts.custom_file_properties import CustomFilePropertiesPart
 from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
+from docxray2.proxy.custom_props import CustomProperties
 from docxray2.proxy.document import Document
-from docxray2.proxy.extf_props import ExtentedFileProperties
+from docxray2.proxy.extf_props import ExtentedProperties
 from docxray2.types import PkgFile
 
 from .base import DocxXmlPart
@@ -36,16 +38,26 @@ class MainDocumentPart(DocxXmlPart[E_Document]):
         return self._docx_package.extended_file_properties_part
 
     @property
+    def custom_props_part(self) -> CustomFilePropertiesPart | None:
+        return self._docx_package.custom_file_properties_part
+
+    @property
     def core_props(self) -> CoreProperties | None:
         if self.core_props_part is None:
             return None
         return self.core_props_part.core_props
 
     @property
-    def extf_props(self) -> ExtentedFileProperties | None:
+    def extf_props(self) -> ExtentedProperties | None:
         if self.extf_props_part is None:
             return None
         return self.extf_props_part.extf_props
+
+    @property
+    def custom_props(self) -> CustomProperties | None:
+        if self.custom_props_part is None:
+            return None
+        return self.custom_props_part.custom_props
 
     def save(self, file: PkgFile) -> None:
         self._docx_package.save(file)

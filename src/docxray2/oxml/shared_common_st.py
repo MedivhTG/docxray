@@ -11,4 +11,4 @@ GUID_RE = re.compile(
 
 class ST_Guid(SimpleType[str]):
     SCHEMA = Restriction(XsdToken[str])
-    FACETS = {"enumeration": GUID_RE}
+    FACETS = {"pattern": GUID_RE}

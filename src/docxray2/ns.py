@@ -32,8 +32,11 @@ class MEDIA_TYPE:
     RELATIONSHIPS = "application/vnd.openxmlformats-package.relationships+xml"
     # Fundamentals
     MAIN_DOCUMENT = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
-    EXTENDED_FILE_PROPERTIES = (
+    EXTENDED_PROPERTIES = (
         "application/vnd.openxmlformats-officedocument.extended-properties+xml"
+    )
+    CUSTOM_PROPERTIES = (
+        "application/vnd.openxmlformats-officedocument.custom-properties+xml"
     )
     # Other
     XML = "application/xml"
@@ -45,6 +48,7 @@ class RELATIONSHIP_TYPE:
     # This is a known erratum in ECMA-376 Part 4: URI defined wrong, here is real URI
     CORE_PROPERTIES = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"
     EXTENDED_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
+    CUSTOM_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties"
 
 
 class NAMESPACE:
@@ -56,6 +60,7 @@ class NAMESPACE:
     VARIANT_TYPES = (
         "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"
     )
+    CUSTOM_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
     # W3C
     XML = "http://www.w3.org/XML/1998/namespace"
     XML_SHEMA_INSTANCE = "http://www.w3.org/2001/XMLSchema-instance"

@@ -68,7 +68,7 @@ if TYPE_CHECKING:
     )
 
 
-class ExtentedFileProperties(
+class ExtentedProperties(
     DocxElementProxy[E_Properties, "ExtendedFilePropertiesPart"]
 ):
     """

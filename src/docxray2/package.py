@@ -8,6 +8,7 @@ from docxray2.opc.parts.base import OpcXmlPart
 from docxray2.opc.parts.core_properties import CorePropertiesPart
 from docxray2.oxml.parser import Oxml
 from docxray2.parts.base import DocxXmlPart
+from docxray2.parts.custom_file_properties import CustomFilePropertiesPart
 from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
 from docxray2.parts.main_document import MainDocumentPart
 
@@ -43,6 +44,12 @@ class DocxPackage(Package):
             RELATIONSHIP_TYPE.EXTENDED_PROPERTIES, ExtendedFilePropertiesPart
         )
 
+    @property
+    def custom_file_properties_part(self) -> CustomFilePropertiesPart | None:
+        return self.part_related_by(
+            RELATIONSHIP_TYPE.CUSTOM_PROPERTIES, CustomFilePropertiesPart
+        )
+
     def create_core_properties_part(self) -> CorePropertiesPart:
         return self._create_xml_part(CorePropertiesPart)
 
@@ -50,6 +57,9 @@ class DocxPackage(Package):
         self,
     ) -> ExtendedFilePropertiesPart:
         return self._create_xml_part(ExtendedFilePropertiesPart)
+
+    def create_custom_file_properties_part(self) -> CustomFilePropertiesPart:
+        return self._create_xml_part(CustomFilePropertiesPart)
 
     def _create_xml_part(self, part_xml_cls: type[PART_T]) -> PART_T:
         elm_cls = cast(
