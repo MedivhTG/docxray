@@ -11,17 +11,43 @@ class DocxElementProxy[ELM_T: Oxml, PART_T: DocxXmlPart = DocxXmlPart[ELM_T]]:
         self._element = element
         self._parent = parent
 
+    @property
+    def element(self) -> ELM_T:
+        return self._element
+
+    @property
+    def parent(self) -> ProvidesDocxXmlPart:
+        return self._parent
+
     @cached_property
     def part(self) -> PART_T:
         return self._part  # type: ignore[return-value]
 
     @cached_property
-    def parent(self) -> ProvidesDocxXmlPart:
-        return self._parent
+    def _part(self) -> DocxXmlPart[ELM_T]:
+        return self._parent._part
+
+
+class DocxParentedElementProxy[
+    ELM_T: Oxml,
+    PARENT_T: DocxElementProxy,
+    PART_T: DocxXmlPart = DocxXmlPart[ELM_T],
+]:
+    def __init__(self, element: ELM_T, parent: PARENT_T) -> None:
+        self._element = element
+        self._parent = parent
 
     @property
     def element(self) -> ELM_T:
         return self._element
+
+    @property
+    def parent(self) -> PARENT_T:
+        return self._parent
+
+    @cached_property
+    def part(self) -> PART_T:
+        return self._part  # type: ignore[return-value]
 
     @cached_property
     def _part(self) -> DocxXmlPart[ELM_T]:

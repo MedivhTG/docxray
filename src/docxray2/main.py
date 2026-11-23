@@ -10,7 +10,6 @@ out = "here.docx"
 doc = Document(origin)
 
 core_props = doc.get_or_add_core_props()
-
 core_props.category = "Parsed"
 core_props.content_status = "Alpha"
 core_props.created = datetime.now() - timedelta(days=1)
@@ -27,7 +26,6 @@ core_props.title = "Call"
 core_props.version = "111"
 
 extf_props = doc.get_or_add_extf_props()
-
 extf_props.application_name = None
 extf_props.application_version = None
 extf_props.total_number_of_characters = None
@@ -54,6 +52,9 @@ extf_props.slides_metadata = None
 extf_props.name_of_document_template = "Normal"
 extf_props.total_edit_time_metadata = 2
 extf_props.word_count = 0
+
+custom_props = doc.get_or_add_custom_props()
+props = custom_props.get_properties()
 
 doc.save(out)
 

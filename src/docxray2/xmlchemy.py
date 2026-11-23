@@ -143,6 +143,11 @@ class BaseOxmlElement(etree.ElementBase):
     def append_child(self, element: BaseOxmlElement) -> None:
         return self.append(element)  # pyright: ignore[reportArgumentType]
 
+    def insert_child(self, index: int, element: BaseOxmlElement) -> None:
+        return self.insert(
+            index, element  # pyright: ignore[reportArgumentType]
+        )
+
     def replace_child(
         self, old_element: BaseOxmlElement, new_element: BaseOxmlElement
     ) -> None:
