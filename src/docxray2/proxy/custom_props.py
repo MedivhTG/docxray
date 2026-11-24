@@ -43,6 +43,7 @@ class CustomProperties(
     def add_property(
         self,
         name: str,
+        value: int | str | W3CDTFDateTime | datetime | bool | None,
         link_target: str | None = None,
     ) -> Property:
         next_pid = max(self._pids_map, default=1) + 1
@@ -51,6 +52,9 @@ class CustomProperties(
         prop_elm.pid = next_pid
         prop_elm.name = name
         prop_elm.link_target = link_target
+        value_elm = self._prop_value_elm_by_type(value)
+        value_elm.content = value
+        prop_elm.append_child(value_elm)
         prop = Property(prop_elm, self)
         self.element.append_child(prop_elm)
         self._link_property(prop)
@@ -72,13 +76,8 @@ class CustomProperties(
     def get_property_by_name(self, name: str) -> Property | None:
         return self._names_map.get(name)
 
-    def _link_property(
-        self, prop: Property, link_at: int | None = None
-    ) -> None:
-        if link_at is not None:
-            self._props.insert(link_at, prop)
-        else:
-            self._props.append(prop)
+    def _link_property(self, prop: Property) -> None:
+        self._props.append(prop)
         self._map_property(prop)
 
     def _unlink_property(self, prop: Property) -> None:
@@ -99,6 +98,36 @@ class CustomProperties(
     def _sort_props_by_pid(self) -> None:
         self._props = sorted(self._props, key=lambda p: p.property_id)
 
+    def _prop_value_elm_by_type(
+        self,
+        value: (
+            int
+            | str
+            | W3CDTFDateTime
+            | datetime
+            | bool
+            | None
+            | WD_CUSTOM_PROPERTY_TYPE
+        ),
+    ) -> E_I4 | E_Bool | E_Lpwstr | E_Filetime:
+        if isinstance(value, WD_CUSTOM_PROPERTY_TYPE):
+            value_type = value
+        else:
+            value_type = WD_CUSTOM_PROPERTY_TYPE.new(value)
+        match value_type:
+            case WD_CUSTOM_PROPERTY_TYPE.NUMBER:
+                return E_I4.new()
+            case WD_CUSTOM_PROPERTY_TYPE.BOOLEAN:
+                return E_Bool.new()
+            case WD_CUSTOM_PROPERTY_TYPE.TEXT:
+                return E_Lpwstr.new()
+            case WD_CUSTOM_PROPERTY_TYPE.DATE:
+                return E_Filetime.new()
+            case WD_CUSTOM_PROPERTY_TYPE.NULL:
+                return E_Lpwstr.new()
+            case _:
+                raise ValueError(f"Unknown value type {value_type}")
+
 
 class Property(
     DocxParentedElementProxy[
@@ -115,7 +144,7 @@ class Property(
         self._name = self._validate_name(element.name)
         self._link_target = element.link_target
         self._elm_value, self._value = self._validate_value(
-            element.value, bool(self._link_target)
+            element.value, self._link_target is not None
         )
 
     @property
@@ -153,15 +182,10 @@ class Property(
         self._name = value
         parent._map_property(self)
 
+    # TODO: add link target as object in future + setter?
     @property
     def bookmark_link_target(self) -> str | None:
         return self._link_target
-
-    # TODO: add link target as object in future
-    @bookmark_link_target.setter
-    def bookmark_link_target(self, value: str | None) -> None:
-        self.element.link_target = value
-        self._link_target = value
 
     @property
     def value(self) -> int | str | W3CDTFDateTime | bool | None:
@@ -171,23 +195,17 @@ class Property(
     def value(
         self, value: int | str | W3CDTFDateTime | datetime | bool | None
     ) -> None:
+        if value is not None and self._link_target is not None:
+            raise ValueError(
+                "For property with link_target value must be None!"
+            )
         if isinstance(value, datetime):
             value = W3CDTFDateTime.from_datetime_python(value)
         old_value_type = WD_CUSTOM_PROPERTY_TYPE.new(self._value)
         new_value_type = WD_CUSTOM_PROPERTY_TYPE.new(value)
         if old_value_type != new_value_type:
             self.element.remove_child(self._elm_value)
-            match new_value_type:
-                case WD_CUSTOM_PROPERTY_TYPE.NUMBER:
-                    self._elm_value = E_I4.new()
-                case WD_CUSTOM_PROPERTY_TYPE.BOOLEAN:
-                    self._elm_value = E_Bool.new()
-                case WD_CUSTOM_PROPERTY_TYPE.TEXT:
-                    self._elm_value = E_Lpwstr.new()
-                case WD_CUSTOM_PROPERTY_TYPE.DATE:
-                    self._elm_value = E_Filetime.new()
-                case WD_CUSTOM_PROPERTY_TYPE.NULL:
-                    self._elm_value = E_Lpwstr.new()
+            self._elm_value = self.parent._prop_value_elm_by_type(value)
             self.element.append_child(self._elm_value)
         self._elm_value.content = value
         self._value = value
@@ -197,7 +215,7 @@ class Property(
         return WD_CUSTOM_PROPERTY_TYPE.new(self._value)
 
     def _validate_name(self, name: str | None) -> str:
-        if not isinstance(name, str) and name is not None:
+        if name is not None and not isinstance(name, str):
             raise TypeError("Name must be string or None")
         if not name:
             raise ValueError("Custom property name cannot be empty")
@@ -206,8 +224,8 @@ class Property(
         return name
 
     def _validate_pid(self, pid: int) -> int:
-        if not isinstance(pid, int) and pid is not None:
-            raise TypeError("Name must be string or None")
+        if isinstance(pid, bool) or not isinstance(pid, int):
+            raise TypeError("Pid must be int")
         if pid < PID_MIN:
             raise ValueError("Custom property mut be more or equal to 2")
         if pid in self.parent._pids_map:
