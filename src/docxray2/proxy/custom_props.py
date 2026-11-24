@@ -10,6 +10,7 @@ from docxray2.parts.types import ProvidesDocxXmlPart
 from docxray2.xsd.w3cdtf import W3CDTFDateTime
 
 from .base import DocxElementProxy, DocxParentedElementProxy
+from .enums import WD_CUSTOM_PROPERTY_TYPE
 
 if TYPE_CHECKING:
     # docxray stuff
@@ -170,19 +171,34 @@ class Property(
     def value(
         self, value: int | str | W3CDTFDateTime | datetime | bool | None
     ) -> None:
-        if (
-            not isinstance(value, (int, str, W3CDTFDateTime, datetime, bool))
-            and value is not None
-        ):
-            raise TypeError(
-                "Value must be integer, string, datetime, boolean or None!"
-            )
-        self._elm_value.content = value
         if isinstance(value, datetime):
             value = W3CDTFDateTime.from_datetime_python(value)
+        old_value_type = WD_CUSTOM_PROPERTY_TYPE.new(self._value)
+        new_value_type = WD_CUSTOM_PROPERTY_TYPE.new(value)
+        if old_value_type != new_value_type:
+            self.element.remove_child(self._elm_value)
+            match new_value_type:
+                case WD_CUSTOM_PROPERTY_TYPE.NUMBER:
+                    self._elm_value = E_I4.new()
+                case WD_CUSTOM_PROPERTY_TYPE.BOOLEAN:
+                    self._elm_value = E_Bool.new()
+                case WD_CUSTOM_PROPERTY_TYPE.TEXT:
+                    self._elm_value = E_Lpwstr.new()
+                case WD_CUSTOM_PROPERTY_TYPE.DATE:
+                    self._elm_value = E_Filetime.new()
+                case WD_CUSTOM_PROPERTY_TYPE.NULL:
+                    self._elm_value = E_Lpwstr.new()
+            self.element.append_child(self._elm_value)
+        self._elm_value.content = value
         self._value = value
 
+    @property
+    def value_type(self) -> WD_CUSTOM_PROPERTY_TYPE:
+        return WD_CUSTOM_PROPERTY_TYPE.new(self._value)
+
     def _validate_name(self, name: str | None) -> str:
+        if not isinstance(name, str) and name is not None:
+            raise TypeError("Name must be string or None")
         if not name:
             raise ValueError("Custom property name cannot be empty")
         if name in self.parent._names_map:
@@ -190,6 +206,8 @@ class Property(
         return name
 
     def _validate_pid(self, pid: int) -> int:
+        if not isinstance(pid, int) and pid is not None:
+            raise TypeError("Name must be string or None")
         if pid < PID_MIN:
             raise ValueError("Custom property mut be more or equal to 2")
         if pid in self.parent._pids_map:

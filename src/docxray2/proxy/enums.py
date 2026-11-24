@@ -1,6 +1,12 @@
-from enum import Enum, IntFlag
+from __future__ import annotations
+
+from datetime import datetime
+from enum import Enum, IntFlag, StrEnum
 from functools import lru_cache
 from typing import Any, Self
+
+# docxray stuff
+from docxray2.xsd.w3cdtf import W3CDTFDateTime
 
 
 class WD_DOCUMENT_SECURITY(IntFlag):
@@ -32,3 +38,27 @@ def is_member(value: Any, enum: type[Enum]) -> bool:
 @lru_cache
 def _is_member_cached(value: Any, enum: type[Enum]) -> bool:
     return value in {m.value for m in enum}
+
+
+class WD_CUSTOM_PROPERTY_TYPE(StrEnum):
+    TEXT = "string"
+    DATE = "datetime"
+    NUMBER = "int32"
+    BOOLEAN = "boolean"
+    NULL = "none"
+
+    @classmethod
+    def new(
+        cls, value: int | str | W3CDTFDateTime | datetime | bool | None
+    ) -> WD_CUSTOM_PROPERTY_TYPE:
+        if isinstance(value, bool):
+            return cls.BOOLEAN
+        if isinstance(value, int):
+            return cls.NUMBER
+        if isinstance(value, str):
+            return cls.TEXT
+        if isinstance(value, (W3CDTFDateTime, datetime)):
+            return cls.DATE
+        if value is None:
+            return cls.NULL
+        raise TypeError(f"None of type is valid for {value}")
