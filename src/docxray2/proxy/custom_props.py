@@ -25,6 +25,16 @@ PID_MIN = 2
 class CustomProperties(
     DocxElementProxy[E_Properties, "CustomFilePropertiesPart"]
 ):
+    """Custom file properties of a WordprocessingML package.
+
+    Root ``op:Properties`` element (ECMA-376 Part 1, §22.3.2.1). Each child
+    ``op:property`` is a name/value pair uniquely identified by ``name`` and
+    linked to an OLE property via ``fmtid``/``pid`` (§22.3.2.2).
+
+    Maintains PID and name indexes for O(1) lookup; ``properties`` is ordered
+    ascending by ``property_id``.
+    """
+
     def __init__(
         self, element: E_Properties, parent: ProvidesDocxXmlPart
     ) -> None:
@@ -38,6 +48,12 @@ class CustomProperties(
 
     @property
     def properties(self) -> list[Property]:
+        """All custom properties, ascending by ``property_id``.
+
+        Returns:
+            list[Property]: Live list view; mutate via :meth:`add_property` / :meth:`del_property`,
+                not directly.
+        """
         return self._props
 
     def add_property(
@@ -46,6 +62,27 @@ class CustomProperties(
         value: int | str | W3CDTFDateTime | datetime | bool | None,
         link_target: str | None = None,
     ) -> Property:
+        """Create and append a new custom property.
+
+        ``pid`` is assigned as ``max(existing_pids) + 1`` (or ``2`` if empty).
+        ``fmtid`` is always ``CUSTOM_PROPERTIES_GUID``.
+
+        Args:
+            name (str): Unique, non-empty property name.
+            value (int | str | W3CDTFDateTime | datetime | bool | None):
+                Property value; ``datetime`` is converted to W3CDTF.
+                ``None`` is allowed only with ``link_target``.
+            link_target (str | None): Bookmark name. When set, the value
+                element is a cache per ECMA-376 §22.3.2.2 and must be ``None``.
+
+        Returns:
+            Property: The newly created property.
+
+        Raises:
+            ValueError: On empty/duplicate name, PID assignment failure, or
+                ``None`` value for an unlinked property.
+            TypeError: On unsupported value type.
+        """
         next_pid = max(self._pids_map, default=1) + 1
         prop_elm = E_Property.new()
         prop_elm.fmtid = CUSTOM_PROPERTIES_GUID
@@ -61,6 +98,11 @@ class CustomProperties(
         return prop
 
     def del_property(self, pid_or_name: int | str) -> None:
+        """Remove a property by PID or name; no-op if not found.
+
+        Args:
+            pid_or_name (int | str): ``pid`` (``int``) or ``name`` (``str``).
+        """
         if isinstance(pid_or_name, int):
             prop = self.get_property_by_pid(pid_or_name)
         else:
@@ -71,9 +113,25 @@ class CustomProperties(
         self._unlink_property(prop)
 
     def get_property_by_pid(self, pid: int) -> Property | None:
+        """Return property with ``pid``, or ``None``.
+
+        Args:
+            pid (int): Property ID.
+
+        Returns:
+            Property | None: Matching property, if any.
+        """
         return self._pids_map.get(pid)
 
     def get_property_by_name(self, name: str) -> Property | None:
+        """Return property with ``name``, or ``None``.
+
+        Args:
+            name (str): Property name.
+
+        Returns:
+            Property | None: Matching property, if any.
+        """
         return self._names_map.get(name)
 
     def _link_property(self, prop: Property) -> None:
@@ -134,6 +192,16 @@ class Property(
         E_Property, CustomProperties, "CustomFilePropertiesPart"
     ]
 ):
+    """Single custom file property (``op:property``, ECMA-376 §22.3.2.2).
+
+    Invariants:
+      - ``fmtid`` equals ``CUSTOM_PROPERTIES_GUID``.
+      - ``pid`` >= 2, unique in parent.
+      - ``name`` unique in parent.
+      - If ``linkTarget`` present, the value element is a cache and the
+        object-model value is ``None``; otherwise the value is non-``None``.
+    """
+
     def __init__(self, element: E_Property, parent: CustomProperties) -> None:
         super().__init__(element, parent)
         if element.fmtid != CUSTOM_PROPERTIES_GUID:
@@ -149,10 +217,20 @@ class Property(
 
     @property
     def format_id(self) -> str:
+        """OLE format ID; always ``CUSTOM_PROPERTIES_GUID``.
+
+        Returns:
+            str: The fixed custom-properties GUID.
+        """
         return CUSTOM_PROPERTIES_GUID
 
     @property
     def property_id(self) -> int:
+        """OLE property ID (``pid``), unique in the collection.
+
+        Returns:
+            int: The property ID.
+        """
         return self._pid
 
     @property_id.setter
@@ -169,6 +247,11 @@ class Property(
 
     @property
     def custom_file_property_name(self) -> str:
+        """Property name (``name`` attribute), unique in the collection.
+
+        Returns:
+            str: The property name.
+        """
         return self._name
 
     @custom_file_property_name.setter
@@ -189,6 +272,14 @@ class Property(
 
     @property
     def value(self) -> int | str | W3CDTFDateTime | bool | None:
+        """Cached value in Python form.
+
+        ``None`` for linked properties, and (by construction) never ``None``
+        for unlinked ones.
+
+        Returns:
+            int | str | W3CDTFDateTime | bool | None: The value.
+        """
         return self._value
 
     @value.setter
@@ -212,6 +303,14 @@ class Property(
 
     @property
     def value_type(self) -> WD_CUSTOM_PROPERTY_TYPE:
+        """Variant type of the current value.
+
+        Derived from ``_value``, so consistent with the setter. ``NULL``
+        when ``value is None`` (linked properties).
+
+        Returns:
+            WD_CUSTOM_PROPERTY_TYPE: The variant type.
+        """
         return WD_CUSTOM_PROPERTY_TYPE.new(self._value)
 
     def _validate_name(self, name: str | None) -> str:
