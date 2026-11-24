@@ -424,6 +424,8 @@ class AttrRequired[T](Attr):
     def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
             return
+        if py_value is None:
+            raise ValueError("Required attribute cannot be set as None!")
         try:
             xml_value = self.simple_type.stringify(py_value)
             self.simple_type.validate_schema(xml_value)
@@ -478,6 +480,9 @@ class AttrOptional[T](Attr):
     def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
             return
+        if py_value is None:
+            element.attrib.pop(self.qname, None)
+            return
         try:
             xml_value = self.simple_type.stringify(py_value)
             self.simple_type.validate_schema(xml_value)
@@ -506,6 +511,9 @@ class Content[T]:
 
     def __set__(self, element: BaseOxmlElement | None, py_value: Any) -> None:
         if element is None:
+            return
+        if py_value is None:
+            element.text = py_value
             return
         try:
             xml_value = self.simple_type.stringify(py_value)
