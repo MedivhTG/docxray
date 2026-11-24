@@ -157,9 +157,9 @@ class Property(
 
     @property_id.setter
     def property_id(self, value: int) -> None:
-        value = self._validate_pid(value)
         if value == self._pid:
             return
+        value = self._validate_pid(value)
         parent = self.parent
         parent._unmap_property(self)
         self.element.pid = value
@@ -173,9 +173,9 @@ class Property(
 
     @custom_file_property_name.setter
     def custom_file_property_name(self, value: str) -> None:
-        value = self._validate_name(value)
         if value == self._name:
             return
+        value = self._validate_name(value)
         parent = self.parent
         parent._unmap_property(self)
         self.element.name = value
