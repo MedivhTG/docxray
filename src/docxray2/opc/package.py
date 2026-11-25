@@ -51,13 +51,24 @@ class Package:
         yield from walk_parts(self)
 
     def part_related_by(
-        self, rel_type: str, part_type: type[PART_T] = Part  # type: ignore[assignment]
+        self,
+        rel_type: str,
+        part_type: type[PART_T] = Part,  # type: ignore[assignment]
+        from_rels: Relationships | None = None,
     ) -> PART_T | None:
-        part = self.rels.part_with_rel_type(rel_type)
+        rels = from_rels if from_rels else self.rels
+        part = rels.part_with_rel_type(rel_type)
         if part is None:
             return None
         assert isinstance(part, part_type)
         return part
+
+    def parts_related_by(self, rel_type: str, part_type: type[PART_T] = Part, from_rels: Relationships | None = None) -> list[PART_T]:  # type: ignore[assignment]
+        rels = from_rels if from_rels else self.rels
+        parts = rels.parts_with_rel_type(rel_type)
+        for part in parts:
+            assert isinstance(part, part_type)
+        return parts  # type: ignore[return-value]
 
     def load_rel(
         self,

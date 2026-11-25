@@ -9,7 +9,7 @@ from enum import StrEnum
 from typing import Any, TypeVar
 
 from .exceptions import XsdStringifyError, XsdValidationError
-from .simple_type import Restriction, SimpleType
+from .simple_type import SimpleType
 from .w3cdtf import W3CDTFDateTime
 
 ANY_T = TypeVar("ANY_T")
@@ -19,11 +19,29 @@ class XsdAnySimpleType(SimpleType[ANY_T]):
     pass
 
 
+class XsdHexBinary(XsdAnySimpleType):
+    @classmethod
+    def _validate(cls, xml_value: str, facets: dict[str, Any]) -> bytes:
+        xml_value = cls.apply_whitespace(xml_value, "collapse")
+        cls.validate_length(xml_value, **facets)
+        cls.validate_pattern(xml_value, **facets)
+        cls.validate_enumeration(xml_value, **facets)
+        return cls.to_bytes(xml_value)
+
+    @classmethod
+    def to_bytes(cls, xml_value: str) -> bytes:
+        try:
+            return bytes.fromhex(xml_value)
+        except ValueError as e:
+            raise XsdValidationError(
+                f"Invalid xs:hexBinary lexical form: {xml_value!r}; caused error: {e}"
+            )
+
+
 STRING_T = TypeVar("STRING_T", bound=str | StrEnum)
 
 
 class XsdString(XsdAnySimpleType[STRING_T]):
-    SCHEMA = Restriction(SimpleType)
     FACETS = {"whitespace": "preserve"}
 
     @classmethod

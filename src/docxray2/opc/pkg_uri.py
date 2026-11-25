@@ -42,6 +42,9 @@ class PkgURI(str):
     def relative_ref(self, baseURI: str) -> str:
         return self[1:] if baseURI == "/" else posixpath.relpath(self, baseURI)
 
+    def format_numbered(self, num: int) -> PkgURI:
+        return PkgURI(self.format(n=num))
+
     @staticmethod
     def from_rel_ref(baseURI: str, relative_ref: str) -> PkgURI:
         rel_path = PurePosixPath(relative_ref)

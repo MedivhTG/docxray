@@ -5,6 +5,9 @@ from typing import TYPE_CHECKING
 # docxray stuff
 from docxray2.opc.parts.core_properties import CorePropertiesPart
 from docxray2.parts.custom_file_properties import CustomFilePropertiesPart
+from docxray2.parts.custom_xml_data_properties import (
+    CustomXmlDataPropertiesPart,
+)
 from docxray2.parts.extended_file_properties import ExtendedFilePropertiesPart
 from docxray2.parts.main_document import MainDocumentPart
 
@@ -45,4 +48,7 @@ DocxPartFactory.part_type_for[MEDIA_TYPE.EXTENDED_PROPERTIES] = (
 )
 DocxPartFactory.part_type_for[MEDIA_TYPE.CUSTOM_PROPERTIES] = (
     CustomFilePropertiesPart
+)
+DocxPartFactory.part_type_for[MEDIA_TYPE.CUSTOM_XML] = (
+    CustomXmlDataPropertiesPart
 )

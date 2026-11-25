@@ -223,6 +223,7 @@ assert remaining == {
     "Флаг",
     "Момент",
 }
+
 doc.save(out)
 
 wait = 1

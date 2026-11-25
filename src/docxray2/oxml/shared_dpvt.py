@@ -4,7 +4,7 @@ from decimal import Decimal
 
 # docxray stuff
 from docxray2.ns import NAMESPACE
-from docxray2.oxml.shared_cst import ST_Guid
+from docxray2.simple_types.shared_cst import ST_Guid
 from docxray2.simple_types.shared_dpvt import (
     ST_ArrayBaseType,
     ST_Cy,

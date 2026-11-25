@@ -38,6 +38,9 @@ class MEDIA_TYPE:
     CUSTOM_PROPERTIES = (
         "application/vnd.openxmlformats-officedocument.custom-properties+xml"
     )
+    CUSTOM_XML = (
+        "application/vnd.openxmlformats-officedocument.customXmlProperties+xml"
+    )
     # Other
     XML = "application/xml"
     PNG = "image/png"
@@ -49,6 +52,7 @@ class RELATIONSHIP_TYPE:
     CORE_PROPERTIES = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"
     EXTENDED_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
     CUSTOM_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties"
+    CUSTOM_XML = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXml"
 
 
 class NAMESPACE:
@@ -61,6 +65,12 @@ class NAMESPACE:
         "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"
     )
     CUSTOM_PROPERTIES = "http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
+    CUSTOM_XML = (
+        "http://schemas.openxmlformats.org/officeDocument/2006/customXml"
+    )
+    BIBLIOGRAPHY = (
+        "http://schemas.openxmlformats.org/officeDocument/2006/bibliography"
+    )
     # W3C
     XML = "http://www.w3.org/XML/1998/namespace"
     XML_SHEMA_INSTANCE = "http://www.w3.org/2001/XMLSchema-instance"

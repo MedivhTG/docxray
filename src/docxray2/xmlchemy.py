@@ -15,6 +15,7 @@ from .exceptions import (
     OxmlChoiceOneError,
     OxmlContentError,
     OxmlExactlyOneError,
+    OxmlSequenceError,
 )
 from .xsd.exceptions import XsdStringifyError, XsdValidationError
 from .xsd.primitives import XsdAnySimpleType
@@ -117,6 +118,56 @@ class BaseOxmlElement(etree.ElementBase):
                 f"Must be at least one element: `{element.qname()}`!"
             )
         return found_elm  # type: ignore[return-value]
+
+    def sequence(
+        self,
+        *descriptions: tuple[
+            type[ELM_T],
+            int,
+            int | Literal["unbounded"],
+        ],
+    ) -> list[ELM_T]:
+        hits: dict[type[BaseOxmlElement], dict[str, Any]] = {}
+        selectors: set[etree.QName] = set()
+        sequence_indexes: dict[type[BaseOxmlElement], int] = {}
+        for i, desc in enumerate(descriptions):
+            elm_cls, min_occurs, max_occurs = desc
+            hits[elm_cls] = {
+                "min": min_occurs,
+                "max": max_occurs,
+                "result": [],
+            }
+            selectors.add(elm_cls.qname())
+            sequence_indexes[elm_cls] = i
+        for curr in self.iterchildren(*selectors):
+            prev = curr.getprevious()
+            if prev is not None:
+                # Normally it will never reach this clause, only in
+                # situation if you will forget to add tag description
+                # in method or schema is invalid
+                if prev.__class__ not in sequence_indexes:
+                    raise OxmlSequenceError(
+                        f"Element `{prev.qname()}` followed by `{curr.qname()}` while not passed in method or encountered in schema"
+                    )
+                if (
+                    sequence_indexes[prev.__class__]
+                    > sequence_indexes[curr.__class__]
+                ):
+                    raise OxmlSequenceError(
+                        f"Element `{prev.qname()}` followed by `{curr.qname()}` in wrong sequence"
+                    )
+            curr_hit = hits[curr.__class__]
+            if curr_hit["max"] == len(curr_hit["result"]):
+                raise OxmlSequenceError(
+                    f"Element `{curr.qname()}` reached maximum of occurencies but appeared more than {curr_hit["max"]}"
+                )
+            hits[curr.__class__]["result"].append(curr)
+        for elm_cls, hit in hits.items():  # type: ignore[assignment]
+            if hit["min"] > len(hit["result"]):
+                raise OxmlSequenceError(
+                    f"Element `{elm_cls.qname()}` must appear at least `{hit["min"]}`, got `{len(hit["result"])}`"
+                )
+        return [elm for hit in hits.values() for elm in hit["result"]]
 
     def choice_one(self, *choices: type[ELM_T]) -> ELM_T:
         found_elm = next(

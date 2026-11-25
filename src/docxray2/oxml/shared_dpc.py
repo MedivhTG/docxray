@@ -2,11 +2,11 @@ from __future__ import annotations
 
 # docxray stuff
 from docxray2.ns import NAMESPACE
+from docxray2.simple_types.shared_cst import ST_Guid
 from docxray2.xmlchemy import AttrOptional, AttrRequired
 from docxray2.xsd.primitives import XsdInt, XsdString
 
 from .parser import Oxml
-from .shared_cst import ST_Guid
 from .shared_dpvt import (
     E_I1,
     E_I2,

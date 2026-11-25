@@ -64,6 +64,9 @@ class Relationships(dict[str, "Relationship"]):
             return None
         return rel.target_part
 
+    def parts_with_rel_type(self, rel_type: str) -> list[Part]:
+        return [rel.target_part for rel in self._get_rels_of_type(rel_type)]
+
     def _get_rel_of_type(self, rel_type: str) -> Relationship | None:
         matching = [rel for rel in self.values() if rel.rel_type == rel_type]
         if len(matching) == 0:
@@ -71,6 +74,9 @@ class Relationships(dict[str, "Relationship"]):
         if len(matching) > 1:
             raise ValueError(f"Multiple rels of type {rel_type}")
         return matching[0]
+
+    def _get_rels_of_type(self, rel_type: str) -> list[Relationship]:
+        return [rel for rel in self.values() if rel.rel_type == rel_type]
 
     def _get_matching(
         self, rel_type: str, target: Part | str, external: bool = False
