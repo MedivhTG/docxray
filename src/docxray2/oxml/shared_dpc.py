@@ -6,7 +6,7 @@ from docxray2.xmlchemy import AttrOptional, AttrRequired
 from docxray2.xsd.primitives import XsdInt, XsdString
 
 from .parser import Oxml
-from .shared_common_st import ST_Guid
+from .shared_cst import ST_Guid
 from .shared_dpvt import (
     E_I1,
     E_I2,
