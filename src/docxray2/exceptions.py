@@ -17,6 +17,10 @@ class OxmlExactlyOneError(OxmlBaseError):
     pass
 
 
+class OxmlOneOrMoreError(OxmlBaseError):
+    pass
+
+
 class OxmlSequenceError(OxmlBaseError):
     pass
 

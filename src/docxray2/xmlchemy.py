@@ -15,6 +15,7 @@ from .exceptions import (
     OxmlChoiceOneError,
     OxmlContentError,
     OxmlExactlyOneError,
+    OxmlOneOrMoreError,
     OxmlSequenceError,
 )
 from .xsd.exceptions import XsdStringifyError, XsdValidationError
@@ -118,6 +119,14 @@ class BaseOxmlElement(etree.ElementBase):
                 f"Must be at least one element: `{element.qname()}`!"
             )
         return found_elm  # type: ignore[return-value]
+
+    def one_or_more(self, element: type[ELM_T]) -> list[ELM_T]:
+        found_elms = self.all(element)
+        if len(found_elms) < 1:
+            raise OxmlOneOrMoreError(
+                f"Must be at least one element: `{element.qname()}`!"
+            )
+        return found_elms
 
     def sequence(
         self,
